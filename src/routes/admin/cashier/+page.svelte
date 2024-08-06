@@ -36,7 +36,7 @@
           await trpc($page).distribuidora.insertCashier.mutate({
             distribuidora_id: distribuidora_id,
             name: toSave.name,
-            currency: 0,
+            currency: toSave.currency,
           })
 
           window.location.reload()
@@ -82,21 +82,18 @@
     <h1 class="text-center text-4xl font-semibold">Selecione o caixa</h1>
 
     <div class="flex gap-2">
-      <a
-        href="/admin/caixa/transacoes"
-        class="rounded-lg bg-primary p-2 px-4 transition ease-in-out hover:bg-opacity-80"
-      >
+      <a href="/admin/caixa/transacoes" class="btn btn-primary">
         Ver transacões dos caixas
       </a>
       <button
-        class="flex gap-2 rounded-lg bg-primary p-2 px-4 transition ease-in-out hover:bg-opacity-80"
+        class="btn btn-primary flex gap-2"
         onclick={handleAddDistribuidora}
       >
         Add distribuidora {@html icons.plus()}
       </button>
     </div>
   </div>
-  <div class="grid grid-cols-1 justify-center gap-2 lg:grid-cols-2">
+  <div class="grid grid-cols-1 justify-center gap-2 lg:grid-cols-3">
     {#each distribuidoras as distribuidora}
       <div class="flex flex-col gap-3">
         <h1 class="min-w-48 rounded p-2 text-center text-xl">
@@ -112,9 +109,12 @@
           {#each distribuidora.cashiers as caixa}
             <a
               href="/admin/cashier/{caixa.id}"
-              class="rounded-lg bg-primary p-2 transition ease-in-out hover:bg-opacity-80"
+              class="btn btn-primary flex justify-between p-3"
             >
-              Caixa {caixa.id}
+              {caixa.name}
+              <span class="text-end font-bold">
+                Valor no caixa: R${caixa.currency}
+              </span>
             </a>
           {/each}
         </div>

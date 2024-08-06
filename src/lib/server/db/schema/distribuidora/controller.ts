@@ -42,7 +42,7 @@ function getCashier() {
   return db.select().from(cashierTable)
 }
 function getCashierById(id: SelectCashier['id']) {
-  return db.select().from(cashierTable).where(eq(cashierTable.id, id))
+  return db.select().from(cashierTable).where(eq(cashierTable.id, id)).limit(1)
 }
 
 function queryCashierByDistribuidora() {
