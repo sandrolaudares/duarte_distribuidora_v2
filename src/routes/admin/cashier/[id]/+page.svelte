@@ -3,14 +3,17 @@
 
   export let data: PageData
 
-  let isOpenModal: HTMLDialogElement
+  let isOpenModal: HTMLDialogElement | null = null
 </script>
 
 <pre>
   {JSON.stringify(data, null, 2)}
 </pre>
 
-<button class="btn" on:click={isOpenModal.showModal}>open modal</button>
+<button class="btn" on:click={() => isOpenModal?.showModal()}>
+  open modal
+</button>
+
 <dialog id="my_modal_2" class="modal" bind:this={isOpenModal}>
   <div class="modal-box">
     <h3 class="text-lg font-bold">Hello!</h3>
