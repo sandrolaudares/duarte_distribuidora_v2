@@ -66,6 +66,10 @@
           name: 'Stock',
           href: '/admin/stock',
         },
+        {
+          name: 'Caixa',
+          href: '/admin/cashier',
+        },
       ],
     },
     {

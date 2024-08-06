@@ -14,6 +14,7 @@ import { product } from './routes/product'
 import { pushNotification } from './routes/push-notification'
 import { customer } from './routes/customer'
 import { stock } from './routes/stock'
+import { distribuidora } from './routes/distribuidora'
 
 export const router = t.router({
   reportBug: publicProcedure
@@ -76,6 +77,7 @@ export const router = t.router({
   customer,
   pushNotification,
   stock,
+  distribuidora,
 })
 
 export type Router = typeof router

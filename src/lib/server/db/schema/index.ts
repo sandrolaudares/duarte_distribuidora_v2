@@ -15,3 +15,5 @@ export * from './stock'
 export * from './push-notification'
 
 export * from './customer'
+
+export * from './distribuidora'

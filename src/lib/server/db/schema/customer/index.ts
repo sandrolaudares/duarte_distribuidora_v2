@@ -10,6 +10,10 @@ import { sql, relations } from 'drizzle-orm'
 import { userTable, productItemTable } from '$db/schema'
 import { createInsertSchema } from 'drizzle-zod'
 
+import { distribuidoraTable } from '$db/schema'
+
+import { product } from '$db/controller'
+
 export const customerTable = sqliteTable('customer', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   // .$defaultFn(() => generateId(15)),
@@ -89,6 +93,9 @@ export const customerOrderTable = sqliteTable('customer_order', {
   created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
   updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
     () => new Date(),
+  ),
+  distribuidora_id: integer('distribuidora_id').references(
+    () => distribuidoraTable.id,
   ),
   customer_id: integer('customer_id').references(() => customerTable.id),
   address_id: text('address_id').references(() => addressTable.id),
