@@ -7,6 +7,7 @@
   import type { RouterInputs } from '$trpc/router'
 
   import { modal, FormModal } from '$components/modal'
+  import { icons } from '$lib/utils'
 
   export let data: PageData
 
@@ -74,25 +75,50 @@
   }
 </script>
 
-<main>
-  <div class="flex justify-around">
-    {#each distribuidoras as distribuidora}
-      <div class="flex flex-col">
-        <div>{distribuidora.name}</div>
+<main class="container mx-auto">
+  <div
+    class="mb-7 flex flex-col items-center justify-between gap-5 rounded-lg bg-base-200 p-3 lg:flex-row"
+  >
+    <h1 class="text-center text-4xl font-semibold">Selecione o caixa</h1>
 
-        <button class="btn" onclick={() => handleAddCachier(distribuidora.id)}>
+    <div class="flex gap-2">
+      <a
+        href="/admin/caixa/transacoes"
+        class="rounded-lg bg-primary p-2 px-4 transition ease-in-out hover:bg-opacity-80"
+      >
+        Ver transacões dos caixas
+      </a>
+      <button
+        class="flex gap-2 rounded-lg bg-primary p-2 px-4 transition ease-in-out hover:bg-opacity-80"
+        onclick={handleAddDistribuidora}
+      >
+        Add distribuidora {@html icons.plus()}
+      </button>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 justify-center gap-2 lg:grid-cols-2">
+    {#each distribuidoras as distribuidora}
+      <div class="flex flex-col gap-3">
+        <h1 class="min-w-48 rounded p-2 text-center text-xl">
+          {distribuidora.name}:
+        </h1>
+        <button
+          class="btn btn-primary mx-auto"
+          onclick={() => handleAddCachier(distribuidora.id)}
+        >
           Adicionar Caixa
         </button>
-
-        {#each distribuidora.cashiers as caixa}
-          <a href="/admin/cashier/{caixa.id}">
-            <pre>
-            {JSON.stringify(caixa, null, 2)}
-          </pre>
-          </a>
-        {/each}
+        <div class="flex flex-col gap-2 text-center">
+          {#each distribuidora.cashiers as caixa}
+            <a
+              href="/admin/cashier/{caixa.id}"
+              class="rounded-lg bg-primary p-2 transition ease-in-out hover:bg-opacity-80"
+            >
+              Caixa {caixa.id}
+            </a>
+          {/each}
+        </div>
       </div>
     {/each}
   </div>
-  <button onclick={handleAddDistribuidora}>add distribuida</button>
 </main>
