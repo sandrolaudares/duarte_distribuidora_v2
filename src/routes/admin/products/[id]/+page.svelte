@@ -8,6 +8,7 @@
   import ImageInput from '$lib/components/input/ImageInput.svelte'
 
   import { toast } from 'svelte-sonner'
+  import { icons } from '$lib/utils'
 
   export let data: PageData
 
@@ -99,6 +100,18 @@
     isChanged = false
   }
 
+  async function handleDeleteProduct(id: number) {
+    try {
+      await trpc($page).product.deleteProduct.mutate(id)
+
+      toast.success('Item deletado com sucesso!')
+      //TODO: Fix delete update sem recarregar
+      window.history.back()
+    } catch (error: any) {
+      toast.error(error.message)
+    }
+  }
+
   let isChanged = false
 </script>
 
@@ -162,12 +175,21 @@
         </button>
       {/if}
       <button class="btn btn-primary px-5" onclick={handleAddItem}>
-        + Add Item
+        {@html icons.plus()} Add Item
       </button>
+      <!--TODO: Estilizar botão-->
+      {#if produto.items.length === 0}
+        <button
+          onclick={() => handleDeleteProduct(produto.id)}
+          class="absolute right-4 top-4 flex h-12 w-12 items-center justify-center rounded-full border-2 border-red-500 bg-opacity-0 hover:cursor-pointer"
+        >
+          {@html icons.trash({ stroke: 'red' })}
+        </button>
+      {/if}
     </div>
   </div>
 
-  <div class="mt-3 flex flex-wrap gap-4 justify-center">
+  <div class="mt-3 flex flex-wrap justify-center gap-4">
     {#each produto.items as item, i (item.id)}
       <ProductItem {item} />
     {/each}
