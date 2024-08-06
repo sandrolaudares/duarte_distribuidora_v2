@@ -116,7 +116,6 @@
 </script>
 
 <!-- TODO: make responsive -->
-<!-- TODO: add delete button -->
 
 <main class="container mx-auto flex flex-col">
   <div
@@ -127,17 +126,19 @@
       image_id={produto.image}
       save={updateProductImage}
     />
-    <div>
-      <h2 class="title-font text-md text-center tracking-widest text-gray-600">
+    <div class="flex flex-col gap-3">
+      <h2
+        class="title-font text-center text-xl font-semibold tracking-widest text-secondary"
+      >
         {produto.category?.name}
       </h2>
       <!-- <h1 class="mb-1 text-center text-3xl font-bold text-gray-900">
         {produto.name}
       </h1> -->
 
-      <div class="flex flex-col items-center gap-2">
-        <div>
-          <label for="name">Name</label>
+      <div class="flex flex-col items-end justify-center gap-2">
+        <div class="flex items-center gap-2">
+          <label for="name">Name:</label>
           <input
             id="name"
             name="name"
@@ -147,8 +148,8 @@
             onchange={() => (isChanged = true)}
           />
         </div>
-        <div>
-          <label for="description">Description</label>
+        <div class="flex items-center gap-2">
+          <label for="description">Description:</label>
           <input
             id="description"
             name="description"
@@ -174,18 +175,17 @@
           Save
         </button>
       {/if}
+      {#if produto.items.length === 0}
+        <button
+          class="btn btn-error px-5"
+          onclick={() => handleDeleteProduct(produto.id)}
+        >
+          {@html icons.trash()} Deletar {produto.name}
+        </button>
+      {/if}
       <button class="btn btn-primary px-5" onclick={handleAddItem}>
         {@html icons.plus()} Add Item
       </button>
-      <!--TODO: Estilizar botão-->
-      {#if produto.items.length === 0}
-        <button
-          onclick={() => handleDeleteProduct(produto.id)}
-          class="absolute right-4 top-4 flex h-12 w-12 items-center justify-center rounded-full border-2 border-red-500 bg-opacity-0 hover:cursor-pointer"
-        >
-          {@html icons.trash({ stroke: 'red' })}
-        </button>
-      {/if}
     </div>
   </div>
 
