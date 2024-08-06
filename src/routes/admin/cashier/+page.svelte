@@ -100,7 +100,7 @@
           {distribuidora.name}:
         </h1>
         <button
-          class="btn btn-primary mx-auto"
+          class="btn btn-outline mx-auto"
           onclick={() => handleAddCachier(distribuidora.id)}
         >
           Adicionar Caixa
