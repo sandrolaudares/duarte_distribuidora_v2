@@ -72,7 +72,7 @@ export const product = router({
         id: z.number(),
         prod: z.object({
           name: z.string().optional(),
-          sku: z.string().optional(),
+          sku: z.number().optional(),
           quantity: z.number().optional(),
           retail_price: z.number().optional(),
           wholesale_price: z.number().optional(),

@@ -60,10 +60,10 @@
   function openSKUModal() {
     modal.open(ModalSku, {
       selectedSKU: async sku => {
-        item.sku = sku.sku
+        item.sku = sku.id
         await updateProductItemInfo()
       },
-      newSKU: { name: item.name, sku: '' },
+      newSKU: { name: item.name },
     })
   }
 
@@ -100,10 +100,7 @@
     >
       {@html icons.box()}
     </button>
-    <button
-      class="btn btn-error"
-      on:click={handleDeleteProductItem}
-    >
+    <button class="btn btn-error" on:click={handleDeleteProductItem}>
       {@html icons.trash()}
     </button>
   </div>

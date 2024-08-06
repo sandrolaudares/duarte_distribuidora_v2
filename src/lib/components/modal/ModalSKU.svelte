@@ -12,7 +12,6 @@
 
   export let newSKU: InsertSku = {
     name: '',
-    sku: '',
   }
 
   export let selectedSKU: (sku: SelectSku) => Promise<void>
@@ -25,8 +24,8 @@
   })
 
   async function handleAddSKU() {
-    if (!newSKU.sku || !newSKU.name) {
-      toast.error('Nome e Codigo de Barras são obrigatórios')
+    if (!newSKU.name) {
+      toast.error('Nome é obrigatório')
       return
     }
 
@@ -70,12 +69,7 @@
         placeholder="Nome"
         class="input input-bordered"
       />
-      <input
-        type="text"
-        bind:value={newSKU.sku}
-        placeholder="Codigo de Barras"
-        class="input input-bordered"
-      />
+
       <button class="btn" onclick={handleAddSKU} disabled={isLoading}>
         Adicionar
       </button>

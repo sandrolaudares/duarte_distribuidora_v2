@@ -53,7 +53,6 @@
             name: 'description',
             label: 'Description',
             type: 'text',
-            required: true,
           },
         ],
         save: async data => {
@@ -61,7 +60,7 @@
           try {
             const resp = await trpc($page).product.insertProduct.mutate({
               name: data.name,
-              description: data.description,
+              description: data.description ?? '',
               category_id: category_id,
             })
             columnsData.map(col => {

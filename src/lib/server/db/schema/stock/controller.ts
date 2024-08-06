@@ -59,6 +59,11 @@ async function insertStockTransaction(data: InsertStockTransaction) {
 }
 
 export const stock = {
+  tables: {
+    skuTable,
+    distribuidoraTable,
+    productStockTable,
+  },
   insertSKU,
   getSKU,
   insertProductStock,

@@ -17,8 +17,10 @@
     getParams,
     EditRowButton,
     EditRowInput,
+    RowActions,
   } from '$lib/components/table'
   import type { RouterOutputs, RouterInputs } from '$trpc/router'
+  import { goto } from '$app/navigation'
 
   type Customer = RouterOutputs['customer']['getPaginatedCustomers']['rows'][0]
 
@@ -47,8 +49,8 @@
         }),
     },
     {
-      header: 'Is Retail',
-      accessorKey: 'is_retail',
+      header: 'Tipo Cliente',
+      accessorFn: row => (row.is_retail ? 'Varejo' : 'Atacado'),
     },
     {
       header: 'RG/IE',
@@ -129,6 +131,21 @@
           row: info.row.original,
         }),
       // footer: info => info.column.id,
+    },
+    {
+      id: 'actions',
+      header: () => 'Actions',
+      cell: info =>
+        renderComponent(RowActions, {
+          actions: [
+            {
+              name: 'View Details',
+              fn: () => {
+                goto(`/admin/customer/${info.row.original.id}`)
+              },
+            },
+          ],
+        }),
     },
   ]
 

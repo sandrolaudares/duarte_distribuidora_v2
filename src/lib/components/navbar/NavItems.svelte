@@ -62,6 +62,10 @@
           href: '/admin/orders',
           icon: icons.cart(),
         },
+        {
+          name: 'Stock',
+          href: '/admin/stock',
+        },
       ],
     },
     {

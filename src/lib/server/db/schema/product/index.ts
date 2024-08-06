@@ -74,7 +74,7 @@ export const productItemTable = sqliteTable('product_item', {
     .notNull()
     .references(() => productTable.id),
   name: text('name').notNull(),
-  sku: text('sku').references(() => skuTable.sku),
+  sku: integer('sku').references(() => skuTable.id),
   quantity: integer('quantity').notNull().default(1),
   image: integer('image_id').references(() => imageTable.id),
   retail_price: integer('retail_price').notNull(),

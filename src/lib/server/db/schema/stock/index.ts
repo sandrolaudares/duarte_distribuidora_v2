@@ -11,7 +11,7 @@ import { imageTable } from '../image'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 
 export const skuTable = sqliteTable('sku', {
-  sku: text('sku').primaryKey().unique().notNull(),
+  id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
   created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
   name: text('name').notNull(),
 })
@@ -41,7 +41,7 @@ export const productStockTable = sqliteTable('stock', {
     .references(() => distribuidoraTable.id),
   sku: text('sku', {})
     .notNull()
-    .references(() => skuTable.sku),
+    .references(() => skuTable.id),
   quantity: integer('quantity').notNull().default(0),
 })
 
