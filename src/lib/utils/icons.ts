@@ -171,6 +171,13 @@ export const icons = {
   <line x1="14" x2="14" y1="11" y2="17" />`,
       cfg,
     ),
+  plus: (cfg?: SVGoptions) =>
+    svgTemplate(
+      `
+  <path d="M5 12h14" />
+  <path d="M12 5v14" />`,
+      cfg,
+    ),
 
   flags: {
     getEmojiFlag: (lang: string) => {

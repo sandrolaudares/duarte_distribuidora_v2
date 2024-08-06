@@ -34,6 +34,16 @@
     }
   }
 
+  async function handleDeleteCategory(id: number) {
+    try {
+      await trpc($page).product.deleteProductCategory.mutate(id)
+      toast.success('Categoria deletada com sucesso!')
+      window.location.reload()
+    } catch (error: any) {
+      toast.error(error.message)
+    }
+  }
+
   function handleAddProduct(category_id: number) {
     console.log('add product')
     modal.open(
@@ -142,8 +152,16 @@
         class="btn btn-outline btn-primary"
         onclick={() => handleAddProduct(cat.id)}
       >
-        +
+        {@html icons.plus()}
       </button>
+      {#if cat.products.length === 0}
+        <button
+          class="btn btn-outline btn-primary"
+          onclick={() => handleDeleteCategory(cat.id)}
+        >
+          {@html icons.trash()}
+        </button>
+      {/if}
     </div>
   {/snippet}
   {#snippet card(p)}
