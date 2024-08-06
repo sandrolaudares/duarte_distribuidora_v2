@@ -41,6 +41,9 @@ function insertCashier(data: InsertCashier) {
 function getCashier() {
   return db.select().from(cashierTable)
 }
+function getCashierById(id: SelectCashier['id']) {
+  return db.select().from(cashierTable).where(eq(cashierTable.id, id))
+}
 
 function queryCashierByDistribuidora() {
   return db.query.distribuidoraTable.findMany({
@@ -78,6 +81,7 @@ export const distribuidora = {
   getDistribuidoraById,
   insertCashier,
   getCashier,
+  getCashierById,
   insertCashierTransaction,
   getCashierTransactions,
   queryCashierByDistribuidora,

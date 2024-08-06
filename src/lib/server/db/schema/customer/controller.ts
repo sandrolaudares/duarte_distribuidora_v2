@@ -52,6 +52,13 @@ export const customer = {
       },
     })
   },
+  getCustomersWithAddress: async () => {
+    return db.query.customerTable.findMany({
+      with: {
+        adresses: true,
+      },
+    })
+  },
   getCustomers: () => {
     return db.select().from(customerTable)
   },
