@@ -80,9 +80,8 @@
   }
 </script>
 
-<!-- TODO: add delete button -->
 <div
-  class="flex flex-col items-center justify-center space-y-1 rounded-lg bg-base-200 p-3"
+  class="flex flex-col items-center justify-center gap-2 space-y-1 rounded-lg bg-base-200 p-4"
 >
   <!-- <h2 class="text-center text-xl font-bold">{item.name}</h2> -->
 
@@ -115,28 +114,34 @@
     />
   </div>
 
-  <div class="my-3">
+  <!-- <div class="my-3">
     <ImageInput
       image_id={item.image}
       name={item.name}
       save={updateProductItemImage}
     />
-  </div>
-  <div class="flex flex-col justify-between gap-1 text-center">
-    <div class="flex items-center justify-between gap-2">
-      WholeSale Price
+  </div> -->
+  <div class="flex items-center justify-between gap-3 text-center">
+    <ImageInput
+      image_id={item.image}
+      name={item.name}
+      save={updateProductItemImage}
+    />
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center justify-between gap-3">
+        WholeSale Price:
 
-      <CurrencyInput
-        bind:value={item.wholesale_price}
-        on:change={() => (isChanged = true)}
-      />
-    </div>
-
-    <div class="flex items-center justify-between gap-2">
-      Retail Price <CurrencyInput
-        bind:value={item.retail_price}
-        on:change={() => (isChanged = true)}
-      />
+        <CurrencyInput
+          bind:value={item.wholesale_price}
+          on:change={() => (isChanged = true)}
+        />
+      </div>
+      <div class="flex items-center justify-between gap-3">
+        Retail Price: <CurrencyInput
+          bind:value={item.retail_price}
+          on:change={() => (isChanged = true)}
+        />
+      </div>
     </div>
   </div>
 

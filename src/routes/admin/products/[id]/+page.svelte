@@ -107,7 +107,7 @@
 
 <main class="container mx-auto flex flex-col">
   <div
-    class="card flex flex-row items-center justify-between bg-surface-200 p-2"
+    class="card flex flex-row items-center justify-between bg-surface-200 p-5"
   >
     <ImageInput
       name={produto.name}
@@ -167,7 +167,7 @@
     </div>
   </div>
 
-  <div class="mt-3 flex flex-wrap gap-4">
+  <div class="mt-3 flex flex-wrap gap-4 justify-center">
     {#each produto.items as item, i (item.id)}
       <ProductItem {item} />
     {/each}

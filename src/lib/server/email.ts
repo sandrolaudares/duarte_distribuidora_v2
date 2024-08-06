@@ -318,6 +318,7 @@ export const emailTemplate = {
       `,
     }
   },
+  //TODO: copiar e colar o estilo dos outros emails
   magicLink: function (magic_link: string): EmailOptions {
     return {
       subject: `Login para ${website.siteShortTitle}`,

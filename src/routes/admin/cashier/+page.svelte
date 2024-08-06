@@ -45,6 +45,33 @@
       },
     })
   }
+
+  function handleAddDistribuidora() {
+    modal.open(
+      FormModal<RouterInputs['distribuidora']['insertDistribuidora']>,
+      {
+        title: 'Adicionar distribuidora',
+        fields: [
+          {
+            label: 'Nome',
+            name: 'name',
+            type: 'text',
+            required: true,
+          },
+        ],
+        save: async toSave => {
+          try {
+            await trpc($page).distribuidora.insertDistribuidora.mutate({
+              name: toSave.name,
+            })
+            window.location.reload()
+          } catch (error: any) {
+            return error.message
+          }
+        },
+      },
+    )
+  }
 </script>
 
 <main>
@@ -67,4 +94,5 @@
       </div>
     {/each}
   </div>
+  <button onclick={handleAddDistribuidora}>add distribuida</button>
 </main>
