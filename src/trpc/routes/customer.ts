@@ -65,7 +65,7 @@ export const customer = router({
   }),
 
   insertOrder: publicProcedure
-    .use(middleware.auth)
+    // .use(middleware.auth)
     .input(
       z.object({
         order_items: z.array(

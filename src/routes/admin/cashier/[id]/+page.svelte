@@ -2,6 +2,8 @@
   import type { PageData } from './$types'
   import Cardapio from '$lib/components/Cardapio.svelte'
 
+  import { toast } from 'svelte-sonner'
+
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
 
@@ -37,7 +39,7 @@
         order_info: {
           customer_id: clienteSelecionado?.id,
           address_id: clienteSelecionado?.adresses[0].id,
-          total,
+          total: 50,
           distribuidora_id: caixa.distribuidora_id,
           observation: observacao,
           payment_method: 'dinheiro',
@@ -46,10 +48,15 @@
         order_items: $cart.map(item => ({
           product_id: item.item.id,
           quantity: item.quantity,
-          price: item.item[tipo_preco],
+          // price: item.item[tipo_preco],
+          price: 12,
         })),
       })
-    } catch (error) {}
+
+      toast.info(JSON.stringify(resp))
+    } catch (error: any) {
+      toast.error(error.message)
+    }
   }
 
   function handleSelectClient() {

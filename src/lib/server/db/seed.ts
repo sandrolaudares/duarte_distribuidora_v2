@@ -2,10 +2,7 @@
 import { faker } from '@faker-js/faker'
 import { hash } from '@node-rs/argon2'
 import { generateId } from 'lucia'
-import fs from 'fs'
-import { image, product, user, distribuidora, customer } from './controller'
-
-const TEST_IMAGE = 'src/lib/assets/home/home-open-graph-square.jpg'
+import { product, user, distribuidora, customer } from './controller'
 
 const main = async () => {
   await seedUsers()
@@ -99,7 +96,7 @@ async function seedProducts() {
         product_id: i,
         name: faker.commerce.productName(),
         retail_price: faker.number.int(),
-        wholesale_price: faker.number.int(),
+        wholesale_price: faker.number.int({ min: 0, max: 30000 }),
       })
     } catch (error) {
       console.error(`Failed to insert product item ${i}:`, error)
