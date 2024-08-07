@@ -93,7 +93,7 @@
   .column {
     height: 100%;
     width: 25%;
-    padding: 0.5em;
+    padding: 1.0em;
     margin: 0.5em;
     float: left;
     border: 1px solid #333333;

@@ -17,6 +17,8 @@
   import DrawerContainer from '$lib/components/drawer/base/DrawerContainer.svelte'
   import Transition from './Transition.svelte'
   import type { LayoutData } from './$types'
+  import PreLoadingIndicator from './PreLoadingIndicator.svelte'
+  import { navigating } from '$app/stores'
 
   export let data: LayoutData
 
@@ -30,6 +32,9 @@
 </script>
 
 <ParaglideJS {i18n}>
+  {#if $navigating}
+    <PreLoadingIndicator />
+  {/if}
   <Toaster richColors closeButton />
   <!-- <DrawerContainer> -->
   <NavBar>
