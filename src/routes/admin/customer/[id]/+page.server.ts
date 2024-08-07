@@ -4,9 +4,11 @@ import type { PageServerLoad } from './$types'
 
 export const load = (async ({ params }) => {
   const customerID = Number(params.id)
-  const cliente = await customer.getCustomerById(customerID)
 
-  const orders = await customer.getCustomerOrders(customerID)
+  const [cliente, orders] = await Promise.all([
+    customer.getCustomerById(customerID),
+    customer.getCustomerOrders(customerID),
+  ])
 
   if (!cliente) {
     error(404, 'Customer not found')

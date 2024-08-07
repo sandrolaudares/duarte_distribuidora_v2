@@ -195,7 +195,12 @@ export const icons = {
   <path d="m6 6 12 12" />`,
       cfg,
     ),
-
+    minus: (cfg?: SVGoptions) =>
+      svgTemplate(
+        `
+           <path d="M5 12h14"></path>`,
+        cfg,
+      ),
   flags: {
     getEmojiFlag: (lang: string) => {
       switch (lang) {

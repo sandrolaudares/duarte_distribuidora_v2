@@ -2,6 +2,7 @@
   import type { PageData } from './$types'
   import Cardapio from '$lib/components/Cardapio.svelte'
   import { icons } from '$lib/utils/icons'
+  import { getImagePath } from '$lib/utils/image'
 
   import { toast } from 'svelte-sonner'
 
@@ -29,6 +30,8 @@
 
   let clienteSelecionado: RouterOutputs['customer']['getCustomers'][0] | null =
     null
+
+    let activeItemIndex = 0
 
   $: total = $cart.reduce((acc, item) => {
     return acc + item.item[tipo_preco] * item.quantity
@@ -64,6 +67,12 @@
     modal.open(ModalCliente, {
       selectedClient: client => {
         clienteSelecionado = client
+
+        if (clienteSelecionado.is_retail) {
+          tipo_preco = 'retail_price'
+        } else {
+          tipo_preco = 'wholesale_price'
+        }
       },
     })
   }
@@ -174,17 +183,65 @@
 <!-- <pre>{JSON.stringify(data, null, 2)}</pre> -->
 
 <dialog class="modal" bind:this={isOpenModal}>
-  <div class="modal-box max-w-full">
+  <div class="modal-box max-w-4xl">
     <Cardapio data={products}>
       {#snippet card(p)}
-        <div class="card bg-base-200 p-1">
-          <h2>{p.name}</h2>
-          <p>{p.description}</p>
+        <div class="card p-1 w-full">
 
-          <div class="flex gap-3">
-            {#each p.items as item}
               <!-- TODO: make better card with + and - but -->
-              <button
+          <div class="grid grid-cols-1 gap-3">
+            {#each p.items as item}
+
+            <hr />
+              <div class="flex py-2 w-full">
+                <div class=" flex-none md:w-auto">
+                  <img
+                    alt="imagem"
+                    src={getImagePath( item.image,
+                    )}
+                    class="h-16 w-16 rounded-lg object-cover md:h-20 md:w-20"
+                  />
+                </div>
+                <div class="ml-4 w-full">
+                    <h2 class="text-xl font-bold">{item.name}</h2>
+                    <h3 class="text-md text-secondary">{p.description}</h3>
+                    
+                </div>
+                <div class="w-full text-right">
+                  <span class="block pb-3 text-xl font-bold">R${item[tipo_preco]}</span>
+                  <div class="flex items-center justify-end gap-3 text-center">
+                    {#if item.quantity >= 1}
+                    <button class="btn btn-primary" on:click={() =>
+                      cart.addItem({
+                        item: item,
+                        quantity: -1,
+                      })}>{@html icons.minus()}</button>
+                    {/if}
+                    <input
+                      min="1"
+                      class="min-w-10 max-w-28 bg-white text-right text-xl font-bold focus:border-yellow-500"
+                      value={item.quantity}
+                      on:change={(e) => {
+                      //TODO: Input ta meio bugado, e tambem tem que setar pra 1 quando modal é fechado
+                        const quant_temp = e.target?.value
+
+                        cart.addItem({
+                          item:item,
+                          quantity: quant_temp,
+                        })
+                      }}
+                    />
+                    <button on:click={() =>
+                    //TODO:Ao clicar no + ou - tem que mudar o value do input
+                      cart.addItem({
+                        item: item,
+                        quantity: 1,
+                      })} class="btn btn-primary">{@html icons.plus()}</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- <button
                 class="btn btn-primary"
                 on:click={() =>
                   cart.addItem({
@@ -193,7 +250,7 @@
                   })}
               >
                 {item.name}
-              </button>
+              </button> -->
             {/each}
           </div>
         </div>
@@ -204,3 +261,5 @@
     <button>close</button>
   </form>
 </dialog>
+
+
