@@ -148,7 +148,7 @@
           {#each pedidosFiltrados as pedido}
             {#if pedido.status === 'CONFIRMED'}
               <CardShowPedidos
-                button_text="Aceitar pedido"
+                button_text="A caminho"
                 order={pedido}
                 click_confirm={async () => {
                   console.log('click aceitar')
@@ -167,7 +167,7 @@
           {#each pedidosFiltrados as pedido}
             {#if pedido.status === 'ON THE WAY'}
               <CardShowPedidos
-                button_text="Aceitar pedido"
+                button_text="Entregue"
                 order={pedido}
                 click_confirm={async () => {
                   console.log('click aceitar')
@@ -186,7 +186,7 @@
           {#each pedidosFiltrados as pedido}
             {#if pedido.status === 'DELIVERED'}
               <CardShowPedidos
-                button_text="Aceitar pedido"
+                button_text="Finalizar"
                 order={pedido}
                 click_confirm={async () => {
                   console.log('click aceitar')
