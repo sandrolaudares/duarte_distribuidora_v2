@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types'
   import Cardapio from '$lib/components/Cardapio.svelte'
+  import { icons } from '$lib/utils/icons'
 
   import { toast } from 'svelte-sonner'
 
@@ -68,14 +69,12 @@
   }
 </script>
 
-<div class="flex flex-col justify-center gap-4 xl:flex-row">
+<div class="mt-15 flex flex-col justify-center gap-4 xl:flex-row">
   <div class="flex h-auto flex-col justify-between">
     <h2 class="text-3xl font-bold">Informações do pedido:</h2>
-    <!-- <div
-        class={`mt-5 w-full rounded-lg px-3 py-1 text-center font-bold text-white  ${caixa.status == 'aberto' ? 'success-bg' : 'bg-red-500'}`}
-      >
-        {caixa.status == 'aberto' ? 'Em aberto' : 'Fechado'}
-      </div> -->
+    <div class={`mt-5 w-full rounded-lg px-3 py-1 text-center font-bold text-white  ${caixa.status == 'Aberto' ? 'success-bg' : 'bg-error'}`}>
+        {caixa.status == 'Aberto' ? 'Em aberto' : 'Fechado'}
+    </div>
     <div class="mt-4">
       <p>
         Número do pedido: <span class="font-bold text-primary">
@@ -108,13 +107,18 @@
           <span class="mr-1">Vincular compra a um cliente</span>
         </button>
       {/if}
-      <button class="btn btn-primary w-full disabled:bg-opacity-50">
+      <a
+        href="/admin/cashier"
+        class="btn btn-primary w-full disabled:bg-opacity-50"
+      >
         <span class="mr-1">CANCELAR</span>
-      </button>
+      </a>
     </div>
   </div>
 
-  <div class="col-auto rounded-lg border-4 border-opacity-50 p-4">
+  <div
+    class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-4"
+  >
     <ul class="mb-4 text-center text-lg">
       {#each $cart as item}
         <div class="flex justify-center">
@@ -122,11 +126,10 @@
             ({item.quantity}x)
             {item.item.name}
 
-            <span class="text-green-500">R${item.item[tipo_preco]}</span>
+            <span class="text-secondary">R${item.item[tipo_preco]}</span>
           </li>
           <button class="px-2" on:click={e => cart.removeItem(item.item.id)}>
-            <!-- todo: add icon -->
-            del
+            {@html icons.delete()}
           </button>
         </div>
         <hr />
@@ -134,7 +137,7 @@
     </ul>
     <h2 class="mx-10 flex justify-center text-3xl font-bold">
       Preco total:&nbsp;
-      <span class="text-green-500">R${total}</span>
+      <span class="text-primary">R${total}</span>
     </h2>
   </div>
 
@@ -156,6 +159,7 @@
     <div class="flex flex-col gap-2">
       <button class="btn btn-primary w-full disabled:bg-opacity-50">
         <span class="mr-1">IMPRIMIR</span>
+        {@html icons.print()}
       </button>
       <button
         class="btn btn-primary w-full disabled:bg-opacity-50"
