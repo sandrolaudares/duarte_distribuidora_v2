@@ -120,7 +120,8 @@
         href="/admin/cashier"
         class="btn btn-primary w-full disabled:bg-opacity-50"
       >
-        <span class="mr-1">CANCELAR</span>
+      <!--TODO: ao cancelar tem que resetar o que ta adicionado no "carrinho"-->
+        <span class="mr-1">CANCELAR</span> {@html icons.delete()}
       </a>
     </div>
   </div>
@@ -156,7 +157,7 @@
         class="btn btn-primary w-full"
         on:click={() => isOpenModal?.showModal()}
       >
-        ACESSAR PRODUTOS
+        ACESSAR PRODUTOS {@html icons.basket()}
       </button>
       <p class="mb-2 mt-4">Observações sobre compra:</p>
       <textarea
@@ -174,7 +175,7 @@
         class="btn btn-primary w-full disabled:bg-opacity-50"
         on:click={createOrder}
       >
-        <span class="mr-1">PAGAMENTO</span>
+        <span class="mr-1">PAGAMENTO</span> {@html icons.dolar()}
       </button>
     </div>
   </div>
@@ -187,8 +188,6 @@
     <Cardapio data={products}>
       {#snippet card(p)}
         <div class="card p-1 w-full">
-
-              <!-- TODO: make better card with + and - but -->
           <div class="grid grid-cols-1 gap-3">
             {#each p.items as item}
 
@@ -240,17 +239,6 @@
                   </div>
                 </div>
               </div>
-
-              <!-- <button
-                class="btn btn-primary"
-                on:click={() =>
-                  cart.addItem({
-                    item: item,
-                    quantity: 1,
-                  })}
-              >
-                {item.name}
-              </button> -->
             {/each}
           </div>
         </div>

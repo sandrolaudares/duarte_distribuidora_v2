@@ -201,6 +201,19 @@ export const icons = {
            <path d="M5 12h14"></path>`,
         cfg,
       ),
+      dolar: (cfg?: SVGoptions) =>
+        svgTemplate(
+          `
+             <line x1="12" x2="12" y1="2" y2="22"></line>
+<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>`,
+          cfg,
+        ),
+        basket: (cfg?: SVGoptions) =>
+          svgTemplate(
+            `
+               <path d="m19 11-4-7"/><path d="M2 11h20"/><path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4"/><path d="M4.5 15.5h15"/><path d="m5 11 4-7"/><path d="m9 11 1 9"/>`,
+            cfg,
+          ),
   flags: {
     getEmojiFlag: (lang: string) => {
       switch (lang) {
@@ -238,3 +251,4 @@ export const icons = {
       ),
   },
 }
+
