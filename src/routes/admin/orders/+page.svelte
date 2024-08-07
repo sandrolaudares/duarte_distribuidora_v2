@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { toast } from 'svelte-sonner'
   import type { PageData } from './$types'
   import CardShowPedidos from './CardShowPedidos.svelte'
 
@@ -12,6 +13,11 @@
 
   let isPendente = false
 
+  type changeStatus = {
+    id: number
+    status: string
+  }
+
   $: pedidosAbertos = pedidosFiltrados.filter(
     pedido => pedido.status === 'PENDING',
   )
@@ -20,12 +26,11 @@
     isPendente = !isPendente
     pedidoSelecionado = 'all'
   }
-</script>
 
-<!-- TODO: frontend -->
-<pre>
-  {JSON.stringify(data.last_orders, null, 2)}
-</pre>
+  function changeStatusPedido({ id, status }: changeStatus) {
+    toast.success('Status mudou com sucesso!')
+  }
+</script>
 
 <main class="p-2">
   {#if pedidosAbertos.length > 0}
@@ -82,13 +87,17 @@
               </div>
             {/if}
             <div class="p-2">
-              <button class="btn btn-primary" on:click={togglePendente}>Pedidos pendentes</button>
+              <button class="btn btn-primary" on:click={togglePendente}>
+                Pedidos pendentes
+              </button>
             </div>
           </div>
         </div>
       {:else}
         <div class="mt-2 p-2">
-          <button class="btn btn-primary" on:click={togglePendente}>Pedidos aceitos</button>
+          <button class="btn btn-primary" on:click={togglePendente}>
+            Pedidos aceitos
+          </button>
         </div>
       {/if}
     </div>
@@ -103,19 +112,24 @@
             <CardShowPedidos
               button_text="Aceitar pedido"
               button_recusar="Recusar pedido"
-              click_button={async () => {
+              order={pedidos}
+              click_confirm={async () => {
                 console.log('click aceitar')
                 pedido.status = 'CONFIRMED'
-                // const { error } = await updateStatusPedido(supabase, {
-                //   id: pedido.id,
-                //   status: 'CONFIRMED',
-                // })
-                // if (error) {
-                //   pedido.status = 'CONFIRMED'
-                // }
+                await changeStatusPedido({
+                  id: pedido.id,
+                  status: 'CONFIRMED',
+                })
+              }}
+              click_refuse={async () => {
+                console.log('click recusar')
+                pedido.status = 'CANCELED'
+                await changeStatusPedido({
+                  id: pedido.id,
+                  status: 'CANCELED',
+                })
               }}
             />
-            PENDENTES
           {/if}
         {/each}
       {:else}
@@ -131,22 +145,18 @@
           <h1 class="text-center">Pedidos aceitos:</h1>
           {#each pedidosFiltrados as pedido}
             {#if pedido.status === 'CONFIRMED'}
-              <!-- <CardShowPedidos
-                {pedido}
-                {supabase}
-                button_text="Saiu Pra Entrega"
-                click_button={async () => {
-                  console.log('click aberto')
-                  pedido.status = 'a_caminho'
-                  const { error } = await updateStatusPedido(supabase, {
+              <CardShowPedidos
+                button_text="Aceitar pedido"
+                order={pedidos}
+                click_confirm={async () => {
+                  console.log('click aceitar')
+                  pedido.status = 'ON THE WAY'
+                  await changeStatusPedido({
                     id: pedido.id,
-                    status: 'a_caminho',
+                    status: 'ON THE WAY',
                   })
-                  if (error) {
-                    pedido.status = 'aberto'
-                  }
                 }}
-              /> -->
+              />
             {/if}
           {/each}
         </div>
@@ -154,22 +164,18 @@
           <h1 class="text-center">A caminho:</h1>
           {#each pedidosFiltrados as pedido}
             {#if pedido.status === 'ON THE WAY'}
-              <!-- <CardShowPedidos
-                {pedido}
-                {supabase}
-                button_text="Chegou"
-                click_button={async () => {
-                  console.log('click caminho')
-                  pedido.status = 'entregue'
-                  const { error } = await updateStatusPedido(supabase, {
+              <CardShowPedidos
+                button_text="Aceitar pedido"
+                order={pedidos}
+                click_confirm={async () => {
+                  console.log('click aceitar')
+                  pedido.status = 'DELIVERED'
+                  await changeStatusPedido({
                     id: pedido.id,
-                    status: 'entregue',
+                    status: 'DELIVERED',
                   })
-                  if (error) {
-                    pedido.status = 'aberto'
-                  }
                 }}
-              /> -->
+              />
             {/if}
           {/each}
         </div>
@@ -177,22 +183,18 @@
           <h1 class="text-center">Entregue:</h1>
           {#each pedidosFiltrados as pedido}
             {#if pedido.status === 'DELIVERED'}
-              <!-- <CardShowPedidos
-                {pedido}
-                {supabase}
-                button_text="Confirmar Entrega"
-                click_button={async () => {
-                  console.log('click entregue')
-                  pedido.status = 'finalizado'
-                  const { error } = await updateStatusPedido(supabase, {
+              <CardShowPedidos
+                button_text="Aceitar pedido"
+                order={pedidos}
+                click_confirm={async () => {
+                  console.log('click aceitar')
+                  pedido.status = 'ENDED'
+                  await changeStatusPedido({
                     id: pedido.id,
-                    status: 'finalizado',
+                    status: 'ENDED',
                   })
-                  if (error) {
-                    pedido.status = 'entregue'
-                  }
                 }}
-              /> -->
+              />
             {/if}
           {/each}
         </div>
@@ -200,3 +202,7 @@
     {/if}
   </div>
 </main>
+
+<pre>
+  {JSON.stringify(data.last_orders, null, 2)}
+</pre>
