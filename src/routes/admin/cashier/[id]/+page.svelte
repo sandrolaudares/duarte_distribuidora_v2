@@ -31,9 +31,9 @@
   let clienteSelecionado: RouterOutputs['customer']['getCustomers'][0] | null =
     null
 
-    let activeItemIndex = 0
 
-  $: total = $cart.reduce((acc, item) => {
+
+  $: total = Object.values($cart).reduce((acc, item) => {
     return acc + item.item[tipo_preco] * item.quantity
   }, 0)
 
@@ -49,7 +49,7 @@
           payment_method: 'dinheiro',
         },
 
-        order_items: $cart.map(item => ({
+        order_items: Object.values($cart).map(item => ({
           product_id: item.item.id,
           quantity: item.quantity,
           // price: item.item[tipo_preco],
@@ -121,7 +121,7 @@
         class="btn btn-primary w-full disabled:bg-opacity-50"
       >
       <!--TODO: ao cancelar tem que resetar o que ta adicionado no "carrinho"-->
-        <span class="mr-1">CANCELAR</span> {@html icons.delete()}
+        <span class="mr-1">CANCELAR</span> {@html icons.x()}
       </a>
     </div>
   </div>
@@ -130,16 +130,16 @@
     class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-4"
   >
     <ul class="mb-4 text-center text-lg">
-      {#each $cart as item}
-        <div class="flex justify-center">
+      {#each Object.values($cart) as item}
+        <div class="flex justify-between">
           <li class="py-2 font-bold">
             ({item.quantity}x)
             {item.item.name}
 
             <span class="text-secondary">R${item.item[tipo_preco]}</span>
           </li>
-          <button class="px-2" on:click={e => cart.removeItem(item.item.id)}>
-            {@html icons.delete()}
+          <button class="btn btn-circle" on:click={e => cart.removeItem(item.item.id)}>
+            {@html icons.x({stroke: 'red'})}
           </button>
         </div>
         <hr />
@@ -190,6 +190,7 @@
         <div class="card p-1 w-full">
           <div class="grid grid-cols-1 gap-3">
             {#each p.items as item}
+            {@const cartItem = $cart[item.id]}
 
             <hr />
               <div class="flex py-2 w-full">
@@ -209,7 +210,7 @@
                 <div class="w-full text-right">
                   <span class="block pb-3 text-xl font-bold">R${item[tipo_preco]}</span>
                   <div class="flex items-center justify-end gap-3 text-center">
-                    {#if item.quantity >= 1}
+                    {#if cartItem?.quantity >= 1}
                     <button class="btn btn-primary" on:click={() =>
                       cart.addItem({
                         item: item,
@@ -219,14 +220,13 @@
                     <input
                       min="1"
                       class="min-w-10 max-w-28 bg-base-100 text-right text-xl font-bold focus:border-yellow-500"
-                      value={item.quantity}
+                      value={$cart[item.id]?.quantity ?? 0}
                       on:change={(e) => {
                       //TODO: Input ta meio bugado, e tambem tem que setar pra 1 quando modal é fechado
-                        const quant_temp = e.target?.value
-
-                        cart.addItem({
+                        const quant_temp = (e.target as HTMLInputElement)?.value
+                        cart.setItem({
                           item:item,
-                          quantity: quant_temp,
+                          quantity: Number(quant_temp),
                         })
                       }}
                     />
