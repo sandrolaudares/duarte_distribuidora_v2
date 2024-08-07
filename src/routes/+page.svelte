@@ -10,6 +10,7 @@
 
   import ShareButton from '$components/share/index.svelte'
   import HeroDuarte from '$lib/components/landing-page/hero/HeroDuarte.svelte'
+  //TODO: Adicionar SEO em todas outras paginas
 </script>
 
 <SEO

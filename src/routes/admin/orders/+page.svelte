@@ -62,7 +62,9 @@
       {#if isPendente}
         <div class="mt-2 flex items-center">
           <div>
-            <label for="filtro">Filtrar pedidos:</label>
+            <!--TODO: FIltro ainda falta ajustar-->
+
+            <!-- <label for="filtro">Filtrar pedidos:</label>
             <select
               name="filtro"
               id="filtro"
@@ -76,7 +78,7 @@
               <option value="CONFIRMED">Pedidos aceitos</option>
               <option value="ON THE WAY">A caminho</option>
               <option value="DELIVERED">Entregue</option>
-            </select>
+            </select> -->
           </div>
           <div class="relative">
             {#if pedidosAbertos.length > 0}
@@ -112,7 +114,7 @@
             <CardShowPedidos
               button_text="Aceitar pedido"
               button_recusar="Recusar pedido"
-              order={pedidos}
+              order={pedido}
               click_confirm={async () => {
                 console.log('click aceitar')
                 pedido.status = 'CONFIRMED'
@@ -137,17 +139,17 @@
       {/if}
     {:else if pedidoSelecionado != 'all' && pedidoSelecionado != 'varejo' && pedidoSelecionado != 'atacado'}
       {#each pedidosFiltrados as pedido}
-        <!-- <CardShowPedidos {pedido} {supabase} /> -->
+        <CardShowPedidos order={pedido} />
       {/each}
     {:else if pedidoSelecionado === 'all' || pedidoSelecionado === 'varejo' || pedidoSelecionado === 'atacado'}
       <div class="grid grid-cols-1 gap-2 xl:grid-cols-3">
-        <div class="max-h-[88vh] overflow-y-auto rounded-lg bg-red-100 p-2">
-          <h1 class="text-center">Pedidos aceitos:</h1>
+        <div class="max-h-[88vh] overflow-y-auto rounded-lg bg-error p-2">
+          <h1 class="text-center text-black">Pedidos aceitos:</h1>
           {#each pedidosFiltrados as pedido}
             {#if pedido.status === 'CONFIRMED'}
               <CardShowPedidos
                 button_text="Aceitar pedido"
-                order={pedidos}
+                order={pedido}
                 click_confirm={async () => {
                   console.log('click aceitar')
                   pedido.status = 'ON THE WAY'
@@ -160,13 +162,13 @@
             {/if}
           {/each}
         </div>
-        <div class="max-h-[88vh] overflow-y-auto rounded-lg bg-yellow-100 p-2">
-          <h1 class="text-center">A caminho:</h1>
+        <div class="max-h-[88vh] overflow-y-auto rounded-lg bg-warning p-2">
+          <h1 class="text-center text-black">A caminho:</h1>
           {#each pedidosFiltrados as pedido}
             {#if pedido.status === 'ON THE WAY'}
               <CardShowPedidos
                 button_text="Aceitar pedido"
-                order={pedidos}
+                order={pedido}
                 click_confirm={async () => {
                   console.log('click aceitar')
                   pedido.status = 'DELIVERED'
@@ -179,13 +181,13 @@
             {/if}
           {/each}
         </div>
-        <div class="max-h-[88vh] overflow-y-auto rounded-lg bg-green-100 p-2">
-          <h1 class="text-center">Entregue:</h1>
+        <div class="max-h-[88vh] overflow-y-auto rounded-lg bg-success p-2">
+          <h1 class="text-center text-black">Entregue:</h1>
           {#each pedidosFiltrados as pedido}
             {#if pedido.status === 'DELIVERED'}
               <CardShowPedidos
                 button_text="Aceitar pedido"
-                order={pedidos}
+                order={pedido}
                 click_confirm={async () => {
                   console.log('click aceitar')
                   pedido.status = 'ENDED'
@@ -203,6 +205,6 @@
   </div>
 </main>
 
-<pre>
+<!-- <pre>
   {JSON.stringify(data.last_orders, null, 2)}
-</pre>
+</pre> -->
