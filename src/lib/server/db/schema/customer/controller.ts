@@ -154,3 +154,6 @@ export const customer = {
     })
   },
 }
+
+
+export type CurrentOrders = Awaited< ReturnType<typeof customer.getCurrentOrders>>
