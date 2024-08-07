@@ -9,7 +9,7 @@
   export let order: CurrentOrders[0]
 </script>
 
-<div class="m-2 overflow-hidden rounded bg-base-300 p-4 shadow-lg">
+<div class="m-2 overflow-hidden rounded bg-base-300 p-2 shadow-lg bg-opacity-90">
   <div class="mb-4 flex justify-between gap-1 text-center text-sm">
     <div class="flex flex-col items-start">
       <h3>
@@ -23,18 +23,18 @@
         Pagamento em <strong>{order.payment_method}</strong>
       </p>
       <p>
-        Total: <strong class="text-success">R${order.total}</strong>
+        Total: <strong class="text-success text-lg">R${order.total}</strong>
       </p>
     </div>
   </div>
   <div class="mt-4">
     <h4 class="mb-2 text-lg font-semibold">Produtos pedidos:</h4>
-    <div class="flex flex-col gap-2 sm:flex-row">
+    <div class="flex flex-col gap-1 sm:flex-row">
       {#each order.items as item}
         <div class="flex rounded-md bg-base-100 p-2 shadow-sm">
           <p class="text-base">
-            {item.quantity}x - {item.product.name} -
-            <span class="font-bold">${item.price}</span>
+            <strong>{item.quantity}x</strong> - {item.product.name} -
+            <span class="font-bold text-success">R${item.price}</span>
           </p>
         </div>
       {/each}
