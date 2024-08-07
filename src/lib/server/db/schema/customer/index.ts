@@ -117,6 +117,7 @@ export const customerOrderTable = sqliteTable('customer_order', {
       'ON THE WAY',
       'DELIVERED',
       'CANCELED',
+      'ENDED'
     ],
   }).notNull(),
 })

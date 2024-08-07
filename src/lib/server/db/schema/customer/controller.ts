@@ -140,6 +140,7 @@ export const customer = {
       where: or(
         ne(customerOrderTable.status, 'DELIVERED'),
         ne(customerOrderTable.status, 'CANCELED'),
+        ne(customerOrderTable.status, 'ENDED'),
       ),
       with: {
         address: true,
