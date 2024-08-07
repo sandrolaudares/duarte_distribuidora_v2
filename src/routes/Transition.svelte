@@ -22,7 +22,10 @@
   })
 </script>
 
-<!-- or $navigating -->
+{#if $navigating}
+  <PreLoadingIndicator />
+{/if}
+
 {#key key}
   <div
     in:fly={{
