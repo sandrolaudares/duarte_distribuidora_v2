@@ -30,6 +30,7 @@
     required?: boolean
     annotation?: string
     placeholder?: string
+    disabled?: boolean
     validate?: (value: any) => { valid: boolean; message: string }
   }
 
@@ -114,6 +115,7 @@
               type="checkbox"
               required={field.required}
               bind:checked={field.value}
+              disabled={field.disabled}
             />
           {:else if field.type === 'currency'}
             <CurrencyInput bind:value={field.value} />
@@ -126,6 +128,7 @@
             class="input input-bordered w-full max-w-xs"
             required={field.required}
             bind:value={field.value}
+            disabled={field.disabled}
           />
         {:else if field.type === 'number'}
           <input
@@ -134,6 +137,7 @@
             placeholder={field.placeholder}
             required={field.required}
             bind:value={field.value}
+            disabled={field.disabled}
           />
         {:else if field.type === 'email'}
           <input
@@ -142,6 +146,7 @@
             placeholder={field.placeholder}
             required={field.required}
             bind:value={field.value}
+            disabled={field.disabled}
           />
         {:else if field.type === 'password'}
           <input
@@ -150,6 +155,7 @@
             placeholder={field.placeholder}
             required={field.required}
             bind:value={field.value}
+            disabled={field.disabled}
           />
         {:else if field.type === 'textarea'}
           <textarea
@@ -157,6 +163,7 @@
             placeholder={field.placeholder}
             required={field.required}
             bind:value={field.value}
+            disabled={field.disabled}
           ></textarea>
         {:else if field.type === 'component' && field.component}
           <svelte:component

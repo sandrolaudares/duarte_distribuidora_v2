@@ -63,6 +63,7 @@
         <div class="mt-2 flex items-center">
           <div>
             <!--TODO: FIltro ainda falta ajustar-->
+            <!--TODO: Adicionar filtro por distribuidora-->
 
             <!-- <label for="filtro">Filtrar pedidos:</label>
             <select
