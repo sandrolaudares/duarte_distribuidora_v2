@@ -63,7 +63,7 @@ export const addressTable = sqliteTable('address', {
   updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
     () => new Date(),
   ),
-  customer_id: text('customer_id')
+  customer_id: integer('customer_id')
     .notNull()
     .references(() => customerTable.id),
   cep: text('cep').notNull(),
@@ -98,8 +98,16 @@ export const customerOrderTable = sqliteTable('customer_order', {
     () => distribuidoraTable.id,
   ),
   customer_id: integer('customer_id').references(() => customerTable.id),
-  address_id: text('address_id').references(() => addressTable.id),
-  payment_method: text('payment_method').notNull(),
+  address_id: integer('address_id').references(() => addressTable.id),
+  payment_method: text('payment_method', {
+    enum: ['credit_card', 'pix', 'fiado', 'dinheiro'],
+  }).notNull(),
+  payment_status: text('payment_status', {
+    enum: ['PENDING', 'CONFIRMED'],
+  })
+    .notNull()
+    .default('PENDING'),
+  observation: text('observation'),
   total: integer('total').notNull(),
   status: text('status', {
     enum: [
@@ -139,7 +147,7 @@ export const orderItemTable = sqliteTable('order_item', {
   order_id: integer('order_id')
     .notNull()
     .references(() => customerOrderTable.id),
-  product_id: text('product_id')
+  product_id: integer('product_id')
     .notNull()
     .references(() => productItemTable.id),
   quantity: integer('quantity').notNull(),

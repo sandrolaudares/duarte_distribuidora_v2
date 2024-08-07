@@ -26,7 +26,7 @@ export const customer = {
     customerOrderTable,
     orderItemTable,
   },
-  insertCustomer: async (input: InsertCustomer) => {
+  insertCustomer: (input: InsertCustomer) => {
     return db.insert(customerTable).values(input)
   },
   updateCustomer: (
@@ -65,7 +65,7 @@ export const customer = {
   insertAddress: async (input: InsertAddress) => {
     return db.insert(addressTable).values(input)
   },
-  getCustomerAddress: async (customerId: string) => {
+  getCustomerAddress: async (customerId: SelectCustomer['id']) => {
     return db
       .select()
       .from(addressTable)
@@ -73,12 +73,12 @@ export const customer = {
   },
   insertOrder: async (input: {
     order_info: Omit<InsertCustomerOrder, 'status'>
-    order_items: InsertOrderItem[]
+    order_items: Omit<InsertOrderItem, 'order_id'>[]
   }) => {
     const { order_info, order_items } = input
 
     const resp = db.transaction(async tx => {
-      if (order_info.customer_id && order_info.payment_method === 'credit') {
+      if (order_info.customer_id && order_info.payment_method === 'fiado') {
         const [customer] = await tx
           .select()
           .from(customerTable)

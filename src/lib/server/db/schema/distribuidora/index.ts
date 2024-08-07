@@ -36,7 +36,9 @@ export const cashierTable = sqliteTable('cashier', {
     .notNull()
     .references(() => distribuidoraTable.id),
   name: text('name').notNull(),
-
+  status: text('status', { enum: ['Aberto', 'Fechado'] })
+    .notNull()
+    .default('Fechado'),
   currency: integer('currency').notNull().default(0),
 })
 

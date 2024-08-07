@@ -128,4 +128,16 @@ export const product = {
       },
     })
   },
+
+  queryCategorysWithProductItems: () => {
+    return db.query.productCategoryTable.findMany({
+      with: {
+        products: {
+          with: {
+            items: true,
+          },
+        },
+      },
+    })
+  },
 }

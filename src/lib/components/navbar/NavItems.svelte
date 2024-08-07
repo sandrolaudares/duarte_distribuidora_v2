@@ -120,8 +120,6 @@
   export let showDefaultItems = true
 
   function isActive(href?: string) {
-    // TODO: Fix translation home not working
-
     return (
       $page.url.pathname === href ||
       $page.url.pathname === '/' + languageTag() + href ||

@@ -40,7 +40,7 @@
       <div class="card-body">
         <span class="text-lg font-bold">{$cart.length} Items</span>
         <!-- TODO: format price -->
-        <span class="text-info">Subtotal: {subtotal}</span>
+        <span class="text-info">Subtotal: {(subtotal / 100).toFixed(2)}</span>
         <div class="card-actions">
           {#each $cart as item}
             <div class="flex items-center justify-between gap-2">

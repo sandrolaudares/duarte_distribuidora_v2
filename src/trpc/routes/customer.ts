@@ -5,6 +5,7 @@ import { customer as customerController } from '$db/controller'
 import {
   insertCustomerSchema,
   insertAddressSchema,
+  customerTable,
 } from '$lib/server/db/schema'
 
 import { paramsSchema } from '$lib/components/table'
@@ -42,17 +43,58 @@ export const customer = router({
     .use(middleware.auth)
     .input(insertAddressSchema)
     .mutation(async ({ input }) => {
-      return await customerController.insertAddress(input)
+      try {
+        return await customerController.insertAddress(input)
+      } catch (error) {
+        console.error('Failed to insert address:', error)
+      }
     }),
-
   getPaginatedCustomers: publicProcedure
     .input(paramsSchema)
     .query(async ({ input }) => {
       return await tableHelper(
         customerController.getCustomers().$dynamic(),
-        customerController.tables.customerTable,
+        customerTable,
         'name',
         input,
       )
+    }),
+
+  getCustomers: publicProcedure.query(async () => {
+    return await customerController.getCustomersWithAddress()
+  }),
+
+  insertOrder: publicProcedure
+    .use(middleware.auth)
+    .input(
+      z.object({
+        order_items: z.array(
+          z.object({
+            product_id: z.number(),
+            quantity: z.number(),
+            price: z.number(),
+          }),
+        ),
+        order_info: z.object({
+          payment_method: z.enum(['pix', 'credit_card', 'fiado', 'dinheiro']),
+          customer_id: z.number().optional(),
+          address_id: z.number().optional(),
+          total: z.number(),
+          distribuidora_id: z.number(),
+          observation: z.string(),
+        }),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const { order_items, order_info } = input
+
+      try {
+        return await customerController.insertOrder({
+          order_items,
+          order_info,
+        })
+      } catch (error) {
+        console.error('Failed to insert order:', error)
+      }
     }),
 })

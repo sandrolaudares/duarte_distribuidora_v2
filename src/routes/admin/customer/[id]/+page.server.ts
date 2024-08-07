@@ -6,8 +6,10 @@ export const load = (async ({ params }) => {
   const customerID = Number(params.id)
   const cliente = await customer.getCustomerById(customerID)
 
+  const orders = await customer.getCustomerOrders(customerID)
+
   if (!cliente) {
     error(404, 'Customer not found')
   }
-  return { customer: cliente }
+  return { customer: cliente, orders }
 }) satisfies PageServerLoad
