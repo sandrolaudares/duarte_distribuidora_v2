@@ -122,7 +122,7 @@
     Add Category
   </button>
 </div>
-
+<!--TODO: Ao mover de uma categoria para outra não ta movendo, ao atualizar a pagina sai-->
 <DnDBoard
   columns={columnsData}
   onFinalUpdate={handleBoardUpdated}

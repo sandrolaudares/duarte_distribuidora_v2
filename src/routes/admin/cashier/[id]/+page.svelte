@@ -218,7 +218,7 @@
                     {/if}
                     <input
                       min="1"
-                      class="min-w-10 max-w-28 bg-white text-right text-xl font-bold focus:border-yellow-500"
+                      class="min-w-10 max-w-28 bg-base-100 text-right text-xl font-bold focus:border-yellow-500"
                       value={item.quantity}
                       on:change={(e) => {
                       //TODO: Input ta meio bugado, e tambem tem que setar pra 1 quando modal é fechado
