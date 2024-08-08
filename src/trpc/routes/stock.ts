@@ -4,6 +4,7 @@ import { publicProcedure, router } from '../t'
 import { z } from 'zod'
 import { stock as stockController } from '$db/schema/stock/controller'
 import { insertSKUschema, insertSupplierSchema } from '$db/schema/stock'
+import { stockTransactionTable } from '$db/schema'
 
 import { paramsSchema } from '$lib/components/table'
 import { tableHelper } from '$lib/server/db/utils'
@@ -29,6 +30,29 @@ export const stock = router({
         stockController.tables.skuTable,
         'name',
         input,
+      )
+    }),
+
+  paginatedTransactions: publicProcedure
+    .input(
+      z.object({
+        distribuidora_id: z.number(),
+        sku: z.number(),
+        table_state: paramsSchema,
+      }),
+    )
+    .query(async ({ input }) => {
+      const { distribuidora_id, sku, table_state } = input
+      return await tableHelper(
+        stockController
+          .getTransactionsFromProduto({
+            distribuidora_id,
+            sku,
+          })
+          .$dynamic(),
+        stockTransactionTable,
+        '',
+        table_state,
       )
     }),
 
