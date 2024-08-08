@@ -41,7 +41,7 @@
       placeholder="Ao clicar em 'Enviar', você estará reportando um bug para nossa equipe de desenvolvimento."
       id="bugReport"
       rows="4"
-      cols="50"
+      cols="33"
     ></textarea>
   </main>
 
@@ -52,8 +52,8 @@
       </a>
 
       <div class="flex gap-3">
-        <button class="btn btn-success" onclick={save}>Enviar</button>
         <button class="btn btn-error" onclick={modal.close}>Cancel</button>
+        <button class="btn btn-success" onclick={save}>Enviar</button>
       </div>
     </div>
   </svelte:fragment>

@@ -98,9 +98,9 @@
 </script>
 
 <Modal {title}>
-  <div class="flex flex-col items-center gap-3">
+  <div class="flex flex-col items-center gap-3 mb-3">
     {#each fields as field (field.name)}
-      <label class="form-control w-full max-w-xs">
+      <label class="form-control w-full ">
         <div class="label">
           <span class="label-text">{field.label}</span>
           {#if !field.required && field.type !== 'checkbox'}
@@ -125,7 +125,7 @@
           <input
             type="text"
             placeholder={field.placeholder}
-            class="input input-bordered w-full max-w-xs"
+            class="input input-bordered w-full "
             required={field.required}
             bind:value={field.value}
             disabled={field.disabled}
@@ -142,7 +142,7 @@
         {:else if field.type === 'email'}
           <input
             type="email"
-            class="input input-bordered w-full max-w-xs"
+            class="input input-bordered w-full "
             placeholder={field.placeholder}
             required={field.required}
             bind:value={field.value}
@@ -189,11 +189,13 @@
   </div>
 
   <svelte:fragment slot="footer">
-    <button class="btn" onclick={handleConfirm} disabled={isLoading}>
-      {!isLoading ? 'Save' : 'Loading...'}
-    </button>
-    <button class="btn" onclick={handleCancel} disabled={isLoading}>
-      Cancel
-    </button>
+    <div class="flex justify-end w-full gap-2 mt-3">
+      <button class="btn btn-error" onclick={handleCancel} disabled={isLoading}>
+        Cancel
+      </button>
+      <button class="btn btn-primary" onclick={handleConfirm} disabled={isLoading}>
+        {!isLoading ? 'Save' : 'Loading...'}
+      </button>
+    </div>
   </svelte:fragment>
 </Modal>
