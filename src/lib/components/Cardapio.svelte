@@ -93,7 +93,7 @@
 <main class="mx-1">
   <div class="sticky top-1 z-10 mx-2 pt-2 flex gap-3">
     <div
-      class="hide-scrollbar flex w-full gap-3 overflow-y-hidden overflow-x-scroll rounded-box bg-base-200 p-2 shadow-xl"
+      class="hide-scrollbar flex w-full gap-3 overflow-y-hidden overflow-x-scroll rounded-box bg-base-200 p-2 shadow-xl "
       bind:this={scrollContainer}
     >
       {#each data as d}

@@ -4,10 +4,10 @@
     descricao: string
     image?: string
     preco: string
+    categorias?: { nome: string }[]
   }
 
-  let categorias = [{ nome: 'Latao' }, { nome: 'Teste' }]
-  let { nome, descricao, image, preco }: CardProps = $props()
+  let { nome, descricao, image, preco, categorias }: CardProps = $props()
 </script>
 
 <button
@@ -25,13 +25,13 @@
   <div class="card-body">
     <h2 class="card-title flex justify-center">
       {nome}
-      <div class="badge badge-primary items-center p-4">
+      <!-- <div class="badge badge-primary items-center p-4">
         <p class="text-center text-xl">R${preco}</p>
-      </div>
+      </div> -->
     </h2>
     <p class="text-sm">Descricão: {descricao}</p>
     <div class="card-actions justify-center">
-      {#each categorias as categoria}
+      {#each categorias ?? [] as categoria}
         <div class="badge badge-outline">{categoria.nome}</div>
       {/each}
     </div>

@@ -27,12 +27,20 @@
           <p class="font-bold">{cliente.name}</p>
           <p>{cliente.phone}</p>
         </div>
+
         <button
           class="btn btn-primary"
-          on:click={() => selectedClient(cliente)}
+          on:click={() => {
+            selectedClient(cliente)
+            modal.close()
+          }}
         >
+          <!-- {JSON.stringify(end)} -->
+
           Selecionar
         </button>
+        <!-- {#each cliente.adresses as end}
+        {/each} -->
       </div>
     {/each}
   </div>

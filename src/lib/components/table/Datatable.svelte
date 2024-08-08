@@ -8,6 +8,7 @@
   } from '@tanstack/svelte-table'
   import type { ColumnDef, TableOptions } from '@tanstack/svelte-table'
   import { type TableState, createRowChanges } from '.'
+  import { toast } from 'svelte-sonner'
 
   const rowChanges = createRowChanges<T>()
   // import { type TableState } from '.'
@@ -43,15 +44,18 @@
 
   async function invalidate() {
     isLoading = true
-    console.log(true)
+    try {
+      const resp = await load(datatableState)
+      console.log(resp)
 
-    const resp = await load(datatableState)
-    console.log(resp)
-
-    if (resp) {
-      options.data = resp.data ?? []
-      totalRows = resp.count ?? 0
+      if (resp) {
+        options.data = resp.data ?? []
+        totalRows = resp.count ?? 0
+      }
+    } catch (error: any) {
+      toast.error(error.message)
     }
+
     console.log(false)
 
     isLoading = false
@@ -116,6 +120,7 @@
       save($rowChanges)
       $rowChanges = {}
     }
+    invalidate()
     isLoading = false
   }
 </script>
@@ -169,7 +174,7 @@
     {#if isLoading}
       <Loading />
     {:else}
-      <table class="table table-zebra ">
+      <table class="table table-zebra">
         <thead>
           {#each table.getHeaderGroups() as headerGroup}
             <tr>
@@ -183,11 +188,11 @@
                 <th colspan={header.colSpan}>
                   {#if !header.isPlaceholder}
                     <button
-                      class="flex items-center gap-2"
+                      class="flex items-center gap-2 "
                       class:btn={isSortable}
-                      class:btn-info={isSortable}
+                      class:btn-primary={isSortable}
                       class:badge={!isSortable}
-                      class:badge-info={!isSortable}
+                      class:badge-primary={!isSortable}
                       disabled={!isSortable}
                       onclick={() => setSort(header.column.id, sortDirection)}
                     >

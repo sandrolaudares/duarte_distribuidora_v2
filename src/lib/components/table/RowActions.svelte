@@ -2,7 +2,7 @@
   export let actions: { name: string; fn: () => void }[]
 </script>
 
-<ul class="menu menu-horizontal rounded-box bg-info">
+<ul class="menu menu-horizontal rounded-box">
   <li>
     <details class="">
       <summary>

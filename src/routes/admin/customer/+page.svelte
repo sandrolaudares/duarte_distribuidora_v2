@@ -232,6 +232,7 @@
           toast.error(error.message)
           return error.message
         }
+        invalidate()  
       },
     })
   }

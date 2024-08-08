@@ -87,6 +87,11 @@
   }
 
   function setSku(sku: SelectSku, quantity: number) {
+    if (quantity === 0) {
+      removeSku(sku)
+      return
+    }
+
     produtosEntrada[sku.id] = {
       sku,
       quantity,
@@ -105,9 +110,9 @@
     <input type="text" placeholder="Nota Fiscal" class="input input-bordered" />
     <div>
       {#if selectedSupplier}
-        <p class="rounded-lg bg-base-300 p-3 shadow-md">
+        <button class="rounded-lg bg-base-300 p-3 shadow-md" on:click={openModalSupplier}>
           {selectedSupplier.name}
-        </p>
+        </button>
       {:else}
         <button class="btn btn-primary w-full" on:click={openModalSupplier}>
           Selecionar fornecedor
@@ -117,9 +122,9 @@
 
     <div>
       {#if selectedDistribuidora}
-        <p class="rounded-lg bg-base-300 p-3 shadow-md">
+        <button class="rounded-lg bg-base-300 p-3 shadow-md" on:click={openModalDistribuidora}>
           {selectedDistribuidora.name}
-        </p>
+        </button>
       {:else}
         <button
           class="btn btn-primary w-full"
@@ -142,15 +147,16 @@
           type="number"
           class="input input-primary mt-2 w-full"
           placeholder="Quantidade"
+          
           on:input={e =>
             setSku(item, Number((e.target as HTMLInputElement).value))}
         />
-        <button
+        <!-- <button
           class="btn btn-primary mt-2 w-full"
           on:click={() => addSku(item, 1)}
         >
           Adicionar
-        </button>
+        </button> -->
       </div>
     {/each}
   </div>

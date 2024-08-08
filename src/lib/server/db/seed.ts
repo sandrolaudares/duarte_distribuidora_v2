@@ -2,12 +2,13 @@
 import { faker } from '@faker-js/faker'
 import { hash } from '@node-rs/argon2'
 import { generateId } from 'lucia'
-import { product, user, distribuidora, customer } from './controller'
+import { product, user, distribuidora, customer, stock } from './controller'
 
 const main = async () => {
-  await seedUsers()
-  await seedCategories()
-  await seedProducts()
+  // await seedUsers()
+  // await seedCategories()
+  // await seedSKU()
+  // await seedProducts()
   await seedDistribuidora()
   await seedCustomers()
 }
@@ -69,6 +70,13 @@ async function seedCategories() {
   console.log('categoryTable seed END')
 }
 
+
+async function seedSKU(){
+  await stock.insertSKU({
+    name: 'Teste SKU'
+  })
+}
+
 async function seedProducts() {
   console.log('productTable seed START')
 
@@ -89,13 +97,14 @@ async function seedProducts() {
       await product.insertProductItem({
         product_id: i,
         name: faker.commerce.productName(),
-        retail_price: faker.number.int(),
-        wholesale_price: faker.number.int(),
+        retail_price: faker.number.int({ min: 0, max: 30000 }),
+        wholesale_price: faker.number.int({ min: 0, max: 30000 }),
+        sku: 1
       })
       await product.insertProductItem({
         product_id: i,
         name: faker.commerce.productName(),
-        retail_price: faker.number.int(),
+        retail_price: faker.number.int({ min: 0, max: 30000 }),
         wholesale_price: faker.number.int({ min: 0, max: 30000 }),
       })
     } catch (error) {
@@ -112,7 +121,13 @@ async function seedDistribuidora() {
   try {
     const [distrib] = await distribuidora
       .insertDistribuidora({
-        name: 'Distribuidora Teste',
+        name: 'Distribuidora Matriz',
+      })
+      .returning()
+
+     await distribuidora
+      .insertDistribuidora({
+        name: 'Distribuidora Unidade 2',
       })
       .returning()
 

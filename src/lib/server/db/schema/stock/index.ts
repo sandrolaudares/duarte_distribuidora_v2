@@ -156,3 +156,27 @@ export const supplierTable = sqliteTable('supplier', {
 export type InsertSupplier = typeof supplierTable.$inferInsert
 export type SelectSupplier = typeof supplierTable.$inferSelect
 export const insertSupplierSchema = createInsertSchema(supplierTable)
+
+export const stockTransferenceTable = sqliteTable('stock_transferance', {
+  id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
+  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  updated_at: integer('updated_at', { mode: 'timestamp' }).default(
+    sql`(CURRENT_TIMESTAMP)`,
+  ),
+  from_distribuidora_id: integer('from_distribuidora_id')
+    .notNull()
+    .references(() => distribuidoraTable.id),
+  to_distribuidora_id: integer('from_distribuidora_id')
+    .notNull()
+    .references(() => distribuidoraTable.id),
+
+  status: text('status', { enum: ['CONFIRMED', 'CANCELED', 'PENDING'] }),
+})
+
+export const stockTransferanceSKUTable = sqliteTable('tranferance_tem', {
+  id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
+  sku: integer('sku')
+    .notNull()
+    .references(() => skuTable.id),
+  quantity: integer('quantity').notNull(),
+})

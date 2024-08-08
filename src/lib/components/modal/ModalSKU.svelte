@@ -13,7 +13,15 @@
   export let newSKU: InsertSku = {
     name: '',
   }
+  let search = ''
 
+  $: filtered = skus.filter(sku => {
+    if (!search) {
+      return true
+    }
+
+    return sku.name.toLowerCase().includes(search.toLowerCase())
+  })
   export let selectedSKU: (sku: SelectSku) => Promise<void>
 
   let isLoading = false
@@ -53,12 +61,20 @@
   {#if isLoading}
     <Loading />
   {:else}
-    <div class=" flex gap-3">
-      {#each skus as item}
-        <button class="btn" onclick={() => handleSelectSKU(item)}>
-          {item.name}
-        </button>
-      {/each}
+    <div class="flex flex-col items-center justify-center">
+      <input
+        type="text"
+        placeholder="Search..."
+        class="input input-bordered mb-3"
+        bind:value={search}
+      />
+      <div class=" flex flex-wrap gap-3">
+        {#each filtered as item}
+          <button class="btn" onclick={() => handleSelectSKU(item)}>
+            {item.name}
+          </button>
+        {/each}
+      </div>
     </div>
 
     <div class="card mt-3 flex flex-col space-y-2 bg-base-200 p-1">
