@@ -105,7 +105,7 @@
       header: 'Used Credit',
       accessorKey: 'used_credit',
       cell: info =>
-        renderComponent(EditRowInput<Customer>, {
+        renderComponent(EditRowCurrency<Customer>, {
           id: info.row.original.id,
           colID: 'used_credit',
           editT: 'number',

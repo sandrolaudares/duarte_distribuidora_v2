@@ -73,7 +73,7 @@
           {m.description()}: {produto.description}
         </p>
 
-        <div class="flex gap-3 border-t border-gray-200 py-2">
+        <div class="flex flex-wrap gap-3 border-t border-gray-200 py-2">
           {#each produto.items as variant, i (variant)}
             <!-- TODO: improve minicard -->
             <button
