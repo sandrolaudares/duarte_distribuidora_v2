@@ -21,6 +21,7 @@
   } from '$lib/components/table'
   import type { RouterOutputs, RouterInputs } from '$trpc/router'
   import { goto } from '$app/navigation'
+  import EditRowCurrency from '$lib/components/table/EditRowCurrency.svelte'
 
   type Customer = RouterOutputs['customer']['getPaginatedCustomers']['rows'][0]
 
@@ -115,7 +116,7 @@
       header: 'Max Credit',
       accessorKey: 'max_credit',
       cell: info =>
-        renderComponent(EditRowInput<Customer>, {
+        renderComponent(EditRowCurrency<Customer>, {
           id: info.row.original.id,
           colID: 'max_credit',
           editT: 'number',
@@ -238,6 +239,6 @@
   }
 </script>
 
-<div class="container mx-auto h-[70vh] overflow-x-auto border p-2">
+<div class=" h-[70vh] overflow-x-auto p-4">
   <Datatable columns={defaultColumns} {load} {save} {add} />
 </div>

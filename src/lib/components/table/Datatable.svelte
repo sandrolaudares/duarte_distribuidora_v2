@@ -99,8 +99,8 @@
 
   function getSortIcon(direction: 'asc' | 'desc' | string) {
     return direction == 'asc'
-      ? '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-narrow-wide"><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/><path d="M11 12h4"/><path d="M11 16h7"/><path d="M11 20h10"/></svg>'
-      : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down-wide-narrow"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M11 4h10"/><path d="M11 8h7"/><path d="M11 12h4"/></svg>'
+      ? '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-narrow-wide"><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/><path d="M11 12h4"/><path d="M11 16h7"/><path d="M11 20h10"/></svg>'
+      : '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down-wide-narrow"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M11 4h10"/><path d="M11 8h7"/><path d="M11 12h4"/></svg>'
   }
 
   const options = $state<TableOptions<T>>({
@@ -174,10 +174,10 @@
     {#if isLoading}
       <Loading />
     {:else}
-      <table class="table table-zebra">
+      <table class="table table-zebra table-xs p-1">
         <thead>
           {#each table.getHeaderGroups() as headerGroup}
-            <tr>
+            <tr class="bg-base-200">
               {#each headerGroup.headers as header}
                 {@const isSortable = header.column.getCanSort()}
                 {@const sortDirection =
@@ -188,10 +188,8 @@
                 <th colspan={header.colSpan}>
                   {#if !header.isPlaceholder}
                     <button
-                      class="flex items-center gap-2 "
-                      class:btn={isSortable}
-                      class:btn-primary={isSortable}
-                      class:badge={!isSortable}
+                      class="flex flex-nowrap items-center gap-2 badge"
+                      class:bg-base-200={isSortable}
                       class:badge-primary={!isSortable}
                       disabled={!isSortable}
                       onclick={() => setSort(header.column.id, sortDirection)}
@@ -210,8 +208,8 @@
                           <span>
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
+                              width="18"
+                              height="18"
                               viewBox="0 0 24 24"
                               fill="none"
                               stroke="currentColor"

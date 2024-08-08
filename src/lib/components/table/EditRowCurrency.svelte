@@ -27,14 +27,8 @@
 
 {#if rInEdit !== true}
   <span>
-    {value}
+    R${(value / 100).toFixed(2)}
   </span>
-{:else if editT === 'text'}
-  <input class={className} type="text" bind:value={changedRow[colID]} />
-{:else if editT === 'number'}
-  <input class={className} type="number" bind:value={changedRow[colID]} />
 {:else}
-  <span>
-    {value}
-  </span>
+  <CurrencyInput bind:value={changedRow[colID]} />
 {/if}
