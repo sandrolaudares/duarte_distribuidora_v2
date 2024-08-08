@@ -4,6 +4,7 @@ import {
   distribuidoraTable,
   productStockTable,
   stockTransactionTable,
+  supplierTable,
 } from '$db/schema'
 
 import type {
@@ -16,6 +17,8 @@ import type {
   SelectSku,
   InsertSku,
   SelectStockTransaction,
+  SelectSupplier,
+  InsertSupplier,
 } from '$db/schema'
 
 import { db } from '$db'
@@ -27,6 +30,27 @@ function insertSKU(data: InsertSku) {
 }
 function getSKU() {
   return db.select().from(skuTable)
+}
+
+function getSKUWithStock() {
+  return db
+    .select()
+    .from(skuTable)
+    .leftJoin(productStockTable, eq(skuTable.id, productStockTable.sku))
+}
+
+function getInfoSKU(sku_id: SelectSku['id']) {
+  return db.query.skuTable.findFirst({
+    where: eq(skuTable.id, sku_id),
+    with: {
+      product_stock: {
+        with: {
+          distribuidora: true,
+          transactions: true,
+        },
+      },
+    },
+  })
 }
 
 function insertProductStock(data: InsertProductStock) {
@@ -86,7 +110,7 @@ async function processStockTransaction(transaction: {
       sku: sku_id,
     })
   } catch (e) {
-    if (e instanceof LibsqlError && e.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+    if (e instanceof LibsqlError && e.code === 'SQLITE_CONSTRAINT_PRIMARYKEY') {
       //  expected error
     } else {
       console.log(e)
@@ -102,6 +126,15 @@ async function processStockTransaction(transaction: {
   })
 }
 
+function insertSupplier(data: InsertSupplier) {
+  return db.insert(supplierTable).values(data)
+}
+
+function getSupplier() {
+  return db.select().from(supplierTable)
+}
+
+
 export const stock = {
   tables: {
     skuTable,
@@ -109,9 +142,13 @@ export const stock = {
   },
   insertSKU,
   getSKU,
+  getInfoSKU,
+  getSKUWithStock,
   insertProductStock,
   // insertStockTransaction,
   processStockTransaction,
   getProductStock,
   getDistributionStock,
+  insertSupplier,
+  getSupplier,
 }

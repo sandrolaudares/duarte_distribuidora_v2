@@ -13,15 +13,20 @@ import { imageTable } from '../image'
 
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 
-import { distribuidoraTable } from '$db/schema'
+import { distribuidoraTable, productTable } from '$db/schema'
 
 export const skuTable = sqliteTable('sku', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
   created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
   name: text('name').notNull(),
 })
-export const insertSKUschema = createInsertSchema(skuTable)
 
+export const skuRelations = relations(skuTable, ({ many, one }) => ({
+  product_stock: many(productStockTable),
+  products: many(productTable),
+}))
+
+export const insertSKUschema = createInsertSchema(skuTable)
 export type InsertSku = typeof skuTable.$inferInsert
 export type SelectSku = typeof skuTable.$inferSelect
 
@@ -49,13 +54,28 @@ export const productStockTable = sqliteTable(
   }),
 )
 
+export const productStockRelations = relations(
+  productStockTable,
+  ({ one, many }) => ({
+    distribuidora: one(distribuidoraTable, {
+      fields: [productStockTable.distribuidora_id],
+      references: [distribuidoraTable.id],
+    }),
+    sku: one(skuTable, {
+      fields: [productStockTable.sku],
+      references: [skuTable.id],
+    }),
+    transactions: many(stockTransactionTable),
+  }),
+)
+
 export type InsertProductStock = typeof productStockTable.$inferInsert
 export type SelectProductStock = typeof productStockTable.$inferSelect
 
 type metaEntrada = {
   type: 'entrada'
   nota_fiscal: string
-  user_id: number
+  user_id: string | null | undefined
 }
 
 type metaSaida = {
@@ -86,7 +106,7 @@ export const stockTransactionTable = sqliteTable(
     sku: integer('sku').notNull(),
     quantity: integer('quantity').notNull().default(0),
     type: text('type', { enum: ['Entrada', 'Saida'] }).notNull(),
-
+    supplier_id: integer('supplier_id').references(() => supplierTable.id),
     meta_data: text('meta_data', { mode: 'json' }).notNull().$type<MetaUnion>(),
   },
   table => ({
@@ -100,5 +120,39 @@ export const stockTransactionTable = sqliteTable(
   }),
 )
 
+export const stockTransactionRelations = relations(
+  stockTransactionTable,
+  ({ one, many }) => ({
+    distribuidora: one(distribuidoraTable, {
+      fields: [stockTransactionTable.distribuidora_id],
+      references: [distribuidoraTable.id],
+    }),
+    sku: one(skuTable, {
+      fields: [stockTransactionTable.sku],
+      references: [skuTable.id],
+    }),
+    stock: one(productStockTable, {
+      fields: [
+        stockTransactionTable.distribuidora_id,
+        stockTransactionTable.sku,
+      ],
+      references: [productStockTable.distribuidora_id, productStockTable.sku],
+    }),
+  }),
+)
+
 export type InsertStockTransaction = typeof stockTransactionTable.$inferInsert
 export type SelectStockTransaction = typeof stockTransactionTable.$inferSelect
+
+export const supplierTable = sqliteTable('supplier', {
+  id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
+    () => new Date(),
+  ),
+})
+
+export type InsertSupplier = typeof supplierTable.$inferInsert
+export type SelectSupplier = typeof supplierTable.$inferSelect
+export const insertSupplierSchema = createInsertSchema(supplierTable)

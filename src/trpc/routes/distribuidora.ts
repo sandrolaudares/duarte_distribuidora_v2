@@ -25,4 +25,8 @@ export const distribuidora = router({
     .mutation(async ({ input }) => {
       return distribuidoraController.insertCashier(input).returning()
     }),
+
+  getDistribuidoras: publicProcedure.query(() => {
+    return distribuidoraController.getDistribuidoras()
+  }),
 })

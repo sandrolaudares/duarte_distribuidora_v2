@@ -93,5 +93,6 @@
 </script>
 
 <div class="container mx-auto h-[70vh] overflow-x-auto border p-2">
+  <a href="/admin/stock/entrada"  class="btn">Entrada Estoque</a>
   <Datatable columns={defaultColumns} {load} {add} />
 </div>
