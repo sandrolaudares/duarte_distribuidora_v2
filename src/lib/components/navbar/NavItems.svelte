@@ -6,6 +6,7 @@
 
   import { modal } from '$lib/components/modal'
   import BugReportModal from '$lib/components/modal/BugReportModal.svelte'
+  import * as m from '$msgs'
 
   import {
     setLanguageTag,
@@ -25,12 +26,12 @@
 
   export let navItems: NavItem[] = [
     {
-      name: 'Home',
+      name: m.home(),
       href: '/',
       icon: icons.home(),
     },
     {
-      name: 'Chart',
+      name: m.chart_grafico(),
       href: '/chart',
       icon: icons.chart.bar(),
     },
@@ -43,27 +44,27 @@
       href: '/admin',
       subItems: [
         {
-          name: 'Products',
+          name: m.products(),
           href: '/admin/products',
           // icon: icons.cube(),
         },
         {
-          name: 'Users',
+          name: m.usuarios(),
           href: '/admin/users',
           // icon: icons.users(),
         },
         {
-          name: 'Customers',
+          name: m.customers(),
           href: '/admin/customer',
           // icon: icons.users(),
         },
         {
-          name: 'Orders',
+          name: m.orders(),
           href: '/admin/orders',
           icon: icons.cart(),
         },
         {
-          name: 'Stock',
+          name: m.stock(),
           href: '/admin/stock',
         },
         {

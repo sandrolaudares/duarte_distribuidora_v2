@@ -8,5 +8,14 @@
   "dont_have_acc": "Ainda não tem uma conta?",
   "create_an_acc": "Criar uma conta!",
   "create_an_account": "Criar uma conta!",
-  "continu": "Continuar"
+  "continu": "Continuar",
+  "log_out": "Sair",
+  "login": "Conecte-se",
+  "home": "Página inicial",
+  "chart_grafico": "Gráfico",
+  "products": "Produtos",
+  "usuarios": "Usuários",
+  "customers": "Clientes",
+  "orders": "Pedidos",
+  "stock": "Estoque"
 }

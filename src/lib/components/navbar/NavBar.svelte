@@ -3,14 +3,13 @@
   import ThemeSwiter from './ThemeSwiter.svelte'
   import ChangeLanguage from './ChangeLanguage.svelte'
   import Cart from './Cart.svelte'
-
   import { website } from '$lib/config'
 
   import { getUserContext } from '$lib/stores/user'
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
   import NavItems from './NavItems.svelte'
-
+import * as m from '$msgs'
   import { icons } from '$lib/utils/icons'
   import { goto } from '$app/navigation'
 
@@ -75,12 +74,12 @@
             >
               <li><a href="/myprofile">{@html icons.user()} Meu Perfil</a></li>
               <li>
-                <button onclick={logout}>{@html icons.logout()} Logout</button>
+                <button onclick={logout}>{@html icons.logout()} {m.log_out()}</button>
               </li>
             </ul>
           </div>
         {:else}
-          <a class="btn" href="/login">{@html icons.login()}Login</a>
+          <a class="btn" href="/login">{@html icons.login()}{m.login()}</a>
         {/if}
 
         <Cart />

@@ -10,5 +10,14 @@
   "create_an_account": "Create an account",
   "continu": "Continue",
   "already_have_acc": "Already have an account? ",
-  "sign_in": "Sign in"
+  "sign_in": "Sign in",
+  "log_out": "Logout",
+  "login": "Login",
+  "home": "Home",
+  "chart_grafico": "Chart",
+  "products": "Products",
+  "usuarios": "Users",
+  "customers": "Customers",
+  "orders": "Orders",
+  "stock": "Stock"
 }

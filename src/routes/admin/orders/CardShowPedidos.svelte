@@ -23,7 +23,7 @@
         Pagamento em <strong>{order.payment_method}</strong>
       </p>
       <p>
-        Total: <strong class="text-success text-lg">R${order.total}</strong>
+        Total: <strong class="text-success text-lg">R${(order.total /100).toFixed(2)}</strong>
       </p>
     </div>
   </div>
