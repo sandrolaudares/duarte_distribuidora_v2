@@ -19,6 +19,8 @@ import type {
 import { db } from '$db'
 import { eq, ne, or, sql } from 'drizzle-orm'
 
+import { stock } from '$db/controller'
+
 export const customer = {
   tables: {
     customerTable,
@@ -106,6 +108,7 @@ export const customer = {
           total: order_info.total,
           customer_id: order_info.customer_id,
           address_id: order_info.address_id,
+          distribuidora_id: order_info.distribuidora_id,
         })
         .returning()
 
@@ -120,6 +123,64 @@ export const customer = {
       }
     })
     return resp
+  },
+
+  getOrderByID: async (order_id: SelectCustomerOrder['id']) => {
+    return db.query.customerOrderTable.findFirst({
+      where: eq(customerOrderTable.id, order_id),
+      with: {
+        items: {
+          with: {
+            product: true,
+          },
+        },
+      },
+    })
+  },
+
+  updateOrderStatus: async (
+    order_id: SelectCustomerOrder['id'],
+    new_status: SelectCustomerOrder['status'],
+  ) => {
+    console.log('Updating order status:', order_id, new_status)
+    if (new_status === 'DELIVERED') {
+      const order = await customer.getOrderByID(order_id)
+      console.log('Order:', order)
+      if (order?.distribuidora_id) {
+        for (const item of order.items) {
+          console.log('sku', item.product.sku)
+          if (item.product.sku) {
+            try {
+              console.log('Processing stock transaction:', {
+                distribuidora_id: order.distribuidora_id,
+                sku_id: item.product.sku,
+                quantity: -item.quantity * item.product.quantity,
+                meta_data: {
+                  order_id,
+                  type: 'saida',
+                },
+              })
+              await stock.processStockTransaction({
+                distribuidora_id: order.distribuidora_id,
+                sku_id: item.product.sku,
+                quantity: -item.quantity * item.product.quantity,
+                meta_data: {
+                  order_id,
+                  type: 'saida',
+                },
+              })
+            } catch (error) {
+              console.error('Failed to process stock transaction:', error)
+            }
+          }
+        }
+      }
+    }
+
+    return await db
+      .update(customerOrderTable)
+      .set({ status: new_status })
+      .where(eq(customerOrderTable.id, order_id))
   },
 
   getCustomerOrders: async (customerId: SelectCustomer['id']) => {
@@ -155,5 +216,6 @@ export const customer = {
   },
 }
 
-
-export type CurrentOrders = Awaited< ReturnType<typeof customer.getCurrentOrders>>
+export type CurrentOrders = Awaited<
+  ReturnType<typeof customer.getCurrentOrders>
+>

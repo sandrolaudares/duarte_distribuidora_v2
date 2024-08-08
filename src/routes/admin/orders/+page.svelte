@@ -2,7 +2,9 @@
   import { toast } from 'svelte-sonner'
   import type { PageData } from './$types'
   import CardShowPedidos from './CardShowPedidos.svelte'
-
+  import type { RouterInputs } from '$trpc/router'
+  import { trpc } from '$trpc/client'
+  import { page } from '$app/stores'
   export let data: PageData
 
   let pedidos = data.last_orders
@@ -27,8 +29,16 @@
     pedidoSelecionado = 'all'
   }
 
-  function changeStatusPedido({ id, status }: changeStatus) {
-    toast.success('Status mudou com sucesso!')
+  async function changeStatusPedido(
+    input: RouterInputs['customer']['updateOrderStatus'],
+  ) {
+    try {
+      await trpc($page).customer.updateOrderStatus.mutate(input)
+
+      toast.success('Status mudou com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao mudar status do pedido!')
+    }
   }
 </script>
 
@@ -120,7 +130,7 @@
                 console.log('click aceitar')
                 pedido.status = 'CONFIRMED'
                 await changeStatusPedido({
-                  id: pedido.id,
+                  order_id: pedido.id,
                   status: 'CONFIRMED',
                 })
               }}
@@ -128,7 +138,7 @@
                 console.log('click recusar')
                 pedido.status = 'CANCELED'
                 await changeStatusPedido({
-                  id: pedido.id,
+                  order_id: pedido.id,
                   status: 'CANCELED',
                 })
               }}
@@ -155,7 +165,7 @@
                   console.log('click aceitar')
                   pedido.status = 'ON THE WAY'
                   await changeStatusPedido({
-                    id: pedido.id,
+                    order_id: pedido.id,
                     status: 'ON THE WAY',
                   })
                 }}
@@ -174,7 +184,7 @@
                   console.log('click aceitar')
                   pedido.status = 'DELIVERED'
                   await changeStatusPedido({
-                    id: pedido.id,
+                    order_id: pedido.id,
                     status: 'DELIVERED',
                   })
                 }}
@@ -193,7 +203,7 @@
                   console.log('click aceitar')
                   pedido.status = 'ENDED'
                   await changeStatusPedido({
-                    id: pedido.id,
+                    order_id: pedido.id,
                     status: 'ENDED',
                   })
                 }}

@@ -97,4 +97,24 @@ export const customer = router({
         console.error('Failed to insert order:', error)
       }
     }),
+
+  updateOrderStatus: publicProcedure
+    .input(
+      z.object({
+        order_id: z.number(),
+        status: z.enum([
+          'PENDING',
+          'CONFIRMED',
+          'PREPARING',
+          'ON THE WAY',
+          'DELIVERED',
+          'CANCELED',
+          'ENDED',
+        ]),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const { order_id, status } = input
+      return await customerController.updateOrderStatus(order_id, status)
+    }),
 })

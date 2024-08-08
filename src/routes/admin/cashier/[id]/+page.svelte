@@ -78,6 +78,7 @@
   }
 </script>
 
+
 <div class="mt-15 flex flex-col justify-center gap-4 xl:flex-row">
   <div class="flex h-auto flex-col justify-between">
     <h2 class="text-3xl font-bold">Informações do pedido:</h2>
@@ -90,7 +91,7 @@
           #{caixa.id}
         </span>
       </p>
-      <p>Pedido iniciado: 25/08/2024</p>
+      <p>ID distribuidora {caixa.distribuidora_id}</p>
       <p>
         Criado por: <span class="font-bold text-primary">
           {user?.email}
