@@ -24,6 +24,7 @@
   import type { RouterOutputs, RouterInputs } from '$trpc/router'
 
   import type { metaEntrada, metaSaida, MetaUnion } from '$db/schema'
+  import { icons } from '$lib/utils'
   function isMetaEntrada(meta: MetaUnion): meta is metaEntrada {
     return meta.type === 'entrada'
   }
@@ -62,53 +63,39 @@
 
 <div class="container mx-auto flex flex-col">
   {#each estoque.product_stock as stock}
-  
-  <div class='flex items-center justify-center'>
+    <div class="flex items-center justify-center">
+      <div class="stats shadow">
+        <div class="stat">
+          <div class="stat-figure text-secondary">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              class="inline-block h-8 w-8 stroke-current"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+          </div>
+          <!-- <div class="stat-title">{stock.distribuidora.name}</div> -->
+          <div class="stat-value">{stock.distribuidora.name}</div>
+          <!-- <div class="stat-desc">Jan 1st - Feb 1st</div> -->
+        </div>
 
-    <div class="stats shadow">
-      <div class="stat">
-        <div class="stat-figure text-secondary">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            class="inline-block h-8 w-8 stroke-current"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
-          </svg>
+        <div class="stat">
+          <div class="stat-figure text-secondary">
+            {@html icons.box()}
+          </div>
+          <div class="stat-title">Quantidade em Estoque</div>
+          <div class="stat-value">{stock.quantity}</div>
+          <!-- <div class="stat-desc">↗︎ 400 (22%)</div> -->
         </div>
-        <!-- <div class="stat-title">{stock.distribuidora.name}</div> -->
-        <div class="stat-value">{stock.distribuidora.name}</div>
-        <!-- <div class="stat-desc">Jan 1st - Feb 1st</div> -->
-      </div>
-  
-      <div class="stat">
-        <div class="stat-figure text-secondary">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            class="inline-block h-8 w-8 stroke-current"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-            ></path>
-          </svg>
-        </div>
-        <div class="stat-title">Quantidade em Estoque</div>
-        <div class="stat-value">{stock.quantity}</div>
-        <!-- <div class="stat-desc">↗︎ 400 (22%)</div> -->
       </div>
     </div>
-  </div>
     <div class="mx-auto h-[70vh] overflow-x-auto border p-2">
       <Datatable
         columns={defaultColumns}
