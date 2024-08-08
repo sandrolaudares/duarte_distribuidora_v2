@@ -32,9 +32,9 @@
     </div>
   </div>
   {#if order.address}
-  Endereco: {order.address?.cep}, {order.address?.city}, {order.address
-    ?.neighborhood}, {order.address?.street}, {order.address?.number}, {order
-    .address?.complement}
+    Endereco: {order.address?.cep}
+    {order.address?.city}, {order.address?.neighborhood}, {order.address
+      ?.street}, {order.address?.number}, {order.address?.complement}
   {/if}
   <div class="mt-4">
     <h4 class="mb-2 text-lg font-semibold">Produtos pedidos:</h4>
@@ -52,10 +52,14 @@
   </div>
 
   <div
-    class="mt-2 flex flex-col items-center justify-between gap-3 text-sm sm:flex-row"
+    class="mt-2 flex flex-col items-center justify-between gap-3  text-sm sm:flex-row"
   >
-    <p>Observacoes: {order.observation ?? 'Nenhuma'}</p>
-    <div>
+    {#if order.observation}
+      <div class="max-w-96">
+        <p>Observacoes: {order.observation}</p>
+      </div>
+    {/if}
+    <div class="flex w-full flex-col justify-end ">
       {#if button_recusar}
         <button class=" btn btn-error" on:click={() => click_refuse()}>
           {button_recusar}
