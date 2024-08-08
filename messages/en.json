@@ -33,5 +33,6 @@
   "base_quantity": "Base Quantity",
   "wholesale_price": "WholeSale Price",
   "retail_price": "Retail Price",
-  "add_item": "Add Item"
+  "add_item": "Add Item",
+  "save_changes": "Save Changes"
 }

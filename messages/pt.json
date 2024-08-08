@@ -31,5 +31,6 @@
   "base_quantity": "Quantidade Base",
   "wholesale_price": "Preço por atacado",
   "retail_price": "Preço de varejo",
-  "add_item": "Adicionar Item"
+  "add_item": "Adicionar Item",
+  "save_changes": "Salvar alterações"
 }

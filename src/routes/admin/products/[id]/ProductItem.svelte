@@ -10,6 +10,7 @@
   import { icons } from '$lib/utils'
   import { modal } from '$lib/components/modal'
   import ModalSku from '$lib/components/modal/ModalSKU.svelte'
+  import * as m from '$msgs'
   export let item: SelectProductItem
 
   let isChanged = false
@@ -129,7 +130,7 @@
     />
     <div class="flex flex-col gap-2">
       <div class="flex items-center justify-between gap-3">
-        WholeSale Price:
+        {m.wholesale_price()}:
 
         <CurrencyInput
           bind:value={item.wholesale_price}
@@ -137,7 +138,8 @@
         />
       </div>
       <div class="flex items-center justify-between gap-3">
-        Retail Price: <CurrencyInput
+        {m.retail_price()}:
+        <CurrencyInput
           bind:value={item.retail_price}
           on:change={() => (isChanged = true)}
         />
@@ -147,7 +149,7 @@
 
   {#if isChanged}
     <button class="btn btn-outline mt-2" on:click={updateProductItemInfo}>
-      Save Changes
+      {m.save_changes()}
     </button>
   {/if}
 </div>
