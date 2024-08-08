@@ -94,62 +94,90 @@
   }
 </script>
 
-<input type="text" placeholder="Nota Fiscal" />
-<div>
-  {#if selectedSupplier}
-    <pre>
-  {JSON.stringify(selectedSupplier)}
-</pre>
-  {:else}
-    <button class="btn btn-primary" on:click={openModalSupplier}>
-      Selecionar fornecedor
+<div class="mx-auto p-3">
+  <div class="mb-4 flex justify-end gap-2">
+    <input type="text" placeholder="Nota Fiscal" class="input input-bordered" />
+    <div>
+      {#if selectedSupplier}
+        <p class="rounded-lg bg-base-300 p-3 shadow-md">
+          {selectedSupplier.name}
+        </p>
+      {:else}
+        <button class="btn btn-primary w-full" on:click={openModalSupplier}>
+          Selecionar fornecedor
+        </button>
+      {/if}
+    </div>
+
+    <div>
+      {#if selectedDistribuidora}
+        <p class="rounded-lg bg-base-300 p-3 shadow-md">
+          {selectedDistribuidora.name}
+        </p>
+      {:else}
+        <button
+          class="btn btn-primary w-full"
+          on:click={openModalDistribuidora}
+        >
+          Selecionar distribuidora
+        </button>
+      {/if}
+    </div>
+  </div>
+
+  <div class="mb-6 grid grid-cols-6 gap-3">
+    {#each data.skus as item}
+      <div
+        class="flex flex-col items-start rounded-lg bg-base-200 p-4 shadow-md"
+      >
+        <span class="font-semibold">{item.name}</span>
+
+        <input
+          type="number"
+          class="input input-primary mt-2 w-full"
+          on:input={e =>
+            setSku(item, Number((e.target as HTMLInputElement).value))}
+        />
+        <button
+          class="btn btn-primary mt-2 w-full"
+          on:click={() => addSku(item, 1)}
+        >
+          Adicionar
+        </button>
+      </div>
+    {/each}
+  </div>
+
+  <h1 class="mb-4 text-xl font-bold">Produtos de entrada</h1>
+
+  <div class="grid grid-cols-4 gap-4">
+    {#each Object.values(produtosEntrada) as item}
+      <div class="flex flex-col rounded-lg bg-base-200 p-4 shadow-md">
+        <div class="flex justify-between">
+          <p>{item.sku.name}</p>
+          <p class="font-semibold">Quantidade: {item.quantity}</p>
+        </div>
+        <div class="flex w-full flex-col gap-2">
+          <input
+            type="number"
+            class="input input-primary mt-2 w-full"
+            placeholder="Preço de custo"
+            bind:value={produtosEntrada[item.sku.id].cost_price}
+          />
+          <button
+            class="btn btn-error w-full"
+            on:click={() => removeSku(item.sku)}
+          >
+            Remover
+          </button>
+        </div>
+      </div>
+    {/each}
+  </div>
+
+  <div class="flex justify-center">
+    <button class="btn btn-success mt-6 w-96" on:click={entradaEstoque}>
+      Entrada estoque
     </button>
-  {/if}
+  </div>
 </div>
-
-{#if selectedDistribuidora}
-  <pre>
-  {JSON.stringify(selectedDistribuidora)}
-</pre>
-{:else}
-  <button class="btn btn-primary" on:click={openModalDistribuidora}>
-    Selecionar distribuidora
-  </button>
-{/if}
-
-<div class="flex gap-3">
-  {#each data.skus as item}
-    <div class="bg-base-100">
-      {item.name}
-
-      <input
-        type="number"
-        class="input input-primary"
-        on:input={e =>
-          setSku(item, Number((e.target as HTMLInputElement).value))}
-      />
-      <button class="btn" on:click={() => addSku(item, 1)}>Adicionar</button>
-    </div>
-  {/each}
-</div>
-
-<h1>Produtos de entrada</h1>
-<div>
-  {#each Object.values(produtosEntrada) as item}
-    <div class="bg-base-100">
-      {item.sku.name} - {item.quantity}
-      <button class="btn" on:click={() => removeSku(item.sku)}>Remover</button>
-
-      <input
-        class="input input-primary"
-        type="number"
-        placeholder="Preço de custo"
-        bind:value={produtosEntrada[item.sku.id].cost_price}
-      />
-    </div>
-  {/each}
-</div>
-
-<button class="btn btn-secondary" on:click={entradaEstoque}>
-  Entrada estoque
-</button>
