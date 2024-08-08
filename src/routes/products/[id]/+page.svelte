@@ -4,6 +4,7 @@
   import { icons } from '$lib/utils/icons'
   import Detail from '$components/detail/Detail1.svelte'
   import { tweened } from 'svelte/motion'
+      import * as m from '$msgs'
 
   import { getCartContext } from '$lib/stores/cart'
   const cart = getCartContext()
@@ -47,7 +48,7 @@
     <div class="mx-auto flex flex-wrap-reverse justify-between gap-3 lg:w-4/5">
       <div class="mb-6 w-full lg:mb-0 lg:w-1/2 lg:py-6 lg:pr-10">
         <button onclick={() => history.back()} class="btn btn-primary mb-3">
-          {@html icons.arrows.left_line()} Back
+          {@html icons.arrows.left_line()} {m.back()}
         </button>
         <h2 class="title-font text-sm tracking-widest">
           {produto.category?.name}
@@ -69,7 +70,7 @@
           </button>
         </div> -->
         <p class="mb-4 leading-relaxed">
-          Description: {produto.description}
+          {m.description()}: {produto.description}
         </p>
 
         <div class="flex gap-3 border-t border-gray-200 py-2">
@@ -88,7 +89,7 @@
         <div
           class="mb-6 flex items-center border-b border-t border-gray-200 py-2"
         >
-          <span class="">Quantity</span>
+          <span class="">{m.quantity()}</span>
           <span class="ml-auto">
             <button class="btn btn-primary" onclick={decrement}>-</button>
             <span class="mx-2">{quantity}</span>
@@ -117,7 +118,7 @@
               </svg>
             </button>
             <button class="btn btn-primary flex" onclick={addToCart}>
-              Add to cart
+              {m.add_to_cart()}
             </button>
           </div>
         </div>

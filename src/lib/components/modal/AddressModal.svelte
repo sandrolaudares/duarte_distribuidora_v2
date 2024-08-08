@@ -6,6 +6,7 @@
   import { page } from '$app/stores'
   import { toast } from 'svelte-sonner'
   import type { SelectCustomer } from '$db/schema'
+  import * as m from '$msgs'
 
   export let formEndereco = {
     number: '',
@@ -171,8 +172,8 @@
   <svelte:fragment slot="footer">
     <div class="mt-4 flex w-full justify-end">
       <div class="flex gap-3">
-        <button class="btn btn-error" on:click={modal.close}>Cancel</button>
-        <button class="btn btn-primary" on:click={save}>Enviar</button>
+        <button class="btn btn-error" on:click={modal.close}>{m.cancel_button()}</button>
+        <button class="btn btn-primary" on:click={save}>{m.send_button()}</button>
       </div>
     </div>
   </svelte:fragment>

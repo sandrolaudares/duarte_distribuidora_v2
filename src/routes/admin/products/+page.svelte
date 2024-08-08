@@ -7,6 +7,7 @@
   import { page } from '$app/stores'
   import { invalidate } from '$app/navigation'
   import { icons } from '$lib/utils/icons'
+      import * as m from '$msgs'
 
   export let data: PageData
 
@@ -119,7 +120,7 @@
 <div class="mx-auto flex items-center justify-center gap-3">
   <p>Produtos</p>
   <button class="btn btn-primary" onclick={handleAddCategory}>
-    Add Category
+    {m.add_category()}
   </button>
 </div>
 <!--TODO: Ao mover de uma categoria para outra não ta movendo, ao atualizar a pagina sai-->

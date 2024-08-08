@@ -55,6 +55,7 @@
       type="text"
       bind:value={name_new_supplier}
       placeholder="Nome novo fornecedor"
+      class="input input-bordered"
     />
 
     {#if name_new_supplier}

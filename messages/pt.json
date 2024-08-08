@@ -17,5 +17,19 @@
   "usuarios": "Usuários",
   "customers": "Clientes",
   "orders": "Pedidos",
-  "stock": "Estoque"
+  "stock": "Estoque",
+  "cancel_button": "Cancelar",
+  "send_button": "Enviar",
+  "save_button": "Salvar",
+  "itens_carrinho": "Nenhum item no carrinho",
+  "add_to_cart": "Adicionar ao carrinho",
+  "quantity": "Quantidade",
+  "description": "Descrição",
+  "back": "Voltar",
+  "add_category": "Adicionar categoria",
+  "name": "Nome",
+  "base_quantity": "Quantidade Base",
+  "wholesale_price": "Preço por atacado",
+  "retail_price": "Preço de varejo",
+  "add_item": "Adicionar Item"
 }
