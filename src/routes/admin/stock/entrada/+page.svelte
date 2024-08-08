@@ -135,6 +135,7 @@
         <input
           type="number"
           class="input input-primary mt-2 w-full"
+          placeholder="Quantidade"
           on:input={e =>
             setSku(item, Number((e.target as HTMLInputElement).value))}
         />
@@ -153,21 +154,25 @@
   <div class="grid grid-cols-4 gap-4">
     {#each Object.values(produtosEntrada) as item}
       <div class="flex flex-col rounded-lg bg-base-200 p-4 shadow-md">
-        <div class="flex justify-between">
-          <p>{item.sku.name}</p>
-          <p class="font-semibold">Quantidade: {item.quantity}</p>
-        </div>
-        <div class="flex w-full flex-col gap-2">
+        <div class="flex w-full flex-col">
+          <div class="label text-xl">
+            <p class="label-text font-bold">{item.sku.name}</p>
+            <p class="label-text">Quantidade: {item.quantity}</p>
+          </div>
           <input
             type="number"
-            class="input input-primary mt-2 w-full"
+            class="input input-primary w-full"
             placeholder="Preço de custo"
             bind:value={produtosEntrada[item.sku.id].cost_price}
           />
+          <div class="label">
+            <span class="label-text-alt">(Preco de custo)</span>
+          </div>
           <button
             class="btn btn-error w-full"
             on:click={() => removeSku(item.sku)}
           >
+          <!--TODO: Ta demorando muito pra remover por algum motivo-->
             Remover
           </button>
         </div>
