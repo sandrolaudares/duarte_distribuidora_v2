@@ -18,6 +18,9 @@
   import { modal } from '$lib/components/modal'
   import ModalSupplier from './ModalSupplier.svelte'
   import ModalDistribuidora from './ModalDistribuidora.svelte'
+  import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
+
+  let isLoading = false
 
   function openModalSupplier() {
     modal.open(ModalSupplier, {
@@ -55,6 +58,7 @@
     }
 
     try {
+      isLoading = true
       await trpc($page).stock.entradaEstoque.mutate({
         distribuidora_id: selectedDistribuidora.id,
         sku_items: Object.values(produtosEntrada).map(item => ({
@@ -67,6 +71,7 @@
     } catch (error) {
       toast.error('Erro ao realizar entrada de estoque')
     }
+    isLoading = false
   }
 
   function addSku(sku: SelectSku, quantity: number) {
@@ -91,6 +96,7 @@
 
   function removeSku(sku: SelectSku) {
     delete produtosEntrada[sku.id]
+    produtosEntrada = produtosEntrada
   }
 </script>
 
@@ -159,12 +165,7 @@
             <p class="label-text font-bold">{item.sku.name}</p>
             <p class="label-text">Quantidade: {item.quantity}</p>
           </div>
-          <input
-            type="number"
-            class="input input-primary w-full"
-            placeholder="Preço de custo"
-            bind:value={produtosEntrada[item.sku.id].cost_price}
-          />
+          <CurrencyInput bind:value={produtosEntrada[item.sku.id].cost_price} />
           <div class="label">
             <span class="label-text-alt">(Preco de custo)</span>
           </div>
@@ -172,7 +173,7 @@
             class="btn btn-error w-full"
             on:click={() => removeSku(item.sku)}
           >
-          <!--TODO: Ta demorando muito pra remover por algum motivo-->
+            <!--TODO: Ta demorando muito pra remover por algum motivo-->
             Remover
           </button>
         </div>
@@ -181,8 +182,16 @@
   </div>
 
   <div class="flex justify-center">
-    <button class="btn btn-success mt-6 w-96" on:click={entradaEstoque}>
-      Entrada estoque
+    <button
+      class="btn btn-success mt-6 w-96"
+      on:click={entradaEstoque}
+      disabled={isLoading}
+    >
+      {#if isLoading}
+        Loading...
+      {:else}
+        Entrada estoque
+      {/if}
     </button>
   </div>
 </div>

@@ -11,19 +11,27 @@
 
   type Distrib = RouterOutputs['distribuidora']['getDistribuidoras']
 
+  let isLoading = true
+
   let suppliers: Distrib = []
   onMount(async () => {
     suppliers = await trpc($page).distribuidora.getDistribuidoras.query()
+    isLoading = false
   })
 
   export let select: (client: Distrib[0]) => void
 </script>
 
-<Modal title="Clientes">
+<Modal title="Selecione Distribuidora">
   <div class="flex flex-col gap-4">
     {#each suppliers as cliente}
       <div class="flex items-center justify-between">
         <div>
+          {#if isLoading}
+          <p class="text-center">
+            Loading...
+          </p>
+          {/if}
           <p class="font-bold">{cliente.name}</p>
         </div>
         <button

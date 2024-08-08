@@ -11,9 +11,12 @@
 
   type Supplier = RouterOutputs['stock']['getSupplier']
 
+  let isLoading = true
+
   let suppliers: Supplier = []
   onMount(async () => {
     suppliers = await trpc($page).stock.getSupplier.query()
+    isLoading = false
   })
 
   export let selectedSupplier: (client: Supplier[0]) => void
@@ -35,8 +38,13 @@
   }
 </script>
 
-<Modal title="Clientes">
+<Modal title="Fornecedor">
   <div class="flex flex-col gap-4">
+    {#if isLoading}
+    <p class="text-center">
+      Loading...
+    </p>
+    {/if}
     {#each suppliers as cliente}
       <div class="flex items-center justify-between">
         <div>

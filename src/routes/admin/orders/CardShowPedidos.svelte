@@ -9,7 +9,9 @@
   export let order: CurrentOrders[0]
 </script>
 
-<div class="m-2 overflow-hidden rounded bg-base-300 p-2 shadow-lg bg-opacity-90">
+<div
+  class="m-2 overflow-hidden rounded bg-base-300 bg-opacity-90 p-2 shadow-lg"
+>
   <div class="mb-4 flex justify-between gap-1 text-center text-sm">
     <div class="flex flex-col items-start">
       <h3>
@@ -23,17 +25,25 @@
         Pagamento em <strong>{order.payment_method}</strong>
       </p>
       <p>
-        Total: <strong class="text-success text-lg">R${(order.total /100).toFixed(2)}</strong>
+        Total: <strong class="text-lg text-success">
+          R${(order.total / 100).toFixed(2)}
+        </strong>
       </p>
     </div>
   </div>
+  {#if order.address}
+  Endereco: {order.address?.cep}, {order.address?.city}, {order.address
+    ?.neighborhood}, {order.address?.street}, {order.address?.number}, {order
+    .address?.complement}
+  {/if}
   <div class="mt-4">
     <h4 class="mb-2 text-lg font-semibold">Produtos pedidos:</h4>
     <div class="flex flex-col gap-1 sm:flex-row">
       {#each order.items as item}
         <div class="flex rounded-md bg-base-100 p-2 shadow-sm">
           <p class="text-base">
-            <strong>{item.quantity}x</strong> - {item.product.name} -
+            <strong>{item.quantity}x</strong>
+            - {item.product.name} -
             <span class="font-bold text-success">R${item.price}</span>
           </p>
         </div>
