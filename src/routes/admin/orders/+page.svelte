@@ -155,7 +155,9 @@
       {/each}
     {:else if pedidoSelecionado === 'all' || pedidoSelecionado === 'varejo' || pedidoSelecionado === 'atacado'}
       <div class="grid grid-cols-1 gap-2 xl:grid-cols-3">
-        <div class="max-h-[88vh] overflow-y-auto rounded-lg bg-error p-1">
+        <div
+          class={`overflow-y-auto rounded-lg bg-error p-1 ${pedidosAbertos.length > 0 ? 'max-h-[71vh]' : 'max-h-[78vh]'}`}
+        >
           <h1 class="text-center text-black">Pedidos aceitos:</h1>
           {#each pedidosFiltrados as pedido}
             {#if pedido.status === 'CONFIRMED'}
@@ -174,7 +176,9 @@
             {/if}
           {/each}
         </div>
-        <div class="max-h-[88vh] overflow-y-auto rounded-lg bg-warning p-1">
+        <div
+          class={`overflow-y-auto rounded-lg bg-warning p-1 ${pedidosAbertos.length > 0 ? 'max-h-[71vh]' : 'max-h-[78vh]'}`}
+        >
           <h1 class="text-center text-black">A caminho:</h1>
           {#each pedidosFiltrados as pedido}
             {#if pedido.status === 'ON THE WAY'}
@@ -193,7 +197,9 @@
             {/if}
           {/each}
         </div>
-        <div class="max-h-[88vh] overflow-y-auto rounded-lg bg-success p-1">
+        <div
+          class={`overflow-y-auto rounded-lg bg-success p-1 ${pedidosAbertos.length > 0 ? 'max-h-[71vh]' : 'max-h-[78vh]'}`}
+        >
           <h1 class="text-center text-black">Entregue:</h1>
           {#each pedidosFiltrados as pedido}
             {#if pedido.status === 'DELIVERED'}
