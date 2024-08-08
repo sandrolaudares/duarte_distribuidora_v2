@@ -46,7 +46,7 @@ function getInfoSKU(sku_id: SelectSku['id']) {
       product_stock: {
         with: {
           distribuidora: true,
-          transactions: true,
+      
         },
       },
     },
@@ -68,6 +68,22 @@ function getProductStock(
       and(
         eq(productStockTable.distribuidora_id, distribuidora_id),
         eq(productStockTable.sku, sku_id),
+      ),
+    )
+}
+
+function getTransactionsFromProduto(data: {
+  distribuidora_id: SelectDistribuidora['id']
+  sku: SelectSku['id']
+}) {
+  const { distribuidora_id, sku } = data
+  return db
+    .select()
+    .from(stockTransactionTable)
+    .where(
+      and(
+        eq(stockTransactionTable.distribuidora_id, distribuidora_id),
+        eq(stockTransactionTable.sku, sku),
       ),
     )
 }
@@ -134,7 +150,6 @@ function getSupplier() {
   return db.select().from(supplierTable)
 }
 
-
 export const stock = {
   tables: {
     skuTable,
@@ -144,6 +159,7 @@ export const stock = {
   getSKU,
   getInfoSKU,
   getSKUWithStock,
+  getTransactionsFromProduto,
   insertProductStock,
   // insertStockTransaction,
   processStockTransaction,

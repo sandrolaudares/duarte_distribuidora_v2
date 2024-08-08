@@ -72,18 +72,18 @@ export const productStockRelations = relations(
 export type InsertProductStock = typeof productStockTable.$inferInsert
 export type SelectProductStock = typeof productStockTable.$inferSelect
 
-type metaEntrada = {
+export type metaEntrada = {
   type: 'entrada'
   nota_fiscal: string
   user_id: string | null | undefined
 }
 
-type metaSaida = {
+export type metaSaida = {
   type: 'saida'
   order_id: number
 }
 
-type MetaUnion = metaEntrada | metaSaida
+export type MetaUnion = metaEntrada | metaSaida
 function isMetaEntrada(meta: MetaUnion): meta is metaEntrada {
   return meta.type === 'entrada'
 }
