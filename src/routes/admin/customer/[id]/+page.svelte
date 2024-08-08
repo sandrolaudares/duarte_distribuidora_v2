@@ -12,6 +12,7 @@
   import { page } from '$app/stores'
 
   import { toast } from 'svelte-sonner'
+  import AddressModal from '$lib/components/modal/AddressModal.svelte'
 
   let { customer, orders } = data
   let newcustomer = customer
@@ -70,84 +71,8 @@
       toast.error(error.message)
     }
   }
-
-  async function addAddress() {
-    modal.open(FormModal<RouterInputs['customer']['insertAddress']>, {
-      title: 'Adicionar Caixa',
-      fields: [
-        {
-          label: 'CEP',
-          name: 'cep',
-          type: 'text',
-          required: true,
-        },
-        {
-          label: 'Rua',
-          name: 'street',
-          type: 'text',
-          validate: e => {
-            if (e.length < 3) {
-              return { valid: false, message: 'sei la' }
-            }
-            return { valid: true, message: '' }
-          },
-          required: true,
-        },
-        {
-          label: 'Numero',
-          name: 'number',
-          type: 'text',
-          required: true,
-        },
-        {
-          label: 'Complemento',
-          name: 'complement',
-          type: 'text',
-        },
-        {
-          label: 'Bairro',
-          name: 'neighborhood',
-          type: 'text',
-          required: true,
-        },
-        {
-          label: 'Cidade',
-          name: 'city',
-          type: 'text',
-          required: true,
-        },
-        {
-          label: 'Estado',
-          name: 'state',
-          type: 'text',
-          required: true,
-          value: 'MG',
-        },
-      ],
-      save: async toSave => {
-        try {
-          await trpc($page).customer.insertAddress.mutate({
-            customer_id: customer.id,
-            cep: toSave.cep,
-            street: toSave.street,
-            number: toSave.number,
-            complement: toSave.complement,
-            neighborhood: toSave.neighborhood,
-            city: toSave.city,
-            state: toSave.state, //select
-            country: 'BR',
-          })
-          toast.success('Endereco adicionado com sucesso!')
-          window.location.reload()
-        } catch (error: any) {
-          return error.message
-        }
-      },
-    })
-  }
 </script>
 
-<!-- TODO: frontend -->
 <!-- <pre>
   {JSON.stringify(data.customer, null, 2)}
 </pre>
@@ -158,13 +83,19 @@
 <main class="mt-10 min-h-screen">
   <div class="m-4 flex justify-between">
     <h1 class="text-3xl font-bold">Informacões do cliente:</h1>
-    <button class="btn btn-primary flex gap-2" on:click={addAddress}>
+    <button
+      class="btn btn-primary flex gap-2"
+      on:click={() =>
+        modal.open(AddressModal, {
+          customer_id: customer.id,
+        })}
+    >
       Add address {@html icons.plus()}
     </button>
   </div>
   <div class=" grid grid-cols-1 xl:grid-cols-2">
     <div
-      class="mx-auto mb-6 w-fit rounded-xl border bg-base-200 p-4 shadow-sm xl:mx-4"
+      class="mx-auto mb-6 min-h-96 w-fit rounded-xl border bg-base-200 p-4 shadow-sm xl:mx-4"
     >
       <div class="mb-2">
         <strong>Data de Criação:</strong>
@@ -262,37 +193,33 @@
       </div>
     </div>
 
-    <div class="overflow-x-auto rounded-lg border">
+    <div class="max-h-96 overflow-x-auto rounded-lg border lg:mr-4">
       <table class="table table-zebra">
         <thead>
           <tr>
-            <th>Number</th>
             <th>CEP</th>
-            <th>Street</th>
-            <th>Complement</th>
-            <th>Neighborhood</th>
-            <th>City</th>
-            <th>State</th>
-            <th>Country</th>
+            <th>Cidade</th>
+            <th>Rua</th>
+            <th>Bairro</th>
+            <th>Numero</th>
+            <th>Complemento</th>
+            <th>UF</th>
           </tr>
         </thead>
         <tbody>
           {#each customer.adresses as address}
             <tr>
-              <td>{address.number}</td>
               <td>{address.cep}</td>
+              <td>{address.city}</td>
               <td>{address.street}</td>
-              <td>
-                {address.complement}
-              </td>
               <td>
                 {address.neighborhood}
               </td>
-              <td>{address.city}</td>
-              <td>{address.state}</td>
+              <td>{address.number}</td>
               <td>
-                {address.country}
+                {address.complement}
               </td>
+              <td>{address.state}</td>
             </tr>
           {/each}
         </tbody>
