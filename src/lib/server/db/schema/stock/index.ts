@@ -109,9 +109,10 @@ export const stockTransactionTable = sqliteTable(
     //   .references(() => productStockTable.id),
     distribuidora_id: integer('distribuidora_id').notNull(),
     sku: integer('sku').notNull(),
-    quantity: integer('quantity').notNull().default(0),
+    quantity: integer('quantity').notNull(),
     type: text('type', { enum: ['Entrada', 'Saida'] }).notNull(),
     supplier_id: integer('supplier_id').references(() => supplierTable.id),
+    cost_price: integer('cost_price'),
     meta_data: text('meta_data', { mode: 'json' }).notNull().$type<MetaUnion>(),
   },
   table => ({

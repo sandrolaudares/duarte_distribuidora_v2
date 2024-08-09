@@ -48,9 +48,9 @@
 
   <svelte:fragment slot="footer">
     <div class="mt-4 flex w-full justify-between">
-      <a href="/bug_report" class="btn btn-primary" onclick={modal.close}>
+      <!-- <a href="/bug_report" class="btn btn-primary" onclick={modal.close}>
         {@html icons.bug()} Ver Bugs Table
-      </a>
+      </a> -->
 
       <div class="flex gap-3">
         <button class="btn btn-error" onclick={modal.close}>{m.cancel_button()}</button>

@@ -28,7 +28,7 @@ import type {
 } from '$db/schema'
 
 import { db } from '$db'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, sql } from 'drizzle-orm'
 import { LibsqlError } from '@libsql/client'
 
 function insertSKU(data: InsertSku) {
@@ -118,17 +118,12 @@ async function insertStockTransaction(data: InsertStockTransaction) {
   })
 }
 
-async function processStockTransaction(transaction: {
-  distribuidora_id: SelectDistribuidora['id']
-  sku_id: SelectSku['id']
-  quantity: number
-  meta_data: SelectStockTransaction['meta_data']
-}) {
-  const { distribuidora_id, sku_id, quantity, meta_data } = transaction
+async function processStockTransaction(transaction: InsertStockTransaction) {
+  const { distribuidora_id, sku, quantity, meta_data } = transaction
   try {
     await insertProductStock({
       distribuidora_id,
-      sku: sku_id,
+      sku,
     })
   } catch (e) {
     if (e instanceof LibsqlError && e.code === 'SQLITE_CONSTRAINT_PRIMARYKEY') {
@@ -142,7 +137,7 @@ async function processStockTransaction(transaction: {
     meta_data: meta_data,
     quantity,
     distribuidora_id,
-    sku: sku_id,
+    sku: sku,
     type: quantity > 0 ? 'Entrada' : 'Saida',
   })
 }
@@ -192,6 +187,16 @@ function updateTransferenceSKU(
     .where(eq(stockTransferanceSKUTable.id, id))
 }
 
+function queryLastCostPrice(sky: SelectSku['id']) {
+  return db.query.stockTransactionTable.findFirst({
+    where: t => and(eq(t.sku, sky), eq(t.type, 'Entrada')),
+    columns: {
+      meta_data: true,
+    },
+    orderBy: [desc(stockTransactionTable.created_at)],
+  })
+}
+
 export const stock = {
   tables: {
     skuTable,
@@ -212,5 +217,5 @@ export const stock = {
   createTransferenciaEstoque,
   updateTransferenceSKU,
   updateTransference,
-  
+  queryLastCostPrice,
 }

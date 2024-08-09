@@ -162,7 +162,8 @@ export const customer = {
               })
               await stock.processStockTransaction({
                 distribuidora_id: order.distribuidora_id,
-                sku_id: item.product.sku,
+                sku: item.product.sku,
+                type: 'Saida',
                 quantity: -item.quantity * item.product.quantity,
                 meta_data: {
                   order_id,

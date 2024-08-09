@@ -1,12 +1,13 @@
 <script lang="ts">
   import type { PageData } from './$types'
 
+  import { getUserContext } from '$lib/stores/user'
+  const user = getUserContext()
   export let data: PageData
   import * as m from '$msgs'
 
   const { customerCount, orderCount, productCount, recentActivity } = data
 </script>
-
 
 <div
   class="bg-background flex min-h-screen flex-col items-center justify-center"
@@ -16,6 +17,9 @@
       <h1 class="text-primary-foreground text-4xl font-bold">
         Admin Dashboard
       </h1>
+      <h2 class="text-xl">
+        Olá, {$user?.username}
+      </h2>
       <!-- <div class="flex items-center space-x-4">
         <button
           class="ring-offset-background focus-visible:ring-ring hover:text-accent-foreground inline-flex h-10 w-10 items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
@@ -166,7 +170,7 @@
         class=" bg-card text-card-foreground space-y-4 rounded-lg border p-6 shadow-sm hover:bg-base-200"
         data-v0-t="card"
       >
-        <h2 class="text-2xl font-bold">Recent Activity</h2>
+        <h2 class="text-2xl font-bold">Event Logs</h2>
         <div class="space-y-4">
           {#each recentActivity as act}
             <div class="flex items-center justify-between">
@@ -194,6 +198,9 @@
         <div class="grid grid-cols-2 gap-4">
           <a class="btn btn-primary" href="/myprofile">Settings</a>
           <a class="btn btn-primary" href="/admin/cashier">Caixa</a>
+          {#if $user?.permissions.role === 'admin'}
+            <a class="btn btn-primary" href="/admin/users">Users</a>
+          {/if}
         </div>
       </div>
     </div>

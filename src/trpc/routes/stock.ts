@@ -82,6 +82,7 @@ export const stock = router({
           z.object({
             sku_id: z.number(),
             quantity: z.number(),
+            cost_price: z.number().optional(),
           }),
         ),
         distribuidora_id: z.number(),
@@ -94,8 +95,10 @@ export const stock = router({
         try {
           await stockController.processStockTransaction({
             distribuidora_id,
-            sku_id: item.sku_id,
+            sku: item.sku_id,
             quantity: item.quantity,
+            cost_price: item.cost_price,
+            type: "Entrada",
             meta_data: {
               type: 'entrada',
               nota_fiscal: '',
@@ -162,5 +165,15 @@ export const stock = router({
     .mutation(async ({ input }) => {
       const { id, data } = input
       return await stockController.updateTransferenceSKU(id, data).returning()
+    }),
+
+  getLastCostPrice: publicProcedure
+    .input(
+      z.object({
+        sku: z.number(),
+      }),
+    )
+    .query(async ({ input }) => {
+      return await stockController.queryLastCostPrice(input.sku)
     }),
 })

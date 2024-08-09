@@ -64,6 +64,7 @@
         sku_items: Object.values(produtosEntrada).map(item => ({
           sku_id: item.sku.id,
           quantity: item.quantity,
+          cost_price: item.cost_price,
         })),
       })
 

@@ -1,13 +1,13 @@
 export const website = {
   author: 'André Brandão',
-  siteTitle: 'Deds Template',
-  siteShortTitle: 'Deds',
-  description: 'A simple template for Deds',
+  siteTitle: 'Duarte Distribuidora',
+  siteShortTitle: 'Duarte',
+  description: 'Sistema de gestão de distribuidora',
 
-  entity: 'Deds',
+  entity: 'Duarte',
 
-  ogLanguage: 'en',
-  siteLanguage: 'en',
+  ogLanguage: 'pt',
+  siteLanguage: 'pt',
 
   siteUrl: 'https://andrebrandao.dev',
 
@@ -30,6 +30,7 @@ export const website = {
   youtubePageName: 'Deds',
   youtubePage: 'https://www.youtube.com/deds',
 
-  emailCoverUrl: 'https://raw.githubusercontent.com/andrebrandao/template/main/src/lib/assets/home/bg-email.jpg',
-  emailColor: '#007bff'
+  emailCoverUrl:
+    'https://raw.githubusercontent.com/andrebrandao/template/main/src/lib/assets/home/bg-email.jpg',
+  emailColor: '#007bff',
 }

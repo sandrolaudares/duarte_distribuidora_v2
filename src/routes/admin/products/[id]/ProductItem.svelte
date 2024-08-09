@@ -11,6 +11,8 @@
   import { modal } from '$lib/components/modal'
   import ModalSku from '$lib/components/modal/ModalSKU.svelte'
   import * as m from '$msgs'
+  import { onMount } from 'svelte'
+  import type { RouterOutputs } from '$trpc/router'
   export let item: SelectProductItem
 
   let isChanged = false
@@ -79,6 +81,12 @@
       toast.error(error.message)
     }
   }
+
+  type CostPrice = RouterOutputs['stock']['getLastCostPrice']
+
+  onMount(async ()=>{
+
+  })
 </script>
 
 <div
