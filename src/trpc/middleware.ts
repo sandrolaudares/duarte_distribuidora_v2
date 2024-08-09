@@ -1,7 +1,7 @@
 import { t } from '$trpc/t'
 import { TRPCError } from '@trpc/server'
 import { bugReport } from '$lib/server/db/controller'
-import type {  UserPermissions } from '$lib/server/db/schema'
+import type { UserPermissions } from '$lib/server/db/schema'
 import { allowPermissionsCheck } from '$db/schema'
 const admin = t.middleware(async ({ next, ctx }) => {
   const { user } = ctx.locals
@@ -15,15 +15,17 @@ const admin = t.middleware(async ({ next, ctx }) => {
 
 const auth = t.middleware(async ({ next, ctx }) => {
   const { user } = ctx.locals
-  if (!user)
+  if (!user) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
       message: 'You must be logged in to access this route',
     })
+  }
+
   return next()
 })
 
-const logged = t.middleware(async ({ next, path, type, ctx }) => {
+const logged = t.middleware(async ({ next, path, type, ctx, input }) => {
   const { user } = ctx.locals
   const start = Date.now()
 
@@ -38,7 +40,7 @@ const logged = t.middleware(async ({ next, path, type, ctx }) => {
       await bugReport.insertLogs({
         text: `${user?.username ?? 'Anonymous'}  ${path} time: ${durationMs}`,
         created_by: user?.id ?? undefined,
-        metadata: meta,
+        metadata: { meta, input, type, ctx, path },
       })
     } else {
       console.error('Non-OK request timing', meta)

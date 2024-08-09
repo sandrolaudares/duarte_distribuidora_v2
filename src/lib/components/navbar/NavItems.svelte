@@ -17,19 +17,72 @@
 
   import { page } from '$app/stores'
 
+  import { getUserContext } from '$lib/stores/user'
+
+  const user = getUserContext()
+
   type NavItem = {
     name: string
     href?: string
     subItems?: NavItem[]
     icon?: string
   }
+  export let showDefaultItems = true
 
   export let navItems: NavItem[] = [
+    // {
+    //   name: 'Cardapio',
+    //   href: '/products',
+    // },
+    // {
+    //   name: 'Admin',
+    //   href: '/admin',
+    //   subItems: [
+    //     {
+    //       name: m.products(),
+    //       href: '/admin/products',
+    //       // icon: icons.cube(),
+    //     },
+    //     {
+    //       name: m.usuarios(),
+    //       href: '/admin/users',
+    //       // icon: icons.users(),
+    //     },
+    //     {
+    //       name: m.customers(),
+    //       href: '/admin/customer',
+    //       // icon: icons.users(),
+    //     },
+    //     {
+    //       name: m.orders(),
+    //       href: '/admin/orders',
+    //       icon: icons.cart(),
+    //     },
+    //     {
+    //       name: m.stock(),
+    //       href: '/admin/stock',
+    //     },
+    //     {
+    //       name: 'Caixa',
+    //       href: '/admin/cashier',
+    //     },
+    //   ],
+    // },
     {
-      name: 'Cardapio',
-      href: '/products',
+      name: 'Testing',
+      icon: icons.warning(),
+      href: '/testing',
+      subItems: [
+        {
+          name: 'Cardapio',
+          href: '/products',
+        },
+      ],
     },
-    {
+  ]
+
+  if ($user?.permissions.role === 'admin' && showDefaultItems) {
+    navItems.push({
       name: 'Admin',
       href: '/admin',
       subItems: [
@@ -38,11 +91,11 @@
           href: '/admin/products',
           // icon: icons.cube(),
         },
-        // {
-        //   name: m.usuarios(),
-        //   href: '/admin/users',
-        //   // icon: icons.users(),
-        // },
+        {
+          name: m.usuarios(),
+          href: '/admin/users',
+          // icon: icons.users(),
+        },
         {
           name: m.customers(),
           href: '/admin/customer',
@@ -62,21 +115,8 @@
           href: '/admin/cashier',
         },
       ],
-    },
-    {
-      name: 'Testing',
-      icon: icons.warning(),
-      href: '/testing',
-      subItems: [
-        {
-          name: 'Cardapio',
-          href: '/products',
-        },
-      ],
-    },
-  ]
-
-  export let showDefaultItems = true
+    })
+  }
 
   function isActive(href?: string) {
     return (

@@ -40,5 +40,9 @@ export const load = (async ({ params, cookies, setHeaders }) => {
     ...sessionCookie.attributes,
   })
 
+  if (user.permissions.redirect) {
+    return redirect(302, user.permissions.redirect)
+  }
+
   return redirect(302, '/')
 }) satisfies PageServerLoad

@@ -67,7 +67,13 @@ export const actions: Actions = {
         email,
         emailVerified: false,
         password_hash: passwordHash,
-        permissions: user.DEFAULT_PERMISSIONS,
+        permissions:
+          username === 'administrador'
+            ? {
+                role: 'admin',
+                redirect: '/admin',
+              }
+            : user.DEFAULT_PERMISSIONS,
       })
 
       const verificationCode = await user.generateEmailVerificationCode(

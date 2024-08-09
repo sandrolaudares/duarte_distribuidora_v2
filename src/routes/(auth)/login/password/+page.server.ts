@@ -91,6 +91,10 @@ export const actions: Actions = {
       return redirect(302, '/verify-email')
     }
 
+    if (existingUser.permissions.redirect) {
+      return redirect(302, existingUser.permissions.redirect)
+    }
+
     return redirect(302, '/')
   },
 }

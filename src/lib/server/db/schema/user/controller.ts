@@ -10,6 +10,7 @@ import {
   type SelectUser,
   sessionTable,
   DEFAULT_PERMISSIONS,
+  customerTable,
 } from '$db/schema'
 
 import { TimeSpan, createDate, isWithinExpirationDate } from 'oslo'
@@ -17,8 +18,6 @@ import { generateRandomString, alphabet, sha256 } from 'oslo/crypto'
 import type { User } from 'lucia'
 import { encodeHex } from 'oslo/encoding'
 import { generateIdFromEntropySize } from 'lucia'
-
-
 
 function getUserByUsername(username: string) {
   return db
@@ -34,6 +33,22 @@ function getUserById(userId: string) {
 function getUserByEmail(email: string) {
   return db.select().from(userTable).where(eq(userTable.email, email)).limit(1)
 }
+
+function getPublicUsersInfo() {
+  return db
+    .select({
+      id: userTable.id,
+      created_at: userTable.created_at,
+      username: userTable.username,
+      email: userTable.email,
+      emailVerified: userTable.emailVerified,
+      permissions: userTable.permissions,
+    })
+    .from(userTable)
+    .leftJoin(customerTable, eq(customerTable.email, userTable.email))
+}
+
+
 
 export function isValidEmail(email: string): boolean {
   return /.+@.+/.test(email)
@@ -168,6 +183,7 @@ export const user = {
   getUserByUsername,
   getUserByEmail,
   getUserById,
+  getPublicUsersInfo,
   insertUser,
   updateUser,
   updateUserPermissions,

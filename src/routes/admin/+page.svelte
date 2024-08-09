@@ -7,10 +7,6 @@
   const { customerCount, orderCount, productCount, recentActivity } = data
 </script>
 
-<!--
-// v0 by Vercel.
-// https://v0.dev/t/aiKr1Xh1F7W
--->
 
 <div
   class="bg-background flex min-h-screen flex-col items-center justify-center"
@@ -197,6 +193,7 @@
         <h2 class="text-2xl font-bold">Quick Actions</h2>
         <div class="grid grid-cols-2 gap-4">
           <a class="btn btn-primary" href="/myprofile">Settings</a>
+          <a class="btn btn-primary" href="/admin/cashier">Caixa</a>
         </div>
       </div>
     </div>

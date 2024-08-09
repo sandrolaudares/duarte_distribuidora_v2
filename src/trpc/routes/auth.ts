@@ -12,6 +12,9 @@ import { redirect } from '@sveltejs/kit'
 import { middleware } from '../middleware'
 
 import { emailTemplate, sendMail } from '$lib/server/email'
+import { paramsSchema } from '$lib/components/table'
+import { tableHelper } from '$lib/server/db/utils'
+import { userTable } from '$lib/server/db/schema'
 
 export const auth = router({
   logOut: publicProcedure.query(async ({ ctx }) => {
@@ -169,5 +172,33 @@ export const auth = router({
         message: 'Magic link sent, Check your email',
         success: true,
       }
+    }),
+
+  paginatedUsers: publicProcedure
+    .use(middleware.admin)
+    .input(paramsSchema)
+    .query(async ({ input }) => {
+      return await tableHelper(
+        userController.getPublicUsersInfo().$dynamic(),
+        userTable,
+        'username',
+        input,
+      )
+    }),
+
+  updateUserPermissions: publicProcedure
+    .use(middleware.admin)
+    .input(
+      z.object({
+        userId: z.string(),
+        permissions: z.object({
+          role: z.enum(['admin', 'customer', 'user']),
+          redirect: z.string().optional(),
+        }),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const { userId, permissions } = input
+      return await userController.updateUserPermissions(userId, permissions)
     }),
 })

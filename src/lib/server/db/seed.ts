@@ -5,10 +5,10 @@ import { generateId } from 'lucia'
 import { product, user, distribuidora, customer, stock } from './controller'
 
 const main = async () => {
-  // await seedUsers()
-  // await seedCategories()
-  // await seedSKU()
-  // await seedProducts()
+  await seedUsers()
+  await seedCategories()
+  await seedSKU()
+  await seedProducts()
   await seedDistribuidora()
   await seedCustomers()
 }
@@ -22,6 +22,9 @@ async function seedUsers() {
       id: generateId(15),
       username: 'administrator',
       email: 'admin@localhost.com',
+      permissions: {
+        role: 'admin',
+      },
       password_hash: await hash('123456', {
         memoryCost: 19456,
         timeCost: 2,
@@ -39,6 +42,9 @@ async function seedUsers() {
         id: generateId(15),
         username: faker.internet.userName(),
         email: faker.internet.email(),
+        permissions: {
+          role: 'user',
+        },
         password_hash: await hash('password', {
           memoryCost: 19456,
           timeCost: 2,
@@ -70,10 +76,9 @@ async function seedCategories() {
   console.log('categoryTable seed END')
 }
 
-
-async function seedSKU(){
+async function seedSKU() {
   await stock.insertSKU({
-    name: 'Teste SKU'
+    name: 'Teste SKU',
   })
 }
 
@@ -99,7 +104,7 @@ async function seedProducts() {
         name: faker.commerce.productName(),
         retail_price: faker.number.int({ min: 0, max: 30000 }),
         wholesale_price: faker.number.int({ min: 0, max: 30000 }),
-        sku: 1
+        sku: 1,
       })
       await product.insertProductItem({
         product_id: i,
@@ -125,7 +130,7 @@ async function seedDistribuidora() {
       })
       .returning()
 
-     await distribuidora
+    await distribuidora
       .insertDistribuidora({
         name: 'Distribuidora Unidade 2',
       })

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from '$app/navigation'
   import SEO, { getSEOProps } from '$lib/components/SEO/index.svelte'
 
   import type { PageData } from './$types'
@@ -17,6 +18,9 @@
   let nottifPermGranted: boolean | null = null
   let isSubscribed = false
 
+  $: {
+    if (!user) goto('/login')
+  }
   onMount(async () => {
     console.log(Notification.permission)
 
@@ -161,6 +165,9 @@
         </p>
         <p>
           {$user?.email_verified ? 'verified' : 'not verified'}
+        </p>
+        <p>
+          {$user?.permissions.role}
         </p>
       </div>
 
