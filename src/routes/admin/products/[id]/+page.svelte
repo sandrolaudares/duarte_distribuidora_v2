@@ -10,10 +10,15 @@
 
   import { toast } from 'svelte-sonner'
   import { icons } from '$lib/utils'
+  import { onMount } from 'svelte'
 
   export let data: PageData
 
+
+
   const produto = data.prod
+
+  
   function handleAddItem() {
     modal.open(FormModal<InsertProductItem>, {
       title: 'Add Product Item',

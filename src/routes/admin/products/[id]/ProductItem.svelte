@@ -83,9 +83,19 @@
   }
 
   type CostPrice = RouterOutputs['stock']['getLastCostPrice']
+  let costPrice: CostPrice | undefined
 
-  onMount(async ()=>{
-
+  onMount(async () => {
+    if (item.sku) {
+      try {
+        costPrice = await trpc($page).stock.getLastCostPrice.query({
+          sku: item.sku,
+        })
+        console.log(costPrice)
+      } catch (error: any) {
+        toast.error(error.message)
+      }
+    }
   })
 </script>
 
@@ -122,6 +132,14 @@
       on:change={() => (isChanged = true)}
     />
   </div>
+  {#if costPrice?.cost_price}
+    <div class=" flex w-full items-center justify-between font-light">
+      <span>Preco Custo:</span>
+      <span>
+        {(costPrice.cost_price / 100).toFixed(2)}
+      </span>
+    </div>
+  {/if}
 
   <!-- <div class="my-3">
     <ImageInput

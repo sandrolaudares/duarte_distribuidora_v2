@@ -28,7 +28,7 @@ import type {
 } from '$db/schema'
 
 import { db } from '$db'
-import { and, desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, gt, ne, sql } from 'drizzle-orm'
 import { LibsqlError } from '@libsql/client'
 
 function insertSKU(data: InsertSku) {
@@ -133,13 +133,7 @@ async function processStockTransaction(transaction: InsertStockTransaction) {
     }
   }
 
-  await insertStockTransaction({
-    meta_data: meta_data,
-    quantity,
-    distribuidora_id,
-    sku: sku,
-    type: quantity > 0 ? 'Entrada' : 'Saida',
-  })
+  await insertStockTransaction(transaction)
 }
 
 function insertSupplier(data: InsertSupplier) {
@@ -189,9 +183,9 @@ function updateTransferenceSKU(
 
 function queryLastCostPrice(sky: SelectSku['id']) {
   return db.query.stockTransactionTable.findFirst({
-    where: t => and(eq(t.sku, sky), eq(t.type, 'Entrada')),
+    where: t => and(eq(t.sku, sky), eq(t.type, 'Entrada'), gt(t.cost_price, 0)),
     columns: {
-      meta_data: true,
+      cost_price: true,
     },
     orderBy: [desc(stockTransactionTable.created_at)],
   })
