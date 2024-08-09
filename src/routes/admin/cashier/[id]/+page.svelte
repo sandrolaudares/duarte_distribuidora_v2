@@ -126,11 +126,11 @@
 <div class="flex justify-center gap-2 mb-3">
   <button class="btn btn-error" on:click={handleFecharCaixa}>Fechar caixa</button>
 </div>
-  <div class="mt-15 flex flex-col justify-center gap-4 xl:flex-row">
-    <div class="flex h-auto flex-col justify-between">
-      <h2 class="text-3xl font-bold">Informações do pedido:</h2>
+  <div class="mt-15 flex flex-col justify-center gap-4 md:flex-row m-4">
+    <div class="flex h-auto md:flex-col flex-col-reverse justify-between">
+      <h2 class="text-3xl font-bold hidden md:block">Informações do pedido:</h2>
       <div
-        class={`mt-5 w-full rounded-lg px-3 py-1 text-center font-bold  ${
+        class={`mt-5 w-full rounded-lg px-3 py-1 text-center font-bold hidden md:block  ${
           caixa.status === 'Aberto' ? 'bg-success' : 'bg-error'
         }`}
       >
@@ -147,7 +147,7 @@
           Criado por: <span class="font-bold text-primary">{user?.email}</span>
         </p>
       </div>
-      <div class="flex flex-col gap-2">
+      <div class="flex md:flex-col flex-col-reverse  gap-2">
         {#if clienteSelecionado}
           <div class="flex items-center justify-between">
             <p class="font-bold">{clienteSelecionado.name}</p>
@@ -203,7 +203,7 @@
       </h2>
     </div>
 
-    <div class="col-auto flex h-auto w-96 flex-col justify-between gap-2">
+    <div class="col-auto flex h-auto md:w-96 flex-col justify-between gap-2">
       <div>
         <button
           class="btn btn-primary w-full"
@@ -218,8 +218,8 @@
           class="textarea textarea-bordered textarea-lg mb-5 w-full"
         ></textarea>
       </div>
-      <div class="flex flex-col gap-2">
-           <button class="btn btn-primary w-full disabled:bg-opacity-50">
+      <div class="flex flex-col gap-2 ">
+           <button class="btn btn-primary w-full disabled:bg-opacity-50 hidden md:block">
              <span class="mr-1">IMPRIMIR</span>
              {@html icons.print()}
            </button>
@@ -281,7 +281,6 @@
                       class="min-w-10 max-w-28 bg-base-100 text-right text-xl font-bold focus:border-yellow-500"
                       value={$cart[item.id]?.quantity ?? 0}
                       on:change={e => {
-                        //TODO: Input ta meio bugado, e tambem tem que setar pra 1 quando modal é fechado
                         const quant_temp = (e.target as HTMLInputElement)?.value
                         cart.setItem({
                           item: item,
@@ -291,7 +290,6 @@
                     />
                     <button
                       on:click={() =>
-                        //TODO:Ao clicar no + ou - tem que mudar o value do input
                         cart.addItem({
                           item: item,
                           quantity: 1,

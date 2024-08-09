@@ -53,6 +53,7 @@ export const insertCashierSchema = createInsertSchema(cashierTable)
 export type InsertCashier = typeof cashierTable.$inferInsert
 export type SelectCashier = typeof cashierTable.$inferSelect
 
+export const cashierTransactionEnum = ['Entrada', 'Saida','Troco'] as const
 export const cashierTransactionTable = sqliteTable('cashier_transaction', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
   created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
@@ -63,7 +64,7 @@ export const cashierTransactionTable = sqliteTable('cashier_transaction', {
     .notNull()
     .references(() => cashierTable.id),
   amount: integer('amount').notNull().default(0),
-  type: text('type', { enum: ['Entrada', 'Saida'] }).notNull(),
+  type: text('type', { enum: cashierTransactionEnum }).notNull(),
   meta_data: text('meta_data', { mode: 'json' }).notNull(),
 })
 

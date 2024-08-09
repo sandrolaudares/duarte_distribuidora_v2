@@ -6,6 +6,7 @@ import { distribuidora as distribuidoraController, stock } from '$db/controller'
 import {
   insertDistribuidoraSchema,
   insertCashierSchema,
+  cashierTransactionEnum
 } from '$lib/server/db/schema'
 
 import { paramsSchema } from '$lib/components/table'
@@ -101,6 +102,7 @@ export const distribuidora = router({
         id: z.number(),
         data: z.object({
           amount: z.number(),
+          type: z.enum(cashierTransactionEnum),
         }),
       }),
     )
@@ -112,7 +114,7 @@ export const distribuidora = router({
         meta_data: {
           user,
         },
-        type: 'Saida',
+        type: data.type,
         amount: data.amount,
       })
     }),
