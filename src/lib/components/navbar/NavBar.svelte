@@ -9,9 +9,10 @@
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
   import NavItems from './NavItems.svelte'
-import * as m from '$msgs'
+  import * as m from '$msgs'
   import { icons } from '$lib/utils/icons'
   import { goto } from '$app/navigation'
+  import Breadcrumbs from './Breadcrumbs.svelte'
 
   const user = getUserContext()
 
@@ -52,6 +53,8 @@ import * as m from '$msgs'
         <a href="/" class="btn btn-ghost text-xl max-sm:hidden">
           {website.siteShortTitle}
         </a>
+
+        <Breadcrumbs />
       </div>
 
       <div class="hidden flex-none lg:block">
@@ -74,7 +77,10 @@ import * as m from '$msgs'
             >
               <li><a href="/myprofile">{@html icons.user()} Meu Perfil</a></li>
               <li>
-                <button onclick={logout}>{@html icons.logout()} {m.log_out()}</button>
+                <button onclick={logout}>
+                  {@html icons.logout()}
+                  {m.log_out()}
+                </button>
               </li>
             </ul>
           </div>

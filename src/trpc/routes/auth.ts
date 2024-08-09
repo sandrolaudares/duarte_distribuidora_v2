@@ -9,6 +9,7 @@ import { redirect } from '@sveltejs/kit'
 
 // import { generateId } from 'lucia'
 // import { LibsqlError } from '@libsql/client'
+import { middleware } from '../middleware'
 
 import { emailTemplate, sendMail } from '$lib/server/email'
 
@@ -57,6 +58,8 @@ export const auth = router({
   }),
 
   verifyEmail: publicProcedure
+    .use(middleware.logged)
+
     .input(
       z.object({
         code: z.string().length(8),
@@ -82,10 +85,7 @@ export const auth = router({
         }
       }
 
-      const validCode = await userController.verifyVerificationCode(
-        user,
-        code,
-      )
+      const validCode = await userController.verifyVerificationCode(user, code)
 
       if (!validCode) {
         return {

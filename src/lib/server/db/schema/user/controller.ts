@@ -9,6 +9,7 @@ import {
   type UserPermissions,
   type SelectUser,
   sessionTable,
+  DEFAULT_PERMISSIONS,
 } from '$db/schema'
 
 import { TimeSpan, createDate, isWithinExpirationDate } from 'oslo'
@@ -17,9 +18,7 @@ import type { User } from 'lucia'
 import { encodeHex } from 'oslo/encoding'
 import { generateIdFromEntropySize } from 'lucia'
 
-const DEFAULT_PERMISSIONS: UserPermissions = {
-  isAdmin: false,
-}
+
 
 function getUserByUsername(username: string) {
   return db

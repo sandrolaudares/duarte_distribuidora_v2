@@ -12,7 +12,7 @@
 
   async function reportBug() {
     try {
-      const resp = await trpc($page).reportBug.query({
+      const resp = await trpc($page).bugReport.reportBug.query({
         text: bugReport,
         metadata: {
           page: $page,
@@ -54,7 +54,7 @@
 
       <div class="flex gap-3">
         <button class="btn btn-error" onclick={modal.close}>{m.cancel_button()}</button>
-        <button class="btn btn-success" onclick={save}>{save}>{m.send_button()}</button>
+        <button class="btn btn-success" onclick={save}>{m.send_button()}</button>
       </div>
     </div>
   </svelte:fragment>

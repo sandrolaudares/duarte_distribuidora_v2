@@ -19,7 +19,7 @@ import type {
 import { db } from '$db'
 import { eq, ne, or, sql } from 'drizzle-orm'
 
-import { stock } from '$db/controller'
+import { stock, bugReport } from '$db/controller'
 
 export const customer = {
   tables: {

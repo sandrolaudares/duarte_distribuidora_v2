@@ -5,6 +5,8 @@ import {
   productStockTable,
   stockTransactionTable,
   supplierTable,
+  stockTransferanceSKUTable,
+  stockTransferenceTable,
 } from '$db/schema'
 
 import type {
@@ -19,6 +21,10 @@ import type {
   SelectStockTransaction,
   SelectSupplier,
   InsertSupplier,
+  InsertStockTransference,
+  InsertTransferenceSKU,
+  SelectTransferenceSKU,
+  SelectStockTransference,
 } from '$db/schema'
 
 import { db } from '$db'
@@ -46,7 +52,6 @@ function getInfoSKU(sku_id: SelectSku['id']) {
       product_stock: {
         with: {
           distribuidora: true,
-      
         },
       },
     },
@@ -150,6 +155,43 @@ function getSupplier() {
   return db.select().from(supplierTable)
 }
 
+async function createTransferenciaEstoque(data: {
+  transference_data: InsertStockTransference
+  items: InsertTransferenceSKU[]
+}) {
+  const { items, transference_data } = data
+  const [transference] = await db
+    .insert(stockTransferenceTable)
+    .values(transference_data)
+    .returning()
+
+  const tranferance_Item = await db
+    .insert(stockTransferanceSKUTable)
+    .values(items)
+
+  return { transference, tranferance_Item }
+}
+
+function updateTransference(
+  id: SelectStockTransference['id'],
+  data: Partial<SelectStockTransference>,
+) {
+  return db
+    .update(stockTransferenceTable)
+    .set(data)
+    .where(eq(stockTransferenceTable.id, id))
+}
+
+function updateTransferenceSKU(
+  id: SelectTransferenceSKU['id'],
+  data: Partial<SelectTransferenceSKU>,
+) {
+  return db
+    .update(stockTransferanceSKUTable)
+    .set(data)
+    .where(eq(stockTransferanceSKUTable.id, id))
+}
+
 export const stock = {
   tables: {
     skuTable,
@@ -167,4 +209,8 @@ export const stock = {
   getDistributionStock,
   insertSupplier,
   getSupplier,
+  createTransferenciaEstoque,
+  updateTransferenceSKU,
+  updateTransference,
+  
 }

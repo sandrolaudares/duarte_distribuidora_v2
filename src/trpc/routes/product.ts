@@ -12,6 +12,7 @@ import {
 
 import { tableHelper } from '$db/utils'
 import { paramsSchema } from '$lib/components/table'
+import { middleware } from '$trpc/middleware'
 
 export const product = router({
   paginatedProducts: publicProcedure
@@ -37,10 +38,16 @@ export const product = router({
 
   insertProduct: publicProcedure
     .input(insertProductSchema)
+    .use(middleware.logged)
+    .use(middleware.auth)
+
     .mutation(async ({ input }) => {
       return await productController.insertProduct(input)
     }),
   updateProduct: publicProcedure
+    .use(middleware.logged)
+    .use(middleware.auth)
+
     .input(
       z.object({
         id: z.number(),
@@ -53,20 +60,30 @@ export const product = router({
     )
     .mutation(async ({ input }) => {
       const { id, prod } = input
+
       return await productController.updateProduct(id, prod).returning()
     }),
   deleteProduct: publicProcedure
+    .use(middleware.logged)
+    .use(middleware.auth)
+
     .input(z.number())
     .mutation(async ({ input }) => {
       return await productController.deleteProduct(input)
     }),
 
   insertProductItem: publicProcedure
+    .use(middleware.logged)
+    .use(middleware.auth)
+
     .input(insertProductItemSchema)
     .mutation(async ({ input }) => {
       return await productController.insertProductItem(input)
     }),
   updateProductItem: publicProcedure
+    .use(middleware.logged)
+    .use(middleware.auth)
+
     .input(
       z.object({
         id: z.number(),
@@ -85,17 +102,26 @@ export const product = router({
       return await productController.updateProductItem(id, prod).returning()
     }),
   deleteProductItem: publicProcedure
+    .use(middleware.logged)
+    .use(middleware.auth)
+
     .input(z.number())
     .mutation(async ({ input }) => {
       return await productController.deleteProductItem(input)
     }),
 
   insertProductCategory: publicProcedure
+    .use(middleware.logged)
+    .use(middleware.auth)
+
     .input(insertProductCategorySchema)
     .mutation(async ({ input }) => {
       return await productController.insertProductCategory(input)
     }),
   updateProductCategory: publicProcedure
+    .use(middleware.logged)
+    .use(middleware.auth)
+
     .input(
       z.object({
         id: z.number(),
@@ -109,6 +135,9 @@ export const product = router({
       return await productController.updateProductCategory(id, prod)
     }),
   deleteProductCategory: publicProcedure
+    .use(middleware.logged)
+    .use(middleware.auth)
+
     .input(z.number())
     .mutation(async ({ input }) => {
       return await productController.deleteProductCategory(input)

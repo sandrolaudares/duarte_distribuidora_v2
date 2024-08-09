@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types'
 
-import { image } from '$db/controller'
+import { image, bugReport } from '$db/controller'
 
 export const GET: RequestHandler = async ({ params }) => {
   const id = Number(params.id)
@@ -44,6 +44,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       buff: imageBuffer,
       name,
       uploaded_by: user.id,
+    })
+
+    await bugReport.insertLogs({
+      created_by: user.id,
+      text: `${user.username} fez upload de uma imagem`,
+      error: '',
+      metadata: {
+        img_id,
+      },
     })
     return new Response(JSON.stringify({ img_id }), {
       status: 200,

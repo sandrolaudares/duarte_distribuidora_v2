@@ -1,9 +1,11 @@
 import { t } from '$trpc/t'
 import { TRPCError } from '@trpc/server'
-
+import { bugReport } from '$lib/server/db/controller'
+import type {  UserPermissions } from '$lib/server/db/schema'
+import { allowPermissionsCheck } from '$db/schema'
 const admin = t.middleware(async ({ next, ctx }) => {
   const { user } = ctx.locals
-  if (!user?.permissions.isAdmin)
+  if (user?.permissions.role !== 'admin')
     throw new TRPCError({
       code: 'UNAUTHORIZED',
       message: 'You must be an admin to access this route',
@@ -21,7 +23,8 @@ const auth = t.middleware(async ({ next, ctx }) => {
   return next()
 })
 
-const logged = t.middleware(async ({ next, path, type }) => {
+const logged = t.middleware(async ({ next, path, type, ctx }) => {
+  const { user } = ctx.locals
   const start = Date.now()
 
   const result = await next()
@@ -29,17 +32,54 @@ const logged = t.middleware(async ({ next, path, type }) => {
   const durationMs = Date.now() - start
   const meta = { path: path, type: type, durationMs }
 
-  if (result.ok) {
-    console.log('OK request timing:', meta)
-  } else {
-    console.error('Non-OK request timing', meta)
+  try {
+    if (result.ok) {
+      console.log('OK request timing:', meta)
+      await bugReport.insertLogs({
+        text: `${user?.username ?? 'Anonymous'}  ${path} time: ${durationMs}`,
+        created_by: user?.id ?? undefined,
+        metadata: meta,
+      })
+    } else {
+      console.error('Non-OK request timing', meta)
+      await bugReport.insertLogs({
+        text: `ERROR`,
+        created_by: user?.id,
+        metadata: meta,
+        error: `${path} ${user?.username ?? 'Anonymous'}`,
+      })
+    }
+  } catch (error) {
+    console.error(error)
   }
 
   return result
 })
 
+const allowPermissions = (permissions: UserPermissions['role'][]) => {
+  return t.middleware(async ({ next, ctx }) => {
+    const { user } = ctx.locals
+
+    if (!user) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'You must be logged in to access this ',
+      })
+    }
+
+    if (allowPermissionsCheck(user, permissions)) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'You do not have permission to access this ',
+      })
+    }
+    return next()
+  })
+}
+
 export const middleware = {
   admin,
   auth,
   logged,
+  allowPermissions,
 }

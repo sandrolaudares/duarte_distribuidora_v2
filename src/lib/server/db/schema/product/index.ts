@@ -88,6 +88,10 @@ export const productItemRelations = relations(
       fields: [productItemTable.product_id],
       references: [productTable.id],
     }),
+    sku: one(skuTable, {
+      fields: [productItemTable.sku],
+      references: [skuTable.id],
+    }),
   }),
 )
 export const insertProductItemSchema = createInsertSchema(productItemTable)

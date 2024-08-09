@@ -16,12 +16,15 @@ import { middleware } from '../middleware'
 export const customer = router({
   insertCustomer: publicProcedure
     .use(middleware.auth)
+    .use(middleware.logged)
+
     .input(insertCustomerSchema)
     .mutation(async ({ input }) => {
       return await customerController.insertCustomer(input)
     }),
   updateCustomer: publicProcedure
     .use(middleware.auth)
+    .use(middleware.logged)
     .input(
       z.object({
         id: z.number(),
@@ -41,6 +44,7 @@ export const customer = router({
     }),
   insertAddress: publicProcedure
     .use(middleware.auth)
+    .use(middleware.logged)
     .input(insertAddressSchema)
     .mutation(async ({ input }) => {
       try {
@@ -65,7 +69,8 @@ export const customer = router({
   }),
 
   insertOrder: publicProcedure
-    // .use(middleware.auth)
+    .use(middleware.auth)
+    .use(middleware.logged)
     .input(
       z.object({
         order_items: z.array(
@@ -99,6 +104,8 @@ export const customer = router({
     }),
 
   updateOrderStatus: publicProcedure
+    .use(middleware.logged)
+    .use(middleware.auth)
     .input(
       z.object({
         order_id: z.number(),

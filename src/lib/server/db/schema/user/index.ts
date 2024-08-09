@@ -23,7 +23,7 @@ export const userTable = sqliteTable('user', {
   permissions: text('permissions', { mode: 'json' })
     .notNull()
     .$type<UserPermissions>()
-    .default({ isAdmin: false }),
+    .default({ role: 'user' }),
 })
 
 export type SelectUser = typeof userTable.$inferSelect
@@ -39,7 +39,23 @@ export interface DatabaseUser {
 }
 
 export type UserPermissions = {
-  isAdmin: boolean
+  role: 'admin' | 'customer' | 'user'
+  redirect?: string
+}
+
+export const DEFAULT_PERMISSIONS: UserPermissions = {
+  role: 'user',
+} as const
+
+export function allowPermissionsCheck(
+  user: Omit<DatabaseUser, 'emailVerified'>,
+  permissions: UserPermissions['role'][],
+) {
+  if (permissions.includes(user.permissions.role)) {
+    return true
+  }
+
+  return true
 }
 
 // AUTH TABLES
@@ -85,5 +101,3 @@ export const magicLinkTable = sqliteTable('magic_link', {
   email: text('email').notNull(),
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
 })
-
-

@@ -15,12 +15,17 @@ import { middleware } from '../middleware'
 
 export const distribuidora = router({
   insertDistribuidora: publicProcedure
+    .use(middleware.logged)
+    .use(middleware.auth)
     .input(insertDistribuidoraSchema)
     .mutation(async ({ input }) => {
       return distribuidoraController.insertDistribuidora(input).returning()
     }),
 
   insertCashier: publicProcedure
+    .use(middleware.logged)
+    .use(middleware.auth)
+
     .input(insertCashierSchema)
     .mutation(async ({ input }) => {
       return distribuidoraController.insertCashier(input).returning()

@@ -7,7 +7,7 @@ import { LibsqlError } from '@libsql/client'
 import type { Actions, PageServerLoad } from './$types'
 import { emailTemplate, sendMail } from '$lib/server/email'
 
-import { user } from '$db/controller'
+import { bugReport, user } from '$db/controller'
 
 export const load: PageServerLoad = async event => {
   if (event.locals.user) {
@@ -52,16 +52,15 @@ export const actions: Actions = {
       })
     }
 
-    const passwordHash = await hash(password, {
-      // recommended minimum parameters
-      memoryCost: 19456,
-      timeCost: 2,
-      outputLen: 32,
-      parallelism: 1,
-    })
-    const userId = generateId(15)
-
     try {
+      const passwordHash = await hash(password, {
+        // recommended minimum parameters
+        memoryCost: 19456,
+        timeCost: 2,
+        outputLen: 32,
+        parallelism: 1,
+      })
+      const userId = generateId(15)
       user.insertUser({
         id: userId,
         username,
@@ -75,6 +74,11 @@ export const actions: Actions = {
         userId,
         email,
       )
+      await bugReport.insertLogs({
+        created_by: userId,
+        text: `${username} se cadastrou`,
+        error: '',
+      })
       await sendMail(email, emailTemplate.verificationCode(verificationCode))
 
       const session = await lucia.createSession(userId, {})
@@ -86,7 +90,7 @@ export const actions: Actions = {
     } catch (e) {
       if (e instanceof LibsqlError && e.code === 'SQLITE_CONSTRAINT_UNIQUE') {
         return fail(400, {
-          message: 'Username already used',
+          message: 'Username or Email already used',
         })
       }
       console.error(e)

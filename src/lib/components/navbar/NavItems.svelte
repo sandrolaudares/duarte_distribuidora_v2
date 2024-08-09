@@ -26,16 +26,6 @@
 
   export let navItems: NavItem[] = [
     {
-      name: m.home(),
-      href: '/',
-      icon: icons.home(),
-    },
-    {
-      name: m.chart_grafico(),
-      href: '/chart',
-      icon: icons.chart.bar(),
-    },
-    {
       name: 'Cardapio',
       href: '/products',
     },
@@ -48,11 +38,11 @@
           href: '/admin/products',
           // icon: icons.cube(),
         },
-        {
-          name: m.usuarios(),
-          href: '/admin/users',
-          // icon: icons.users(),
-        },
+        // {
+        //   name: m.usuarios(),
+        //   href: '/admin/users',
+        //   // icon: icons.users(),
+        // },
         {
           name: m.customers(),
           href: '/admin/customer',
@@ -79,40 +69,8 @@
       href: '/testing',
       subItems: [
         {
-          name: 'Datatable',
-          href: '/datatable',
-          icon: icons.table(),
-        },
-        {
-          name: 'Modal',
-          href: '/modal',
-        },
-        {
           name: 'Cardapio',
           href: '/products',
-        },
-        {
-          name: 'Tanner',
-          href: '/tanstack',
-        },
-        {
-          name: 'Checkout',
-          href: '/checkout',
-          icon: icons.cart(),
-        },
-        {
-          name: 'Inner Parent',
-          href: '/inner-parent',
-          subItems: [
-            {
-              name: 'Item 1',
-              href: '/item-1',
-            },
-            {
-              name: 'Item 2',
-              href: '/item-2',
-            },
-          ],
         },
       ],
     },

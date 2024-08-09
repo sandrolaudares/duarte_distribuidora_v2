@@ -13,7 +13,12 @@ import { imageTable } from '../image'
 
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 
-import { distribuidoraTable, productTable } from '$db/schema'
+import {
+  distribuidoraTable,
+  productItemTable,
+  productTable,
+  userTable,
+} from '$db/schema'
 
 export const skuTable = sqliteTable('sku', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
@@ -23,7 +28,7 @@ export const skuTable = sqliteTable('sku', {
 
 export const skuRelations = relations(skuTable, ({ many, one }) => ({
   product_stock: many(productStockTable),
-  products: many(productTable),
+  products: many(productItemTable),
 }))
 
 export const insertSKUschema = createInsertSchema(skuTable)
@@ -163,6 +168,9 @@ export const stockTransferenceTable = sqliteTable('stock_transferance', {
   updated_at: integer('updated_at', { mode: 'timestamp' }).default(
     sql`(CURRENT_TIMESTAMP)`,
   ),
+  created_by: text('created_by')
+    .notNull()
+    .references(() => userTable.username),
   from_distribuidora_id: integer('from_distribuidora_id')
     .notNull()
     .references(() => distribuidoraTable.id),
@@ -170,8 +178,18 @@ export const stockTransferenceTable = sqliteTable('stock_transferance', {
     .notNull()
     .references(() => distribuidoraTable.id),
 
-  status: text('status', { enum: ['CONFIRMED', 'CANCELED', 'PENDING'] }),
+  status: text('status', {
+    enum: ['CONFIRMED', 'CANCELED', 'PENDING'],
+  }).default('PENDING'),
 })
+
+export const insertStockTransferenceSchema = createInsertSchema(
+  stockTransferenceTable,
+).omit({
+  created_by: true,
+})
+export type InsertStockTransference = typeof stockTransferenceTable.$inferInsert
+export type SelectStockTransference = typeof stockTransferenceTable.$inferSelect
 
 export const stockTransferanceSKUTable = sqliteTable('tranferance_tem', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
@@ -180,3 +198,11 @@ export const stockTransferanceSKUTable = sqliteTable('tranferance_tem', {
     .references(() => skuTable.id),
   quantity: integer('quantity').notNull(),
 })
+
+export const insertTransferenceSKUSchema = createInsertSchema(
+  stockTransferanceSKUTable,
+)
+export type InsertTransferenceSKU =
+  typeof stockTransferanceSKUTable.$inferInsert
+export type SelectTransferenceSKU =
+  typeof stockTransferanceSKUTable.$inferSelect
