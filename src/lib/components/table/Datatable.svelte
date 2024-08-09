@@ -128,7 +128,7 @@
 <section>
   <header>
     <div
-      class="mb-2 flex items-center justify-between rounded-box bg-base-300 p-2"
+      class="mb-2 flex items-center justify-between rounded-t-box bg-base-300 p-2"
     >
       <label class="input input-bordered flex items-center gap-2">
         <input
@@ -170,7 +170,7 @@
       </div>
     </div>
   </header>
-  <article class="thin-scrollbar">
+  <article class="thin-scrollba">
     {#if isLoading}
       <Loading />
     {:else}
