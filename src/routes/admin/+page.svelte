@@ -10,7 +10,7 @@
 </script>
 
 <div
-  class="bg-background flex min-h-screen flex-col items-center justify-center"
+  class="bg-background flex min-h-[90vh] flex-col items-center justify-center"
 >
   <div class="container max-w-4xl space-y-8 px-4 py-12">
     <div class="flex items-center justify-between">
