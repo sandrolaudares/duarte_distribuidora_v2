@@ -59,8 +59,10 @@
 
       <div class="hidden flex-none lg:block">
         <ul class="menu menu-horizontal space-x-1">
-          <!-- Navbar menu content here -->
-          <NavItems />
+          <!-- Navbar top menu content here -->
+          {#key $user?.permissions}
+            <NavItems />
+          {/key}
         </ul>
       </div>
 
@@ -105,7 +107,9 @@
     ></label>
     <ul class="menu min-h-full w-80 bg-base-200 p-4">
       <!-- Sidebar content here -->
-      <NavItems />
+      {#key $user?.permissions}
+        <NavItems />
+      {/key}
     </ul>
   </div>
 </div>
