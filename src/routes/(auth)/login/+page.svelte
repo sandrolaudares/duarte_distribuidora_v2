@@ -75,7 +75,7 @@
     </p>
 
     <p class="mt-4 text-center text-sm">
-      <a href="/login/password" class="btn btn-outline btn-primary">
+      <a href="/login/password" class="btn btn-outline ">
         Login with password
       </a>
     </p>

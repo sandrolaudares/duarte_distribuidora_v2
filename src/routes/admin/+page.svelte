@@ -180,9 +180,9 @@
                   </div>
                 </div>
               </div>
-              <div class="text-muted-foreground text-sm">
+              <!-- <div class="text-muted-foreground text-sm">
                 {JSON.stringify(act.metadata, null, 2)}
-              </div>
+              </div> -->
             </div>
           {/each}
         </div>
