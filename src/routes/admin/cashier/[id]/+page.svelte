@@ -12,9 +12,10 @@
 
   import type { RouterOutputs } from '$trpc/router'
   import { modal } from '$components/modal'
-  import ModalCliente from './ModalCliente.svelte'
-
+  
   import { getCartContext } from '$lib/stores/cart'
+  import ModalEndereco from './ModalEndereco.svelte'
+  import ModalCliente from './ModalCliente.svelte'
 
   const cart = getCartContext()
 
@@ -30,6 +31,8 @@
 
   let clienteSelecionado: RouterOutputs['customer']['getCustomers'][0] | null =
     null
+
+  let enderecoCliente: RouterOutputs['customer']['getCustomers'][0]['adresses'][0] | null = null
 
   $: total = Object.values($cart).reduce((acc, item) => {
     return acc + item.item[tipo_preco] * item.quantity
@@ -65,7 +68,14 @@
     modal.open(ModalCliente, {
       selectedClient: client => {
         clienteSelecionado = client
-
+        modal.open(ModalEndereco, {
+          addresses: client.adresses,
+          selectedAddress: address => {
+            enderecoCliente = address
+            console.log(address);
+            modal.close()            
+          }
+        })
         if (clienteSelecionado.is_retail) {
           tipo_preco = 'retail_price'
         } else {
@@ -158,7 +168,7 @@
             <p class="font-bold">{clienteSelecionado.name}</p>
             <button
               class="btn btn-primary"
-              on:click={() => (clienteSelecionado = null)}
+              on:click={() => (clienteSelecionado = null, enderecoCliente = null)}
             >
               Desvincular
             </button>
@@ -170,6 +180,11 @@
           >
             <span class="mr-1">Vincular compra a um cliente</span>
           </button>
+        {/if}
+        {#if enderecoCliente}
+        <div class="flex items-center justify-between">
+            {enderecoCliente.cep} - {enderecoCliente.city} <!--TODO: apenas colocar o endereco completo-->
+          </div>
         {/if}
         <a
           href="/admin/cashier"
@@ -224,7 +239,7 @@
         ></textarea>
       </div>
       <div class="flex flex-col gap-2 ">
-           <button class="btn btn-primary w-full disabled:bg-opacity-50 hidden md:block">
+           <button class="btn btn-primary w-full disabled:bg-opacity-50">
              <span class="mr-1">IMPRIMIR</span>
              {@html icons.print()}
            </button>
