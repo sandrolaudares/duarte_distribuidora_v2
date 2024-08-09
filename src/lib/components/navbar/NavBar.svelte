@@ -92,7 +92,7 @@
 
         <Cart />
 
-        <ThemeSwiter />
+        <!-- <ThemeSwiter /> -->
 
         <ChangeLanguage />
       </div>
