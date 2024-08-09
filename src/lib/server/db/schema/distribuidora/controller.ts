@@ -72,6 +72,10 @@ function getCashierTransactions(cachier_id: SelectCashier['id']) {
     .where(eq(cashierTransactionTable.cashier_id, cachier_id))
 }
 
+function updateCashier(id: SelectCashier['id'], data: Partial<SelectCashier>) {
+  return db.update(cashierTable).set(data).where(eq(cashierTable.id, id))
+}
+
 export const distribuidora = {
   tables: {
     distribuidoraTable,
@@ -85,4 +89,5 @@ export const distribuidora = {
   insertCashierTransaction,
   getCashierTransactions,
   queryCashierByDistribuidora,
+  updateCashier,
 }

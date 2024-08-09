@@ -1,4 +1,5 @@
 <script lang="ts">
+  import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
   import type { PageData } from './$types'
   import Cardapio from '$lib/components/Cardapio.svelte'
   import { icons } from '$lib/utils/icons'
@@ -30,8 +31,6 @@
 
   let clienteSelecionado: RouterOutputs['customer']['getCustomers'][0] | null =
     null
-
-
 
   $: total = Object.values($cart).reduce((acc, item) => {
     return acc + item.item[tipo_preco] * item.quantity
@@ -76,111 +75,141 @@
       },
     })
   }
+
+  let dinheiro_caixa = 0
+
+  async function abrirCaixa() {
+    try {
+      const resp = await trpc($page).distribuidora.updateCashier.mutate({
+        id: caixa.id,
+        data: {
+          status: 'Aberto',
+          currency: dinheiro_caixa,
+        },
+      })
+
+      console.log(resp)
+      toast.success('Caixa aberto com sucesso!')
+    } catch (error: any) {
+      toast.error(error.message)
+    }
+  }
 </script>
 
-
-<div class="mt-15 flex flex-col justify-center gap-4 xl:flex-row">
-  <div class="flex h-auto flex-col justify-between">
-    <h2 class="text-3xl font-bold">Informações do pedido:</h2>
-    <div class={`mt-5 w-full rounded-lg px-3 py-1 text-center font-bold text-white  ${caixa.status == 'Aberto' ? 'success-bg' : 'bg-error'}`}>
-        {caixa.status == 'Aberto' ? 'Em aberto' : 'Fechado'}
-    </div>
-    <div class="mt-4">
-      <p>
-        Número do pedido: <span class="font-bold text-primary">
-          #{caixa.id}
-        </span>
-      </p>
-      <p>ID distribuidora {caixa.distribuidora_id}</p>
-      <p>
-        Criado por: <span class="font-bold text-primary">
-          {user?.email}
-        </span>
-      </p>
-    </div>
-    <div class="flex flex-col gap-2">
-      {#if clienteSelecionado}
-        <div class="flex items-center justify-between">
-          <p class="font-bold">{clienteSelecionado.name}</p>
+{#if caixa.status === 'Fechado'}
+  <div class="flex">
+    <button class="btn btn-primary" on:click={abrirCaixa}>Abrir caixa</button>
+    <CurrencyInput bind:value={dinheiro_caixa} />
+  </div>
+{:else}
+  <div class="mt-15 flex flex-col justify-center gap-4 xl:flex-row">
+    <div class="flex h-auto flex-col justify-between">
+      <h2 class="text-3xl font-bold">Informações do pedido:</h2>
+      <div
+        class={`mt-5 w-full rounded-lg px-3 py-1 text-center font-bold  ${
+          caixa.status === 'Aberto' ? 'bg-success' : 'bg-error'
+        }`}
+      >
+        {caixa.status === 'Aberto' ? 'Em aberto' : 'Fechado'}
+      </div>
+      <div class="mt-4">
+        <p>
+          Número do pedido: <span class="font-bold text-primary">
+            #{caixa.id}
+          </span>
+        </p>
+        <p>ID distribuidora {caixa.distribuidora_id}</p>
+        <p>
+          Criado por: <span class="font-bold text-primary">{user?.email}</span>
+        </p>
+      </div>
+      <div class="flex flex-col gap-2">
+        {#if clienteSelecionado}
+          <div class="flex items-center justify-between">
+            <p class="font-bold">{clienteSelecionado.name}</p>
+            <button
+              class="btn btn-primary"
+              on:click={() => (clienteSelecionado = null)}
+            >
+              Desvincular
+            </button>
+          </div>
+        {:else}
           <button
-            class="btn btn-primary"
-            on:click={() => (clienteSelecionado = null)}
+            class="btn btn-outline w-full disabled:bg-opacity-50"
+            on:click={handleSelectClient}
           >
-            Desvincular
+            <span class="mr-1">Vincular compra a um cliente</span>
           </button>
-        </div>
-      {:else}
-        <button
-          class="btn btn-outline w-full disabled:bg-opacity-50"
-          on:click={handleSelectClient}
+        {/if}
+        <a
+          href="/admin/cashier"
+          class="btn btn-primary w-full disabled:bg-opacity-50"
         >
-          <span class="mr-1">Vincular compra a um cliente</span>
+          <!--TODO: ao cancelar tem que resetar o que ta adicionado no "carrinho"-->
+          <span class="mr-1">CANCELAR</span>
+          {@html icons.x()}
+        </a>
+      </div>
+    </div>
+
+    <div
+      class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-4"
+    >
+      <ul class="mb-4 text-center text-lg">
+        {#each Object.values($cart) as item}
+          <div class="flex justify-between">
+            <li class="py-2 font-bold">
+              ({item.quantity}x) {item.item.name}
+              <span class="text-secondary">R${item.item[tipo_preco]}</span>
+            </li>
+            <button
+              class="btn btn-circle"
+              on:click={e => cart.removeItem(item.item.id)}
+            >
+              {@html icons.x({ stroke: 'red' })}
+            </button>
+          </div>
+          <hr />
+        {/each}
+      </ul>
+      <h2 class="mx-10 flex justify-center text-3xl font-bold">
+        Preço total:&nbsp;
+        <span class="text-primary">R${total}</span>
+      </h2>
+    </div>
+
+    <div class="col-auto flex h-auto w-96 flex-col justify-between gap-2">
+      <div>
+        <button
+          class="btn btn-primary w-full"
+          on:click={() => isOpenModal?.showModal()}
+        >
+          ACESSAR PRODUTOS {@html icons.basket()}
         </button>
-      {/if}
-      <a
-        href="/admin/cashier"
-        class="btn btn-primary w-full disabled:bg-opacity-50"
-      >
-      <!--TODO: ao cancelar tem que resetar o que ta adicionado no "carrinho"-->
-        <span class="mr-1">CANCELAR</span> {@html icons.x()}
-      </a>
+        <p class="mb-2 mt-4">Observações sobre compra:</p>
+        <textarea
+          bind:value={observacao}
+          placeholder="Anotar observacões..."
+          class="textarea textarea-bordered textarea-lg mb-5 w-full"
+        ></textarea>
+      </div>
+      <div class="flex flex-col gap-2">
+        <button class="btn btn-primary w-full disabled:bg-opacity-50">
+          <span class="mr-1">IMPRIMIR</span>
+          {@html icons.print()}
+        </button>
+        <button
+          class="btn btn-primary w-full disabled:bg-opacity-50"
+          on:click={createOrder}
+        >
+          <span class="mr-1">PAGAMENTO</span>
+          {@html icons.dolar()}
+        </button>
+      </div>
     </div>
   </div>
-
-  <div
-    class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-4"
-  >
-    <ul class="mb-4 text-center text-lg">
-      {#each Object.values($cart) as item}
-        <div class="flex justify-between">
-          <li class="py-2 font-bold">
-            ({item.quantity}x)
-            {item.item.name}
-
-            <span class="text-secondary">R${item.item[tipo_preco]}</span>
-          </li>
-          <button class="btn btn-circle" on:click={e => cart.removeItem(item.item.id)}>
-            {@html icons.x({stroke: 'red'})}
-          </button>
-        </div>
-        <hr />
-      {/each}
-    </ul>
-    <h2 class="mx-10 flex justify-center text-3xl font-bold">
-      Preco total:&nbsp;
-      <span class="text-primary">R${total}</span>
-    </h2>
-  </div>
-
-  <div class="col-auto flex h-auto w-96 flex-col justify-between gap-2">
-    <div>
-      <button
-        class="btn btn-primary w-full"
-        on:click={() => isOpenModal?.showModal()}
-      >
-        ACESSAR PRODUTOS {@html icons.basket()}
-      </button>
-      <p class="mb-2 mt-4">Observações sobre compra:</p>
-      <textarea
-        bind:value={observacao}
-        placeholder="Anotar observacões..."
-        class="textarea textarea-bordered textarea-lg mb-5 w-full"
-      ></textarea>
-    </div>
-    <div class="flex flex-col gap-2">
-      <button class="btn btn-primary w-full disabled:bg-opacity-50">
-        <span class="mr-1">IMPRIMIR</span>
-        {@html icons.print()}
-      </button>
-      <button
-        class="btn btn-primary w-full disabled:bg-opacity-50"
-        on:click={createOrder}
-      >
-        <span class="mr-1">PAGAMENTO</span> {@html icons.dolar()}
-      </button>
-    </div>
-  </div>
-</div>
+{/if}
 
 <!-- <pre>{JSON.stringify(data, null, 2)}</pre> -->
 
@@ -188,55 +217,65 @@
   <div class="modal-box max-w-4xl">
     <Cardapio data={products}>
       {#snippet card(p)}
-        <div class="card p-1 w-full">
+        <div class="card w-full p-1">
           <div class="grid grid-cols-1 gap-3">
             {#each p.items as item}
-            {@const cartItem = $cart[item.id]}
+              {@const cartItem = $cart[item.id]}
 
-            <hr />
-              <div class="flex py-2 w-full">
+              <hr />
+              <div class="flex w-full py-2">
                 <div class=" flex-none md:w-auto">
                   <img
                     alt="imagem"
-                    src={getImagePath( item.image,
-                    )}
+                    src={getImagePath(item.image)}
                     class="h-16 w-16 rounded-lg object-cover md:h-20 md:w-20"
                   />
                 </div>
                 <div class="ml-4 w-full">
-                    <h2 class="text-xl font-bold">{item.name}</h2>
-                    <h3 class="text-md text-secondary">{p.description}</h3>
-                    
+                  <h2 class="text-xl font-bold">{item.name}</h2>
+                  <h3 class="text-md text-secondary">{p.description}</h3>
                 </div>
                 <div class="w-full text-right">
-                  <span class="block pb-3 text-xl font-bold">R${item[tipo_preco]}</span>
+                  <span class="block pb-3 text-xl font-bold">
+                    R${item[tipo_preco]}
+                  </span>
                   <div class="flex items-center justify-end gap-3 text-center">
                     {#if cartItem?.quantity >= 1}
-                    <button class="btn btn-primary" on:click={() =>
-                      cart.addItem({
-                        item: item,
-                        quantity: -1,
-                      })}>{@html icons.minus()}</button>
+                      <button
+                        class="btn btn-primary"
+                        on:click={() =>
+                          cart.addItem({
+                            item: item,
+                            quantity: -1,
+                          })}
+                      >
+                        {@html icons.minus()}
+                      </button>
                     {/if}
                     <input
                       min="1"
                       class="min-w-10 max-w-28 bg-base-100 text-right text-xl font-bold focus:border-yellow-500"
                       value={$cart[item.id]?.quantity ?? 0}
-                      on:change={(e) => {
-                      //TODO: Input ta meio bugado, e tambem tem que setar pra 1 quando modal é fechado
+                      on:change={e => {
+                        //TODO: Input ta meio bugado, e tambem tem que setar pra 1 quando modal é fechado
                         const quant_temp = (e.target as HTMLInputElement)?.value
                         cart.setItem({
-                          item:item,
+                          item: item,
                           quantity: Number(quant_temp),
                         })
                       }}
                     />
-                    <button on:click={() =>
-                    //TODO:Ao clicar no + ou - tem que mudar o value do input
-                      cart.addItem({
-                        item: item,
-                        quantity: 1,
-                      })} class="btn btn-primary">{@html icons.plus()}</button>
+                    <button
+                      on:click={() =>
+                        //TODO:Ao clicar no + ou - tem que mudar o value do input
+                        cart.addItem({
+                          item: item,
+                          quantity: 1,
+                        })}
+                      class="btn btn-primary"
+                    >
+                      {@html icons.plus()}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -250,5 +289,3 @@
     <button>close</button>
   </form>
 </dialog>
-
-

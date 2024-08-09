@@ -34,4 +34,15 @@ export const distribuidora = router({
   getDistribuidoras: publicProcedure.query(() => {
     return distribuidoraController.getDistribuidoras()
   }),
+  updateCashier: publicProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        data: insertCashierSchema.partial(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const { id, data } = input
+      return distribuidoraController.updateCashier(id, data)
+    }),
 })
