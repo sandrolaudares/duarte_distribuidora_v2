@@ -1,5 +1,5 @@
 <script>
-    let logo = 'src/lib/assets/home/logo-duarte.jpg'
+    let logo = 'https://raw.githubusercontent.com/andre-brandao/duarte_distribuidora_v2/main/src/lib/assets/home/logo-duarte.jpg'
 </script>
 
 <div class="flex min-h-[80vh] flex-col items-center justify-center">
