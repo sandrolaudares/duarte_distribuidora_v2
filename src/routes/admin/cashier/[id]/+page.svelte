@@ -11,8 +11,7 @@
   import { page } from '$app/stores'
 
   import type { RouterOutputs } from '$trpc/router'
-
-  import { modal } from '$modal'
+  import { modal } from '$components/modal'
   import ModalCliente from './ModalCliente.svelte'
 
   import { getCartContext } from '$lib/stores/cart'
@@ -78,30 +77,55 @@
 
   let dinheiro_caixa = 0
 
-  async function abrirCaixa() {
+  async function handleAbrirCaixa() {
     try {
-      const resp = await trpc($page).distribuidora.updateCashier.mutate({
+      const resp = await trpc($page).distribuidora.abrirCaixa.mutate({
         id: caixa.id,
         data: {
-          status: 'Aberto',
-          currency: dinheiro_caixa,
+          amount: dinheiro_caixa,
         },
       })
 
       console.log(resp)
       toast.success('Caixa aberto com sucesso!')
+      window.location.reload()
     } catch (error: any) {
       toast.error(error.message)
     }
   }
-</script>
 
+  async function handleFecharCaixa() {
+    const confirmacao = confirm('Você está prestes a fechar o caixa. Deseja continuar?');
+    
+    if (!confirmacao) {
+        return;
+    }
+    try {
+        const resp = await trpc($page).distribuidora.fecharCaixa.mutate({
+            id: caixa.id,
+            data: {
+                amount: dinheiro_caixa,
+            },
+        });
+        console.log(resp);
+        toast.success('Caixa fechado com sucesso!');
+        window.location.reload();
+    } catch (error: any) {
+        toast.error(error.message);
+    }
+}
+  //TODO: endereco na hora de selecionar cliente
+</script>
+    <h1 class="text-center text-3xl font-semibold mb-3">Caixa:</h1>
 {#if caixa.status === 'Fechado'}
-  <div class="flex">
-    <button class="btn btn-primary" on:click={abrirCaixa}>Abrir caixa</button>
+  <div class="flex justify-center gap-2 mt-3">
+    <button class="btn btn-primary" on:click={handleAbrirCaixa}>Abrir caixa</button>
     <CurrencyInput bind:value={dinheiro_caixa} />
   </div>
 {:else}
+<div class="flex justify-center gap-2 mb-3">
+  <button class="btn btn-error" on:click={handleFecharCaixa}>Fechar caixa</button>
+</div>
   <div class="mt-15 flex flex-col justify-center gap-4 xl:flex-row">
     <div class="flex h-auto flex-col justify-between">
       <h2 class="text-3xl font-bold">Informações do pedido:</h2>
@@ -195,10 +219,10 @@
         ></textarea>
       </div>
       <div class="flex flex-col gap-2">
-        <button class="btn btn-primary w-full disabled:bg-opacity-50">
-          <span class="mr-1">IMPRIMIR</span>
-          {@html icons.print()}
-        </button>
+           <button class="btn btn-primary w-full disabled:bg-opacity-50">
+             <span class="mr-1">IMPRIMIR</span>
+             {@html icons.print()}
+           </button>
         <button
           class="btn btn-primary w-full disabled:bg-opacity-50"
           on:click={createOrder}

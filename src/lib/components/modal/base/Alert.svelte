@@ -4,20 +4,25 @@
   interface Props {
     title?: string
     text: string
-    onConfirm?: () => void
-    onCancel?: () => void
+    onConfirm?: () => Promise<void> | void
+    onCancel?: () => Promise<void> | void
   }
 
-  const { title = 'Alert!!!!', text, onCancel, onConfirm }: Props = $props()
+  const {
+    title = 'Alert!!!!',
+    text = 'Are you sure?!?',
+    onCancel,
+    onConfirm,
+  }: Props = $props()
 
-  function confirm() {
+  async function confirm() {
     modal.close()
-    onConfirm?.()
+    if (onConfirm) await onConfirm()
   }
 
-  function cancel() {
+  async function cancel() {
     modal.close()
-    onCancel?.()
+    if (onCancel) await onCancel()
   }
 </script>
 

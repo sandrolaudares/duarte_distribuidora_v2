@@ -45,4 +45,75 @@ export const distribuidora = router({
       const { id, data } = input
       return distribuidoraController.updateCashier(id, data)
     }),
+
+  abrirCaixa: publicProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        data: z.object({
+          amount: z.number(),
+        }),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { id, data } = input
+      const { user } = ctx.locals
+      await distribuidoraController.insertCashierTransaction({
+        cashier_id: id,
+        meta_data: {
+          user,
+        },
+        type: 'Entrada',
+        amount: data.amount,
+      })
+      return await distribuidoraController.updateCashier(id, {
+        status: 'Aberto',
+      })
+    }),
+  fecharCaixa: publicProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        data: z.object({
+          amount: z.number(),
+        }),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { id, data } = input
+      const { user } = ctx.locals
+      await distribuidoraController.insertCashierTransaction({
+        cashier_id: id,
+        meta_data: {
+          user,
+        },
+        type: 'Saida',
+        amount: data.amount,
+      })
+      return await distribuidoraController.updateCashier(id, {
+        status: 'Fechado',
+      })
+    }),
+
+  inserirTransacao: publicProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        data: z.object({
+          amount: z.number(),
+        }),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { id, data } = input
+      const { user } = ctx.locals
+      await distribuidoraController.insertCashierTransaction({
+        cashier_id: id,
+        meta_data: {
+          user,
+        },
+        type: 'Saida',
+        amount: data.amount,
+      })
+    }),
 })
