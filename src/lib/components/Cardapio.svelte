@@ -109,8 +109,8 @@
         </a>
       {/each}
     </div>
-    <div>
-      <label class="input input-bordered flex items-center gap-2 h-full">
+    <div class="hidden md:block">
+      <label class="input input-bordered flex items-center gap-2 h-full ">
         <input type="text" class="grow" placeholder="Search" />
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -145,7 +145,7 @@
     {/each}
   </div>
 </main>
-
+<!-- 
 <style>
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
@@ -154,4 +154,4 @@
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
-</style>
+</style> -->

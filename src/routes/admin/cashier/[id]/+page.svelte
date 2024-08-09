@@ -118,9 +118,14 @@
 </script>
     <h1 class="text-center text-3xl font-semibold mb-3">Caixa:</h1>
 {#if caixa.status === 'Fechado'}
-  <div class="flex justify-center gap-2 mt-3">
-    <button class="btn btn-primary" on:click={handleAbrirCaixa}>Abrir caixa</button>
-    <CurrencyInput bind:value={dinheiro_caixa} />
+  <div class="flex justify-center">
+    <label class="form-control w-full max-w-xs gap-2">
+      <div class="label justify-center">
+        <span class="label-text">Digite o valor no caixa!</span>
+      </div>
+      <CurrencyInput bind:value={dinheiro_caixa} />
+      <button class="btn btn-primary" on:click={handleAbrirCaixa}>Abrir caixa</button>
+    </label>
   </div>
 {:else}
 <div class="flex justify-center gap-2 mb-3">
@@ -248,7 +253,7 @@
 
               <hr />
               <div class="flex w-full py-2">
-                <div class=" flex-none md:w-auto">
+                <div class=" flex-none md:w-auto hidden md:block">
                   <img
                     alt="imagem"
                     src={getImagePath(item.image)}
@@ -256,8 +261,8 @@
                   />
                 </div>
                 <div class="ml-4 w-full">
-                  <h2 class="text-xl font-bold">{item.name}</h2>
-                  <h3 class="text-md text-secondary">{p.description}</h3>
+                  <h2 class="md:text-xl font-bold">{item.name}</h2>
+                  <h3 class="md:text-md text-secondary">{p.description}</h3>
                 </div>
                 <div class="w-full text-right">
                   <span class="block pb-3 text-xl font-bold">
@@ -266,7 +271,7 @@
                   <div class="flex items-center justify-end gap-3 text-center">
                     {#if cartItem?.quantity >= 1}
                       <button
-                        class="btn btn-primary"
+                        class="btn btn-primary hidden md:block"
                         on:click={() =>
                           cart.addItem({
                             item: item,
@@ -278,7 +283,7 @@
                     {/if}
                     <input
                       min="1"
-                      class="min-w-10 max-w-28 bg-base-100 text-right text-xl font-bold focus:border-yellow-500"
+                      class="md:min-w-10 md:max-w-28 max-w-16  bg-base-100 text-right text-xl font-bold focus:border-yellow-500"
                       value={$cart[item.id]?.quantity ?? 0}
                       on:change={e => {
                         const quant_temp = (e.target as HTMLInputElement)?.value
