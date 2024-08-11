@@ -8,6 +8,7 @@
 
   import type { RouterOutputs } from '$trpc/router'
   import ModalEndereco from './ModalEndereco.svelte'
+  import Loading from '$lib/components/Loading.svelte'
 
   type Clientes = RouterOutputs['customer']['getCustomers']
 
@@ -21,7 +22,6 @@
     isLoading = false
   })
 
-  //   TODO: selecionar endereço do cliente
   // TODO: Colocar um input para buscar
   export let selectedClient: (client: Clientes[0]) => void
 </script>
@@ -29,7 +29,9 @@
 <Modal title="Clientes">
   <div class="my-4 flex flex-col gap-4">
     {#if isLoading}
-      <h1 class="mt-2 text-center text-xl">Loading...</h1>
+    <div class="flex justify-center items-center">
+      <Loading/>
+    </div>
     {/if}
     {#each clientes as cliente}
       <div class="flex items-center justify-between">
@@ -44,12 +46,9 @@
             selectedClient(cliente) 
           }}
         >
-          <!-- {JSON.stringify(end)} -->
 
           Selecionar
         </button>
-        <!-- {#each cliente.adresses as end}
-        {/each} -->
       </div>
     {/each}
   </div>

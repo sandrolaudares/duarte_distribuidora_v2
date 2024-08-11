@@ -1,4 +1,5 @@
 <script lang="ts">
+	import TransactionsModal from './TransactionsModal.svelte';
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
   import type { PageData } from './$types'
   import Cardapio from '$lib/components/Cardapio.svelte'
@@ -72,8 +73,7 @@
           addresses: client.adresses,
           selectedAddress: address => {
             enderecoCliente = address
-            console.log(address);
-            modal.close()            
+            console.log(address);          
           }
         })
         if (clienteSelecionado.is_retail) {
@@ -124,8 +124,16 @@
         toast.error(error.message);
     }
 }
-  //TODO: endereco na hora de selecionar cliente
+
+async function seeTransactionsCaixa(){
+  modal.open(TransactionsModal, {
+
+  })
+}
 </script>
+<div class="flex justify-end m-4">
+  <button class="btn btn-primary" on:click={seeTransactionsCaixa}>Ver transacoes do caixa</button>
+</div>
     <h1 class="text-center text-3xl font-semibold mb-3">Caixa:</h1>
 {#if caixa.status === 'Fechado'}
   <div class="flex justify-center">

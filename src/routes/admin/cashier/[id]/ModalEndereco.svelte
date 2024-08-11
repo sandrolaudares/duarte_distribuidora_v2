@@ -20,25 +20,19 @@
   <div class="my-4 flex flex-col gap-4">
 
     {#each addresses as addres}
+    <div class="flex flex-col bg-base-200 p-4 gap-3 rounded-box text-center">
       {addres.cep} -
       {addres.city}
       <button
       class="btn btn-primary"
         on:click={() => {
           selectedAddress(addres)
+          modal.close()
         }}
       >
         selecione
       </button>
+    </div>
     {/each}
-    <!-- <button
-        class="btn btn-primary"
-        on:click={() => {
-          selectedAddress(cliente)
-          modal.close()
-        }}
-      >
-        Selecionar
-      </button> -->
   </div>
 </Modal>
