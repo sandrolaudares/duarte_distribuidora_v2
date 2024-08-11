@@ -128,7 +128,7 @@
 <section>
   <header>
     <div
-      class="mb-2 flex items-center justify-between rounded-t-box bg-base-300 p-2"
+      class="mb-2 flex items-center justify-between rounded-t-box bg-base-200 p-2"
     >
       <label class="input input-bordered flex items-center gap-2">
         <input
@@ -174,7 +174,7 @@
     {#if isLoading}
       <Loading />
     {:else}
-      <table class="table table-zebra table-xs p-1">
+      <table class="table table-zebra p-1">
         <thead>
           {#each table.getHeaderGroups() as headerGroup}
             <tr class="bg-base-200">
@@ -266,8 +266,8 @@
       </table>
     {/if}
   </article>
-  <footer class="mt-2 flex justify-between">
-    <div class="flex items-center">
+  <footer class="my-3 flex justify-between">
+    <div class="flex items-center mx-5">
       Showing
       <div class="dropdown dropdown-top dropdown-hover">
         <div tabindex="0" role="button" class="btn m-1">
@@ -298,7 +298,7 @@
         {totalRows}
       </span>
     </div>
-    <div class="flex items-center gap-1">
+    <div class="flex items-center gap-5 mx-3">
       <div class="join">
         <button
           class="btn join-item"
