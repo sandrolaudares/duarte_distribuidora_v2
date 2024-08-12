@@ -68,7 +68,6 @@
   ]
 </script>
 
-<!-- TODO: frontend, mas ainda nao faz que vou precisar fazer um refactor pra gente colocar as transacoes em uma table -->
 
 <div class="">
   <div class="container mx-auto flex flex-col gap-5">

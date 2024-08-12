@@ -89,7 +89,6 @@
     }
   }
 </script>
-<!--TODO: scroll-x da barra nao ta pegando-->
 <main class="mx-1">
   <div class="sticky top-1 z-10 mx-2 pt-2 flex gap-3">
     <div

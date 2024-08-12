@@ -180,7 +180,6 @@
             class="btn btn-error w-full"
             on:click={() => removeSku(item.sku)}
           >
-            <!--TODO: Ta demorando muito pra remover por algum motivo-->
             Remover
           </button>
         </div>
