@@ -10,9 +10,6 @@
   import type { SelectAddress } from '$lib/server/db/schema'
 
   export let addresses: SelectAddress[] = []
-
-  // TODO: selecionar endereço do cliente
-  // TODO: Colocar um input para buscar
   export let selectedAddress: (address: SelectAddress) => void
 </script>
 

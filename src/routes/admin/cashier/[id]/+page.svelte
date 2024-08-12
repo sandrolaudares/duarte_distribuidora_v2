@@ -207,7 +207,6 @@ onDestroy(() =>  {
           class="btn btn-primary w-full disabled:bg-opacity-50"
           on:click={() => cart.set({})}
         >
-          <!--TODO: ao cancelar tem que resetar o que ta adicionado no "carrinho"-->
           <span class="mr-1">CANCELAR</span>
           {@html icons.x()}
         </a>

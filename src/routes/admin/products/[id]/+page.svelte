@@ -121,11 +121,9 @@
   let isChanged = false
 </script>
 
-<!-- TODO: make responsive -->
-
 <main class="container mx-auto flex flex-col">
   <div
-    class="card flex flex-row items-center justify-between bg-surface-200 p-5"
+    class="card flex md:flex-row gap-3 items-center justify-between bg-surface-200 p-5 m-3"
   >
     <ImageInput
       name={produto.name}
@@ -143,7 +141,7 @@
       </h1> -->
 
       <div class="flex flex-col items-end justify-center gap-2">
-        <div class="flex items-center gap-2">
+        <div class="md:flex-row flex-col flex items-center gap-2">
           <label for="name">{m.name()}:</label>
           <input
             id="name"
@@ -154,7 +152,7 @@
             onchange={() => (isChanged = true)}
           />
         </div>
-        <div class="flex items-center gap-2">
+        <div class="md:flex-row flex-col flex items-center gap-2">
           <label for="description">{m.description()}:</label>
           <input
             id="description"
@@ -195,7 +193,7 @@
     </div>
   </div>
 
-  <div class="mt-3 flex flex-wrap justify-center gap-4">
+  <div class="m-3 flex flex-wrap justify-center gap-4">
     {#each produto.items as item, i (item.id)}
       <ProductItem {item} />
     {/each}

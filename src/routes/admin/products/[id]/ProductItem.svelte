@@ -135,8 +135,8 @@
   {#if costPrice?.cost_price}
     <div class=" flex w-full items-center justify-between font-light">
       <span>Preco Custo:</span>
-      <span>
-        {(costPrice.cost_price / 100).toFixed(2)}
+      <span class="font-semibold">
+        R${(costPrice.cost_price / 100).toFixed(2)}
       </span>
     </div>
   {/if}
@@ -148,7 +148,7 @@
       save={updateProductItemImage}
     />
   </div> -->
-  <div class="flex items-center justify-between gap-3 text-center">
+  <div class="flex flex-col md:flex-row items-center justify-between gap-3 text-center">
     <ImageInput
       image_id={item.image}
       name={item.name}
