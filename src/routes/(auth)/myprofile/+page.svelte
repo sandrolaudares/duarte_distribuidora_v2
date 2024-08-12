@@ -138,93 +138,96 @@
   })}
 />
 
-<div
-  class="mx-auto w-full max-w-md rounded-lg border border-primary bg-base-200 shadow-sm"
->
-  <div class="flex flex-col space-y-1.5 p-6">
-    <h3
-      class="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight"
-    >
-      Edit Profile
-    </h3>
-    <div class="space-y-6 p-6">
-      <div class="flex flex-col items-center gap-4">
-        <span
-          class="relative flex h-20 w-20 shrink-0 overflow-hidden rounded-full"
-        >
-          <img
-            class="aspect-square h-full w-full"
-            src="https://generated.vusercontent.net/placeholder-user.jpg"
-          />
-        </span>
-        <p>
-          {$user?.username}
-        </p>
-        <p>
-          {$user?.email}
-        </p>
-        <p>
-          {$user?.email_verified ? 'verified' : 'not verified'}
-        </p>
-        <p>
-          {$user?.permissions.role}
-        </p>
-      </div>
-
-      <div class="flex flex-col gap-3">
-        <h1>Sessions:</h1>
-
-        {#each sessions as s}
-          <div class="rounded bg-base-300 p-1">
-            <p>
-              id: {s.id}
-            </p>
-            <p>
-              expiration: {new Date(s.expiresAt)}
-            </p>
-          </div>
-        {/each}
-      </div>
-    </div>
-  </div>
-
-  <div class="px-4">
-    <h1 class="">Settings</h1>
-
-    <div class="mt-4">
-      <h2 class="">Push Notifications</h2>
-      <p>Receive notifications when albums are updated.</p>
-      <div class="mt-3 space-y-3">
-        {#if nottifPermGranted === null}
-          <p>Checking permissions...</p>
-        {:else if nottifPermGranted === false}
-          <button
-            class="btn btn-outline"
-            type="button"
-            onclick={requestNotificationPermission}
+<main class="min-h-[91vh] bg-base-200 p-5">
+  <div
+    class="mx-auto w-full max-w-md rounded-lg border border-primary bg-base-100 shadow-sm"
+  >
+    <div class="flex flex-col space-y-1.5 p-6">
+      <h3
+        class="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight text-center mb-2"
+      >
+        Edit Profile
+      </h3>
+      <div class="space-y-6">
+        <div class="flex flex-col items-center gap-4">
+          <span
+            class="relative flex h-24 w-24 overflow-hidden rounded-full border-4 border-primary shadow-lg"
           >
-            Enable notifications
-          </button>
-        {:else}
+            <img
+              class="aspect-square h-full w-full object-cover"
+              src="https://generated.vusercontent.net/placeholder-user.jpg"
+              alt="profile"
+            />
+          </span>
           <p>
-            Subscribed to push notifications: <b>{isSubscribed}</b>
+            {$user?.username}
           </p>
-          {#if isSubscribed}
-            <div class="pb-5">
-              <button
-                class="btn btn-outline"
-                type="button"
-                onclick={unsubscribe}
-              >
-                Unsubscribe
-              </button>
-              <button class="btn btn-outline" onclick={testNotification}>
-                Test Notification
-              </button>
+          <p>
+            {$user?.email}
+          </p>
+          <p>
+            {$user?.email_verified ? 'verified' : 'not verified'}
+          </p>
+          <p>
+            {$user?.permissions.role}
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <h1>Sessions:</h1>
+
+          {#each sessions as s}
+            <div class="rounded bg-base-200 p-2">
+              <p>
+                id: {s.id}
+              </p>
+              <p>
+                expiration: {new Date(s.expiresAt)}
+              </p>
             </div>
+          {/each}
+        </div>
+      </div>
+    </div>
+
+    <div class="px-5 pb-5">
+      <h1 class="">Settings</h1>
+
+      <div class="mt-4">
+        <h2 class="">Push Notifications</h2>
+        <p>Receive notifications when albums are updated.</p>
+        <div class="mt-3 space-y-3">
+          {#if nottifPermGranted === null}
+            <p>Checking permissions...</p>
+          {:else if nottifPermGranted === false}
+            <button
+              class="btn btn-outline"
+              type="button"
+              onclick={requestNotificationPermission}
+            >
+              Enable notifications
+            </button>
+          {:else}
+            <p>
+              Subscribed to push notifications: <b>{isSubscribed}</b>
+            </p>
+            {#if isSubscribed}
+              <div class="pb-5">
+                <button
+                  class="btn btn-outline"
+                  type="button"
+                  onclick={unsubscribe}
+                >
+                  Unsubscribe
+                </button>
+                <button class="btn btn-outline" onclick={testNotification}>
+                  Test Notification
+                </button>
+              </div>
+            {/if}
           {/if}
-        {/if}
+        </div>
       </div>
     </div>
   </div>
-</div>
+</main>
