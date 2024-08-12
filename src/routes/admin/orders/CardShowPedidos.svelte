@@ -59,7 +59,7 @@
         <p>Observacoes: {order.observation}</p>
       </div>
     {/if}
-    <div class="flex w-full flex-col justify-end ">
+    <div class="flex w-full gap-2 justify-end ">
       {#if button_recusar}
         <button class=" btn btn-error" on:click={() => click_refuse()}>
           {button_recusar}

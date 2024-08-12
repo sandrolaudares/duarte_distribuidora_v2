@@ -17,6 +17,7 @@
   import { getCartContext } from '$lib/stores/cart'
   import ModalEndereco from './ModalEndereco.svelte'
   import ModalCliente from './ModalCliente.svelte'
+  import { onDestroy } from 'svelte';
 
   const cart = getCartContext()
 
@@ -130,6 +131,11 @@ async function seeTransactionsCaixa(){
 
   })
 }
+
+onDestroy(() =>  {
+  cart.set({});
+}
+)
 </script>
 <div class="flex justify-end m-4">
   <button class="btn btn-primary" on:click={seeTransactionsCaixa}>Ver transacoes do caixa</button>
@@ -190,13 +196,16 @@ async function seeTransactionsCaixa(){
           </button>
         {/if}
         {#if enderecoCliente}
-        <div class="flex items-center justify-between">
-            {enderecoCliente.cep} - {enderecoCliente.city} <!--TODO: apenas colocar o endereco completo-->
+        <div class="flex-wrap items-center justify-between max-w-[50vh]">
+          {enderecoCliente?.cep}
+          {enderecoCliente?.city}, {enderecoCliente?.neighborhood}, {enderecoCliente
+            ?.street}, {enderecoCliente?.number}
           </div>
         {/if}
         <a
           href="/admin/cashier"
           class="btn btn-primary w-full disabled:bg-opacity-50"
+          on:click={() => cart.set({})}
         >
           <!--TODO: ao cancelar tem que resetar o que ta adicionado no "carrinho"-->
           <span class="mr-1">CANCELAR</span>
