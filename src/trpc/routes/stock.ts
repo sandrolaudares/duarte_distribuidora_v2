@@ -182,4 +182,8 @@ export const stock = router({
     .query(async ({ input }) => {
       return await stockController.getRecentTransactionsCaixa(input)
     }),
+
+    getAllTransaoCaixa: publicProcedure.query(() => {
+      return stockController.getAllTransactionsCaixa()
+    }),
 })

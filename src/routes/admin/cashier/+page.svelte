@@ -82,7 +82,7 @@
     <h1 class="text-center text-4xl font-semibold">Selecione o caixa</h1>
 
     <div class="flex gap-2">
-      <a href="/admin/caixa/transacoes" class="btn btn-primary">
+      <a href="/admin/cashier/transactions" class="btn btn-primary">
         Ver transacões dos caixas
       </a>
       <button

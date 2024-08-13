@@ -16,8 +16,12 @@
 
   let suppliers: Distrib = []
   onMount(async () => {
-    suppliers = await trpc($page).distribuidora.getDistribuidoras.query()
-    isLoading = false
+    try {
+      suppliers = await trpc($page).distribuidora.getDistribuidoras.query()
+      isLoading = false
+    } catch (error:any) {
+      toast.error(error.message)
+    }
   })
 
   export let select: (client: Distrib[0]) => void

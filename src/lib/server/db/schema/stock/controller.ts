@@ -201,6 +201,13 @@ function getRecentTransactionsCaixa(id: number) {
     .limit(15)
 }
 
+function getAllTransactionsCaixa() {
+  return db
+    .select()
+    .from(cashierTransactionTable)
+    .orderBy(desc(cashierTransactionTable.created_at))
+}
+
 export const stock = {
   tables: {
     skuTable,
@@ -223,4 +230,5 @@ export const stock = {
   updateTransference,
   queryLastCostPrice,
   getRecentTransactionsCaixa,
+  getAllTransactionsCaixa
 }
