@@ -7,6 +7,7 @@ import {
   supplierTable,
   stockTransferanceSKUTable,
   stockTransferenceTable,
+  cashierTransactionTable,
 } from '$db/schema'
 
 import type {
@@ -191,6 +192,15 @@ function queryLastCostPrice(sky: SelectSku['id']) {
   })
 }
 
+function getRecentTransactionsCaixa(id: number) {
+  return db
+    .select()
+    .from(cashierTransactionTable)
+    .where(eq(cashierTransactionTable.cashier_id, id))
+    .orderBy(desc(cashierTransactionTable.created_at))
+    .limit(15)
+}
+
 export const stock = {
   tables: {
     skuTable,
@@ -212,4 +222,5 @@ export const stock = {
   updateTransferenceSKU,
   updateTransference,
   queryLastCostPrice,
+  getRecentTransactionsCaixa,
 }

@@ -74,6 +74,7 @@
           addresses: client.adresses,
           selectedAddress: address => {
             enderecoCliente = address
+            //TODO:ARRUMAR TIPO
             console.log(address);          
           }
         })
@@ -128,7 +129,7 @@
 
 async function seeTransactionsCaixa(){
   modal.open(TransactionsModal, {
-
+      caixa_id:caixa.id
   })
 }
 

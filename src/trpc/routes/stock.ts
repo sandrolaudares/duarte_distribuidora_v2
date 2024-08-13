@@ -98,7 +98,7 @@ export const stock = router({
             sku: item.sku_id,
             quantity: item.quantity,
             cost_price: item.cost_price,
-            type: "Entrada",
+            type: 'Entrada',
             meta_data: {
               type: 'entrada',
               nota_fiscal: '',
@@ -175,5 +175,11 @@ export const stock = router({
     )
     .query(async ({ input }) => {
       return await stockController.queryLastCostPrice(input.sku)
+    }),
+
+  getRecentTransaoEstoque: publicProcedure
+    .input(z.number())
+    .query(async ({ input }) => {
+      return await stockController.getRecentTransactionsCaixa(input)
     }),
 })
