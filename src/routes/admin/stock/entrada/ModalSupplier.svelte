@@ -8,6 +8,7 @@
 
   import type { RouterOutputs } from '$trpc/router'
   import { toast } from 'svelte-sonner'
+  import Loading from '$lib/components/Loading.svelte'
 
   type Supplier = RouterOutputs['stock']['getSupplier']
 
@@ -41,9 +42,9 @@
 <Modal title="Fornecedor">
   <div class="flex flex-col gap-4">
     {#if isLoading}
-    <p class="text-center">
-      Loading...
-    </p>
+      <div class="flex items-center justify-center">
+        <Loading />
+      </div>
     {/if}
     {#each suppliers as cliente}
       <div class="flex items-center justify-between">

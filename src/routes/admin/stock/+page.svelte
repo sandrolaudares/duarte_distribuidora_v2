@@ -93,7 +93,8 @@
 </script>
 
 <div class="container mx-auto overflow-x-auto p-2">
-  <div class="flex justify-end mb-2">
+  <div class="flex justify-end mb-2 gap-2">
+    <a href="/admin/stock/transferir"  class="btn btn-success">Transferir estoque</a>
     <a href="/admin/stock/entrada"  class="btn btn-primary">Entrada de estoque</a>
   </div>
   <Datatable columns={defaultColumns} {load} {add} />

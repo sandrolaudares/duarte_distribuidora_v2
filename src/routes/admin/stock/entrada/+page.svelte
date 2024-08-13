@@ -17,7 +17,7 @@
 
   import { modal } from '$lib/components/modal'
   import ModalSupplier from './ModalSupplier.svelte'
-  import ModalDistribuidora from './ModalDistribuidora.svelte'
+  import ModalDistribuidora from '../ModalDistribuidora.svelte'
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
 
   let isLoading = false
