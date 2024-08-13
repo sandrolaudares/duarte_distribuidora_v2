@@ -108,22 +108,28 @@
           </div>
         </div>
       </div>
-      <div class=" h-[70vh] overflow-x-auto border border-base-300 rounded-box mb-5">
-        <Datatable
-          columns={defaultColumns}
-          load={async s => {
-            const resp = await trpc($page).stock.paginatedTransactions.query({
-              distribuidora_id: stock.distribuidora_id,
-              sku: stock.sku,
-              table_state: s,
-            })
+      <div class="flex gap-2 mb-5">
+        <div class=" h-[70vh] overflow-x-auto border border-base-300 rounded-box max-w-[50%] w-full">
+          <Datatable
+            columns={defaultColumns}
+            load={async s => {
+              const resp = await trpc($page).stock.paginatedTransactions.query({
+                distribuidora_id: stock.distribuidora_id,
+                sku: stock.sku,
+                table_state: s,
+              })
+    
+              return {
+                data: resp.rows ?? [],
+                count: resp.total ?? 0,
+              }
+            }}
+          />
+        </div>
   
-            return {
-              data: resp.rows ?? [],
-              count: resp.total ?? 0,
-            }
-          }}
-        />
+        <div class="border w-full max-w-[50%] rounded-box">
+          grafico <!--TODO: GRAFICO-->
+        </div>
       </div>
     {/each}
   </div>
