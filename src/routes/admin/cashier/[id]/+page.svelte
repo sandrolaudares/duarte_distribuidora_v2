@@ -43,27 +43,7 @@
 
   //TODO:TIPAGEM DA VARIAVEL metodo_pagamento
   async function createOrder(metodo_pagamento: any) {
-    try {
-      if (metodo_pagamento === 'dinheiro') {
-        const resp = await trpc($page).customer.insertOrder.mutate({
-        order_info: {
-          customer_id: clienteSelecionado?.id,
-          address_id: clienteSelecionado?.adresses[0].id,
-          total: 50,
-          distribuidora_id: caixa.distribuidora_id,
-          observation: observacao,
-          payment_method: metodo_pagamento
-          //TODO: tratar pedido em dinheiro corretamente
-        },
-
-        order_items: Object.values($cart).map(item => ({
-          product_id: item.item.id,
-          quantity: item.quantity,
-          price: item.item[tipo_preco],
-          //price: 12,
-        })),
-      })
-      } else {
+    try {  
         const resp = await trpc($page).customer.insertOrder.mutate({
           order_info: {
             customer_id: clienteSelecionado?.id,
@@ -82,7 +62,6 @@
           })),
         })
         toast.info(JSON.stringify(resp))
-      }
       toast.success('Pedido realizado com sucesso!')
     } catch (error: any) {
       toast.error(error.message)
