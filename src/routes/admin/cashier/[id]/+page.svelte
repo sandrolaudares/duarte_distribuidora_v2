@@ -18,6 +18,7 @@
   import ModalEndereco from './ModalEndereco.svelte'
   import ModalCliente from './ModalCliente.svelte'
   import { onDestroy } from 'svelte';
+  import ModalPagamento from './ModalPagamento.svelte'
 
   const cart = getCartContext()
 
@@ -40,27 +41,49 @@
     return acc + item.item[tipo_preco] * item.quantity
   }, 0)
 
-  async function createOrder() {
+  //TODO:TIPAGEM DA VARIAVEL metodo_pagamento
+  async function createOrder(metodo_pagamento: any) {
     try {
-      const resp = await trpc($page).customer.insertOrder.mutate({
+      if (metodo_pagamento === 'dinheiro') {
+        const resp = await trpc($page).customer.insertOrder.mutate({
         order_info: {
           customer_id: clienteSelecionado?.id,
           address_id: clienteSelecionado?.adresses[0].id,
           total: 50,
           distribuidora_id: caixa.distribuidora_id,
           observation: observacao,
-          payment_method: 'dinheiro',
+          payment_method: metodo_pagamento
+          //TODO: tratar pedido em dinheiro corretamente
         },
 
         order_items: Object.values($cart).map(item => ({
           product_id: item.item.id,
           quantity: item.quantity,
-          // price: item.item[tipo_preco],
-          price: 12,
+          price: item.item[tipo_preco],
+          //price: 12,
         })),
       })
-
-      toast.info(JSON.stringify(resp))
+      } else {
+        const resp = await trpc($page).customer.insertOrder.mutate({
+          order_info: {
+            customer_id: clienteSelecionado?.id,
+            address_id: clienteSelecionado?.adresses[0].id,
+            total: 50,
+            distribuidora_id: caixa.distribuidora_id,
+            observation: observacao,
+            payment_method: metodo_pagamento,
+          },
+  
+          order_items: Object.values($cart).map(item => ({
+            product_id: item.item.id,
+            quantity: item.quantity,
+            price: item.item[tipo_preco],
+            //price: 12,
+          })),
+        })
+        toast.info(JSON.stringify(resp))
+      }
+      toast.success('Pedido realizado com sucesso!')
     } catch (error: any) {
       toast.error(error.message)
     }
@@ -133,12 +156,22 @@ async function seeTransactionsCaixa(){
   })
 }
 
+async function pagamentoModal(){
+  modal.open(ModalPagamento, {
+    cliente_selecionado: clienteSelecionado,
+    total_pedido:total,
+    realizarPedido: (metodo_pagamento) => {
+      createOrder(metodo_pagamento)
+    }
+  })
+}
+
 onDestroy(() =>  {
   cart.set({});
 }
 )
 </script>
-<div class="flex justify-end m-4">
+<div class="flex justify-center m-4">
   <button class="btn btn-primary" on:click={seeTransactionsCaixa}>Ver transacoes do caixa</button>
 </div>
     <h1 class="text-center text-3xl font-semibold mb-3">Caixa:</h1>
@@ -158,15 +191,30 @@ onDestroy(() =>  {
 </div>
   <div class="mt-15 flex flex-col justify-center gap-4 md:flex-row m-4">
     <div class="flex h-auto md:flex-col flex-col-reverse justify-between">
-      <h2 class="text-3xl font-bold hidden md:block">Informações do pedido:</h2>
+      <h2 class="text-3xl font-bold hidden md:block mb-2">Informações do pedido:</h2>
+      <div>
+
+        <h1 class="text-center">Selecione o tipo de preco</h1>
+        <div class="flex w-full flex-col lg:flex-row">
+
+          <div class="grid flex-grow place-items-center">
+            <button class="btn w-full btn-primary" on:click={()=> {tipo_preco = 'retail_price'}} disabled={tipo_preco === 'retail_price'}>Varejo</button>
+          </div>
+          <div class="divider lg:divider-horizontal">OU</div>
+          <div class="grid flex-grow place-items-center">
+            <button class="btn w-full btn-primary" on:click={()=> {tipo_preco = 'wholesale_price'}} disabled={tipo_preco === 'wholesale_price'}>Atacado</button>
+          </div>
+        </div>
+
+      </div>
       <div
-        class={`mt-5 w-full rounded-lg px-3 py-1 text-center font-bold hidden md:block  ${
+        class={`mt-3 w-full rounded-lg px-3 py-1 text-center font-bold hidden md:block  ${
           caixa.status === 'Aberto' ? 'bg-success' : 'bg-error'
         }`}
       >
         {caixa.status === 'Aberto' ? 'Em aberto' : 'Fechado'}
       </div>
-      <div class="mt-4">
+      <div class="my-4">
         <p>
           Número do pedido: <span class="font-bold text-primary">
             #{caixa.id}
@@ -222,12 +270,11 @@ onDestroy(() =>  {
           <div class="flex justify-between">
             <li class="py-2 font-bold">
               ({item.quantity}x) {item.item.name}
-              <span class="text-secondary">R${item.item[tipo_preco]}</span>
+              <span class="text-secondary">R${(item.item[tipo_preco]/100).toFixed(2)}</span>
             </li>
             <button
               class="btn btn-circle"
-              on:click={e => cart.removeItem(item.item.id)}
-            >
+              on:click={e=> cart.removeItem(item.item.id)}>
               {@html icons.x({ stroke: 'red' })}
             </button>
           </div>
@@ -236,7 +283,7 @@ onDestroy(() =>  {
       </ul>
       <h2 class="mx-10 flex justify-center text-3xl font-bold">
         Preço total:&nbsp;
-        <span class="text-primary">R${total}</span>
+        <span class="text-primary">R${(total/100).toFixed(2)}</span>
       </h2>
     </div>
 
@@ -244,8 +291,7 @@ onDestroy(() =>  {
       <div>
         <button
           class="btn btn-primary w-full"
-          on:click={() => isOpenModal?.showModal()}
-        >
+          on:click={()=> isOpenModal?.showModal()}>
           ACESSAR PRODUTOS {@html icons.basket()}
         </button>
         <p class="mb-2 mt-4">Observações sobre compra:</p>
@@ -262,7 +308,8 @@ onDestroy(() =>  {
            </button>
         <button
           class="btn btn-primary w-full disabled:bg-opacity-50"
-          on:click={createOrder}
+          on:click={pagamentoModal}
+          disabled={Object.values($cart).length===0}
         >
           <span class="mr-1">PAGAMENTO</span>
           {@html icons.dolar()}
@@ -298,18 +345,17 @@ onDestroy(() =>  {
                 </div>
                 <div class="w-full text-right">
                   <span class="block pb-3 text-xl font-bold">
-                    R${item[tipo_preco]}
+                    R${(item[tipo_preco]/100).toFixed(2)}
                   </span>
                   <div class="flex items-center justify-end gap-3 text-center">
                     {#if cartItem?.quantity >= 1}
                       <button
                         class="btn btn-primary hidden md:block"
-                        on:click={() =>
+                        on:click={()=>
                           cart.addItem({
                             item: item,
                             quantity: -1,
-                          })}
-                      >
+                          })}>
                         {@html icons.minus()}
                       </button>
                     {/if}

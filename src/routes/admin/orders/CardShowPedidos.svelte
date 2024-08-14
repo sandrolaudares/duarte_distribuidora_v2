@@ -38,7 +38,7 @@
   {/if}
   <div class="mt-4">
     <h4 class="mb-2 text-lg font-semibold">Produtos pedidos:</h4>
-    <div class="flex flex-col gap-1 sm:flex-row">
+    <div class="flex flex-col gap-1 sm:flex-row overflow-x-auto">
       {#each order.items as item}
         <div class="flex rounded-md bg-base-100 p-2 shadow-sm">
           <p class="text-base">

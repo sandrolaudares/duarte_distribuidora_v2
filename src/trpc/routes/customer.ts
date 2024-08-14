@@ -81,7 +81,7 @@ export const customer = router({
           }),
         ),
         order_info: z.object({
-          payment_method: z.enum(['pix', 'credit_card', 'fiado', 'dinheiro']),
+          payment_method: z.enum(['pix', 'credit_card', 'fiado', 'dinheiro','pago']),
           customer_id: z.number().optional(),
           address_id: z.number().optional(),
           total: z.number(),
