@@ -20,6 +20,7 @@ import { db } from '$db'
 import { eq, ne, or, sql } from 'drizzle-orm'
 
 import { stock, bugReport } from '$db/controller'
+import { cashierTransactionTable } from '../distribuidora'
 
 export const customer = {
   tables: {
@@ -74,41 +75,98 @@ export const customer = {
       .where(eq(addressTable.customer_id, customerId))
   },
   insertOrder: async (input: {
-    order_info: Omit<InsertCustomerOrder, 'status'>
+    order_info: Omit<
+      InsertCustomerOrder,
+      'status' | 'payment_method' | 'payment_status'
+    >
     order_items: Omit<InsertOrderItem, 'order_id'>[]
+    payment_info: {
+      payment_method: InsertCustomerOrder['payment_method']
+      payment_status: InsertCustomerOrder['payment_status']
+      amount_paid?: number
+    }
   }) => {
-    const { order_info, order_items } = input
+    const { order_info, order_items, payment_info } = input
 
     const resp = db.transaction(async tx => {
-      if (order_info.customer_id && order_info.payment_method === 'fiado') {
-        const [customer] = await tx
-          .select()
-          .from(customerTable)
-          .where(eq(customerTable.id, order_info.customer_id))
-        if (customer.max_credit < order_info.total + customer.used_credit) {
-          await tx.rollback()
-          return {
-            error: `Customer ${customer.name} has no credit available`,
+      switch (payment_info.payment_method) {
+        case 'fiado': {
+          if (!order_info.customer_id) {
+            await tx.rollback()
+            return {
+              error: `Para pagar fiado é necessario selecionar um cliente`,
+            }
           }
+          const [customer] = await tx
+            .select()
+            .from(customerTable)
+            .where(eq(customerTable.id, order_info.customer_id))
+          if (customer.max_credit < order_info.total + customer.used_credit) {
+            await tx.rollback()
+            return {
+              error: `Customer ${customer.name} has no credit available`,
+            }
+          }
+          await tx
+            .update(customerTable)
+            .set({
+              // used_credit: sql`${customerTable.used_credit} + ${order_info.total}`,
+              used_credit: customer.used_credit + order_info.total,
+            })
+            .where(eq(customerTable.id, order_info.customer_id))
+          break
         }
-        await tx
-          .update(customerTable)
-          .set({
-            // used_credit: sql`${customerTable.used_credit} + ${order_info.total}`,
-            used_credit: customer.used_credit + order_info.total,
+
+        case 'dinheiro': {
+          if (!payment_info.amount_paid) {
+            await tx.rollback()
+            return {
+              error: `Para pagar em dinheiro é necessario informar o valor pago`,
+            }
+          }
+
+          if (payment_info.amount_paid < order_info.total) {
+            await tx.rollback()
+            return {
+              error: `O valor pago é menor que o valor da compra`,
+            }
+          }
+          if (!order_info.cachier_id) {
+            await tx.rollback()
+            return {
+              error: `Para pagar em dinheiro é necessario informar o caixa`,
+            }
+          }
+
+          await tx.insert(cashierTransactionTable).values({
+            cashier_id: order_info.cachier_id,
+            amount: payment_info.amount_paid,
+            type: 'Entrada',
+            observation: 'Venda',
+            meta_data: {
+              order_id: order_info.id,
+            },
           })
-          .where(eq(customerTable.id, order_info.customer_id))
+
+          break
+        }
+
+        default:
+          break
       }
 
       const [order] = await tx
         .insert(customerOrderTable)
         .values({
-          payment_method: order_info.payment_method,
+          payment_method: payment_info.payment_method,
+          payment_status:
+            payment_info.payment_method === 'dinheiro'
+              ? 'CONFIRMED'
+              : 'PENDING',
           status: 'PENDING',
           total: order_info.total,
           customer_id: order_info.customer_id,
           address_id: order_info.address_id,
-          distribuidora_id: order_info.distribuidora_id,
         })
         .returning()
 
@@ -146,33 +204,36 @@ export const customer = {
     if (new_status === 'DELIVERED') {
       const order = await customer.getOrderByID(order_id)
       console.log('Order:', order)
-      if (order?.distribuidora_id) {
-        for (const item of order.items) {
-          console.log('sku', item.product.sku)
-          if (item.product.sku) {
-            try {
-              console.log('Processing stock transaction:', {
-                distribuidora_id: order.distribuidora_id,
-                sku_id: item.product.sku,
-                quantity: -item.quantity * item.product.quantity,
-                meta_data: {
-                  order_id,
-                  type: 'saida',
-                },
-              })
-              await stock.processStockTransaction({
-                distribuidora_id: order.distribuidora_id,
-                sku: item.product.sku,
-                type: 'Saida',
-                quantity: -item.quantity * item.product.quantity,
-                meta_data: {
-                  order_id,
-                  type: 'saida',
-                },
-              })
-            } catch (error) {
-              console.error('Failed to process stock transaction:', error)
-            }
+
+      if (!order) {
+        return {
+          error: 'Order not found',
+        }
+      }
+
+      for (const item of order.items) {
+        console.log('sku', item.product.sku)
+        if (item.product.sku) {
+          try {
+            console.log('Processing stock transaction:', {
+              sku_id: item.product.sku,
+              quantity: -item.quantity * item.product.quantity,
+              meta_data: {
+                order_id,
+                type: 'saida',
+              },
+            })
+            await stock.processStockTransaction({
+              sku: item.product.sku,
+              type: 'Saida',
+              quantity: -item.quantity * item.product.quantity,
+              meta_data: {
+                order_id,
+                type: 'saida',
+              },
+            })
+          } catch (error) {
+            console.error('Failed to process stock transaction:', error)
           }
         }
       }

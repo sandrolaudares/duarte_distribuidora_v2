@@ -4,7 +4,6 @@ import { publicProcedure, router } from '$trpc/t'
 import { z } from 'zod'
 import { distribuidora as distribuidoraController, stock } from '$db/controller'
 import {
-  insertDistribuidoraSchema,
   insertCashierSchema,
   cashierTransactionEnum
 } from '$lib/server/db/schema'
@@ -15,13 +14,7 @@ import { tableHelper } from '$lib/server/db/utils'
 import { middleware } from '$trpc/middleware'
 
 export const distribuidora = router({
-  insertDistribuidora: publicProcedure
-    .use(middleware.logged)
-    .use(middleware.auth)
-    .input(insertDistribuidoraSchema)
-    .mutation(async ({ input }) => {
-      return distribuidoraController.insertDistribuidora(input).returning()
-    }),
+
 
   insertCashier: publicProcedure
     .use(middleware.logged)
@@ -32,9 +25,7 @@ export const distribuidora = router({
       return distribuidoraController.insertCashier(input).returning()
     }),
 
-  getDistribuidoras: publicProcedure.query(() => {
-    return distribuidoraController.getDistribuidoras()
-  }),
+ 
   updateCashier: publicProcedure
     .input(
       z.object({

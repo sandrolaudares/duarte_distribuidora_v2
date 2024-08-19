@@ -10,31 +10,12 @@ import { imageTable } from '../image'
 
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 
-export const distribuidoraTable = sqliteTable('distribuidora', {
-  id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
-  name: text('name').notNull(),
-})
-
-export const distribuidoraRelations = relations(
-  distribuidoraTable,
-  ({ one, many }) => ({
-    cashiers: many(cashierTable),
-  }),
-)
-export const insertDistribuidoraSchema = createInsertSchema(distribuidoraTable)
-export type InsertDistribuidora = typeof distribuidoraTable.$inferInsert
-export type SelectDistribuidora = typeof distribuidoraTable.$inferSelect
-
 export const cashierTable = sqliteTable('cashier', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
   created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
   updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
     () => new Date(),
   ),
-  distribuidora_id: integer('distribuidora_id')
-    .notNull()
-    .references(() => distribuidoraTable.id),
   name: text('name').notNull(),
   status: text('status', { enum: ['Aberto', 'Fechado'] })
     .notNull()
@@ -43,10 +24,6 @@ export const cashierTable = sqliteTable('cashier', {
 })
 
 export const cachierRelations = relations(cashierTable, ({ one, many }) => ({
-  distribuidora: one(distribuidoraTable, {
-    fields: [cashierTable.distribuidora_id],
-    references: [distribuidoraTable.id],
-  }),
   transactions: many(cashierTransactionTable),
 }))
 export const insertCashierSchema = createInsertSchema(cashierTable)
@@ -64,6 +41,7 @@ export const cashierTransactionTable = sqliteTable('cashier_transaction', {
     .notNull()
     .references(() => cashierTable.id),
   amount: integer('amount').notNull().default(0),
+  observation: text('observation'),
   type: text('type', { enum: cashierTransactionEnum }).notNull(),
   meta_data: text('meta_data', { mode: 'json' }).notNull(),
 })

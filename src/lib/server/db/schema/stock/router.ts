@@ -4,11 +4,7 @@ import { publicProcedure, router } from '$trpc/t'
 import { z } from 'zod'
 import { stock as stockController } from '$db/schema/stock/controller'
 import { insertSKUschema, insertSupplierSchema } from '$db/schema/stock'
-import {
-  stockTransactionTable,
-  insertTransferenceSKUSchema,
-  insertStockTransferenceSchema,
-} from '$db/schema'
+import { stockTransactionTable } from '$db/schema'
 
 import { paramsSchema } from '$lib/components/table'
 import { tableHelper } from '$lib/server/db/utils'
@@ -43,17 +39,15 @@ export const stock = router({
   paginatedTransactions: publicProcedure
     .input(
       z.object({
-        distribuidora_id: z.number(),
-        sku: z.number(),
+        sku: z.string(),
         table_state: paramsSchema,
       }),
     )
     .query(async ({ input }) => {
-      const { distribuidora_id, sku, table_state } = input
+      const { sku, table_state } = input
       return await tableHelper(
         stockController
           .getTransactionsFromProduto({
-            distribuidora_id,
             sku,
           })
           .$dynamic(),
@@ -80,21 +74,19 @@ export const stock = router({
       z.object({
         sku_items: z.array(
           z.object({
-            sku_id: z.number(),
+            sku_id: z.string(),
             quantity: z.number(),
             cost_price: z.number().optional(),
           }),
         ),
-        distribuidora_id: z.number(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { sku_items, distribuidora_id } = input
+      const { sku_items } = input
       const { user } = ctx.locals
       for (const item of sku_items) {
         try {
           await stockController.processStockTransaction({
-            distribuidora_id,
             sku: item.sku_id,
             quantity: item.quantity,
             cost_price: item.cost_price,
@@ -111,66 +103,10 @@ export const stock = router({
       }
     }),
 
-  createStockTranference: publicProcedure
-    .use(middleware.logged)
-    .use(middleware.auth)
-    .input(
-      z.object({
-        transference_data: insertStockTransferenceSchema,
-        items: z.array(insertTransferenceSKUSchema),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      const { transference_data, items } = input
-      const { user } = ctx.locals
-
-      if (!user) {
-        throw new TRPCError({
-          code: 'UNAUTHORIZED',
-          message: 'User not found',
-        })
-      }
-      return await stockController.createTransferenciaEstoque({
-        transference_data: {
-          created_by: user.username,
-          ...transference_data,
-        },
-        items,
-      })
-    }),
-
-  updateStockTranference: publicProcedure
-    .use(middleware.logged)
-    .use(middleware.auth)
-    .input(
-      z.object({
-        id: z.number(),
-        data: insertStockTransferenceSchema.partial(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      const { id, data } = input
-      return await stockController.updateTransference(id, data).returning()
-    }),
-
-  updateStockTranferenceItem: publicProcedure
-    .use(middleware.logged)
-    .use(middleware.auth)
-    .input(
-      z.object({
-        id: z.number(),
-        data: insertTransferenceSKUSchema.partial(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      const { id, data } = input
-      return await stockController.updateTransferenceSKU(id, data).returning()
-    }),
-
   getLastCostPrice: publicProcedure
     .input(
       z.object({
-        sku: z.number(),
+        sku: z.string(),
       }),
     )
     .query(async ({ input }) => {
@@ -183,7 +119,7 @@ export const stock = router({
       return await stockController.getRecentTransactionsCaixa(input)
     }),
 
-    getAllTransaoCaixa: publicProcedure.query(() => {
-      return stockController.getAllTransactionsCaixa()
-    }),
+  getAllTransaoCaixa: publicProcedure.query(() => {
+    return stockController.getAllTransactionsCaixa()
+  }),
 })

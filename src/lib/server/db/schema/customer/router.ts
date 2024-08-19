@@ -6,6 +6,8 @@ import {
   insertCustomerSchema,
   insertAddressSchema,
   customerTable,
+  paymentMethodEnum,
+  paymentStatusEnum,
 } from '$lib/server/db/schema'
 
 import { paramsSchema } from '$lib/components/table'
@@ -81,22 +83,27 @@ export const customer = router({
           }),
         ),
         order_info: z.object({
-          payment_method: z.enum(['pix', 'credit_card', 'fiado', 'dinheiro']),
           customer_id: z.number().optional(),
           address_id: z.number().optional(),
           total: z.number(),
           distribuidora_id: z.number(),
           observation: z.string(),
         }),
+        payment_info: z.object({
+          payment_method: z.enum(paymentMethodEnum),
+          payment_status: z.enum(paymentStatusEnum),
+          amount_paid: z.number().optional(),
+        }),
       }),
     )
     .mutation(async ({ input }) => {
-      const { order_items, order_info } = input
+      const { order_items, order_info, payment_info } = input
 
       try {
         return await customerController.insertOrder({
           order_items,
           order_info,
+          payment_info,
         })
       } catch (error) {
         console.error('Failed to insert order:', error)

@@ -7,10 +7,8 @@ import {
 } from 'drizzle-orm/sqlite-core'
 import { sql, relations } from 'drizzle-orm'
 
-import { userTable, productItemTable } from '$db/schema'
+import { userTable, productItemTable, stockTransactionTable, cashierTable } from '$db/schema'
 import { createInsertSchema } from 'drizzle-zod'
-
-import { distribuidoraTable } from '$db/schema'
 
 import { product } from '$db/controller'
 
@@ -87,6 +85,21 @@ export const insertAddressSchema = createInsertSchema(addressTable)
 export type SelectAddress = typeof addressTable.$inferSelect
 export type InsertAddress = typeof addressTable.$inferInsert
 
+export const paymentMethodEnum = [
+  'credit_card',
+  'debit_card',
+  'pix',
+  'fiado',
+  'dinheiro',
+] as const
+
+export const paymentStatusEnum = [
+  'PENDING',
+  'CONFIRMED',
+  'CANCELED',
+  'REFUNDED',
+] as const
+
 export const customerOrderTable = sqliteTable('customer_order', {
   id: integer('id').notNull().primaryKey({ autoIncrement: true }),
   // .$defaultFn(() => generateId(15)),
@@ -94,16 +107,14 @@ export const customerOrderTable = sqliteTable('customer_order', {
   updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
     () => new Date(),
   ),
-  distribuidora_id: integer('distribuidora_id').references(
-    () => distribuidoraTable.id,
-  ),
   customer_id: integer('customer_id').references(() => customerTable.id),
   address_id: integer('address_id').references(() => addressTable.id),
+  cachier_id: integer('cachier_id').references(() => cashierTable.id),
   payment_method: text('payment_method', {
-    enum: ['credit_card', 'pix', 'fiado', 'dinheiro'],
+    enum: paymentMethodEnum,
   }).notNull(),
   payment_status: text('payment_status', {
-    enum: ['PENDING', 'CONFIRMED'],
+    enum: paymentStatusEnum,
   })
     .notNull()
     .default('PENDING'),
@@ -117,7 +128,7 @@ export const customerOrderTable = sqliteTable('customer_order', {
       'ON THE WAY',
       'DELIVERED',
       'CANCELED',
-      'ENDED'
+      'ENDED',
     ],
   }).notNull(),
 })
@@ -134,6 +145,7 @@ export const customerOrderRelations = relations(
       references: [addressTable.id],
     }),
     items: many(orderItemTable),
+    transactions: many(stockTransactionTable),
   }),
 )
 export type SelectCustomerOrder = typeof customerOrderTable.$inferSelect
