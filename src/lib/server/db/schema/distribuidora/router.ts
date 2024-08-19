@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { publicProcedure, router } from '../t'
+import { publicProcedure, router } from '$trpc/t'
 
 import { z } from 'zod'
 import { distribuidora as distribuidoraController, stock } from '$db/controller'
@@ -12,7 +12,7 @@ import {
 import { paramsSchema } from '$lib/components/table'
 import { tableHelper } from '$lib/server/db/utils'
 
-import { middleware } from '../middleware'
+import { middleware } from '$trpc/middleware'
 
 export const distribuidora = router({
   insertDistribuidora: publicProcedure

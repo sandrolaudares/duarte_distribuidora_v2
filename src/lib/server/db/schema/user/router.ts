@@ -1,4 +1,4 @@
-import { publicProcedure, router } from '../t'
+import { publicProcedure, router } from '$trpc/t'
 
 import { z } from 'zod'
 
@@ -9,7 +9,7 @@ import { redirect } from '@sveltejs/kit'
 
 // import { generateId } from 'lucia'
 // import { LibsqlError } from '@libsql/client'
-import { middleware } from '../middleware'
+import { middleware } from '$trpc/middleware'
 
 import { emailTemplate, sendMail } from '$lib/server/email'
 import { paramsSchema } from '$lib/components/table'

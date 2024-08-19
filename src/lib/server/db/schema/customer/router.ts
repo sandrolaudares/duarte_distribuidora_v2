@@ -1,4 +1,4 @@
-import { publicProcedure, router } from '../t'
+import { publicProcedure, router } from '$trpc/t'
 
 import { z } from 'zod'
 import { customer as customerController } from '$db/controller'
@@ -11,7 +11,7 @@ import {
 import { paramsSchema } from '$lib/components/table'
 import { tableHelper } from '$lib/server/db/utils'
 
-import { middleware } from '../middleware'
+import { middleware } from '$trpc/middleware'
 
 export const customer = router({
   insertCustomer: publicProcedure
@@ -81,7 +81,7 @@ export const customer = router({
           }),
         ),
         order_info: z.object({
-          payment_method: z.enum(['pix', 'credit_card', 'fiado', 'dinheiro','pago']),
+          payment_method: z.enum(['pix', 'credit_card', 'fiado', 'dinheiro']),
           customer_id: z.number().optional(),
           address_id: z.number().optional(),
           total: z.number(),
