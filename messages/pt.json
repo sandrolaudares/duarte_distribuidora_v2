@@ -18,6 +18,8 @@
   "customers": "Clientes",
   "orders": "Pedidos",
   "stock": "Estoque",
+  "already_have_acc": "Já tem uma conta?",
+  "sign_in": "Entrar",
   "cancel_button": "Cancelar",
   "send_button": "Enviar",
   "save_button": "Salvar",
