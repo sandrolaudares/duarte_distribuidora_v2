@@ -48,7 +48,7 @@
               <tr>
                 <td>{transaction.id}</td>
                 <td>{transaction.type}</td>
-                <td>{transaction.amount}</td>
+                <td>R${(transaction.amount/100).toFixed(2)}</td>
                 <td>{transaction.created_at}</td>
               </tr>
             {/each}
