@@ -11,9 +11,9 @@
 
   export let data: PageData
 
-  const { distribuidoras } = data
+  let cashiers = data
 
-  function handleAddCachier(distribuidora_id: number) {
+  function handleAddCachier() {
     modal.open(FormModal<RouterInputs['distribuidora']['insertCashier']>, {
       title: 'Adicionar Caixa',
       fields: [
@@ -34,7 +34,6 @@
       save: async toSave => {
         try {
           await trpc($page).distribuidora.insertCashier.mutate({
-            distribuidora_id: distribuidora_id,
             name: toSave.name,
             currency: toSave.currency,
           })
@@ -45,33 +44,6 @@
         }
       },
     })
-  }
-
-  function handleAddDistribuidora() {
-    modal.open(
-      FormModal<RouterInputs['distribuidora']['insertDistribuidora']>,
-      {
-        title: 'Adicionar distribuidora',
-        fields: [
-          {
-            label: 'Nome',
-            name: 'name',
-            type: 'text',
-            required: true,
-          },
-        ],
-        save: async toSave => {
-          try {
-            await trpc($page).distribuidora.insertDistribuidora.mutate({
-              name: toSave.name,
-            })
-            window.location.reload()
-          } catch (error: any) {
-            return error.message
-          }
-        },
-      },
-    )
   }
 </script>
 
@@ -85,40 +57,24 @@
       <a href="/admin/cashier/transactions" class="btn btn-primary">
         Ver transacões dos caixas
       </a>
-      <button
-        class="btn btn-primary flex gap-2"
-        onclick={handleAddDistribuidora}
-      >
-        Add distribuidora {@html icons.plus()}
-      </button>
     </div>
   </div>
-  <div class="grid grid-cols-1 justify-center gap-2 lg:grid-cols-3">
-    {#each distribuidoras as distribuidora}
-      <div class="flex flex-col gap-3">
-        <h1 class="min-w-48 rounded p-2 text-center text-xl">
-          {distribuidora.name}:
-        </h1>
-        <button
-          class="btn btn-outline mx-auto"
-          onclick={() => handleAddCachier(distribuidora.id)}
+  <div class="flex flex-col justify-center gap-3">
+    <button class="btn btn-outline mx-auto" onclick={handleAddCachier}>
+      Adicionar Caixa
+    </button>
+    <div class="flex flex-col gap-2 text-center mx-96">
+      {#each cashiers.distribuidoras as caixa}
+        <a
+          href="/admin/cashier/{caixa.id}"
+          class="btn btn-primary flex justify-between p-3"
         >
-          Adicionar Caixa
-        </button>
-        <div class="flex flex-col gap-2 text-center">
-          {#each distribuidora.cashiers as caixa}
-            <a
-              href="/admin/cashier/{caixa.id}"
-              class="btn btn-primary flex justify-between p-3"
-            >
-              {caixa.name}
-              <span class="text-end font-bold">
-                Valor no caixa: R${caixa.currency}
-              </span>
-            </a>
-          {/each}
-        </div>
-      </div>
-    {/each}
+          {caixa.name}
+          <span class="text-end font-bold">
+            Valor no caixa: R${(caixa.currency / 100).toFixed(2)}
+          </span>
+        </a>
+      {/each}
+    </div>
   </div>
 </main>

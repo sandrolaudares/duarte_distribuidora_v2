@@ -49,7 +49,6 @@
             customer_id: clienteSelecionado?.id,
             address_id: clienteSelecionado?.adresses[0].id,
             total: 50,
-            distribuidora_id: caixa.distribuidora_id,
             observation: observacao,
             payment_method: metodo_pagamento,
           },
@@ -199,7 +198,7 @@ onDestroy(() =>  {
             #{caixa.id}
           </span>
         </p>
-        <p>ID distribuidora {caixa.distribuidora_id}</p>
+        <p>ID distribuidora</p>
         <p>
           Criado por: <span class="font-bold text-primary">{user?.email}</span>
         </p>
