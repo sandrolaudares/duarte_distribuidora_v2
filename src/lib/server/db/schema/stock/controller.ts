@@ -49,19 +49,13 @@ async function insertStockTransaction(data: InsertStockTransaction) {
   const { sku } = data
   return await db.transaction(async trx => {
     await trx.insert(stockTransactionTable).values(data)
-    await trx
+    return await trx
       .update(skuTable)
       .set({
         quantity: sql`${skuTable.quantity} + ${data.quantity}`,
       })
-      .where(eq(skuTable.sku, sku))
+      .where(eq(skuTable.sku, sku)).returning()
   })
-}
-
-async function processStockTransaction(transaction: InsertStockTransaction) {
-  const { sku, quantity, meta_data } = transaction
-
-  await insertStockTransaction(transaction)
 }
 
 function insertSupplier(data: InsertSupplier) {
@@ -104,10 +98,10 @@ export const stock = {
   },
   insertSKU,
   getSKU,
-  getInfoSKU: getSKUByID,
+  getSKUByID,
   getSKUWithStock,
   getTransactionsFromProduto,
-  processStockTransaction,
+  insertStockTransaction,
   insertSupplier,
   getSupplier,
   queryLastCostPrice,

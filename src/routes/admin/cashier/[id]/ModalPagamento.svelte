@@ -9,11 +9,15 @@
     | RouterOutputs['customer']['getCustomers'][0]
     | null = null
 
-  export let realizarPedido = (metodo_pagamento:string) => {}
+  export let realizarPedido = (metodo_pagamento:string,status_pagamento:string) => {}
+
+  export let valor_recebido = 0
+
+  let metodo_pagamento = ''
+
+  let isPago = false
 
   let isDinheiro = false
-
-  let valor_recebido = 0
 
   let troco = 0
 
@@ -24,13 +28,25 @@
   <div class="my-3">
     <div class=" my-3 flex flex-col items-center justify-center gap-3">
       {#if cliente_selecionado}
-        <button class="btn btn-primary w-full" on:click={()=>{realizarPedido('fiado')}}>FIADO</button>
+        <button class="btn btn-primary w-full" on:click={()=>{realizarPedido('fiado','PENDING')}}>FIADO</button>
       {/if}
-      <button class="btn btn-primary w-full" on:click={()=>{realizarPedido('pago')}}>PAGO</button>
+      <button class="btn btn-primary w-full" on:click={()=>{isPago = true,isDinheiro=false}}>PAGO</button>
+      {#if isPago}
+      <select class="select select-bordered w-full" bind:value={metodo_pagamento}>
+        <option disabled selected>Qual foi o metodo?</option>
+        <option value="credit_card">Cartão de crédito</option>
+        <option value="debit_card">Cartão de debito</option>
+        <option value="pix">Pix</option>
+        <option value="dinheiro">Dinheiro</option>
+      </select>
+      <button class="btn btn-accent w-full" on:click={()=>{realizarPedido(metodo_pagamento,'CONFIRMED')}} disabled={metodo_pagamento ===''}>CONFIRMAR</button>
+      <hr class="w-full bg-base-300">
+      {/if}
       <button
         class="btn btn-primary w-full"
         on:click={() => {
           isDinheiro = true
+          isPago=false
         }}
       >
         DINHEIRO
@@ -44,7 +60,7 @@
               <span class="label-text-alt">(Valor pago pelo cliente)</span>
             </div>
             <CurrencyInput bind:value={valor_recebido} />
-            <button class="btn btn-primary" on:click={()=>{realizarPedido('dinheiro')}} disabled={total_pedido >=valor_recebido}>CONFIRMAR</button>
+            <button class="btn btn-accent" on:click={()=>{realizarPedido('dinheiro','CONFIRMED')}} disabled={total_pedido >=valor_recebido}>CONFIRMAR</button>
           </label>
         </div>
         {#if valor_recebido && valor_recebido >= total_pedido}

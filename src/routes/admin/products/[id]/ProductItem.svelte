@@ -63,10 +63,10 @@
   function openSKUModal() {
     modal.open(ModalSku, {
       selectedSKU: async sku => {
-        item.sku = sku.id
+        item.sku = sku.sku
         await updateProductItemInfo()
       },
-      newSKU: { name: item.name },
+      newSKU: { name: item.name, sku: item.sku },
     })
   }
 

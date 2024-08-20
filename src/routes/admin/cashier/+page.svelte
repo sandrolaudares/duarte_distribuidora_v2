@@ -63,7 +63,7 @@
     <button class="btn btn-outline mx-auto" onclick={handleAddCachier}>
       Adicionar Caixa
     </button>
-    <div class="flex flex-col gap-2 text-center mx-96">
+    <div class="flex flex-col gap-2 text-center lg:mx-96">
       {#each cashiers.distribuidoras as caixa}
         <a
           href="/admin/cashier/{caixa.id}"

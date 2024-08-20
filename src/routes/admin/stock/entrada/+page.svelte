@@ -6,18 +6,16 @@
 
   import { toast } from 'svelte-sonner'
 
-  import type { SelectSku, SelectDistribuidora } from '$db/schema'
+  import type { SelectSku } from '$db/schema'
 
   import type { RouterOutputs } from '$trpc/router'
   export let data: PageData
 
   let selectedSupplier: RouterOutputs['stock']['getSupplier'][0] | null = null
 
-  let selectedDistribuidora: SelectDistribuidora | null = null
-
   import { modal } from '$lib/components/modal'
   import ModalSupplier from './ModalSupplier.svelte'
-  import ModalDistribuidora from '../ModalDistribuidora.svelte'
+ 
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
 
   let isLoading = false
@@ -30,17 +28,9 @@
       },
     })
   }
-  function openModalDistribuidora() {
-    modal.open(ModalDistribuidora, {
-      select: distribuidora => {
-        selectedDistribuidora = distribuidora
-        modal.close()
-      },
-    })
-  }
 
   let produtosEntrada: Record<
-    SelectSku['id'],
+    SelectSku['sku'],
     {
       sku: SelectSku
       quantity: number
@@ -49,9 +39,6 @@
   > = {}
 
   async function entradaEstoque() {
-    if (!selectedDistribuidora) {
-      return toast.error('Selecione uma distribuidora')
-    }
 
     if (Object.keys(produtosEntrada).length === 0) {
       return toast.error('Adicione produtos para entrada')
@@ -59,15 +46,18 @@
 
     try {
       isLoading = true
-      await trpc($page).stock.entradaEstoque.mutate({
-        distribuidora_id: selectedDistribuidora.id,
+      const response = await trpc($page).stock.entradaEstoque.mutate({
         sku_items: Object.values(produtosEntrada).map(item => ({
-          sku_id: item.sku.id,
+          sku_id: item.sku.sku,
           quantity: item.quantity,
           cost_price: item.cost_price,
         })),
       })
-
+      if (!response) {
+        console.log("nada");
+    } else {
+      console.log(response);
+    }
       toast.success('Entrada de estoque realizada com sucesso!')
     } catch (error) {
       toast.error('Erro ao realizar entrada de estoque')
@@ -76,10 +66,10 @@
   }
 
   function addSku(sku: SelectSku, quantity: number) {
-    if (produtosEntrada[sku.id]) {
-      produtosEntrada[sku.id].quantity += quantity
+    if (produtosEntrada[sku.sku]) {
+      produtosEntrada[sku.sku].quantity += quantity
     } else {
-      produtosEntrada[sku.id] = {
+      produtosEntrada[sku.sku] = {
         sku,
         quantity,
         cost_price: 0,
@@ -93,7 +83,7 @@
       return
     }
 
-    produtosEntrada[sku.id] = {
+    produtosEntrada[sku.sku] = {
       sku,
       quantity,
       cost_price: 0,
@@ -101,7 +91,7 @@
   }
 
   function removeSku(sku: SelectSku) {
-    delete produtosEntrada[sku.id]
+    delete produtosEntrada[sku.sku]
     produtosEntrada = produtosEntrada
   }
 </script>
@@ -121,20 +111,6 @@
       {/if}
     </div>
 
-    <div>
-      {#if selectedDistribuidora}
-        <button class="rounded-lg bg-base-300 p-3 shadow-md" on:click={openModalDistribuidora}>
-          {selectedDistribuidora.name}
-        </button>
-      {:else}
-        <button
-          class="btn btn-primary w-full"
-          on:click={openModalDistribuidora}
-        >
-          Selecionar distribuidora
-        </button>
-      {/if}
-    </div>
   </div>
 
   <div class="mb-6 grid grid-cols-6 gap-3">
@@ -172,7 +148,7 @@
             <p class="label-text font-bold">{item.sku.name}</p>
             <p class="label-text">Quantidade: {item.quantity}</p>
           </div>
-          <CurrencyInput bind:value={produtosEntrada[item.sku.id].cost_price} />
+          <CurrencyInput bind:value={produtosEntrada[item.sku.sku].cost_price} />
           <div class="label">
             <span class="label-text-alt">(Preco de custo)</span>
           </div>

@@ -63,9 +63,9 @@ export type MetaUnion = metaEntrada | metaSaida
 // }
 export const stockTransactionTable = sqliteTable('stock_transaction', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  created_at: integer('created_at', { mode: 'timestamp' }).default(sql`(CURRENT_TIMESTAMP)`),
   updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => new Date(),
+    () => sql`(CURRENT_TIMESTAMP)`,
   ),
   sku: text('sku')
     .notNull()
@@ -102,9 +102,9 @@ export type SelectStockTransaction = typeof stockTransactionTable.$inferSelect
 export const supplierTable = sqliteTable('supplier', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  created_at: integer('created_at', { mode: 'timestamp' }).default(sql`(CURRENT_TIMESTAMP)`),
   updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => new Date(),
+    () => sql`(CURRENT_TIMESTAMP)`,
   ),
   razao_social: text('razao_social'),
   cnpj_cpf: text('cnpj_cpf'),

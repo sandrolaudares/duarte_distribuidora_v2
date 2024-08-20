@@ -84,9 +84,10 @@ export const stock = router({
     .mutation(async ({ input, ctx }) => {
       const { sku_items } = input
       const { user } = ctx.locals
+      let arr = []
       for (const item of sku_items) {
         try {
-          await stockController.processStockTransaction({
+        const resp  =  await stockController.insertStockTransaction({
             sku: item.sku_id,
             quantity: item.quantity,
             cost_price: item.cost_price,
@@ -97,10 +98,15 @@ export const stock = router({
               user_id: user?.id,
             },
           })
+          arr.push(resp)
+          console.log(resp);
+          
         } catch (error) {
           console.log('Failed to process stock transaction:', error)
         }
       }
+      
+      return arr
     }),
 
   getLastCostPrice: publicProcedure

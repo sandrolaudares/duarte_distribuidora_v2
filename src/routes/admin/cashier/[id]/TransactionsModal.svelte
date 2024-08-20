@@ -32,28 +32,29 @@
       <div class="flex items-center justify-center">
         <Loading />
       </div>
-    {/if}
-    <div class="overflow-x-auto">
-      <table class="table table-zebra table-xs">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Tipo</th>
-            <th>Valor</th>
-            <th>Data de Criação</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each transactions as transaction}
+    {:else}
+      <div class="overflow-x-auto">
+        <table class="table table-zebra table-xs">
+          <thead>
             <tr>
-              <td>{transaction.id}</td>
-              <td>{transaction.type}</td>
-              <td>{transaction.amount}</td>
-              <td>{transaction.created_at}</td>
+              <th>ID</th>
+              <th>Tipo</th>
+              <th>Valor</th>
+              <th>Data de Criação</th>
             </tr>
-          {/each}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {#each transactions as transaction}
+              <tr>
+                <td>{transaction.id}</td>
+                <td>{transaction.type}</td>
+                <td>{transaction.amount}</td>
+                <td>{transaction.created_at}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+    {/if}
   </div>
 </Modal>

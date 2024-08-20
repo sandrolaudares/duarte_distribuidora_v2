@@ -12,6 +12,7 @@
 
   export let newSKU: InsertSku = {
     name: '',
+    sku: ''
   }
   let search = ''
 
@@ -83,6 +84,12 @@
         type="text"
         bind:value={newSKU.name}
         placeholder="Nome"
+        class="input input-bordered"
+      />
+      <input
+        type="text"
+        bind:value={newSKU.sku}
+        placeholder="sku"
         class="input input-bordered"
       />
 

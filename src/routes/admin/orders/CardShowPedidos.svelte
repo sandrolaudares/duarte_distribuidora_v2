@@ -44,7 +44,7 @@
           <p class="text-base">
             <strong>{item.quantity}x</strong>
             - {item.product.name} -
-            <span class="font-bold text-success">R${item.price}</span>
+            <span class="font-bold text-success">R${(item.price/100).toFixed(2)}</span>
           </p>
         </div>
       {/each}

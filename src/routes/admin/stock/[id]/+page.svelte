@@ -38,8 +38,8 @@
 
   const defaultColumns: ColumnDef<Transaction>[] = [
     {
-      header: 'ID',
-      accessorKey: 'id',
+      header: 'SKU',
+      accessorKey: 'sku',
     },
     {
       header: 'Quantidade',
@@ -66,15 +66,12 @@
         }),
     },
   ]
+  
 </script>
 
 
 <div class="">
   <div class="container mx-auto flex flex-col gap-5">
-    <h1 class="text-center text-4xl mt-5">
-      Estoque de: <span class="font-bold">{estoque.name}</span>
-    </h1>
-    {#each estoque.product_stock as stock}
       <div class="flex items-center justify-center">
         <div class="stats shadow bg-base-200">
           <div class="stat flex items-center">
@@ -94,7 +91,7 @@
               </svg>
             </div>
             <!-- <div class="stat-title">{stock.distribuidora.name}</div> -->
-            <div class="stat-value">{stock.distribuidora.name}</div>
+            <div class="stat-value">{estoque.name}</div>
             <!-- <div class="stat-desc">Jan 1st - Feb 1st</div> -->
           </div>
   
@@ -103,7 +100,7 @@
               {@html icons.box()}
             </div>
               <div class="stat-title">Quantidade em Estoque</div>
-              <div class="stat-value flex justify-center">{stock.quantity}</div>
+              <div class="stat-value flex justify-center">{estoque.quantity}</div>
             <!-- <div class="stat-desc">↗︎ 400 (22%)</div> -->
           </div>
         </div>
@@ -114,8 +111,7 @@
             columns={defaultColumns}
             load={async s => {
               const resp = await trpc($page).stock.paginatedTransactions.query({
-                distribuidora_id: stock.distribuidora_id,
-                sku: stock.sku,
+                sku: estoque.sku,
                 table_state: s,
               })
     
@@ -131,6 +127,5 @@
           grafico <!--TODO: GRAFICO-->
         </div>
       </div>
-    {/each}
   </div>
 </div>

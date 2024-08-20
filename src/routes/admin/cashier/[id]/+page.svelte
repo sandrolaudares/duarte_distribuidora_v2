@@ -37,22 +37,28 @@
 
   let enderecoCliente: RouterOutputs['customer']['getCustomers'][0]['adresses'][0] | null = null
 
+  let amount_paid = 0
+
   $: total = Object.values($cart).reduce((acc, item) => {
     return acc + item.item[tipo_preco] * item.quantity
   }, 0)
 
-  //TODO:TIPAGEM DA VARIAVEL metodo_pagamento
-  async function createOrder(metodo_pagamento: any) {
+  //TODO:TIPAGEM DA VARIAVEL metodo_pagamento - status_pagamento
+  //TODO: todos pedidos tao indo como pendentes
+  async function createOrder(metodo_pagamento: any,status_pagamento:any) {
     try {  
         const resp = await trpc($page).customer.insertOrder.mutate({
           order_info: {
             customer_id: clienteSelecionado?.id,
             address_id: clienteSelecionado?.adresses[0].id,
-            total: 50,
+            total: total,
             observation: observacao,
-            payment_method: metodo_pagamento,
           },
-  
+          payment_info:{
+            payment_method: metodo_pagamento,
+            payment_status: status_pagamento,
+            amount_paid:amount_paid
+          },
           order_items: Object.values($cart).map(item => ({
             product_id: item.item.id,
             quantity: item.quantity,
@@ -61,7 +67,13 @@
           })),
         })
         toast.info(JSON.stringify(resp))
-      toast.success('Pedido realizado com sucesso!')
+        toast.success('Pedido realizado com sucesso!')
+        setTimeout(() => {
+        modal.close();
+        clienteSelecionado = null
+        enderecoCliente = null
+        }, 300);
+        cart.set({})
     } catch (error: any) {
       toast.error(error.message)
     }
@@ -138,8 +150,9 @@ async function pagamentoModal(){
   modal.open(ModalPagamento, {
     cliente_selecionado: clienteSelecionado,
     total_pedido:total,
-    realizarPedido: (metodo_pagamento) => {
-      createOrder(metodo_pagamento)
+    valor_recebido:amount_paid,
+    realizarPedido: (metodo_pagamento,status_pagamento) => {
+      createOrder(metodo_pagamento,status_pagamento)
     }
   })
 }
@@ -198,7 +211,6 @@ onDestroy(() =>  {
             #{caixa.id}
           </span>
         </p>
-        <p>ID distribuidora</p>
         <p>
           Criado por: <span class="font-bold text-primary">{user?.email}</span>
         </p>

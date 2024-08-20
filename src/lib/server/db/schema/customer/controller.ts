@@ -159,10 +159,7 @@ export const customer = {
         .insert(customerOrderTable)
         .values({
           payment_method: payment_info.payment_method,
-          payment_status:
-            payment_info.payment_method === 'dinheiro'
-              ? 'CONFIRMED'
-              : 'PENDING',
+          payment_status: payment_info.payment_status,
           status: 'PENDING',
           total: order_info.total,
           customer_id: order_info.customer_id,

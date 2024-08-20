@@ -86,7 +86,6 @@ export const customer = router({
           customer_id: z.number().optional(),
           address_id: z.number().optional(),
           total: z.number(),
-          distribuidora_id: z.number(),
           observation: z.string(),
         }),
         payment_info: z.object({
