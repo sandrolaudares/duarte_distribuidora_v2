@@ -84,7 +84,7 @@ export const stock = router({
     .mutation(async ({ input, ctx }) => {
       const { sku_items } = input
       const { user } = ctx.locals
-      let arr = []
+      const arr = []
       for (const item of sku_items) {
         try {
         const resp  =  await stockController.insertStockTransaction({

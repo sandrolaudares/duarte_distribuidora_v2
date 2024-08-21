@@ -54,7 +54,7 @@ async function insertStockTransaction(data: InsertStockTransaction) {
       .set({
         quantity: sql`${skuTable.quantity} + ${data.quantity}`,
       })
-      .where(eq(skuTable.sku, sku)).returning()
+      .where(eq(skuTable.sku, sku))
   })
 }
 

@@ -27,7 +27,7 @@ export const skuTable = sqliteTable('sku', {
   ),
   updated_at: integer('updated_at', { mode: 'timestamp' })
     .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+    .$onUpdate(() => new Date()),
   image: integer('image_id').references(() => imageTable.id),
   name: text('name').notNull(),
   quantity: integer('quantity').notNull().default(0),

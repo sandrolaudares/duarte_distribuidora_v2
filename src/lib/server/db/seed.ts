@@ -7,9 +7,7 @@ import { product, user, distribuidora, customer, stock } from './controller'
 const main = async () => {
   await seedUsers()
   await seedCategories()
-  await seedSKU()
   await seedProducts()
-  await seedDistribuidora()
   await seedCustomers()
 }
 main()
@@ -76,10 +74,8 @@ async function seedCategories() {
   console.log('categoryTable seed END')
 }
 
-async function seedSKU() {
-  await stock.insertSKU({
-    name: 'Teste SKU',
-  })
+async function seedSKU(data: { sku: string; name: string }) {
+  await stock.insertSKU(data)
 }
 
 async function seedProducts() {
@@ -99,13 +95,20 @@ async function seedProducts() {
 
   for (let i = 0; i < 20; i++) {
     try {
+      const sku = generateId(15)
+      const name = faker.commerce.productName()
+      await stock.insertSKU({
+        sku: sku,
+        name: name,
+      })
       await product.insertProductItem({
         product_id: i,
-        name: faker.commerce.productName(),
+        name: name,
         retail_price: faker.number.int({ min: 0, max: 30000 }),
         wholesale_price: faker.number.int({ min: 0, max: 30000 }),
-        sku: 1,
+        sku: sku,
       })
+
       await product.insertProductItem({
         product_id: i,
         name: faker.commerce.productName(),
@@ -118,32 +121,6 @@ async function seedProducts() {
   }
 
   console.log('productTable seed END')
-}
-
-async function seedDistribuidora() {
-  console.log('distribuidoraTable seed START')
-
-  try {
-    const [distrib] = await distribuidora
-      .insertDistribuidora({
-        name: 'Distribuidora Matriz',
-      })
-      .returning()
-
-    await distribuidora
-      .insertDistribuidora({
-        name: 'Distribuidora Unidade 2',
-      })
-      .returning()
-
-    await distribuidora.insertCashier({
-      distribuidora_id: distrib.id,
-      currency: 0,
-      name: 'Caixa Teste',
-    })
-  } catch (error) {
-    console.error('Failed to insert distribuidora:', error)
-  }
 }
 
 async function seedCustomers() {
