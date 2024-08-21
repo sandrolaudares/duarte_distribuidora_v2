@@ -3,7 +3,7 @@ import { publicProcedure, router } from '$trpc/t'
 
 import { z } from 'zod'
 import { stock as stockController } from '$db/schema/stock/controller'
-import { insertSKUschema, insertSupplierSchema } from '$db/schema/stock'
+import { insertSKUschema, insertSupplierSchema, supplierTable } from '$db/schema/stock'
 import { stockTransactionTable } from '$db/schema'
 
 import { paramsSchema } from '$lib/components/table'
@@ -60,6 +60,18 @@ export const stock = router({
   getSupplier: publicProcedure.query(() => {
     return stockController.getSupplier()
   }),
+
+  paginatedSupplier: publicProcedure
+    .input(paramsSchema)
+    .query(async ({ input }) => {
+      return await tableHelper(
+        stockController.getSupplier().$dynamic(),
+        supplierTable,
+        'name',
+        input,
+      )
+    }),
+
   insertSupplier: publicProcedure
     .use(middleware.logged)
     .use(middleware.auth)
@@ -87,7 +99,7 @@ export const stock = router({
       const arr = []
       for (const item of sku_items) {
         try {
-        const resp  =  await stockController.insertStockTransaction({
+          const resp = await stockController.insertStockTransaction({
             sku: item.sku_id,
             quantity: item.quantity,
             cost_price: item.cost_price,
@@ -99,13 +111,12 @@ export const stock = router({
             },
           })
           arr.push(resp)
-          console.log(resp);
-          
+          console.log(resp)
         } catch (error) {
           console.log('Failed to process stock transaction:', error)
         }
       }
-      
+
       return arr
     }),
 

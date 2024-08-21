@@ -114,6 +114,10 @@
           name: 'Caixa',
           href: '/admin/cashier',
         },
+        {
+          name: 'Fornecedor',
+          href: '/admin/supplier',
+        },
       ],
     })
   }
