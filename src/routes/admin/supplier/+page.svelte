@@ -21,73 +21,72 @@
   import { goto } from '$app/navigation'
 
   type Supplier = RouterOutputs['stock']['paginatedSupplier']
-  //   let suppliers: Supplier = []
 
   const defaultColumns: ColumnDef<Supplier>[] = [
     {
-      header: 'id',
-      accessorKey: 'name',
-      cell: info =>
-        renderComponent(EditRowInput<Supplier>, {
-          id: info.row.original.id,
-          colID: 'id',
-          editT: 'text',
-          value: info.getValue(),
-        }),
+      header: 'ID',
+      accessorKey: 'id',
+
       footer: info => info.column.id,
     },
     {
+      header: 'name',
+      accessorKey: 'name',
+    },
+    {
+      header: 'Razao social',
+      accessorKey: 'razao_social',
+    },
+    {
       header: 'CPF/CNPJ',
-      accessorKey: 'cpf_cnpj',
-      cell: info =>
-        renderComponent(EditRowInput<Supplier>, {
-          id: info.row.original.id,
-          colID: 'cpf_cnpj',
-          editT: 'text',
-          value: info.getValue(),
-        }),
+      accessorKey: 'cnpj_cpf',
     },
     {
       header: 'RG/IE',
-      accessorKey: 'rg_ie',
-      cell: info =>
-        renderComponent(EditRowInput<Supplier>, {
-          id: info.row.original.id,
-          colID: 'rg_ie',
-          editT: 'text',
-          value: info.getValue(),
-        }),
+      accessorKey: 'ie_rg',
+    },
+    {
+      header: 'CEP',
+      accessorKey: 'cep',
+    },
+    {
+      header: 'Telephone 1',
+      accessorKey: 'telephone_1',
+    },
+    {
+      header: 'Criado em',
+      accessorKey: 'created_at',
     },
 
-    {
-      id: 'edit',
-      header: () => 'Edit',
-      cell: info =>
-        renderComponent(EditRowButton<Supplier>, {
-          row: info.row.original,
-        }),
-      // footer: info => info.column.id,
-    },
-    {
-      id: 'actions',
-      header: () => 'Actions',
-      cell: info =>
-        renderComponent(RowActions, {
-          actions: [
-            {
-              name: 'View Details',
-              fn: () => {
-                goto(`/admin/supplier/${info.row.original.id}`)
-              },
-            },
-          ],
-        }),
-    },
+    // {
+    //   id: 'edit',
+    //   header: () => 'Edit',
+    //   cell: info =>
+    //     renderComponent(EditRowButton<Supplier>, {
+    //       row: info.row.original,
+    //     }),
+    //   footer: info => info.column.id,
+    // },
+    // {
+    //   id: 'actions',
+    //   header: () => 'Actions',
+    //   cell: info =>
+    //     renderComponent(RowActions, {
+    //       actions: [
+    //         {
+    //           name: 'View Details',
+    //           fn: () => {
+    //             goto(`/admin/supplier/${info.row.original.id}`)
+    //           },
+    //         },
+    //       ],
+    //     }),
+    // },
   ]
 
   async function load(s: TableState) {
     const resp = await trpc($page).stock.paginatedSupplier.query(s)
-      //TODO:GET PAGINATED SUPPLIER 
+    //TODO:GET PAGINATED SUPPLIER
 
     return {
       data: resp.rows ?? [],
