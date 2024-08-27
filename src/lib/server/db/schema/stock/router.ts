@@ -4,7 +4,7 @@ import { publicProcedure, router } from '$trpc/t'
 import { z } from 'zod'
 import { stock as stockController } from '$db/schema/stock/controller'
 import { insertSKUschema, insertSupplierSchema, supplierTable } from '$db/schema/stock'
-import { stockTransactionTable } from '$db/schema'
+import { cashierTransactionTable, stockTransactionTable } from '$db/schema'
 
 import { paramsSchema } from '$lib/components/table'
 import { tableHelper } from '$lib/server/db/utils'
@@ -139,4 +139,17 @@ export const stock = router({
   getAllTransaoCaixa: publicProcedure.query(() => {
     return stockController.getAllTransactionsCaixa()
   }),
+
+  getPaginatedTransacaoCaixa: publicProcedure
+  .input(paramsSchema)
+  .query(async ({ input }) => {
+    return await tableHelper(
+      stockController.getAllTransactionsCaixa().$dynamic(),
+      cashierTransactionTable,
+      'name',
+      input,
+    )
+  }),
+
+
 })
