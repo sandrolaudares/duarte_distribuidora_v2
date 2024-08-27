@@ -75,6 +75,7 @@
     "nodemailer": "^6.9.14",
     "oslo": "^1.2.1",
     "sharp": "^0.33.4",
+    "superjson": "^2.2.1",
     "svelte-motion": "^0.12.2",
     "svelte-sonner": "^0.3.27",
     "tailwind-merge": "^2.4.0",

@@ -148,6 +148,16 @@ export const customer = {
             },
           })
 
+          await tx.insert(cashierTransactionTable).values({
+            cashier_id: order_info.cachier_id,
+            amount: payment_info.amount_paid - order_info.total,
+            type: 'Troco',
+            observation: 'Venda',
+            meta_data: {
+              order_id: order_info.id,
+            },
+          })
+
           break
         }
 
@@ -220,7 +230,7 @@ export const customer = {
                 type: 'saida',
               },
             })
-            await stock.processStockTransaction({
+            await stock.insertStockTransaction({
               sku: item.product.sku,
               type: 'Saida',
               quantity: -item.quantity * item.product.quantity,
