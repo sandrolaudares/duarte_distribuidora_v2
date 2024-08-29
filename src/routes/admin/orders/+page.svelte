@@ -89,8 +89,8 @@
               class="rounded-lg border bg-white p-2"
               bind:value={pedidoSelecionado}
             >
-              <!-- <option value="all">Todos pedidos</option>
-              <option value="varejo">Varejo</option>
+              <option value="all">Todos pedidos</option>
+              <!--<option value="varejo">Varejo</option>
               <option value="atacado">Atacado</option> -->
               <hr />
               <option value="CONFIRMED">Pedidos aceitos</option>

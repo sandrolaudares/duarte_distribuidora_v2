@@ -13,6 +13,7 @@
   export let realizarPedido = (
     metodo_pagamento: string,
     status_pagamento: string,
+    isChecked:boolean,
   ) => {}
 
   export let valor_recebido = 0
@@ -28,6 +29,9 @@
   $: troco = valor_recebido - total_pedido
 
   let isLoading = false
+
+  let isChecked = false
+
 </script>
 
 <Modal title="Pagamento">
@@ -43,7 +47,7 @@
             class="btn btn-primary w-full"
             on:click={() => {
               isLoading=true
-              realizarPedido('fiado', 'PENDING')
+              realizarPedido('fiado', 'PENDING',isChecked)
             }}
           >
             FIADO
@@ -72,13 +76,13 @@
             class="btn btn-accent w-full"
             on:click={() => {
               isLoading=true
-              realizarPedido(metodo_pagamento, 'CONFIRMED')
+              realizarPedido(metodo_pagamento, 'CONFIRMED',isChecked)
+
             }}
             disabled={metodo_pagamento === ''}
           >
             CONFIRMAR
           </button>
-          check
           <hr class="w-full bg-base-300" />
         {/if}
         <button
@@ -103,7 +107,7 @@
                 class="btn btn-accent"
                 on:click={() => {
                   isLoading=true
-                  realizarPedido('dinheiro', 'CONFIRMED')
+                  realizarPedido('dinheiro', 'CONFIRMED',isChecked)
                 }}
                 disabled={total_pedido >= valor_recebido}
               >
@@ -119,6 +123,10 @@
             </h1>
           {/if}
         {/if}
+        <div class="flex gap-2">
+          Deseja finalizar este pedido?
+          <input type="checkbox" class="checkbox checkbox-primary" on:change={()=> (isChecked = !isChecked)}/>
+        </div>
       </div>
     </div>
   {/if}

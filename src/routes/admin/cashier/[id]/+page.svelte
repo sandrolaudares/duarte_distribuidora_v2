@@ -44,8 +44,7 @@
   }, 0)
 
   //TODO:TIPAGEM DA VARIAVEL metodo_pagamento - status_pagamento
-  //TODO: todos pedidos tao indo como pendentes
-  async function createOrder(metodo_pagamento: any,status_pagamento:any) {
+  async function createOrder(metodo_pagamento: any,status_pagamento:any,isChecked:boolean) {
     try {  
         const resp = await trpc($page).customer.insertOrder.mutate({
           order_info: {
@@ -66,13 +65,28 @@
             //price: 12,
           })),
         })
-        toast.info(JSON.stringify(resp))
+
+        if(!resp){
+          toast.error('Erro ao criar pedido')
+          return
+        }
+
         toast.success('Pedido realizado com sucesso!')
+
+        if(isChecked){
+          const respUpdate = await trpc($page).customer.updateOrderStatus.mutate({
+            order_id: resp.order.id,
+            status: 'ENDED'
+        })
+        toast.info('Finalizando pedido..')
+        }
+
         setTimeout(() => {
         modal.close();
         clienteSelecionado = null
         enderecoCliente = null
         }, 300);
+        
         cart.set({})
     } catch (error: any) {
       toast.error(error.message)
@@ -151,8 +165,8 @@ async function pagamentoModal(){
     cliente_selecionado: clienteSelecionado,
     total_pedido:total,
     valor_recebido:amount_paid,
-    realizarPedido: (metodo_pagamento,status_pagamento) => {
-      createOrder(metodo_pagamento,status_pagamento)
+    realizarPedido: (metodo_pagamento,status_pagamento,isChecked) => {
+      createOrder(metodo_pagamento,status_pagamento,isChecked)
     }
   })
 }
