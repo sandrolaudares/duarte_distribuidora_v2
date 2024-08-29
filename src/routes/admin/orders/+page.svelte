@@ -15,14 +15,21 @@
 
   let isPendente = false
 
-  type changeStatus = {
-    id: number
-    status: string
-  }
-
   $: pedidosAbertos = pedidosFiltrados.filter(
     pedido => pedido.status === 'PENDING',
   )
+
+  const pedidosPorStatus = () => {
+		if (pedidoSelecionado === 'all') {
+			return pedidos
+		}
+
+		return pedidos.filter((pedido) => pedido.status === pedidoSelecionado)
+	}
+
+  $: if (pedidoSelecionado) {
+		pedidosFiltrados = pedidosPorStatus()
+	}
 
   function togglePendente() {
     isPendente = !isPendente
@@ -73,29 +80,28 @@
       {#if isPendente}
         <div class="mt-2 flex items-center">
           <div>
-            <!--TODO: FIltro ainda falta ajustar-->
-            <!--TODO: Adicionar filtro por distribuidora-->
+            <!--TODO: FIltro ainda falta ajustar para atacado, varejo-->
 
-            <!-- <label for="filtro">Filtrar pedidos:</label>
+            <label for="filtro">Filtrar pedidos:</label>
             <select
               name="filtro"
               id="filtro"
               class="rounded-lg border bg-white p-2"
               bind:value={pedidoSelecionado}
             >
-              <option value="all">Todos pedidos</option>
+              <!-- <option value="all">Todos pedidos</option>
               <option value="varejo">Varejo</option>
-              <option value="atacado">Atacado</option>
+              <option value="atacado">Atacado</option> -->
               <hr />
               <option value="CONFIRMED">Pedidos aceitos</option>
               <option value="ON THE WAY">A caminho</option>
               <option value="DELIVERED">Entregue</option>
-            </select> -->
+            </select>
           </div>
           <div class="relative">
             {#if pedidosAbertos.length > 0}
-              <div class="absolute right-0 top-0 rounded-full bg-red-500">
-                <span class="p-2 text-center text-sm font-bold text-white">
+              <div class="absolute right-0 top-0 rounded-full bg-error">
+                <span class="p-2 text-center text-sm font-bold text-white ">
                   {pedidosAbertos.length}
                 </span>
               </div>
