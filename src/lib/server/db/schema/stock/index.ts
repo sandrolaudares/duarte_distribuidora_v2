@@ -22,8 +22,8 @@ import {
 
 export const skuTable = sqliteTable('sku', {
   sku: text('sku').primaryKey(),
-  created_at: integer('created_at', { mode: 'timestamp' }).default(
-    sql`(CURRENT_TIMESTAMP)`,
+  created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(
+    () => new Date(),
   ),
   updated_at: integer('updated_at', { mode: 'timestamp' })
     .default(sql`(CURRENT_TIMESTAMP)`)
@@ -63,9 +63,11 @@ export type MetaUnion = metaEntrada | metaSaida
 // }
 export const stockTransactionTable = sqliteTable('stock_transaction', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: integer('created_at', { mode: 'timestamp' }).default(sql`(CURRENT_TIMESTAMP)`),
+  created_at: integer('created_at', { mode: 'timestamp' }).default(
+    sql`(CURRENT_TIMESTAMP)`,
+  ),
   updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => sql`(CURRENT_TIMESTAMP)`,
+    () => new Date(),
   ),
   sku: text('sku')
     .notNull()
@@ -76,6 +78,8 @@ export const stockTransactionTable = sqliteTable('stock_transaction', {
   order_id: integer('order_id').references(() => customerOrderTable.id),
   cost_price: integer('cost_price'),
   meta_data: text('meta_data', { mode: 'json' }).notNull().$type<MetaUnion>(),
+
+  total_log: integer('total_log').notNull(),
 })
 
 export const stockTransactionRelations = relations(
@@ -102,9 +106,11 @@ export type SelectStockTransaction = typeof stockTransactionTable.$inferSelect
 export const supplierTable = sqliteTable('supplier', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
-  created_at: integer('created_at', { mode: 'timestamp' }).default(sql`(CURRENT_TIMESTAMP)`),
+  created_at: integer('created_at', { mode: 'timestamp' }).default(
+    sql`(CURRENT_TIMESTAMP)`,
+  ),
   updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => sql`(CURRENT_TIMESTAMP)`,
+    () => new Date(),
   ),
   razao_social: text('razao_social'),
   cnpj_cpf: text('cnpj_cpf'),

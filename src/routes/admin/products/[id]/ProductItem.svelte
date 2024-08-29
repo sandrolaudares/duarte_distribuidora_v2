@@ -105,6 +105,9 @@
   <!-- <h2 class="text-center text-xl font-bold">{item.name}</h2> -->
 
   <div class="flex items-center gap-2">
+  <span>
+    #{item.id}
+  </span>
     <input
       type="text"
       class="input w-full"

@@ -1,4 +1,4 @@
-<script lang="ts" generics="T extends {id:any}">
+<script lang="ts" generics="T">
   import { writable } from 'svelte/store'
   import Loading from '../Loading.svelte'
   import {

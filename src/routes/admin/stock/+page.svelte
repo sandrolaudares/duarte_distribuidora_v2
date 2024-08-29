@@ -28,16 +28,14 @@
     {
       header: 'Name',
       accessorKey: 'name',
-      cell: info =>
-        renderComponent(EditRowInput<SKU>, {
-          id: info.row.original.sku,
-          colID: 'name',
-          editT: 'text',
-          value: info.getValue(),
-        }),
+
       footer: info => info.column.id,
     },
 
+    {
+      header: 'Quantidade em Estoque',
+      accessorKey: 'quantity',
+    },
     {
       id: 'actions',
       header: () => 'Actions',
@@ -93,9 +91,11 @@
 </script>
 
 <div class="container mx-auto overflow-x-auto p-2">
-  <div class="flex justify-end mb-2 gap-2">
+  <div class="mb-2 flex justify-end gap-2">
     <!-- <a href="/admin/stock/transferir"  class="btn btn-success">Transferir estoque</a> -->
-    <a href="/admin/stock/entrada"  class="btn btn-primary">Entrada de estoque</a>
+    <a href="/admin/stock/entrada" class="btn btn-primary">
+      Entrada de estoque
+    </a>
   </div>
   <Datatable columns={defaultColumns} {load} {add} />
 </div>

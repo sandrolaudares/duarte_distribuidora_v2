@@ -270,7 +270,7 @@ onDestroy(() =>  {
     <div
       class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-4"
     >
-      <ul class="mb-4 text-center text-lg">
+      <ul class="mb-4 text-center text-lg max-h-[70vh] overflow-scroll">
         {#each Object.values($cart) as item}
           <div class="flex justify-between">
             <li class="py-2 font-bold">

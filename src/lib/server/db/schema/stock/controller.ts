@@ -45,16 +45,22 @@ function getTransactionsFromProduto(data: { sku: SelectSku['sku'] }) {
     .where(eq(stockTransactionTable.sku, sku))
 }
 
-async function insertStockTransaction(data: InsertStockTransaction) {
+async function insertStockTransaction(
+  data: Omit<InsertStockTransaction, 'total_log'>,
+) {
   const { sku } = data
   return await db.transaction(async trx => {
-    await trx.insert(stockTransactionTable).values(data)
-    return await trx
+    const [resp] = await trx
       .update(skuTable)
       .set({
         quantity: sql`${skuTable.quantity} + ${data.quantity}`,
       })
       .where(eq(skuTable.sku, sku))
+      .returning()
+    await trx.insert(stockTransactionTable).values({
+      ...data,
+      total_log: resp.quantity,
+    })
   })
 }
 

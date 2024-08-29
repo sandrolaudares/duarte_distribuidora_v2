@@ -5,10 +5,12 @@ import { generateId } from 'lucia'
 import { product, user, distribuidora, customer, stock } from './controller'
 
 const main = async () => {
-  await seedUsers()
-  await seedCategories()
-  await seedProducts()
-  await seedCustomers()
+  // await seedUsers()
+  // await seedCategories()
+  // await seedProducts()
+  // await seedCustomers()
+
+  await seedOrders()
 }
 main()
 
@@ -19,11 +21,11 @@ async function seedUsers() {
     await user.insertUser({
       id: generateId(15),
       username: 'administrator',
-      email: 'admin@localhost.com',
+      email: 'admin@admin.com',
       permissions: {
         role: 'admin',
       },
-      password_hash: await hash('123456', {
+      password_hash: await hash('senha123', {
         memoryCost: 19456,
         timeCost: 2,
         outputLen: 32,
@@ -153,4 +155,29 @@ async function seedCustomers() {
   }
 
   console.log('customerTable seed END')
+}
+
+async function seedOrders() {
+  for (let i = 0; i < 20; i++) {
+    try {
+      await customer.insertOrder({
+        order_info: {
+          total: faker.number.int({ min: 0, max: 30000 }),
+        },
+        order_items: [
+          {
+            product_id: 1,
+            price: faker.number.int({ min: 0, max: 30000 }),
+            quantity: faker.number.int({ min: 0, max: 30000 }),
+          },
+        ],
+        payment_info: {
+          payment_method: 'credit_card',
+          payment_status: 'PENDING',
+        },
+      })
+    } catch (error) {
+      console.error(`Failed to insert order ${i}:`, error)
+    }
+  }
 }

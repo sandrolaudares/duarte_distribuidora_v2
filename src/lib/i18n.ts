@@ -22,14 +22,14 @@ export const i18n = createI18n(runtime, {
       en: '/admin/stock',
       pt: '/administrador/estoque',
     },
-    '/admin/stock/transfer': {
+    '/admin/stock/entrada': {
       en: '/admin/stock/transfer',
-      pt: '/administrador/estoque/transferir',
+      pt: '/administrador/estoque/entrada',
     },
-    '/admin/stock/transfer/[id]': {
-      en: '/admin/stock/transfer/[id]',
-      pt: '/administrador/estoque/transferir/[id]',
-    },
+    // '/admin/stock/transfer/[id]': {
+    //   en: '/admin/stock/transfer/[id]',
+    //   pt: '/administrador/estoque/transferir/[id]',
+    // },
     // pedidos
     '/admin/orders': {
       en: '/admin/orders',
