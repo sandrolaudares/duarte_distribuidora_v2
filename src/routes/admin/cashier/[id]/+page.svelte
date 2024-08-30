@@ -355,11 +355,16 @@ onDestroy(() =>  {
                     {#if cartItem?.quantity >= 1}
                       <button
                         class="btn btn-primary hidden md:block"
-                        on:click={()=>
-                          cart.addItem({
-                            item: item,
-                            quantity: -1,
-                          })}>
+                        on:click={()=> {
+                          if(cartItem.quantity === 1){
+                            cart.removeItem(item.id)
+                          } else {
+                            cart.addItem({
+                              item: item,
+                              quantity: -1,
+                            })
+                          }
+                        }}>
                         {@html icons.minus()}
                       </button>
                     {/if}
