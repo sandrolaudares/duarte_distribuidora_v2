@@ -256,6 +256,10 @@ export const customer = {
       },
     })
   },
+  
+  
+  
+  
   getCurrentOrders: async () => {
     return db.query.customerOrderTable.findMany({
       where: or(
@@ -274,6 +278,38 @@ export const customer = {
       },
     })
   },
+  getEndedOrders: async () => {
+    return db.query.customerOrderTable.findMany({
+      where: or(
+        ne(customerOrderTable.status, 'ENDED'),
+      ),
+      with: {
+        address: true,
+        customer: true,
+        items: {
+          with: {
+            product: true,
+          },
+        },
+      },
+    })
+  },
+  getPendingOrders: async () => {
+    return db.query.customerOrderTable.findMany({
+      where: or(
+        ne(customerOrderTable.payment_status, 'PENDING'),
+      ),
+      with: {
+        address: true,
+        customer: true,
+        items: {
+          with: {
+            product: true,
+          },
+        },
+      },
+    })
+  }
 }
 
 export type CurrentOrders = Awaited<

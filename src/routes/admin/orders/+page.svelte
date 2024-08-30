@@ -95,7 +95,6 @@
               <hr />
               <option value="CONFIRMED">Pedidos aceitos</option>
               <option value="ON THE WAY">A caminho</option>
-              <option value="DELIVERED">Entregue</option>
             </select>
           </div>
           <div class="relative">
@@ -160,7 +159,7 @@
         <CardShowPedidos order={pedido} />
       {/each}
     {:else if pedidoSelecionado === 'all' || pedidoSelecionado === 'varejo' || pedidoSelecionado === 'atacado'}
-      <div class="grid grid-cols-1 gap-2 xl:grid-cols-3">
+      <div class="grid grid-cols-1 gap-2 xl:grid-cols-2">
         <div
           class={`overflow-y-auto rounded-lg bg-error p-1 ${pedidosAbertos.length > 0 ? 'max-h-[71vh]' : 'max-h-[78vh]'}`}
         >
@@ -203,7 +202,7 @@
             {/if}
           {/each}
         </div>
-        <div
+        <!-- <div
           class={`overflow-y-auto rounded-lg bg-success p-1 ${pedidosAbertos.length > 0 ? 'max-h-[71vh]' : 'max-h-[78vh]'}`}
         >
           <h1 class="text-center text-black">Entregue:</h1>
@@ -223,7 +222,7 @@
               />
             {/if}
           {/each}
-        </div>
+        </div> -->
       </div>
     {/if}
   </div>

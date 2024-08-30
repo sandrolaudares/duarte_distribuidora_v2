@@ -107,6 +107,14 @@
           icon: icons.cart(),
         },
         {
+          name: 'Pedidos finalizados',
+          href: '/admin/ordersended',
+        },
+        {
+          name: 'Pendentes',
+          href: '/admin/finance',
+        },
+        {
           name: m.stock(),
           href: '/admin/stock',
         },

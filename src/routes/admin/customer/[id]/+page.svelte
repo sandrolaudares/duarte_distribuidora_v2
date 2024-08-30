@@ -13,6 +13,7 @@
 
   import { toast } from 'svelte-sonner'
   import AddressModal from '$lib/components/modal/AddressModal.svelte'
+  import CardShowPedidos from '../../orders/CardShowPedidos.svelte'
 
   let { customer, orders } = data
   let newcustomer = customer
@@ -229,45 +230,12 @@
 
   {#if orders.length > 0}
     {#each orders as order}
-      <div class=" m-4 rounded-lg border bg-base-200 p-6 shadow-sm">
-        <div class="mb-4 flex flex-col gap-2 text-center text-lg md:flex-row">
-          <h3>
-            Pedido <strong>#{order.id}</strong>
-            -
-          </h3>
-          <p>
-            Total: <strong>R${order.total}</strong>
-            -
-          </p>
-          <p>
-            Tipo do pedido: <strong>{order.payment_method}</strong>
-          </p>
-          <p>
-            Status do pedido: <strong>{order.status}</strong>
-          </p>
-        </div>
-        <div>
-          <h4 class="mb-2 text-lg font-semibold">Produtos pedidos:</h4>
-          <div
-            class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
-          >
-            {#each order.items as produto}
-              <div class="flex rounded-md bg-white p-2 shadow-sm">
-                <p class="text-gray-800">
-                  {produto.quantity}x -
-                  {produto.product.name}-
-                  <span class="font-bold text-success">
-                    R${produto.price}
-                  </span>
-                </p>
-              </div>
-            {/each}
-          </div>
-        </div>
-      </div>
+      <CardShowPedidos {order} />
     {/each}
   {:else}
-    <h1 class="text-center my-2 text-xl">Este cliente não possui nenhum pedido...</h1>
+    <h1 class="my-2 text-center text-xl">
+      Este cliente não possui nenhum pedido...
+    </h1>
   {/if}
 </main>
 

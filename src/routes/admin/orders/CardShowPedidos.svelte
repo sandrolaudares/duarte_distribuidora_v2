@@ -38,18 +38,24 @@
         ?.street}, {order.address?.number}, {order.address?.complement}
     {/if}
     {#if order.customer}
-       <p class="text-sm"><strong>Cliente:</strong> {order.customer?.name} - {order.customer?.cellphone ?? 'Telefone sem registro'} - {order.customer?.email}</p>
+      <p class="text-sm">
+        <strong>Cliente:</strong>
+        {order.customer?.name} - {order.customer?.cellphone ??
+          'Telefone sem registro'} - {order.customer?.email}
+      </p>
     {/if}
   </div>
   <div class="mt-4">
     <h4 class="mb-2 text-lg font-semibold">Produtos pedidos:</h4>
-    <div class="flex flex-col gap-1 sm:flex-row overflow-x-auto">
+    <div class="flex flex-col gap-1 overflow-x-auto sm:flex-row">
       {#each order.items as item}
         <div class="flex rounded-md bg-base-100 p-2 shadow-sm">
           <p class="text-base">
             <strong>{item.quantity}x</strong>
             - {item.product.name} -
-            <span class="font-bold text-success">R${(item.price/100).toFixed(2)}</span>
+            <span class="font-bold text-success">
+              R${(item.price / 100).toFixed(2)}
+            </span>
           </p>
         </div>
       {/each}
@@ -57,7 +63,7 @@
   </div>
 
   <div
-    class="mt-2 flex flex-col items-center justify-between gap-3  text-sm sm:flex-row"
+    class="mt-2 flex flex-col items-center justify-between gap-3 text-sm sm:flex-row"
   >
     {#if order.observation}
       <div class="max-w-96">
@@ -65,7 +71,7 @@
       </div>
     {/if}
 
-    <div class="flex w-full gap-2 justify-end ">
+    <div class="flex w-full justify-end gap-2">
       {#if button_recusar}
         <button class=" btn btn-error" on:click={() => click_refuse()}>
           {button_recusar}
