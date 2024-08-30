@@ -7,6 +7,7 @@
 
   import type { RouterOutputs } from '$trpc/router'
   import { toast } from 'svelte-sonner'
+  import Loading from '$lib/components/Loading.svelte'
 
   type Supplier = RouterOutputs['stock']['getSupplier']
 
@@ -22,6 +23,8 @@
     cep: '',
   }
 
+  let isLoading = false
+
   onMount(async () => {
     suppliers = await trpc($page).stock.getSupplier.query()
   })
@@ -31,6 +34,7 @@
       return toast.error('Nome do fornecedor não pode ser vazio!')
     }
     try {
+      isLoading = true
       const [resp] = await trpc($page).stock.insertSupplier.mutate({
         name: new_suppliers.name,
         razao_social: new_suppliers.razao_social,
@@ -42,11 +46,13 @@
       })
       toast.success('Fornecedor criado com sucesso!')
       suppliers = [...suppliers, resp]
-
-      modal.close()
+      window.setTimeout(() => {
+        modal.close()
+        isLoading = false
+      }, 1000)
     } catch (error) {
       toast.error('Erro ao criar fornecedor!')
-    } 
+    }
   }
 </script>
 
@@ -60,88 +66,94 @@
       </div>
     {/each} -->
 
-    <label class="form-control w-full">
-      <div class="flex gap-2">
-        <div>
-          <div class="label">
-            <span class="label-text">Nome</span>
-          </div>
-          <input
-            type="text"
-            placeholder="Nome novo fornecedor"
-            class="input input-bordered w-full"
-            bind:value={new_suppliers.name}
-          />
-        </div>
-        <div>
-          <div class="label">
-            <span class="label-text">Razão social</span>
-          </div>
-          <input
-            type="text"
-            placeholder="Razão social"
-            class="input input-bordered w-full"
-            bind:value={new_suppliers.razao_social}
-          />
-        </div>
+    {#if isLoading}
+      <div class="flex items-center justify-center">
+        <Loading />
       </div>
+    {:else}
+      <label class="form-control w-full">
+        <div class="flex gap-2">
+          <div>
+            <div class="label">
+              <span class="label-text">Nome</span>
+            </div>
+            <input
+              type="text"
+              placeholder="Nome novo fornecedor"
+              class="input input-bordered w-full"
+              bind:value={new_suppliers.name}
+            />
+          </div>
+          <div>
+            <div class="label">
+              <span class="label-text">Razão social</span>
+            </div>
+            <input
+              type="text"
+              placeholder="Razão social"
+              class="input input-bordered w-full"
+              bind:value={new_suppliers.razao_social}
+            />
+          </div>
+        </div>
 
-      <div>
+        <div>
+          <div class="label">
+            <span class="label-text">CEP</span>
+          </div>
+          <input
+            type="text"
+            placeholder="cep"
+            class="input input-bordered w-full"
+            bind:value={new_suppliers.cep}
+          />
+        </div>
+
         <div class="label">
-          <span class="label-text">CEP</span>
+          <span class="label-text">CNPJ</span>
         </div>
         <input
           type="text"
-          placeholder="cep"
+          placeholder="CNPJ"
           class="input input-bordered w-full"
-          bind:value={new_suppliers.cep}
+          bind:value={new_suppliers.cnpj_cpf}
         />
-      </div>
-
-      <div class="label">
-        <span class="label-text">CNPJ</span>
-      </div>
-      <input
-        type="text"
-        placeholder="CNPJ"
-        class="input input-bordered w-full"
-        bind:value={new_suppliers.cnpj_cpf}
-      />
-      <div class="label">
-        <span class="label-text">IE</span>
-      </div>
-      <input
-        type="text"
-        placeholder="IE"
-        class="input input-bordered w-full"
-        bind:value={new_suppliers.ie_rg}
-      />
-      <div class="flex gap-2">
-        <div>
-          <div class="label">
-            <span class="label-text">Telefone 1</span>
-          </div>
-          <input
-            type="text"
-            placeholder="Telefone"
-            class="input input-bordered w-full"
-            bind:value={new_suppliers.telephone_1}
-          />
+        <div class="label">
+          <span class="label-text">IE</span>
         </div>
-
-        <div>
-          <div class="label">
-            <span class="label-text">Telefone 2</span>
+        <input
+          type="text"
+          placeholder="IE"
+          class="input input-bordered w-full"
+          bind:value={new_suppliers.ie_rg}
+        />
+        <div class="flex gap-2">
+          <div>
+            <div class="label">
+              <span class="label-text">Telefone 1</span>
+            </div>
+            <input
+              type="text"
+              placeholder="Telefone"
+              class="input input-bordered w-full"
+              bind:value={new_suppliers.telephone_1}
+            />
           </div>
-          <input
-            type="text"
-            placeholder="Telefone"
-            class="input input-bordered w-full"
-            bind:value={new_suppliers.telephone_2}
-          />
+
+          <div>
+            <div class="label">
+              <span class="label-text">Telefone 2</span>
+            </div>
+            <input
+              type="text"
+              placeholder="Telefone"
+              class="input input-bordered w-full"
+              bind:value={new_suppliers.telephone_2}
+            />
+          </div>
         </div>
-      </div>
-    </label>
+      </label>
+    {/if}
   </div>
   <svelte:fragment slot="footer">
     <div class="mt-4 flex w-full">
