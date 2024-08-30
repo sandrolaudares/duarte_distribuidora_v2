@@ -180,7 +180,6 @@ onDestroy(() =>  {
   <button class="btn btn-primary" on:click={seeTransactionsCaixa}>Ver transacoes do caixa</button>
 </div>
     <h1 class="text-center text-3xl font-semibold mb-1">Caixa:</h1>
-    <p class="text-center mb-3">Quantidade no caixa R${(caixa.currency/100).toFixed(2)}</p>
 {#if caixa.status === 'Fechado'}
   <div class="flex justify-center">
     <label class="form-control w-full max-w-xs gap-2">

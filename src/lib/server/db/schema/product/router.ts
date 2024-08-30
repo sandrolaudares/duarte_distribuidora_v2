@@ -40,7 +40,7 @@ export const product = router({
     .input(insertProductSchema)
     .use(middleware.logged)
     .use(middleware.auth)
-    .use(middleware.allowPermissions(['admin', 'user']))
+    //.use(middleware.allowPermissions(['admin', 'user']))
 
     .mutation(async ({ input }) => {
       return await productController.insertProduct(input)

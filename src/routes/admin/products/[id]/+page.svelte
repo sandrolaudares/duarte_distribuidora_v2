@@ -16,7 +16,7 @@
 
 
 
-  const produto = data.prod
+  let produto = data.prod
 
   
   function handleAddItem() {
@@ -61,10 +61,9 @@
             product_id: produto.id,
           })
           console.log(resp)
-          produto.items.push({
-            ...resp,
-            updated_at: new Date(resp.updated_at ?? ''),
-          })
+          produto.items.push(resp)
+          produto = produto
+          //window.location.reload()
         } catch (error) {
           console.error(error)
           return JSON.stringify(error, null, 2)

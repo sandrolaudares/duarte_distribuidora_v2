@@ -14,10 +14,14 @@
   let isLoading = true
 
   let transactions: RouterOutputs['stock']['getRecentTransaoEstoque']
+  let caixa: RouterOutputs['distribuidora']['getCashierById'][0]
   onMount(async () => {
     try {
       transactions =
         await trpc($page).stock.getRecentTransaoEstoque.query(caixa_id)
+
+        const [temp] = await trpc($page).distribuidora.getCashierById.query(caixa_id)
+        caixa = temp
 
       isLoading = false
     } catch (error: any) {
@@ -33,6 +37,7 @@
         <Loading />
       </div>
     {:else}
+    <p class="text-center mb-3">Quantidade no caixa R${(caixa.currency/100).toFixed(2)}</p>
       <div class="overflow-x-auto">
         <table class="table table-zebra table-xs">
           <thead>

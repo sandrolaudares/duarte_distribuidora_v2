@@ -109,4 +109,9 @@ export const distribuidora = router({
         amount: data.amount,
       })
     }),
+
+  getCashierById: publicProcedure.input(z.number()).query(async({input})=>{
+    const id = input
+    return await distribuidoraController.getCashierById(id)
+  })
 })
