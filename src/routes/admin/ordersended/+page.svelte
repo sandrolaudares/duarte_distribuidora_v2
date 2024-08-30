@@ -24,18 +24,20 @@
   }
 </script>
 
-<h1 class="text-center text-4xl font-semibold">Pedidos finalizados:</h1>
-{#each ended as pedido}
-    <CardShowPedidos
-      button_text="Finalizar"
-      order={pedido}
-      click_confirm={async () => {
-        console.log('click aceitar')
-        pedido.status = 'ENDED'
-        await changeStatusPedido({
-          order_id: pedido.id,
-          status: 'ENDED',
-        })
-      }}
-    />
-{/each}
+<h1 class="text-center text-4xl font-semibold">Pedidos entregues:</h1>
+<div class="grid grid-cols-1 lg:grid-cols-2">
+  {#each ended as pedido}
+      <CardShowPedidos
+        button_text="Finalizar"
+        order={pedido}
+        click_confirm={async () => {
+          console.log('click aceitar')
+          pedido.status = 'ENDED'
+          await changeStatusPedido({
+            order_id: pedido.id,
+            status: 'ENDED',
+          })
+        }}
+      />
+  {/each}
+</div>

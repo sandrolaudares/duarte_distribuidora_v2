@@ -259,6 +259,18 @@ export const customer = {
       .where(eq(customerOrderTable.id, order_id))
   },
 
+  updateOrderPaymentStatus: async (
+    order_id: SelectCustomerOrder['id'],
+    new_status: SelectCustomerOrder['payment_status'],
+  ) => {
+    console.log('Updating order payment status:', order_id, new_status)
+
+    return await db
+      .update(customerOrderTable)
+      .set({ payment_status: new_status })
+      .where(eq(customerOrderTable.id, order_id))
+  },
+
   getCustomerOrders: async (customerId: SelectCustomer['id']) => {
     return db.query.customerOrderTable.findMany({
       where: eq(customerOrderTable.customer_id, customerId),

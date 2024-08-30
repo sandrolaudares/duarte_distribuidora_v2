@@ -77,7 +77,6 @@
         <h1 class="text-3xl font-bold">Pedidos {pedidoSelecionado}:</h1>
       {/if}
 
-      {#if isPendente}
         <div class="mt-2 flex items-center">
           <div>
             <!--TODO: FIltro ainda falta ajustar para atacado, varejo-->
@@ -97,35 +96,20 @@
               <option value="ON THE WAY">A caminho</option>
             </select>
           </div>
-          <div class="relative">
-            {#if pedidosAbertos.length > 0}
-              <div class="absolute right-0 top-0 rounded-full bg-error">
-                <span class="p-2 text-center text-sm font-bold text-white ">
-                  {pedidosAbertos.length}
-                </span>
-              </div>
-            {/if}
-            <div class="p-2">
-              <button class="btn btn-primary" on:click={togglePendente}>
-                Pedidos pendentes
-              </button>
-            </div>
-          </div>
         </div>
-      {:else}
-        <div class="mt-2 p-2">
-          <button class="btn btn-primary" on:click={togglePendente}>
-            Pedidos aceitos
-          </button>
-        </div>
-      {/if}
     </div>
-    {#if !isPendente}
-      <h1 class="text-center text-3xl font-bold">Pedidos pendentes</h1>
-      <p class="text-center">
-        (Lista de todos pedidos pendentes aguardando aprovacão)
-      </p>
-      {#if pedidosAbertos.length > 0}
+    
+    {#if pedidoSelecionado != 'all' && pedidoSelecionado != 'varejo' && pedidoSelecionado != 'atacado'}
+      {#each pedidosFiltrados as pedido}
+        <CardShowPedidos order={pedido} />
+      {/each}
+    {:else if pedidoSelecionado === 'all' || pedidoSelecionado === 'varejo' || pedidoSelecionado === 'atacado'}
+      <div class="grid grid-cols-1 gap-2 xl:grid-cols-3">
+
+        <div
+        class={`overflow-y-auto rounded-lg bg-error p-1 ${pedidosAbertos.length > 0 ? 'max-h-[71vh]' : 'max-h-[78vh]'}`}
+      >
+        <h1 class="text-center text-black">Pedidos Pendentes:</h1>
         {#each pedidosFiltrados as pedido}
           {#if pedido.status === 'PENDING'}
             <CardShowPedidos
@@ -151,17 +135,10 @@
             />
           {/if}
         {/each}
-      {:else}
-        <p class="mt-10 text-center text-xl">Nenhum pedido pendente!</p>
-      {/if}
-    {:else if pedidoSelecionado != 'all' && pedidoSelecionado != 'varejo' && pedidoSelecionado != 'atacado'}
-      {#each pedidosFiltrados as pedido}
-        <CardShowPedidos order={pedido} />
-      {/each}
-    {:else if pedidoSelecionado === 'all' || pedidoSelecionado === 'varejo' || pedidoSelecionado === 'atacado'}
-      <div class="grid grid-cols-1 gap-2 xl:grid-cols-2">
+      </div>
+
         <div
-          class={`overflow-y-auto rounded-lg bg-error p-1 ${pedidosAbertos.length > 0 ? 'max-h-[71vh]' : 'max-h-[78vh]'}`}
+          class={`overflow-y-auto rounded-lg bg-warning p-1 ${pedidosAbertos.length > 0 ? 'max-h-[71vh]' : 'max-h-[78vh]'}`}
         >
           <h1 class="text-center text-black">Pedidos aceitos:</h1>
           {#each pedidosFiltrados as pedido}
@@ -182,7 +159,7 @@
           {/each}
         </div>
         <div
-          class={`overflow-y-auto rounded-lg bg-warning p-1 ${pedidosAbertos.length > 0 ? 'max-h-[71vh]' : 'max-h-[78vh]'}`}
+          class={`overflow-y-auto rounded-lg bg-success p-1 ${pedidosAbertos.length > 0 ? 'max-h-[71vh]' : 'max-h-[78vh]'}`}
         >
           <h1 class="text-center text-black">A caminho:</h1>
           {#each pedidosFiltrados as pedido}
@@ -227,7 +204,3 @@
     {/if}
   </div>
 </main>
-
-<!-- <pre>
-  {JSON.stringify(data.last_orders, null, 2)}
-</pre> -->

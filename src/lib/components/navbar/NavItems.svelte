@@ -107,11 +107,7 @@
           icon: icons.cart(),
         },
         {
-          name: 'Pedidos finalizados',
-          href: '/admin/ordersended',
-        },
-        {
-          name: 'Pendentes',
+          name: 'Financeiro',
           href: '/admin/finance',
         },
         {

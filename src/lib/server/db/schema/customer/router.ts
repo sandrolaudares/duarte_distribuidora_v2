@@ -130,4 +130,25 @@ export const customer = router({
       const { order_id, status } = input
       return await customerController.updateOrderStatus(order_id, status)
     }),
+
+    updateOrderPaymentStatus: publicProcedure
+    .use(middleware.logged)
+    .use(middleware.auth)
+    .input(
+      z.object({
+        order_id: z.number(),
+        payment_status: z.enum([
+          'PENDING',
+          'CONFIRMED',
+          'CANCELED',
+          'REFUNDED',
+        ]),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const { order_id, payment_status } = input
+      return await customerController.updateOrderPaymentStatus(order_id, payment_status)
+    }),
+
+    //TODO: updateOrderPaymentStatus 
 })

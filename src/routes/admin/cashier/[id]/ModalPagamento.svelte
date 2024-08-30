@@ -85,7 +85,7 @@
           </button>
           <hr class="w-full bg-base-300" />
         {/if}
-        <button
+        <!-- <button
           class="btn btn-primary w-full"
           on:click={() => {
             isDinheiro = true
@@ -93,7 +93,7 @@
           }}
         >
           DINHEIRO
-        </button>
+        </button> -->
 
         {#if isDinheiro}
           <div class="flex w-full items-center justify-center gap-4">
