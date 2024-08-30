@@ -94,7 +94,10 @@ export const customer = {
         case 'fiado': {
           if (!order_info.customer_id) {
             await tx.rollback()
-            throw new TRPCError({code: 'BAD_REQUEST', message:'Para pagar fiado é necessario selecionar um cliente'})
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'Para pagar fiado é necessario selecionar um cliente',
+            })
           }
           const [customer] = await tx
             .select()
@@ -102,7 +105,10 @@ export const customer = {
             .where(eq(customerTable.id, order_info.customer_id))
           if (customer.max_credit < order_info.total + customer.used_credit) {
             await tx.rollback()
-            throw new TRPCError({code: 'BAD_REQUEST', message:`Customer ${customer.name} has no credit available`})
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: `Customer ${customer.name} has no credit available`,
+            })
           }
           await tx
             .update(customerTable)
@@ -117,16 +123,26 @@ export const customer = {
         case 'dinheiro': {
           if (!payment_info.amount_paid) {
             await tx.rollback()
-            throw new TRPCError({code: 'BAD_REQUEST', message:'Para pagar em dinheiro é necessario informar o valor pago'})
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message:
+                'Para pagar em dinheiro é necessario informar o valor pago',
+            })
           }
 
           if (payment_info.amount_paid < order_info.total) {
             await tx.rollback()
-            throw new TRPCError({code: 'BAD_REQUEST', message:'O valor pago é menor que o valor da compra'})
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'O valor pago é menor que o valor da compra',
+            })
           }
           if (!order_info.cachier_id) {
             await tx.rollback()
-            throw new TRPCError({code: 'BAD_REQUEST', message:'Para pagar em dinheiro é necessario informar o caixa'})
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'Para pagar em dinheiro é necessario informar o caixa',
+            })
           }
 
           await tx.insert(cashierTransactionTable).values({
@@ -256,10 +272,7 @@ export const customer = {
       },
     })
   },
-  
-  
-  
-  
+
   getCurrentOrders: async () => {
     return db.query.customerOrderTable.findMany({
       where: or(
@@ -280,9 +293,7 @@ export const customer = {
   },
   getEndedOrders: async () => {
     return db.query.customerOrderTable.findMany({
-      where: or(
-        ne(customerOrderTable.status, 'ENDED'),
-      ),
+      where: eq(customerOrderTable.status, 'ENDED'),
       with: {
         address: true,
         customer: true,
@@ -296,9 +307,7 @@ export const customer = {
   },
   getPendingOrders: async () => {
     return db.query.customerOrderTable.findMany({
-      where: or(
-        ne(customerOrderTable.payment_status, 'PENDING'),
-      ),
+      where: eq(customerOrderTable.payment_status, 'PENDING'),
       with: {
         address: true,
         customer: true,
@@ -309,7 +318,7 @@ export const customer = {
         },
       },
     })
-  }
+  },
 }
 
 export type CurrentOrders = Awaited<
