@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "26de7820-938e-4aa2-b8f5-9c0c6f9feebd",
+  "id": "074f65af-2653-493f-931c-1954e007c09f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "magic_link": {
@@ -408,7 +408,7 @@
         },
         "sku": {
           "name": "sku",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -458,15 +458,15 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "product_item_sku_sku_id_fk": {
-          "name": "product_item_sku_sku_id_fk",
+        "product_item_sku_sku_sku_fk": {
+          "name": "product_item_sku_sku_sku_fk",
           "tableFrom": "product_item",
           "tableTo": "sku",
           "columnsFrom": [
             "sku"
           ],
           "columnsTo": [
-            "id"
+            "sku"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -708,36 +708,43 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "stock": {
-      "name": "stock",
+    "sku": {
+      "name": "sku",
       "columns": {
-        "distribuidora_id": {
-          "name": "distribuidora_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "sku": {
           "name": "sku",
-          "type": "integer",
-          "primaryKey": false,
+          "type": "text",
+          "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         },
         "created_at": {
           "name": "created_at",
-          "type": "text",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
-          "default": "(CURRENT_TIMESTAMP)"
+          "autoincrement": false
         },
         "updated_at": {
           "name": "updated_at",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
+        },
+        "image_id": {
+          "name": "image_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
           "autoincrement": false
         },
         "quantity": {
@@ -751,25 +758,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "stock_distribuidora_id_distribuidora_id_fk": {
-          "name": "stock_distribuidora_id_distribuidora_id_fk",
-          "tableFrom": "stock",
-          "tableTo": "distribuidora",
+        "sku_image_id_image_id_fk": {
+          "name": "sku_image_id_image_id_fk",
+          "tableFrom": "sku",
+          "tableTo": "image",
           "columnsFrom": [
-            "distribuidora_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "stock_sku_sku_id_fk": {
-          "name": "stock_sku_sku_id_fk",
-          "tableFrom": "stock",
-          "tableTo": "sku",
-          "columnsFrom": [
-            "sku"
+            "image_id"
           ],
           "columnsTo": [
             "id"
@@ -778,45 +772,6 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "stock_distribuidora_id_sku_pk": {
-          "columns": [
-            "distribuidora_id",
-            "sku"
-          ],
-          "name": "stock_distribuidora_id_sku_pk"
-        }
-      },
-      "uniqueConstraints": {}
-    },
-    "sku": {
-      "name": "sku",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "(CURRENT_TIMESTAMP)"
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -832,7 +787,7 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "text",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
@@ -845,16 +800,9 @@
           "notNull": false,
           "autoincrement": false
         },
-        "distribuidora_id": {
-          "name": "distribuidora_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "sku": {
           "name": "sku",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -880,6 +828,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "order_id": {
+          "name": "order_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "cost_price": {
           "name": "cost_price",
           "type": "integer",
@@ -893,10 +848,30 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "total_log": {
+          "name": "total_log",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
         }
       },
       "indexes": {},
       "foreignKeys": {
+        "stock_transaction_sku_sku_sku_fk": {
+          "name": "stock_transaction_sku_sku_sku_fk",
+          "tableFrom": "stock_transaction",
+          "tableTo": "sku",
+          "columnsFrom": [
+            "sku"
+          ],
+          "columnsTo": [
+            "sku"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "stock_transaction_supplier_id_supplier_id_fk": {
           "name": "stock_transaction_supplier_id_supplier_id_fk",
           "tableFrom": "stock_transaction",
@@ -910,139 +885,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "stock_transaction_distribuidora_id_sku_stock_distribuidora_id_sku_fk": {
-          "name": "stock_transaction_distribuidora_id_sku_stock_distribuidora_id_sku_fk",
+        "stock_transaction_order_id_customer_order_id_fk": {
+          "name": "stock_transaction_order_id_customer_order_id_fk",
           "tableFrom": "stock_transaction",
-          "tableTo": "stock",
+          "tableTo": "customer_order",
           "columnsFrom": [
-            "distribuidora_id",
-            "sku"
-          ],
-          "columnsTo": [
-            "distribuidora_id",
-            "sku"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "tranferance_tem": {
-      "name": "tranferance_tem",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "sku": {
-          "name": "sku",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "quantity": {
-          "name": "quantity",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "tranferance_tem_sku_sku_id_fk": {
-          "name": "tranferance_tem_sku_sku_id_fk",
-          "tableFrom": "tranferance_tem",
-          "tableTo": "sku",
-          "columnsFrom": [
-            "sku"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "stock_transferance": {
-      "name": "stock_transferance",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "(CURRENT_TIMESTAMP)"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "(CURRENT_TIMESTAMP)"
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "from_distribuidora_id": {
-          "name": "from_distribuidora_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "'PENDING'"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "stock_transferance_created_by_user_username_fk": {
-          "name": "stock_transferance_created_by_user_username_fk",
-          "tableFrom": "stock_transferance",
-          "tableTo": "user",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "username"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "stock_transferance_from_distribuidora_id_distribuidora_id_fk": {
-          "name": "stock_transferance_from_distribuidora_id_distribuidora_id_fk",
-          "tableFrom": "stock_transferance",
-          "tableTo": "distribuidora",
-          "columnsFrom": [
-            "from_distribuidora_id"
+            "order_id"
           ],
           "columnsTo": [
             "id"
@@ -1073,7 +921,7 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "text",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
@@ -1082,6 +930,48 @@
         "updated_at": {
           "name": "updated_at",
           "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "razao_social": {
+          "name": "razao_social",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cnpj_cpf": {
+          "name": "cnpj_cpf",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ie_rg": {
+          "name": "ie_rg",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "telephone_1": {
+          "name": "telephone_1",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "telephone_2": {
+          "name": "telephone_2",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cep": {
+          "name": "cep",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -1439,13 +1329,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "distribuidora_id": {
-          "name": "distribuidora_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "customer_id": {
           "name": "customer_id",
           "type": "integer",
@@ -1455,6 +1338,13 @@
         },
         "address_id": {
           "name": "address_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cachier_id": {
+          "name": "cachier_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -1499,19 +1389,6 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "customer_order_distribuidora_id_distribuidora_id_fk": {
-          "name": "customer_order_distribuidora_id_distribuidora_id_fk",
-          "tableFrom": "customer_order",
-          "tableTo": "distribuidora",
-          "columnsFrom": [
-            "distribuidora_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
         "customer_order_customer_id_customer_id_fk": {
           "name": "customer_order_customer_id_customer_id_fk",
           "tableFrom": "customer_order",
@@ -1531,6 +1408,19 @@
           "tableTo": "address",
           "columnsFrom": [
             "address_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "customer_order_cachier_id_cashier_id_fk": {
+          "name": "customer_order_cachier_id_cashier_id_fk",
+          "tableFrom": "customer_order",
+          "tableTo": "cashier",
+          "columnsFrom": [
+            "cachier_id"
           ],
           "columnsTo": [
             "id"
@@ -1764,13 +1654,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "distribuidora_id": {
-          "name": "distribuidora_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "name": {
           "name": "name",
           "type": "text",
@@ -1796,21 +1679,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "cashier_distribuidora_id_distribuidora_id_fk": {
-          "name": "cashier_distribuidora_id_distribuidora_id_fk",
-          "tableFrom": "cashier",
-          "tableTo": "distribuidora",
-          "columnsFrom": [
-            "distribuidora_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -1854,6 +1723,13 @@
           "autoincrement": false,
           "default": 0
         },
+        "observation": {
+          "name": "observation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "type": {
           "name": "type",
           "type": "text",
@@ -1885,37 +1761,6 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "distribuidora": {
-      "name": "distribuidora",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "(CURRENT_TIMESTAMP)"
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     }

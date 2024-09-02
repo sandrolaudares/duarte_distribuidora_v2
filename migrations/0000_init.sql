@@ -60,13 +60,13 @@ CREATE TABLE `product_item` (
 	`updated_at` integer,
 	`product_id` integer NOT NULL,
 	`name` text NOT NULL,
-	`sku` integer,
+	`sku` text,
 	`quantity` integer DEFAULT 1 NOT NULL,
 	`image_id` integer,
 	`retail_price` integer NOT NULL,
 	`wholesale_price` integer NOT NULL,
 	FOREIGN KEY (`product_id`) REFERENCES `product`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`sku`) REFERENCES `sku`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`sku`) REFERENCES `sku`(`sku`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`image_id`) REFERENCES `image`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
@@ -102,61 +102,44 @@ CREATE TABLE `logs` (
 	FOREIGN KEY (`created_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
-CREATE TABLE `stock` (
-	`distribuidora_id` integer NOT NULL,
-	`sku` integer NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
-	`updated_at` integer,
-	`quantity` integer DEFAULT 0 NOT NULL,
-	PRIMARY KEY(`distribuidora_id`, `sku`),
-	FOREIGN KEY (`distribuidora_id`) REFERENCES `distribuidora`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`sku`) REFERENCES `sku`(`id`) ON UPDATE no action ON DELETE no action
-);
---> statement-breakpoint
 CREATE TABLE `sku` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
-	`name` text NOT NULL
+	`sku` text PRIMARY KEY NOT NULL,
+	`created_at` integer,
+	`updated_at` integer DEFAULT (CURRENT_TIMESTAMP),
+	`image_id` integer,
+	`name` text NOT NULL,
+	`quantity` integer DEFAULT 0 NOT NULL,
+	FOREIGN KEY (`image_id`) REFERENCES `image`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `stock_transaction` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (CURRENT_TIMESTAMP),
 	`updated_at` integer,
-	`distribuidora_id` integer NOT NULL,
-	`sku` integer NOT NULL,
+	`sku` text NOT NULL,
 	`quantity` integer NOT NULL,
 	`type` text NOT NULL,
 	`supplier_id` integer,
+	`order_id` integer,
 	`cost_price` integer,
 	`meta_data` text NOT NULL,
+	`total_log` integer NOT NULL,
+	FOREIGN KEY (`sku`) REFERENCES `sku`(`sku`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`supplier_id`) REFERENCES `supplier`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`distribuidora_id`,`sku`) REFERENCES `stock`(`distribuidora_id`,`sku`) ON UPDATE no action ON DELETE no action
-);
---> statement-breakpoint
-CREATE TABLE `tranferance_tem` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`sku` integer NOT NULL,
-	`quantity` integer NOT NULL,
-	FOREIGN KEY (`sku`) REFERENCES `sku`(`id`) ON UPDATE no action ON DELETE no action
-);
---> statement-breakpoint
-CREATE TABLE `stock_transferance` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
-	`updated_at` integer DEFAULT (CURRENT_TIMESTAMP),
-	`created_by` text NOT NULL,
-	`from_distribuidora_id` integer NOT NULL,
-	`status` text DEFAULT 'PENDING',
-	FOREIGN KEY (`created_by`) REFERENCES `user`(`username`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`from_distribuidora_id`) REFERENCES `distribuidora`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`order_id`) REFERENCES `customer_order`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `supplier` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
-	`updated_at` integer
+	`created_at` integer DEFAULT (CURRENT_TIMESTAMP),
+	`updated_at` integer,
+	`razao_social` text,
+	`cnpj_cpf` text,
+	`ie_rg` text,
+	`telephone_1` text,
+	`telephone_2` text,
+	`cep` text
 );
 --> statement-breakpoint
 CREATE TABLE `notification_channel` (
@@ -210,17 +193,17 @@ CREATE TABLE `customer_order` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
 	`updated_at` integer,
-	`distribuidora_id` integer,
 	`customer_id` integer,
 	`address_id` integer,
+	`cachier_id` integer,
 	`payment_method` text NOT NULL,
 	`payment_status` text DEFAULT 'PENDING' NOT NULL,
 	`observation` text,
 	`total` integer NOT NULL,
 	`status` text NOT NULL,
-	FOREIGN KEY (`distribuidora_id`) REFERENCES `distribuidora`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`customer_id`) REFERENCES `customer`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`address_id`) REFERENCES `address`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`address_id`) REFERENCES `address`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`cachier_id`) REFERENCES `cashier`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `customer` (
@@ -255,11 +238,9 @@ CREATE TABLE `cashier` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
 	`updated_at` integer,
-	`distribuidora_id` integer NOT NULL,
 	`name` text NOT NULL,
 	`status` text DEFAULT 'Fechado' NOT NULL,
-	`currency` integer DEFAULT 0 NOT NULL,
-	FOREIGN KEY (`distribuidora_id`) REFERENCES `distribuidora`(`id`) ON UPDATE no action ON DELETE no action
+	`currency` integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `cashier_transaction` (
@@ -268,15 +249,10 @@ CREATE TABLE `cashier_transaction` (
 	`updated_at` integer,
 	`cashier_id` integer NOT NULL,
 	`amount` integer DEFAULT 0 NOT NULL,
+	`observation` text,
 	`type` text NOT NULL,
 	`meta_data` text NOT NULL,
 	FOREIGN KEY (`cashier_id`) REFERENCES `cashier`(`id`) ON UPDATE no action ON DELETE no action
-);
---> statement-breakpoint
-CREATE TABLE `distribuidora` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
-	`name` text NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `user_username_unique` ON `user` (`username`);--> statement-breakpoint
