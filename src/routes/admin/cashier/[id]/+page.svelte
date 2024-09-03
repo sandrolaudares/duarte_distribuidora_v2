@@ -270,8 +270,7 @@ onDestroy(() =>  {
         {#each Object.values($cart) as item}
           <div class="flex justify-between items-center">
             <li class="py-2 font-bold">
-              ({item.quantity}x) {item.item.name}
-              <span class="text-secondary">R${(item.item[tipo_preco]/100).toFixed(2)} - <span class="text-success">R${(item.quantity*item.item[tipo_preco]/100).toFixed(2)}</span></span>
+              ({item.quantity}x)<span class="text-secondary text-sm"> R${(item.item[tipo_preco]/100).toFixed(2)}</span> = <span class="text-success">R${(item.quantity*item.item[tipo_preco]/100).toFixed(2)}</span> {item.item.name}
             </li>
             <button
               class="btn btn-circle m-1"
@@ -284,7 +283,7 @@ onDestroy(() =>  {
       </ul>
       <h2 class="mx-10 flex justify-center text-3xl font-bold">
         Preço total:&nbsp;
-        <span class="text-primary">R${(total/100).toFixed(2)}</span>
+        <span class="text-success">R${(total/100).toFixed(2)}</span>
       </h2>
     </div>
 
