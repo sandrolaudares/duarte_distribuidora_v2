@@ -19,6 +19,7 @@
   import ModalCliente from './ModalCliente.svelte'
   import { onDestroy } from 'svelte';
   import ModalPagamento from './ModalPagamento.svelte'
+  import CaixaColumn from './CaixaColumn.svelte'
 
   const cart = getCartContext()
 
@@ -37,12 +38,13 @@
 
   let enderecoCliente: RouterOutputs['customer']['getCustomers'][0]['adresses'][0] | null = null
 
-  $: total = Object.values($cart).reduce((acc, item) => {
-    return acc + item.item[item.is_retail ? 'retail_price': 'wholesale_price'] * item.quantity
-  }, 0)
+
 
   //TODO:TIPAGEM DA VARIAVEL metodo_pagamento - status_pagamento
   async function createOrder(metodo_pagamento: any,status_pagamento:any,isChecked:boolean,amount_paid:number) {
+    let total = Object.values($cart).reduce((acc, item) => {
+    return acc + item.item[item.is_retail ? 'retail_price': 'wholesale_price'] * item.quantity
+    }, 0)
     try {  
         const resp = await trpc($page).customer.insertOrder.mutate({
           order_info: {
@@ -159,6 +161,9 @@ async function seeTransactionsCaixa(){
 }
 
 async function pagamentoModal(){
+  let total = Object.values($cart).reduce((acc, item) => {
+    return acc + item.item[item.is_retail ? 'retail_price': 'wholesale_price'] * item.quantity
+    }, 0)
   modal.open(ModalPagamento, {
     cliente_selecionado: clienteSelecionado,
     total_pedido:total,
@@ -269,31 +274,7 @@ onDestroy(() =>  {
     <div
       class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-4"
     >
-      <ul class="mb-4 text-center text-lg max-h-[70vh] overflow-scroll">
-        {#each Object.values($cart) as item}
-          <div class="flex justify-between items-center">
-            <label class="swap border rounded-md m-1 p-1">
-              <input type="checkbox" bind:checked={item.is_retail} />
-              <div class="swap-on">Atacado</div>
-              <div class="swap-off">Varejo</div>
-            </label>
-            <li class="py-2 font-bold">
-              ({item.quantity}x)<span class="text-secondary text-sm"> R${(item.item[item.is_retail?'retail_price':'wholesale_price']/100).toFixed(2)}</span> = 
-              <span class="text-success">R${(item.quantity*item.item[item.is_retail?'retail_price':'wholesale_price']/100).toFixed(2)}</span> {item.item.name}
-            </li>
-            <button
-              class="btn btn-circle m-1"
-              on:click={e=> cart.removeItem(item.item.id)}>
-              {@html icons.x({ stroke: 'red' })}
-            </button>
-          </div>
-          <hr />
-        {/each}
-      </ul>
-      <h2 class="mx-10 flex justify-center text-3xl font-bold">
-        Preço total:&nbsp;
-        <span class="text-success">R${(total/100).toFixed(2)}</span>
-      </h2>
+     <CaixaColumn/>
     </div>
 
     <div class="col-auto flex h-auto md:w-96 flex-col justify-between gap-2">
