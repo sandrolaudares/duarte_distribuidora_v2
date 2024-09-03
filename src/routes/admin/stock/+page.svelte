@@ -64,11 +64,17 @@
 
   function add(invalidate: Function) {
     modal.open(FormModal<RouterInputs['stock']['insertSKU']>, {
-      title: 'Create new Customer',
+      title: 'Create',
       fields: [
         {
           label: 'Name',
           name: 'name',
+          type: 'text',
+          required: true,
+        },
+        {
+          label: 'codigo',
+          name: 'sku',
           type: 'text',
           required: true,
         },

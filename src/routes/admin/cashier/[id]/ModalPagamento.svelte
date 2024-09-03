@@ -14,9 +14,10 @@
     metodo_pagamento: string,
     status_pagamento: string,
     isChecked:boolean,
+    valor_recebido:number
   ) => {}
 
-  export let valor_recebido = 0
+  let valor_recebido = 0
 
   let metodo_pagamento = ''
 
@@ -47,7 +48,7 @@
             class="btn btn-primary w-full"
             on:click={() => {
               isLoading=true
-              realizarPedido('fiado', 'PENDING',isChecked)
+              realizarPedido('fiado', 'PENDING',isChecked,valor_recebido)
             }}
           >
             FIADO
@@ -76,7 +77,7 @@
             class="btn btn-accent w-full"
             on:click={() => {
               isLoading=true
-              realizarPedido(metodo_pagamento, 'CONFIRMED',isChecked)
+              realizarPedido(metodo_pagamento, 'CONFIRMED',isChecked,valor_recebido)
 
             }}
             disabled={metodo_pagamento === ''}
@@ -85,7 +86,7 @@
           </button>
           <hr class="w-full bg-base-300" />
         {/if}
-        <!-- <button
+        <button
           class="btn btn-primary w-full"
           on:click={() => {
             isDinheiro = true
@@ -93,7 +94,7 @@
           }}
         >
           DINHEIRO
-        </button> -->
+        </button>
 
         {#if isDinheiro}
           <div class="flex w-full items-center justify-center gap-4">
@@ -107,7 +108,7 @@
                 class="btn btn-accent"
                 on:click={() => {
                   isLoading=true
-                  realizarPedido('dinheiro', 'CONFIRMED',isChecked)
+                  realizarPedido('dinheiro', 'CONFIRMED',isChecked,valor_recebido)
                 }}
                 disabled={total_pedido >= valor_recebido}
               >

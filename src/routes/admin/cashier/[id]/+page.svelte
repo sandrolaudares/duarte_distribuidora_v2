@@ -37,14 +37,12 @@
 
   let enderecoCliente: RouterOutputs['customer']['getCustomers'][0]['adresses'][0] | null = null
 
-  let amount_paid = 0
-
   $: total = Object.values($cart).reduce((acc, item) => {
     return acc + item.item[tipo_preco] * item.quantity
   }, 0)
 
   //TODO:TIPAGEM DA VARIAVEL metodo_pagamento - status_pagamento
-  async function createOrder(metodo_pagamento: any,status_pagamento:any,isChecked:boolean) {
+  async function createOrder(metodo_pagamento: any,status_pagamento:any,isChecked:boolean,amount_paid:number) {
     try {  
         const resp = await trpc($page).customer.insertOrder.mutate({
           order_info: {
@@ -164,9 +162,8 @@ async function pagamentoModal(){
   modal.open(ModalPagamento, {
     cliente_selecionado: clienteSelecionado,
     total_pedido:total,
-    valor_recebido:amount_paid,
-    realizarPedido: (metodo_pagamento,status_pagamento,isChecked) => {
-      createOrder(metodo_pagamento,status_pagamento,isChecked)
+    realizarPedido: (metodo_pagamento,status_pagamento,isChecked,amount_paid) => {
+      createOrder(metodo_pagamento,status_pagamento,isChecked,amount_paid)
     }
   })
 }
@@ -271,13 +268,13 @@ onDestroy(() =>  {
     >
       <ul class="mb-4 text-center text-lg max-h-[70vh] overflow-scroll">
         {#each Object.values($cart) as item}
-          <div class="flex justify-between">
+          <div class="flex justify-between items-center">
             <li class="py-2 font-bold">
               ({item.quantity}x) {item.item.name}
-              <span class="text-secondary">R${(item.item[tipo_preco]/100).toFixed(2)}</span>
+              <span class="text-secondary">R${(item.item[tipo_preco]/100).toFixed(2)} - <span class="text-success">R${(item.quantity*item.item[tipo_preco]/100).toFixed(2)}</span></span>
             </li>
             <button
-              class="btn btn-circle"
+              class="btn btn-circle m-1"
               on:click={e=> cart.removeItem(item.item.id)}>
               {@html icons.x({ stroke: 'red' })}
             </button>
