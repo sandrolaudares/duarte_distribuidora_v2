@@ -8,6 +8,7 @@ type Cart = Record<
   {
     item: SelectProductItem
     quantity: number
+    is_retail?:boolean 
   }
 >
 
@@ -17,7 +18,7 @@ function createCartStore(base_cart: Cart = {}) {
     set,
     subscribe,
     update,
-    addItem: (input: { item: SelectProductItem; quantity: number }) => {
+    addItem: (input: { item: SelectProductItem; quantity: number;is_retail?:boolean }) => {
       update(cart => {
         const existing = cart[input.item.id]
 
@@ -27,17 +28,26 @@ function createCartStore(base_cart: Cart = {}) {
           cart[input.item.id] = {
             item: input.item,
             quantity: input.quantity,
+            is_retail: input.is_retail
           }
         }
         return cart
       })
     },
-    setItem: (input: { item: SelectProductItem; quantity: number }) => {
+    setItem: (input: { item: SelectProductItem; quantity: number;is_retail?:boolean }) => {
       update(cart => {
         cart[input.item.id] = {
           item: input.item,
           quantity: input.quantity,
+          is_retail: input.is_retail
         }
+        return cart
+      })
+    },
+    toggleTipoPreco: (id:number) => {
+      update(cart => {
+        cart[id].is_retail = !cart[id].is_retail
+
         return cart
       })
     },

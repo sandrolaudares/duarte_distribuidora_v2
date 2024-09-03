@@ -22,10 +22,13 @@
   import type { RouterOutputs, RouterInputs } from '$trpc/router'
   import { goto } from '$app/navigation'
   import EditRowCurrency from '$lib/components/table/EditRowCurrency.svelte'
+  import { createRawSnippet } from 'svelte';
+  import SimpleSelect from './SimpleSelect.svelte'
+
 
   type Customer = RouterOutputs['customer']['getPaginatedCustomers']['rows'][0]
 
-  const defaultColumns: ColumnDef<Customer>[] = [
+  const columns: ColumnDef<Customer>[] = [
     {
       header: 'Name',
       accessorKey: 'name',
@@ -51,7 +54,23 @@
     },
     {
       header: 'Tipo Cliente',
-      accessorFn: row => (row.is_retail ? 'Juridica' : 'Fisica'),
+      accessorKey: 'is_retail',
+      cell: info =>
+        renderComponent(SimpleSelect, {
+          id: info.row.original.id,
+          colID: 'is_retail',
+          value: info.getValue(),
+          options: [
+            {
+              label: 'Pessoa Juridica',
+              value: false,
+            },
+            {
+              label: 'Pessoa Fisica',
+              value: true,
+            },
+          ],
+        }),
     },
     {
       header: 'RG/IE',
@@ -170,14 +189,16 @@
             phone: changes[key].phone ?? undefined,
             name: changes[key].name,
             email: changes[key].email ?? undefined,
+            is_retail: changes[key].is_retail ?? undefined
           },
         })
 
         if (resp) {
-          toast.success(`#${key} 'Product updated'`)
+          toast.success(`#${key} 'Cliente updated'`)
+          window.location.reload()
         }
       } catch (error) {
-        toast.error(`#${key} 'Product update failed'`)
+        toast.error(`#${key} 'Cliente update failed'`)
       }
     }
     return {
@@ -191,7 +212,7 @@
       fields: [
         {
           name: 'is_retail',
-          label: 'Pessoa Juridica',
+          label: 'Pessoa Fisica',
           type: 'checkbox',
         },
         {
@@ -233,12 +254,12 @@
           toast.error(error.message)
           return error.message
         }
-        invalidate()  
+        invalidate()
       },
     })
   }
 </script>
 
 <div class=" h-[70vh] overflow-x-auto p-4">
-  <Datatable columns={defaultColumns} {load} {save} {add} />
+  <Datatable columns={columns} {load} {save} {add} />
 </div>

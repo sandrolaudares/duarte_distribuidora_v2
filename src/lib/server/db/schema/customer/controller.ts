@@ -39,6 +39,9 @@ export const customer = {
   ) => {
     return db.update(customerTable).set(input).where(eq(customerTable.id, id))
   },
+  deleteCustomerById:(id:SelectCustomer['id'])=>{
+    return db.delete(customerTable).where(eq(customerTable.id,id))
+  },
   getCustomerById: async (id: SelectCustomer['id']) => {
     return db.query.customerTable.findFirst({
       where: eq(customerTable.id, id),

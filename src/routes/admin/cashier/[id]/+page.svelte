@@ -19,6 +19,7 @@
   import ModalCliente from './ModalCliente.svelte'
   import { onDestroy } from 'svelte';
   import ModalPagamento from './ModalPagamento.svelte'
+  import CaixaColumn from './CaixaColumn.svelte'
 
   const cart = getCartContext()
 
@@ -37,12 +38,13 @@
 
   let enderecoCliente: RouterOutputs['customer']['getCustomers'][0]['adresses'][0] | null = null
 
-  $: total = Object.values($cart).reduce((acc, item) => {
-    return acc + item.item[tipo_preco] * item.quantity
-  }, 0)
+
 
   //TODO:TIPAGEM DA VARIAVEL metodo_pagamento - status_pagamento
   async function createOrder(metodo_pagamento: any,status_pagamento:any,isChecked:boolean,amount_paid:number) {
+    let total = Object.values($cart).reduce((acc, item) => {
+    return acc + item.item[item.is_retail ? 'retail_price': 'wholesale_price'] * item.quantity
+    }, 0)
     try {  
         const resp = await trpc($page).customer.insertOrder.mutate({
           order_info: {
@@ -59,7 +61,7 @@
           order_items: Object.values($cart).map(item => ({
             product_id: item.item.id,
             quantity: item.quantity,
-            price: item.item[tipo_preco],
+            price: item.item[item.is_retail ? 'retail_price':'wholesale_price'],
             //price: 12,
           })),
         })
@@ -159,6 +161,9 @@ async function seeTransactionsCaixa(){
 }
 
 async function pagamentoModal(){
+  let total = Object.values($cart).reduce((acc, item) => {
+    return acc + item.item[item.is_retail ? 'retail_price': 'wholesale_price'] * item.quantity
+    }, 0)
   modal.open(ModalPagamento, {
     cliente_selecionado: clienteSelecionado,
     total_pedido:total,
@@ -200,11 +205,14 @@ onDestroy(() =>  {
         <div class="flex w-full flex-col lg:flex-row">
 
           <div class="grid flex-grow place-items-center">
-            <button class="btn w-full btn-primary" on:click={()=> {tipo_preco = 'retail_price'}} disabled={tipo_preco === 'retail_price'}>Varejo</button>
+            <button class="btn w-full btn-primary" on:click={()=> {tipo_preco = 'retail_price'}} disabled={tipo_preco === 'retail_price' || Object.values($cart).length >= 1}>Varejo</button>
           </div>
           <div class="divider lg:divider-horizontal">OU</div>
           <div class="grid flex-grow place-items-center">
-            <button class="btn w-full btn-primary" on:click={()=> {tipo_preco = 'wholesale_price'}} disabled={tipo_preco === 'wholesale_price'}>Atacado</button>
+            <button class="btn w-full btn-primary" on:click={()=> {
+              tipo_preco = 'wholesale_price'
+              }} 
+              disabled={tipo_preco === 'wholesale_price' || Object.values($cart).length >= 1}>Atacado</button>
           </div>
         </div>
 
@@ -266,25 +274,7 @@ onDestroy(() =>  {
     <div
       class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-4"
     >
-      <ul class="mb-4 text-center text-lg max-h-[70vh] overflow-scroll">
-        {#each Object.values($cart) as item}
-          <div class="flex justify-between items-center">
-            <li class="py-2 font-bold">
-              ({item.quantity}x)<span class="text-secondary text-sm"> R${(item.item[tipo_preco]/100).toFixed(2)}</span> = <span class="text-success">R${(item.quantity*item.item[tipo_preco]/100).toFixed(2)}</span> {item.item.name}
-            </li>
-            <button
-              class="btn btn-circle m-1"
-              on:click={e=> cart.removeItem(item.item.id)}>
-              {@html icons.x({ stroke: 'red' })}
-            </button>
-          </div>
-          <hr />
-        {/each}
-      </ul>
-      <h2 class="mx-10 flex justify-center text-3xl font-bold">
-        Preço total:&nbsp;
-        <span class="text-success">R${(total/100).toFixed(2)}</span>
-      </h2>
+     <CaixaColumn/>
     </div>
 
     <div class="col-auto flex h-auto md:w-96 flex-col justify-between gap-2">
@@ -358,6 +348,7 @@ onDestroy(() =>  {
                             cart.addItem({
                               item: item,
                               quantity: -1,
+                              is_retail: tipo_preco=='retail_price'? false : true
                             })
                           }
                         }}>
@@ -373,6 +364,7 @@ onDestroy(() =>  {
                         cart.setItem({
                           item: item,
                           quantity: Number(quant_temp),
+                          is_retail: tipo_preco=='retail_price'? false: true
                         })
                       }}
                     />
@@ -381,6 +373,7 @@ onDestroy(() =>  {
                         cart.addItem({
                           item: item,
                           quantity: 1,
+                          is_retail: tipo_preco=='retail_price'? false: true
                         })}
                       class="btn btn-primary"
                     >
