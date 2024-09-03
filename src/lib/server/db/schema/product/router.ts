@@ -43,7 +43,7 @@ export const product = router({
     //.use(middleware.allowPermissions(['admin', 'user']))
 
     .mutation(async ({ input }) => {
-      return await productController.insertProduct(input)
+      return await productController.insertProduct(input).returning()
     }),
   updateProduct: publicProcedure
     .use(middleware.logged)
@@ -117,7 +117,7 @@ export const product = router({
 
     .input(insertProductCategorySchema)
     .mutation(async ({ input }) => {
-      return await productController.insertProductCategory(input)
+      return await productController.insertProductCategory(input).returning()
     }),
   updateProductCategory: publicProcedure
     .use(middleware.logged)

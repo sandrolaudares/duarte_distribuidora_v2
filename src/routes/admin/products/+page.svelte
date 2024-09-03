@@ -7,7 +7,7 @@
   import { page } from '$app/stores'
   import { invalidate } from '$app/navigation'
   import { icons } from '$lib/utils/icons'
-      import * as m from '$msgs'
+  import * as m from '$msgs'
 
   export let data: PageData
 
@@ -57,7 +57,7 @@
         save: async data => {
           console.log(data)
           try {
-            const resp = await trpc($page).product.insertProduct.mutate({
+            const [resp] = await trpc($page).product.insertProduct.mutate({
               name: data.name,
               description: data.description ?? '',
               category_id: category_id,
@@ -95,18 +95,19 @@
         save: async data => {
           console.log(data)
           try {
-            const resp = await trpc($page).product.insertProductCategory.mutate(
-              {
-                name: data.name,
-              },
-            )
+            const [resp] = await trpc(
+              $page,
+            ).product.insertProductCategory.mutate({
+              name: data.name,
+            })
             columnsData.push({
               id: resp.id,
-              category: resp,
+              category: { ...resp, products: [] },
               items: [],
             })
+            columnsData = columnsData
             console.log(resp)
-            window.location.reload()
+            // window.location.reload()
           } catch (error) {
             return JSON.stringify(error)
           }
@@ -155,7 +156,7 @@
   {/snippet}
   {#snippet card(p)}
     <div class="flex w-full gap-0 rounded-lg bg-base-300 text-center">
-      <a href="/admin/products/{p.id}" class="text-center w-full px-4 py-3">
+      <a href="/admin/products/{p.id}" class="w-full px-4 py-3 text-center">
         <p class="text-xl font-bold">{p.name}</p>
         <p class="font-light">{p.description}</p>
       </a>

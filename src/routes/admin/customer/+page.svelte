@@ -51,7 +51,7 @@
     },
     {
       header: 'Tipo Cliente',
-      accessorFn: row => (row.is_retail ? 'Varejo' : 'Atacado'),
+      accessorFn: row => (row.is_retail ? 'Juridica' : 'Fisica'),
     },
     {
       header: 'RG/IE',

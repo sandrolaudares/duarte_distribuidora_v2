@@ -66,7 +66,7 @@
         item.sku = sku.sku
         await updateProductItemInfo()
       },
-      newSKU: { name: item.name, sku: item.sku },
+      newSKU: { name: item.name, sku: item.sku ?? '' },
     })
   }
 
@@ -105,9 +105,9 @@
   <!-- <h2 class="text-center text-xl font-bold">{item.name}</h2> -->
 
   <div class="flex items-center gap-2">
-  <span>
-    #{item.id}
-  </span>
+    <span>
+      #{item.id}
+    </span>
     <input
       type="text"
       class="input w-full"
@@ -151,7 +151,9 @@
       save={updateProductItemImage}
     />
   </div> -->
-  <div class="flex flex-col md:flex-row items-center justify-between gap-3 text-center">
+  <div
+    class="flex flex-col items-center justify-between gap-3 text-center md:flex-row"
+  >
     <ImageInput
       image_id={item.image}
       name={item.name}
