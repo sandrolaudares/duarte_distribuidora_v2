@@ -87,8 +87,12 @@
           </span>
         </a>
         <button class="btn btn-circle" onclick={()=>{
-          confirm('Tem certeza que gostaria de excluir o caixa?')
-          handleDeleteCashier(caixa.id)
+          if(confirm('Tem certeza que gostaria de excluir o caixa?') === true) {
+            handleDeleteCashier(caixa.id)
+          } else{
+            toast.info('Ação cancelada!')
+          }
+          
         }}>
           {@html icons.trash()}
         </button>

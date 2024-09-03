@@ -151,7 +151,13 @@
           <!-- <div class="stat-desc">↗︎ 400 (22%)</div> -->
         </div>
       </div>
-      <button class="btn btn-circle"  on:click={()=>{handleDeleteStockItem(estoque.sku)}}>
+      <button class="btn btn-circle btn-error w-20 h-20"  on:click={()=>{
+        if(confirm("Tem certeza que deseja deletar?") === true){
+          handleDeleteStockItem(estoque.sku)
+        } else {
+          toast.info("Cancelado")
+        }
+        }}>
         {@html icons.trash()}
       </button>
     </div>
