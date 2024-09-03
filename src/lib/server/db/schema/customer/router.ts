@@ -22,7 +22,7 @@ export const customer = router({
 
     .input(insertCustomerSchema)
     .mutation(async ({ input }) => {
-      return await customerController.insertCustomer(input)
+      return await customerController.insertCustomer(input).returning()
     }),
   updateCustomer: publicProcedure
     .use(middleware.auth)
@@ -37,6 +37,7 @@ export const customer = router({
           max_credit: z.number().optional(),
           used_credit: z.number().optional(),
           email: z.string().email().optional(),
+          is_retail:z.boolean().optional()
         }),
       }),
     )

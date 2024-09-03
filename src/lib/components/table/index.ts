@@ -18,7 +18,7 @@ export const paramsSchema = z.object({
 })
 export type TableState = z.infer<typeof paramsSchema>
 
-export type EditableTypes = 'text' | 'number'
+export type EditableTypes = 'text' | 'number' | 'select'
 
 export const getParams = ({
   pageSize,
