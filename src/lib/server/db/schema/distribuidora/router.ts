@@ -113,5 +113,9 @@ export const distribuidora = router({
   getCashierById: publicProcedure.input(z.number()).query(async({input})=>{
     const id = input
     return await distribuidoraController.getCashierById(id)
+  }),
+
+  deleteCashierById: publicProcedure.input(z.number()).mutation(async({input})=> {
+    return await distribuidoraController.deleteCashierById(input)
   })
 })

@@ -29,6 +29,10 @@ function getCashierById(id: SelectCashier['id']) {
   return db.select().from(cashierTable).where(eq(cashierTable.id, id)).limit(1)
 }
 
+function deleteCashierById(id:SelectCashier['id']){
+  return db.delete(cashierTable).where(eq(cashierTable.id,id))
+}
+
 function insertCashierTransaction(data: InsertCashierTransaction) {
   return db.transaction(async trx => {
     await trx.insert(cashierTransactionTable).values(data)
@@ -60,4 +64,5 @@ export const distribuidora = {
   insertCashierTransaction,
   getCashierTransactions,
   updateCashier,
+  deleteCashierById
 }
