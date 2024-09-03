@@ -8,6 +8,7 @@
 
   import { modal, FormModal } from '$components/modal'
   import { icons } from '$lib/utils'
+  import { toast } from 'svelte-sonner'
 
   export let data: PageData
 
@@ -45,6 +46,16 @@
       },
     })
   }
+
+  async function handleDeleteCashier(id:number){
+    try {
+      await trpc($page).distribuidora.deleteCashierById.mutate(id)
+      toast.success('Caixa deletado com sucesso!')
+      window.location.reload()
+    } catch (error) {
+      toast.error('Erro ao deletar o caixa!')
+    }
+  }
 </script>
 
 <main class="container mx-auto">
@@ -65,15 +76,27 @@
     </button>
     <div class="flex flex-col gap-2 text-center lg:mx-96">
       {#each cashiers.distribuidoras as caixa}
+      <div class="flex w-full gap-3">
         <a
           href="/admin/cashier/{caixa.id}"
-          class="btn btn-primary flex justify-between p-3"
+          class="btn btn-primary flex justify-between p-3 w-full"
         >
           {caixa.name}
           <span class="text-end font-bold">
             Valor no caixa: R${(caixa.currency / 100).toFixed(2)}
           </span>
         </a>
+        <button class="btn btn-circle" onclick={()=>{
+          if(confirm('Tem certeza que gostaria de excluir o caixa?') === true) {
+            handleDeleteCashier(caixa.id)
+          } else{
+            toast.info('Ação cancelada!')
+          }
+          
+        }}>
+          {@html icons.trash()}
+        </button>
+      </div>
       {/each}
     </div>
   </div>

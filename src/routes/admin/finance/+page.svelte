@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { toast } from 'svelte-sonner';
+  import { toast } from 'svelte-sonner'
   import { trpc } from '$trpc/client'
   import type { PageData } from './$types'
   import { page } from '$app/stores'
@@ -49,57 +49,63 @@
 <h1 class="my-3 text-center text-3xl">Pedidos com pagamento pendente:</h1>
 
 <div class="overflow-x-auto">
-  <table class="table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Data do Pedido</th>
-        <th>Data de Expiração</th>
-        <th>Dias para Expiração</th>
-        <th>Status Pagamento</th>
-        <th>Pagamento em</th>
-        <th>Total</th>
-        <th>Cliente</th>
-        <th>Pagamento recebido</th>
-      </tr>
-    </thead>
-    <tbody>
-      {#each orders as order}
-        <tr class={getBgColor(order.created_at)}>
-          <td>{order.id}</td>
-          <td>{order.created_at}</td>
-          <td>{getExpirationDate(order.created_at)}</td>
-          <td>
-            {#if getDaysToExpiry(order.created_at) >= 0}
-              {getDaysToExpiry(order.created_at)} dias
-            {:else}
-              Expirado
-            {/if}
-          </td>
-          <td>PENDENTE</td>
-          <td>{order.payment_method}</td>
-          <td>R${(order.total / 100).toFixed(2)}</td>
-          <td>
-            {order.customer?.name} - {order.customer?.cellphone ??
-              'Telefone sem registro'} - {order.customer?.email}
-          </td>
-          <td>
-            <button
-              class="btn btn-primary"
-              on:click={async () => {
-                await trpc($page).customer.updateOrderPaymentStatus.mutate({
-                  order_id: order.id,
-                  payment_status: 'CONFIRMED'
-                })
-                toast.success('Pedido finalizado!')
-                window.location.reload()
-              }}
-            >
-              PEDIDO PAGO
-            </button>
-          </td>
+  {#if orders.length > 0}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Data do Pedido</th>
+          <th>Data de Expiração</th>
+          <th>Dias para Expiração</th>
+          <th>Status Pagamento</th>
+          <th>Pagamento em</th>
+          <th>Total</th>
+          <th>Cliente</th>
+          <th>Pagamento recebido</th>
         </tr>
-      {/each}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {#each orders as order}
+          <tr class={getBgColor(order.created_at)}>
+            <td>{order.id}</td>
+            <td>{order.created_at}</td>
+            <td>{getExpirationDate(order.created_at)}</td>
+            <td>
+              {#if getDaysToExpiry(order.created_at) >= 0}
+                {getDaysToExpiry(order.created_at)} dias
+              {:else}
+                Expirado
+              {/if}
+            </td>
+            <td>PENDENTE</td>
+            <td>{order.payment_method}</td>
+            <td>R${(order.total / 100).toFixed(2)}</td>
+            <td>
+              {order.customer?.name} - {order.customer?.cellphone ??
+                'Telefone sem registro'} - {order.customer?.email}
+            </td>
+            <td>
+              <button
+                class="btn btn-primary"
+                on:click={async () => {
+                  await trpc($page).customer.updateOrderPaymentStatus.mutate({
+                    order_id: order.id,
+                    payment_status: 'CONFIRMED',
+                  })
+                  toast.success('Pedido finalizado!')
+                  window.location.reload()
+                }}
+              >
+                PEDIDO PAGO
+              </button>
+            </td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  {:else}
+  <h1 class="text-4xl text-center mt-10">
+    Nenhum pagamento está pendente!!!
+  </h1>
+  {/if}
 </div>

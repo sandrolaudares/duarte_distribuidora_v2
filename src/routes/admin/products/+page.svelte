@@ -24,15 +24,20 @@
   }
 
   async function handleDeleteCategory(id: number) {
-    try {
-      await trpc($page).product.deleteProductCategory.mutate(id)
-      toast.success('Categoria deletada com sucesso!')
-      window.location.reload()
-    } catch (error: any) {
-      toast.error(error.message)
+    if(confirm('Tem certeza que deseja deletar categoria')===true){
+      try {
+        await trpc($page).product.deleteProductCategory.mutate(id)
+        toast.success('Categoria deletada com sucesso!')
+        window.location.reload()
+      } catch (error: any) {
+        console.error(error.message)
+        toast.error('Erro ao deletar categoria!')
+      }
+    } else {
+      toast.info('Ação cancelada')
     }
   }
-
+  //TODO:fix not use window.location.reload()
   function handleAddProduct(category_id: number) {
     console.log('add product')
     modal.open(
@@ -68,6 +73,7 @@
               }
             })
             console.log(resp)
+            toast.success('Produto adicionado com sucesso!')
             window.location.reload()
           } catch (error) {
             return JSON.stringify(error)
@@ -107,7 +113,8 @@
             })
             columnsData = columnsData
             console.log(resp)
-            // window.location.reload()
+            toast.success('Categoria adicionada com sucesso!')
+            window.location.reload()
           } catch (error) {
             return JSON.stringify(error)
           }
@@ -144,14 +151,14 @@
       >
         {@html icons.plus()}
       </button>
-      {#if cat.products.length === 0}
+
         <button
-          class="btn btn-outline btn-primary"
+          class="btn btn-outline btn-error"
           onclick={() => handleDeleteCategory(cat.id)}
         >
           {@html icons.trash()}
         </button>
-      {/if}
+
     </div>
   {/snippet}
   {#snippet card(p)}

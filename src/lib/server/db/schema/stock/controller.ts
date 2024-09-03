@@ -37,6 +37,10 @@ function getSKUByID(sku_id: SelectSku['sku']) {
   })
 }
 
+function deleteItemStock(sku:SelectSku['sku']){
+  return db.delete(skuTable).where(eq(skuTable.sku,sku))
+}
+
 function getTransactionsFromProduto(data: { sku: SelectSku['sku'] }) {
   const { sku } = data
   return db
@@ -70,6 +74,10 @@ function insertSupplier(data: InsertSupplier) {
 
 function getSupplier() {
   return db.select().from(supplierTable)
+}
+
+function updateSupplier(id: SelectSupplier['id'],supplier:Partial<SelectSupplier>) {
+  return db.update(supplierTable).set(supplier).where(eq(supplierTable.id,id)).run()
 }
 
 function queryLastCostPrice(sku: SelectSku['sku']) {
@@ -113,4 +121,6 @@ export const stock = {
   queryLastCostPrice,
   getRecentTransactionsCaixa,
   getAllTransactionsCaixa,
+  deleteItemStock,
+  updateSupplier
 }

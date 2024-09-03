@@ -106,14 +106,19 @@
   }
 
   async function handleDeleteProduct(id: number) {
-    try {
-      await trpc($page).product.deleteProduct.mutate(id)
-
-      toast.success('Item deletado com sucesso!')
-      //TODO: Fix delete update sem recarregar
-      window.history.back()
-    } catch (error: any) {
-      toast.error(error.message)
+    if(confirm('Deseja deletar produto?') === true) {
+      try {
+        await trpc($page).product.deleteProduct.mutate(id)
+  
+        toast.success('Item deletado com sucesso!')
+        //TODO: Fix delete update sem recarregar
+        window.history.back()
+      } catch (error: any) {
+        console.error(error.message)
+        toast.error('Erro ao deletar produto!')
+      }
+    } else {
+      toast.info('Ação cancelada')
     }
   }
 
@@ -178,14 +183,14 @@
         {m.save_button()}
         </button>
       {/if}
-      {#if produto.items.length === 0}
+
         <button
           class="btn btn-error px-5"
           onclick={() => handleDeleteProduct(produto.id)}
         >
           {@html icons.trash()} Deletar {produto.name}
         </button>
-      {/if}
+
       <button class="btn btn-primary px-5" onclick={handleAddItem}>
         {@html icons.plus()} {m.add_item()}
       </button>
