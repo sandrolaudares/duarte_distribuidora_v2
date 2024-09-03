@@ -36,6 +36,7 @@
     Tooltip,
     TooltipItem,
   } from 'layerchart'
+  import { toast } from 'svelte-sonner'
 
   function isMetaEntrada(meta: MetaUnion): meta is metaEntrada {
     return meta.type === 'entrada'
@@ -104,11 +105,21 @@
       count: resp.total ?? 0,
     }
   }
+
+  async function handleDeleteStockItem(sku:string){
+    try {
+      await trpc($page).stock.deleteItemStock.mutate(sku)
+      toast.success('Deletado com sucesso!')
+      window.location.href = "./"
+    } catch (error) {
+      toast.error('Ocorreu um erro ao deletar!')
+    }
+  }
 </script>
 
 <div class="">
   <div class="container mx-auto flex flex-col gap-5">
-    <div class="flex items-center justify-center">
+    <div class="flex items-center justify-center gap-3">
       <div class="stats bg-base-200 shadow">
         <div class="stat flex items-center">
           <div class="stat-figure text-secondary">
@@ -140,6 +151,9 @@
           <!-- <div class="stat-desc">↗︎ 400 (22%)</div> -->
         </div>
       </div>
+      <button class="btn btn-circle"  on:click={()=>{handleDeleteStockItem(estoque.sku)}}>
+        {@html icons.trash()}
+      </button>
     </div>
     <div class="mb-5 flex gap-2">
       <div

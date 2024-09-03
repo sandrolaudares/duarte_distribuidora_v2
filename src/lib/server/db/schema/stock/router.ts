@@ -3,14 +3,24 @@ import { publicProcedure, router } from '$trpc/t'
 
 import { z } from 'zod'
 import { stock as stockController } from '$db/schema/stock/controller'
-import { insertSKUschema, insertSupplierSchema, supplierTable } from '$db/schema/stock'
-import { cashierTransactionTable, stockTransactionTable } from '$db/schema'
+import {
+  insertSKUschema,
+  insertSupplierSchema,
+  supplierTable,
+} from '$db/schema/stock'
+import {
+  cashierTable,
+  cashierTransactionTable,
+  stockTransactionTable,
+} from '$db/schema'
 
 import { paramsSchema } from '$lib/components/table'
 import { tableHelper } from '$lib/server/db/utils'
 
 import { middleware } from '$trpc/middleware'
 import { TRPCError } from '@trpc/server'
+import { db } from '../..'
+import { eq } from 'drizzle-orm'
 
 export const stock = router({
   getSKUs: publicProcedure.query(() => {
@@ -140,16 +150,25 @@ export const stock = router({
     return stockController.getAllTransactionsCaixa()
   }),
 
-  getPaginatedTransacaoCaixa: publicProcedure
-  .input(paramsSchema)
-  .query(async ({ input }) => {
-    return await tableHelper(
-      stockController.getAllTransactionsCaixa().$dynamic(),
-      cashierTransactionTable,
-      'name',
-      input,
-    )
+  deleteItemStock: publicProcedure.input(z.string()).mutation(({ input }) => {
+      return stockController.deleteItemStock(input)
   }),
 
-
+  getPaginatedTransacaoCaixa: publicProcedure
+    .input(paramsSchema)
+    .query(async ({ input }) => {
+      return await tableHelper(
+        db
+          .select()
+          .from(cashierTransactionTable)
+          .innerJoin(
+            cashierTable,
+            eq(cashierTransactionTable.cashier_id, cashierTable.id),
+          )
+          .$dynamic(),
+        cashierTransactionTable,
+        'name',
+        input,
+      )
+    }),
 })

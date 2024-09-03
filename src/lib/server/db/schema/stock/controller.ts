@@ -37,6 +37,10 @@ function getSKUByID(sku_id: SelectSku['sku']) {
   })
 }
 
+function deleteItemStock(sku:SelectSku['sku']){
+  return db.delete(skuTable).where(eq(skuTable.sku,sku))
+}
+
 function getTransactionsFromProduto(data: { sku: SelectSku['sku'] }) {
   const { sku } = data
   return db
@@ -113,4 +117,5 @@ export const stock = {
   queryLastCostPrice,
   getRecentTransactionsCaixa,
   getAllTransactionsCaixa,
+  deleteItemStock,
 }
