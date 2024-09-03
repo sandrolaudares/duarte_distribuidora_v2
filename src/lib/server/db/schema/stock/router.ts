@@ -159,7 +159,10 @@ export const stock = router({
     .query(async ({ input }) => {
       return await tableHelper(
         db
-          .select()
+          .select({
+            cashier_name:cashierTable.name,
+            cashier_transaction:cashierTransactionTable
+          })
           .from(cashierTransactionTable)
           .innerJoin(
             cashierTable,

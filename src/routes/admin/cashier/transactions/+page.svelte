@@ -19,43 +19,33 @@
     RowActions,
   } from '$lib/components/table'
 
-  let transactions: RouterOutputs['stock']['getAllTransaoCaixa']
-
-  // onMount(async () => {
-  //   try {
-  //     transactions = await trpc($page).stock.getAllTransaoCaixa.query()
-  //   } catch (error: any) {
-  //     toast.error(error.message)
-  //   }
-  // })
-
   const defaultColumns: ColumnDef<
-    RouterOutputs['stock']['getAllTransaoCaixa']
+    RouterOutputs['stock']['getPaginatedTransacaoCaixa']['rows']
   >[] = [
     {
       header: 'ID',
-      accessorKey: 'id',
-
+      accessorKey: 'cashier_transaction.id',
       footer: info => info.column.id,
     },
     {
-      header: 'Tipo',
-      accessorKey: 'type',
-    },
-
-    {
       header: 'Criado em',
-      accessorKey: 'created_at',
+      accessorKey: 'cashier_transaction.created_at',
     },
-
     {
-      header: 'Observacão',
-      accessorKey: 'observation',
+      header: 'caixa',
+      accessorKey: 'cashier_name',
     },
-
+    {
+      header: 'Tipo',
+      accessorKey: 'cashier_transaction.type',
+    },
     {
       header: 'Valor',
-      accessorKey: 'amount',
+      accessorKey: 'cashier_transaction.amount',
+    },
+    {
+      header: 'Observacão',
+      accessorKey: 'cashier_transaction.observation',
     },
   ]
 
@@ -68,11 +58,6 @@
   }
 </script>
 
-<main>
-  {#each transactions as transaction}
-    {transaction.type}
-  {/each}
-</main>
 
 <div class="container mx-auto my-3 overflow-x-auto p-2">
   <Datatable columns={defaultColumns} {load} />
