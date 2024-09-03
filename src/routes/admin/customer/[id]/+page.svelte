@@ -14,6 +14,7 @@
   import { toast } from 'svelte-sonner'
   import AddressModal from '$lib/components/modal/AddressModal.svelte'
   import CardShowPedidos from '../../orders/CardShowPedidos.svelte'
+  import * as m from '$msgs'
 
   let { customer, orders } = data
   let newcustomer = customer
@@ -72,6 +73,16 @@
       toast.error(error.message)
     }
   }
+
+  async function handleDeleteCustomer(id: number) {
+    try {
+      await trpc($page).customer.deleteCustomer.mutate(id)
+      toast.success('Cliente deletado com sucesso!')
+      window.location.href = "./";
+    } catch (error: any) {
+      toast.error(error.message)
+    }
+  }
 </script>
 
 <!-- <pre>
@@ -84,15 +95,25 @@
 <main class="mt-10 min-h-screen">
   <div class="m-4 flex justify-between">
     <h1 class="text-3xl font-bold">Informacões do cliente:</h1>
-    <button
-      class="btn btn-primary flex gap-2"
-      on:click={() =>
-        modal.open(AddressModal, {
-          customer_id: customer.id,
-        })}
-    >
-      Add address {@html icons.plus()}
-    </button>
+    <div class="flex gap-2">
+      <button
+        class="btn btn-error flex gap-2"
+        on:click={() => handleDeleteCustomer(customer.id)}
+      >
+        Deletar
+        {@html icons.trash()}
+      </button>
+      <button
+        class="btn btn-primary flex gap-2"
+        on:click={() =>
+          modal.open(AddressModal, {
+            customer_id: customer.id,
+          })}
+      >
+        Add address
+        {@html icons.plus()}
+      </button>
+    </div>
   </div>
   <div class=" grid grid-cols-1 xl:grid-cols-2">
     <div

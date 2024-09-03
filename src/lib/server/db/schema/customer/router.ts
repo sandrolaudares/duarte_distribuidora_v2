@@ -44,6 +44,16 @@ export const customer = router({
       const { id, customer } = input
       return await customerController.updateCustomer(id, customer)
     }),
+
+  deleteCustomer: publicProcedure
+    .use(middleware.logged)
+    .use(middleware.auth)
+
+    .input(z.number())
+    .mutation(async ({ input }) => {
+      return await customerController.deleteCustomerById(input)
+    }),
+
   insertAddress: publicProcedure
     .use(middleware.auth)
     .use(middleware.logged)
@@ -131,7 +141,7 @@ export const customer = router({
       return await customerController.updateOrderStatus(order_id, status)
     }),
 
-    updateOrderPaymentStatus: publicProcedure
+  updateOrderPaymentStatus: publicProcedure
     .use(middleware.logged)
     .use(middleware.auth)
     .input(
@@ -147,8 +157,11 @@ export const customer = router({
     )
     .mutation(async ({ input }) => {
       const { order_id, payment_status } = input
-      return await customerController.updateOrderPaymentStatus(order_id, payment_status)
+      return await customerController.updateOrderPaymentStatus(
+        order_id,
+        payment_status,
+      )
     }),
 
-    //TODO: updateOrderPaymentStatus 
+  //TODO: updateOrderPaymentStatus
 })
