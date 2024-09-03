@@ -76,6 +76,10 @@ function getSupplier() {
   return db.select().from(supplierTable)
 }
 
+function updateSupplier(id: SelectSupplier['id'],supplier:Partial<SelectSupplier>) {
+  return db.update(supplierTable).set(supplier).where(eq(supplierTable.id,id)).run()
+}
+
 function queryLastCostPrice(sku: SelectSku['sku']) {
   return db.query.stockTransactionTable.findFirst({
     where: t => and(eq(t.sku, sku), eq(t.type, 'Entrada'), gt(t.cost_price, 0)),
@@ -118,4 +122,5 @@ export const stock = {
   getRecentTransactionsCaixa,
   getAllTransactionsCaixa,
   deleteItemStock,
+  updateSupplier
 }

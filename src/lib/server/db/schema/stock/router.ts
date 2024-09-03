@@ -89,6 +89,25 @@ export const stock = router({
     .mutation(async ({ input }) => {
       return stockController.insertSupplier(input).returning()
     }),
+
+  updateSupplier: publicProcedure
+    .use(middleware.logged)
+    .use(middleware.auth)
+    .input(z.object({ 
+      id: z.number(),
+      supplier: z.object({
+        name:z.string().optional(),
+        cnpj_cpf:z.string().optional(),
+        razao_social:z.string().optional(),
+        phone_1:z.string().optional(),
+        cep:z.string().optional(),
+        ie_rg:z.string().optional()
+      })
+    })).mutation(async({input})=>{
+      const {id,supplier} = input
+      return await stockController.updateSupplier(id,supplier)
+    }),
+
   entradaEstoque: publicProcedure
     .use(middleware.logged)
     .use(middleware.auth)
@@ -151,7 +170,7 @@ export const stock = router({
   }),
 
   deleteItemStock: publicProcedure.input(z.string()).mutation(({ input }) => {
-      return stockController.deleteItemStock(input)
+    return stockController.deleteItemStock(input)
   }),
 
   getPaginatedTransacaoCaixa: publicProcedure
@@ -160,8 +179,8 @@ export const stock = router({
       return await tableHelper(
         db
           .select({
-            cashier_name:cashierTable.name,
-            cashier_transaction:cashierTransactionTable
+            cashier_name: cashierTable.name,
+            cashier_transaction: cashierTransactionTable,
           })
           .from(cashierTransactionTable)
           .innerJoin(
