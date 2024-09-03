@@ -268,13 +268,13 @@ onDestroy(() =>  {
     >
       <ul class="mb-4 text-center text-lg max-h-[70vh] overflow-scroll">
         {#each Object.values($cart) as item}
-          <div class="flex justify-between">
+          <div class="flex justify-between items-center">
             <li class="py-2 font-bold">
               ({item.quantity}x) {item.item.name}
-              <span class="text-secondary">R${(item.item[tipo_preco]/100).toFixed(2)}</span>
+              <span class="text-secondary">R${(item.item[tipo_preco]/100).toFixed(2)} - <span class="text-success">R${(item.quantity*item.item[tipo_preco]/100).toFixed(2)}</span></span>
             </li>
             <button
-              class="btn btn-circle"
+              class="btn btn-circle m-1"
               on:click={e=> cart.removeItem(item.item.id)}>
               {@html icons.x({ stroke: 'red' })}
             </button>
