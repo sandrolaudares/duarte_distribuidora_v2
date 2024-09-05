@@ -1,9 +1,12 @@
 <script lang="ts">
-  import type { PageData } from './$types'
+  import PaymentCashier from '$lib/components/PaymentCashier.svelte'
+import type { PageData } from './$types'
 
   export let data: PageData
 
   let order_details = data.order_details
+
+  let isOpenModal: HTMLDialogElement | null = null
 </script>
 
 {#if order_details}
@@ -62,7 +65,7 @@
           </dl>
 
           <div class="gap-4 sm:flex sm:items-center">
-            <button type="button" class="btn btn-primary w-full">
+            <button type="button" class="btn btn-primary w-full" on:click={()=> isOpenModal?.showModal()}>
               Pagamento
             </button>
           </div>
@@ -105,11 +108,8 @@
               <dl>
                 <dd class="mt-1 text-base font-normal text-opacity-50">
                   {order_details.address.street}, {order_details.address.number}
-                  {order_details.address.complement
-                    ? `, ${order_details.address.complement}`
-                    : ''}, {order_details.address.neighborhood}, {order_details
-                    .address.city} - {order_details.address.state}, {order_details
-                    .address.country}, CEP: {order_details.address.cep}
+                  {order_details.address.complement}, {order_details.address.neighborhood}, {order_details
+                    .address.city} - {order_details.address.state}, CEP: {order_details.address.cep}
                 </dd>
               </dl>
               <!-- <div class="flex justify-end">
@@ -127,3 +127,13 @@
 <pre>
     {JSON.stringify(order_details, null, 2)}
 </pre>
+
+<dialog class="modal" bind:this={isOpenModal}>
+  <div class="modal-box max-w-2xl">
+    <PaymentCashier total_pedido={order_details?.total}/>
+  </div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
