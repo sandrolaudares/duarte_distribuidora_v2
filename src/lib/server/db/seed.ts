@@ -5,12 +5,12 @@ import { generateId } from 'lucia'
 import { product, user, distribuidora, customer, stock } from './controller'
 
 const main = async () => {
-  // await seedUsers()
-  // await seedCategories()
-  // await seedProducts()
-  // await seedCustomers()
+  await seedUsers()
+  await seedCategories()
+  await seedProducts()
+  await seedCustomers()
 
-  await seedOrders()
+  // await seedOrders()
 }
 main()
 
