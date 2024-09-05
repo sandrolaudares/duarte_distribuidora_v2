@@ -172,7 +172,6 @@ async function seedOrders() {
           },
         ],
         payment_info: {
-          payment_method: 'credit_card',
           payment_status: 'PENDING',
         },
       })

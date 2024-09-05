@@ -41,8 +41,8 @@ export const customer = {
   ) => {
     return db.update(customerTable).set(input).where(eq(customerTable.id, id))
   },
-  deleteCustomerById:(id:SelectCustomer['id'])=>{
-    return db.delete(customerTable).where(eq(customerTable.id,id))
+  deleteCustomerById: (id: SelectCustomer['id']) => {
+    return db.delete(customerTable).where(eq(customerTable.id, id))
   },
   getCustomerById: async (id: SelectCustomer['id']) => {
     return db.query.customerTable.findFirst({
@@ -209,6 +209,10 @@ export const customer = {
             product: true,
           },
         },
+        address: true,
+        customer: true,
+        payments: true,
+        transactions: true,
       },
     })
   },
@@ -334,9 +338,9 @@ export const customer = {
       },
     })
   },
-  insertOrderPayment:  (data:InsertOrderPayment) => {
+  insertOrderPayment: (data: InsertOrderPayment) => {
     return db.insert(orderPaymentTable).values(data)
-  }
+  },
 }
 
 export type CurrentOrders = Awaited<
