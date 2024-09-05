@@ -211,3 +211,4 @@ export const orderPaymentRelations = relations(
 
 export type SelectOrderPayment = typeof orderPaymentTable.$inferSelect
 export type InsertOrderPayment = typeof orderPaymentTable.$inferInsert
+export const insertOrderPaymentSchema = createInsertSchema(orderPaymentTable)
