@@ -348,7 +348,7 @@ onDestroy(() =>  {
                             cart.addItem({
                               item: item,
                               quantity: -1,
-                              is_retail: tipo_preco=='retail_price'? false : true
+                              is_retail: tipo_preco=='retail_price'? true : false
                             })
                           }
                         }}>
@@ -364,7 +364,7 @@ onDestroy(() =>  {
                         cart.setItem({
                           item: item,
                           quantity: Number(quant_temp),
-                          is_retail: tipo_preco=='retail_price'? false: true
+                          is_retail: tipo_preco=='retail_price'? true: false
                         })
                       }}
                     />
@@ -373,7 +373,7 @@ onDestroy(() =>  {
                         cart.addItem({
                           item: item,
                           quantity: 1,
-                          is_retail: tipo_preco=='retail_price'? false: true
+                          is_retail: tipo_preco=='retail_price'? true: false
                         })}
                       class="btn btn-primary"
                     >
