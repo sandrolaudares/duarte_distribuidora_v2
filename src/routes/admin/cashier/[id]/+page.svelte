@@ -37,8 +37,23 @@
     null
 
   let enderecoCliente: RouterOutputs['customer']['getCustomers'][0]['adresses'][0] | null = null
+  //TODO: Fix type filteredProducts
+  let filteredProducts = []
+  let searchTerm = ''
 
+  const searchProducts = () => {
+    return (filteredProducts = products
+      .flatMap(category => category.products)
+      .map(product => {
+        const filteredItems = product.items.filter(item => {
+          let itemName = item.name.toLowerCase()
+          return itemName.includes(searchTerm.toLowerCase())
+        })
 
+        return { ...product, items: filteredItems }
+      })
+      .filter(product => product.items.length > 0))
+  }
 
   //TODO:TIPAGEM DA VARIAVEL metodo_pagamento - status_pagamento
   async function createOrder(metodo_pagamento: any,status_pagamento:any,isChecked:boolean,amount_paid:number) {
@@ -292,10 +307,10 @@ onDestroy(() =>  {
         ></textarea>
       </div>
       <div class="flex flex-col gap-2 ">
-           <button class="btn btn-primary w-full disabled:bg-opacity-50">
-             <span class="mr-1">IMPRIMIR</span>
-             {@html icons.print()}
-           </button>
+          <button class="btn btn-primary w-full disabled:bg-opacity-50">
+            <span class="mr-1">IMPRIMIR</span>
+            {@html icons.print()}
+          </button>
         <button
           class="btn btn-primary w-full disabled:bg-opacity-50"
           on:click={pagamentoModal}
@@ -313,7 +328,7 @@ onDestroy(() =>  {
 
 <dialog class="modal" bind:this={isOpenModal}>
   <div class="modal-box max-w-4xl">
-    <Cardapio data={products}>
+    <Cardapio data={products} {filteredProducts} {searchTerm}>
       {#snippet card(p)}
         <div class="card w-full p-1">
           <div class="grid grid-cols-1 gap-3">
@@ -385,6 +400,30 @@ onDestroy(() =>  {
             {/each}
           </div>
         </div>
+      {/snippet}
+      {#snippet inputFilter()}
+      <label class="input input-bordered flex h-full items-center gap-2">
+        <input
+          type="text"
+          class="grow"
+          placeholder="Search"
+          bind:value={searchTerm}
+          on:input={searchProducts}
+        />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 16 16"
+          fill="currentColor"
+          class="h-4 w-4 opacity-70"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </label>
+      
       {/snippet}
     </Cardapio>
   </div>
