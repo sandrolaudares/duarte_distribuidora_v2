@@ -15,8 +15,8 @@
       <div class="flex">
         <label class="swap m-1 rounded-md border p-1">
           <input type="checkbox" bind:checked={item.is_retail} />
-          <div class="swap-on">Atacado</div>
-          <div class="swap-off">Varejo</div>
+          <div class="swap-on">Varejo</div>
+          <div class="swap-off">Atacado</div>
         </label>
         <li class="py-2 font-bold">
           ({item.quantity}x)
