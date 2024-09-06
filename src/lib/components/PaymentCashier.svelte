@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { is } from 'drizzle-orm'
   import CurrencyInput from './input/CurrencyInput.svelte'
 
   export let total_pedido = 0
@@ -67,7 +66,7 @@
       <option value="pix">Pix</option>
       <option value="dinheiro">Dinheiro</option>
     </select>
-    <button class="btn btn-accent w-full" disabled={metodo_pagamento === ''}>
+    <button class="btn btn-primary w-full" disabled={metodo_pagamento === ''}>
       CONFIRMAR
     </button>
     <hr class="w-full bg-base-300" />
@@ -95,15 +94,8 @@
       </h1>
     {/if}
   {:else}
-    <button
-      class="btn btn-primary"
-      on:click={() => {
-        isDiferent = !isDiferent
-      }}
-    >
-      Varias formas de pagamento
-    </button>
-    <button class="btn btn-primary w-full">FIADO</button>
+  <button class="btn btn-primary w-full">FIADO</button>
+    
     <button
       class="btn btn-primary w-full"
       on:click={() => {
@@ -120,6 +112,14 @@
       }}
     >
       DINHEIRO
+    </button>
+    <button
+      class="btn btn-primary"
+      on:click={() => {
+        isDiferent = !isDiferent
+      }}
+    >
+      Varias formas de pagamento
     </button>
   {/if}
 </div>

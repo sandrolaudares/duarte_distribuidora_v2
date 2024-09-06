@@ -1,6 +1,7 @@
 <script lang="ts">
   import PaymentCashier from '$lib/components/PaymentCashier.svelte'
 import type { PageData } from './$types'
+import {getImagePath} from '$utils/image'
 
   export let data: PageData
 
@@ -33,7 +34,7 @@ import type { PageData } from './$types'
                       >
                         <img
                           class="h-auto max-h-full w-full"
-                          src="https://flowbite.s3.amazonaws.com/blocks/e-commerce/imac-front-dark.svg"
+                          src={getImagePath(item.product.image)}
                           alt="product"
                         />
                       </div>
