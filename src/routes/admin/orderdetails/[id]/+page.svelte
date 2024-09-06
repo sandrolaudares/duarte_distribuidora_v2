@@ -14,7 +14,7 @@ import {getImagePath} from '$utils/image'
   <section
     class="container mx-auto flex flex-col-reverse gap-5 py-8 antialiased md:py-16 lg:flex-row"
   >
-    <div class=" px-4 lg:w-2/3 2xl:px-0">
+    <div class=" px-4 {order_details.address ? 'lg:w-2/3' : 'w-full'}  2xl:px-0">
       <h2 class="text-xl font-semibold text-opacity-90 sm:text-2xl">
         Resumo do pedido
       </h2>
@@ -30,10 +30,10 @@ import {getImagePath} from '$utils/image'
                   <td class="whitespace-nowrap py-4 md:w-[384px]">
                     <div class="flex items-center gap-4">
                       <div
-                        class="flex aspect-square h-10 w-10 shrink-0 items-center"
+                        class="flex aspect-square h-14 w-14 shrink-0 items-center"
                       >
                         <img
-                          class="h-auto max-h-full w-full"
+                          class="h-auto max-h-full w-full rounded-md"
                           src={getImagePath(item.product.image)}
                           alt="product"
                         />
@@ -42,14 +42,14 @@ import {getImagePath} from '$utils/image'
                     </div>
                   </td>
 
-                  <td class="p-4 text-base font-normal text-opacity-90">
-                    {item.quantity}x
+                  <td class="p-4 text-base font-normal text-opacity-90 text-right">
+                    {item.quantity}x R${(item.price/100).toFixed(2)}
                   </td>
 
                   <td
                     class="p-4 text-right text-base font-bold text-opacity-90"
                   >
-                    R${item.price}
+                    R${(item.price*item.quantity/100).toFixed(2)}
                   </td>
                 </tr>
               {/each}
@@ -125,9 +125,9 @@ import {getImagePath} from '$utils/image'
   </section>
 {/if}
 
-<pre>
+<!-- <pre>
     {JSON.stringify(order_details, null, 2)}
-</pre>
+</pre> -->
 
 <dialog class="modal" bind:this={isOpenModal}>
   <div class="modal-box max-w-2xl">
