@@ -9,7 +9,7 @@
   },0)
 </script>
 
-<ul class="mb-4 max-h-[70vh] overflow-scroll text-center text-lg">
+<ul class="mb-4 max-h-[50vh] overflow-scroll text-center text-lg">
   {#each Object.values($cart) as item}
     <div class="flex items-center justify-between">
       <div class="flex">
@@ -26,7 +26,7 @@
               100
             ).toFixed(2)}
           </span>
-          =
+          {item.item.name} - 
           <span class="text-success">
             R${(
               (item.quantity *
@@ -36,7 +36,6 @@
               100
             ).toFixed(2)}
           </span>
-          {item.item.name}
         </li>
       </div>
       <button
