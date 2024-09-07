@@ -37,23 +37,10 @@
     null
 
   let enderecoCliente: RouterOutputs['customer']['getCustomers'][0]['adresses'][0] | null = null
-  //TODO: Fix type filteredProducts
-  let filteredProducts = []
-  let searchTerm = ''
 
-  const searchProducts = () => {
-    return (filteredProducts = products
-      .flatMap(category => category.products)
-      .map(product => {
-        const filteredItems = product.items.filter(item => {
-          let itemName = item.name.toLowerCase()
-          return itemName.includes(searchTerm.toLowerCase())
-        })
+  let filteredProducts = products
 
-        return { ...product, items: filteredItems }
-      })
-      .filter(product => product.items.length > 0))
-  }
+  $:console.log(filteredProducts)
 
   //TODO:TIPAGEM DA VARIAVEL metodo_pagamento - status_pagamento
   async function createOrder(metodo_pagamento: any,status_pagamento:any,isChecked:boolean,amount_paid:number) {
@@ -328,104 +315,97 @@ onDestroy(() =>  {
 
 <dialog class="modal" bind:this={isOpenModal}>
   <div class="modal-box max-w-4xl">
-    <Cardapio data={products} {filteredProducts} {searchTerm}>
-      {#snippet card(p)}
-        <div class="card w-full p-1">
-          <div class="grid grid-cols-1 gap-3">
-            {#each p.items as item}
-              {@const cartItem = $cart[item.id]}
+    <Cardapio data={filteredProducts} onFilterChange={(value)=> {
+        filteredProducts = products
+          .map((product) => {
+            const filteredSubProducts = product.products.map((subProduct) => {
+              const filteredItems = subProduct.items.filter((item) =>
+                item.name.toLowerCase().includes(value)
+              );
+              return { ...subProduct, items: filteredItems };
+            });
 
-              <hr />
-              <div class="flex w-full py-2">
-                <div class=" flex-none md:w-auto hidden md:block">
-                  <img
-                    alt="imagem"
-                    src={getImagePath(item.image)}
-                    class="h-16 w-16 rounded-lg object-cover md:h-20 md:w-20"
-                  />
-                </div>
-                <div class="ml-4 w-full">
-                  <h2 class="md:text-xl font-bold">{item.name}</h2>
-                  <h3 class="md:text-md text-secondary">{p.description}</h3>
-                </div>
-                <div class="w-full text-right">
-                  <span class="block pb-3 text-xl font-bold">
-                    R${(item[tipo_preco]/100).toFixed(2)}
-                  </span>
-                  <div class="flex items-center justify-end gap-3 text-center">
-                    {#if cartItem?.quantity >= 1}
-                      <button
-                        class="btn btn-primary hidden md:block"
-                        on:click={()=> {
-                          if(cartItem.quantity <=  1){
-                            cart.removeItem(item.id)
-                          } else {
-                            cart.addItem({
-                              item: item,
-                              quantity: -1,
-                              is_retail: tipo_preco=='retail_price'? true : false
-                            })
-                          }
-                        }}>
-                        {@html icons.minus()}
-                      </button>
-                    {/if}
-                    <input
-                      min="1"
-                      class="md:min-w-10 md:max-w-28 max-w-16  bg-base-100 text-right text-xl font-bold focus:border-yellow-500"
-                      value={$cart[item.id]?.quantity ?? 0}
-                      on:change={e => {
-                        const quant_temp = (e.target as HTMLInputElement)?.value
-                        cart.setItem({
-                          item: item,
-                          quantity: Number(quant_temp),
-                          is_retail: tipo_preco=='retail_price'? true: false
-                        })
-                      }}
+            return { ...product, products: filteredSubProducts };
+          })
+          .filter((product) =>
+            product.products.some((subProduct) => subProduct.items.length > 0)
+          );
+
+        }}>
+      {#snippet card(p)}
+          <div class="card w-full p-1">
+            <div class="grid grid-cols-1 gap-3">
+              {#each p.items as item}
+                {@const cartItem = $cart[item.id]}
+  
+                <hr />
+                <div class="flex w-full py-2">
+                  <div class=" flex-none md:w-auto hidden md:block">
+                    <img
+                      alt="imagem"
+                      src={getImagePath(item.image)}
+                      class="h-16 w-16 rounded-lg object-cover md:h-20 md:w-20"
                     />
-                    <button
-                      on:click={() =>
-                        cart.addItem({
-                          item: item,
-                          quantity: 1,
-                          is_retail: tipo_preco=='retail_price'? true: false
-                        })}
-                      class="btn btn-primary"
-                    >
-                      {@html icons.plus()}
-                    </button>
+                  </div>
+                  <div class="ml-4 w-full">
+                    <h2 class="md:text-xl font-bold">{item.name}</h2>
+                    <h3 class="md:text-md text-secondary">{p.description}</h3>
+                  </div>
+                  <div class="w-full text-right">
+                    <span class="block pb-3 text-xl font-bold">
+                      R${(item[tipo_preco]/100).toFixed(2)}
+                    </span>
+                    <div class="flex items-center justify-end gap-3 text-center">
+                      {#if cartItem?.quantity >= 1}
+                        <button
+                          class="btn btn-primary hidden md:block"
+                          on:click={()=> {
+                            if(cartItem.quantity <=  1){
+                              cart.removeItem(item.id)
+                            } else {
+                              cart.addItem({
+                                item: item,
+                                quantity: -1,
+                                is_retail: tipo_preco=='retail_price'? true : false
+                              })
+                            }
+                          }}>
+                          {@html icons.minus()}
+                        </button>
+                      {/if}
+                      <input
+                        min="1"
+                        class="md:min-w-10 md:max-w-28 max-w-16  bg-base-100 text-right text-xl font-bold focus:border-yellow-500"
+                        value={$cart[item.id]?.quantity ?? 0}
+                        on:change={e => {
+                          const quant_temp = (e.target as HTMLInputElement)?.value
+                          cart.setItem({
+                            item: item,
+                            quantity: Number(quant_temp),
+                            is_retail: tipo_preco=='retail_price'? true: false
+                          })
+                        }}
+                      />
+                      <button
+                        on:click={() =>
+                          cart.addItem({
+                            item: item,
+                            quantity: 1,
+                            is_retail: tipo_preco=='retail_price'? true: false
+                          })}
+                        class="btn btn-primary"
+                      >
+                        {@html icons.plus()}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            {/each}
+              {/each}
+            </div>
           </div>
-        </div>
-      {/snippet}
-      {#snippet inputFilter()}
-      <label class="input input-bordered flex h-full items-center gap-2">
-        <input
-          type="text"
-          class="grow"
-          placeholder="Search"
-          bind:value={searchTerm}
-          on:input={searchProducts}
-        />
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-          fill="currentColor"
-          class="h-4 w-4 opacity-70"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
-            clip-rule="evenodd"
-          />
-        </svg>
-      </label>
-      
       {/snippet}
     </Cardapio>
+  
   </div>
   <form method="dialog" class="modal-backdrop">
     <button>close</button>
