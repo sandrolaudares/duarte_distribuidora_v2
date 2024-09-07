@@ -40,11 +40,7 @@
 
   let filteredProducts = products
 
-  let isDelivery = false
-
-  function toggleDelivery(){
-    isDelivery = !isDelivery
-  }
+  $:console.log(filteredProducts)
 
   //TODO:TIPAGEM DA VARIAVEL metodo_pagamento - status_pagamento
   async function createOrder(metodo_pagamento: any,status_pagamento:any,isChecked:boolean,amount_paid:number) {
@@ -220,21 +216,6 @@ onDestroy(() =>  {
               }} 
               disabled={tipo_preco === 'wholesale_price' || Object.values($cart).length >= 1}>Atacado</button>
           </div>
-        </div>
-
-
-        <div class="flex gap-1 flex-col items-center mt-5 justify-center">
-          <div class="flex gap-3 items-center justify-center">
-
-            <h1>É um pedido delivery?</h1>
-            <input type="checkbox" class="toggle toggle-success" checked={isDelivery} on:click={toggleDelivery} />
-          </div>
-          <div>
-            
-          </div>
-          {#if isDelivery}
-             (Modal selecionar motoboy)
-          {/if}
         </div>
 
       </div>
