@@ -159,9 +159,9 @@
               />
             </svg>
           </div>
-          <h1 class="mt-3 text-lg">Nenhum produto encontrado</h1>
+          <h1 class="mt-3 text-lg font-semibold">Nenhum produto encontrado</h1>
           <p class="mt-2">
-            Sua busca “Stripe” não foi encontrada em nenhum dos produtos. Por
+            Sua busca não foi encontrada. Por
             favor tente novamente.
           </p>
           <div class="mt-4 flex items-center gap-x-3 sm:mx-auto">
