@@ -173,4 +173,8 @@ export const customer = router({
     }),
 
   //TODO: updateOrderPaymentStatus
+
+  getCurrentOrders: publicProcedure.use(middleware.logged).query(() => {
+    return customerController.getCurrentOrders()
+  }),
 })
