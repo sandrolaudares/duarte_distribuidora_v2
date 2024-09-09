@@ -30,10 +30,11 @@
   
   setInterval(async()=>{
       await getOrders()
-    },5000)
+  },5000)
     
-    onMount(async () => {
-      await getOrders()
+  onMount(async () => {
+    await getOrders()
+    pedidosFiltrados  = pedidos
     isLoading = false
   })
 
@@ -47,10 +48,9 @@
         notification.play()
       }
 
-      pedidosFiltrados = newPedidos
       pedidos = newPedidos
       isFetching = false
-      return {pedidos, pedidosFiltrados}
+      return {pedidos}
     } catch (error) {
       console.error(error)
       return []
@@ -150,7 +150,7 @@
   
       {#if pedidoSelecionado != 'all' && pedidoSelecionado != 'varejo' && pedidoSelecionado != 'atacado'}
         {#each pedidosFiltrados as pedido}
-          <CardShowPedidos order={pedido} />
+          <CardShowPedidos order={pedido} columns={4} />
         {/each}
       {:else if pedidoSelecionado === 'all' || pedidoSelecionado === 'varejo' || pedidoSelecionado === 'atacado'}
         <div class="grid grid-cols-1 gap-2 xl:grid-cols-3">
@@ -158,9 +158,10 @@
             class={`overflow-y-auto rounded-lg bg-error p-1 ${pedidosAbertos.length > 0 ? 'max-h-[71vh]' : 'max-h-[78vh]'}`}
           >
             <h1 class="text-center text-black">Pedidos Pendentes:</h1>
-            {#each pedidosFiltrados as pedido}
+            {#each pedidos as pedido}
               {#if pedido.status === 'PENDING'}
                 <CardShowPedidos
+                columns={1}
                   button_text="Aceitar pedido"
                   button_recusar="Recusar pedido"
                   order={pedido}
@@ -189,9 +190,10 @@
             class={`overflow-y-auto rounded-lg bg-warning p-1 ${pedidosAbertos.length > 0 ? 'max-h-[71vh]' : 'max-h-[78vh]'}`}
           >
             <h1 class="text-center text-black">Pedidos aceitos:</h1>
-            {#each pedidosFiltrados as pedido}
+            {#each pedidos as pedido}
               {#if pedido.status === 'CONFIRMED'}
                 <CardShowPedidos
+                columns={1}
                   button_text="A caminho"
                   order={pedido}
                   click_confirm={async () => {
@@ -210,9 +212,10 @@
             class={`overflow-y-auto rounded-lg bg-success p-1 ${pedidosAbertos.length > 0 ? 'max-h-[71vh]' : 'max-h-[78vh]'}`}
           >
             <h1 class="text-center text-black">A caminho:</h1>
-            {#each pedidosFiltrados as pedido}
+            {#each pedidos as pedido}
               {#if pedido.status === 'ON THE WAY'}
                 <CardShowPedidos
+                columns={1}
                   button_text="Entregue"
                   order={pedido}
                   click_confirm={async () => {
