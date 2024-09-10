@@ -80,125 +80,123 @@ export const customer = {
       .from(addressTable)
       .where(eq(addressTable.customer_id, customerId))
   },
-  insertOrder: async (input: {
-    order_info: Omit<
-      InsertCustomerOrder,
-      'status' | 'payment_method' | 'payment_status'
-    >
-    order_items: Omit<InsertOrderItem, 'order_id'>[]
-    payment_info: {
-      payment_status: InsertCustomerOrder['payment_status']
-      amount_paid?: number
-    }
-  }) => {
-    const { order_info, order_items, payment_info } = input
+  // insertOrder: async (input: {
+  //   order_info: Omit<
+  //     InsertCustomerOrder,
+  //     'status' | 'payment_method' | 'payment_status'
+  //   >
+  //   order_items: Omit<InsertOrderItem, 'order_id'>[]
+  //   payment_info?: Omit<InsertOrderPayment, 'order_id'>[]
+  //   is_order_delivery: boolean
+  // }) => {
+  //   const { order_info, order_items, payment_info } = input
+  //   for (const payment of payment_info || []) {
+  //     switch (payment.payment_method) {
+  //       case 'dinheiro': {
+  //         break
+  //       }
+  //       case 'fiado': {
+  //         if (!order_info.customer_id) {
+  //           throw new TRPCError({
+  //             code: 'BAD_REQUEST',
+  //             message: 'Customer ID is required for "fiado" payment',
+  //           })
+  //         }
 
-    const resp = await db.transaction(async tx => {
-      // switch (payment_info.payment_method) {
-      //   case 'fiado': {
-      //     if (!order_info.customer_id) {
-      //       await tx.rollback()
-      //       throw new TRPCError({
-      //         code: 'BAD_REQUEST',
-      //         message: 'Para pagar fiado é necessario selecionar um cliente',
-      //       })
-      //     }
-      //     const [customer] = await tx
-      //       .select()
-      //       .from(customerTable)
-      //       .where(eq(customerTable.id, order_info.customer_id))
-      //     if (customer.max_credit < order_info.total + customer.used_credit) {
-      //       await tx.rollback()
-      //       throw new TRPCError({
-      //         code: 'BAD_REQUEST',
-      //         message: `Customer ${customer.name} has no credit available`,
-      //       })
-      //     }
-      //     await tx
-      //       .update(customerTable)
-      //       .set({
-      //         // used_credit: sql`${customerTable.used_credit} + ${order_info.total}`,
-      //         used_credit: customer.used_credit + order_info.total,
-      //       })
-      //       .where(eq(customerTable.id, order_info.customer_id))
-      //     break
-      //   }
+  //         break
+  //       }
+  //       // case 'credit_card': {
+  //       //   break
+  //       // }
+  //       // case 'debit_card': {
+  //       //   break
+  //       // }
+  //       // case 'pix': {
+  //       //   break
+  //       // }
 
-      //   case 'dinheiro': {
-      //     if (!payment_info.amount_paid) {
-      //       await tx.rollback()
-      //       throw new TRPCError({
-      //         code: 'BAD_REQUEST',
-      //         message:
-      //           'Para pagar em dinheiro é necessario informar o valor pago',
-      //       })
-      //     }
+  //       default: {
+         
+  //         break
+  //       }
+  //     }
+    
 
-      //     if (payment_info.amount_paid < order_info.total) {
-      //       await tx.rollback()
-      //       throw new TRPCError({
-      //         code: 'BAD_REQUEST',
-      //         message: 'O valor pago é menor que o valor da compra',
-      //       })
-      //     }
-      //     if (!order_info.cachier_id) {
-      //       await tx.rollback()
-      //       throw new TRPCError({
-      //         code: 'BAD_REQUEST',
-      //         message: 'Para pagar em dinheiro é necessario informar o caixa',
-      //       })
-      //     }
+  //   const resp = await db.transaction(async tx => {
+  //     const [order] = await tx
+  //       .insert(customerOrderTable)
+  //       .values({
+  //         status: 'PENDING',
+  //         total: order_info.total,
+  //         customer_id: order_info.customer_id,
+  //         address_id: order_info.address_id,
+  //       })
+  //       .returning()
 
-      //     await tx.insert(cashierTransactionTable).values({
-      //       cashier_id: order_info.cachier_id,
-      //       amount: payment_info.amount_paid,
-      //       type: 'Entrada',
-      //       observation: 'Venda',
-      //       meta_data: {
-      //         order_id: order_info.id,
-      //       },
-      //     })
+  //     const items = order_items.map(item => ({
+  //       ...item,
+  //       order_id: order.id,
+  //     }))
 
-      //     await tx.insert(cashierTransactionTable).values({
-      //       cashier_id: order_info.cachier_id,
-      //       amount: payment_info.amount_paid - order_info.total,
-      //       type: 'Troco',
-      //       observation: 'Venda',
-      //       meta_data: {
-      //         order_id: order_info.id,
-      //       },
-      //     })
+  //     const payments: InsertOrderPayment[] = []
 
-      //     break
-      //   }
+  //     for (const payment of payment_info || []) {
+  //       switch (payment.payment_method) {
+  //         case 'dinheiro': {
+  //           break
+  //         }
+  //         case 'fiado': {
+  //           if (!order_info.customer_id) {
+  //             tx.rollback()
+  //           }
 
-      //   default:
-      //     break
-      // }
+  //           break
+  //         }
+  //         // case 'credit_card': {
+  //         //   break
+  //         // }
+  //         // case 'debit_card': {
+  //         //   break
+  //         // }
+  //         // case 'pix': {
+  //         //   break
+  //         // }
 
-      const [order] = await tx
-        .insert(customerOrderTable)
-        .values({
-          payment_status: payment_info.payment_status,
-          status: 'PENDING',
-          total: order_info.total,
-          customer_id: order_info.customer_id,
-          address_id: order_info.address_id,
-        })
-        .returning()
+  //         default: {
+  //           if (order_info.cachier_id) {
+  //             await tx.insert(cashierTransactionTable).values({
+  //               cashier_id: order_info.cachier_id,
+  //               amount: payment.amount_paid,
+  //               observation: `Venda ${order.id}`,
+  //               type: 'PAGAMENTO',
+  //               meta_data: {
+  //                 order_id: order.id,
+  //                 payment_method: payment.payment_method,
+  //               },
+  //             })
+  //           }
+  //           await tx.insert(orderPaymentTable).values({
+  //             ...payment,
+  //             order_id: order.id,
+  //           })
+  //           break
+  //         }
+        
+  //       }
+  //       // payments.push({
+  //       //   ...payment,
+  //       //   order_id: order.id,
+  //       // })
+  //     }
 
-      const items = order_items.map(item => ({
-        ...item,
-        order_id: order.id,
-      }))
-      await tx.insert(orderItemTable).values(items)
-      return {
-        order,
-        items,
-      }
-    })
-    return resp
-  },
+  //     await tx.insert(orderItemTable).values(items)
+  //     return {
+  //       order,
+  //       items,
+  //     }
+  //   })
+  //   return resp
+  // },
 
   getOrderByID: async (order_id: SelectCustomerOrder['id']) => {
     return db.query.customerOrderTable.findFirst({
@@ -266,18 +264,6 @@ export const customer = {
       .where(eq(customerOrderTable.id, order_id))
   },
 
-  updateOrderPaymentStatus: async (
-    order_id: SelectCustomerOrder['id'],
-    new_status: SelectCustomerOrder['payment_status'],
-  ) => {
-    console.log('Updating order payment status:', order_id, new_status)
-
-    return await db
-      .update(customerOrderTable)
-      .set({ payment_status: new_status })
-      .where(eq(customerOrderTable.id, order_id))
-  },
-
   getCustomerOrders: async (customerId: SelectCustomer['id']) => {
     return db.query.customerOrderTable.findMany({
       where: eq(customerOrderTable.customer_id, customerId),
@@ -326,7 +312,7 @@ export const customer = {
   },
   getPendingOrders: async () => {
     return db.query.customerOrderTable.findMany({
-      where: eq(customerOrderTable.payment_status, 'PENDING'),
+      where: eq(customerOrderTable.status, 'DELIVERED'),
       with: {
         address: true,
         customer: true,

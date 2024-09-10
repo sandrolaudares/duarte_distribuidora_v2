@@ -39,7 +39,7 @@ export interface DatabaseUser {
 }
 
 export type UserPermissions = {
-  role: 'admin' | 'customer' | 'user'
+  role: 'admin' | 'customer' | 'user' | 'caissier' | 'entregador'
   redirect?: string
 }
 

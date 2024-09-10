@@ -125,11 +125,6 @@ export const customerOrderTable = sqliteTable('customer_order', {
   customer_id: integer('customer_id').references(() => customerTable.id),
   address_id: integer('address_id').references(() => addressTable.id),
   cachier_id: integer('cachier_id').references(() => cashierTable.id),
-  payment_status: text('payment_status', {
-    enum: paymentStatusEnum,
-  })
-    .notNull()
-    .default('PENDING'),
   observation: text('observation'),
   total: integer('total').notNull(),
   status: text('status', {
@@ -151,7 +146,7 @@ export const customerOrderRelations = relations(
     items: many(orderItemTable),
     transactions: many(stockTransactionTable),
 
-    payments: many(orderPaymentTable)
+    payments: many(orderPaymentTable),
   }),
 )
 export type SelectCustomerOrder = typeof customerOrderTable.$inferSelect
@@ -193,20 +188,22 @@ export type InsertOrderItem = typeof orderItemTable.$inferInsert
 export const orderPaymentTable = sqliteTable('order_payment', {
   id: integer('id').primaryKey({ autoIncrement: true }).notNull(),
   amount_paid: integer('amount_paid').notNull(),
+  troco: integer('troco'),
   payment_method: text('payment_method', { enum: paymentMethodEnum }).notNull(),
   order_id: integer('order_id')
     .references(() => customerOrderTable.id)
     .notNull(),
+  status: text('status', { enum: paymentStatusEnum }).notNull(),
 })
 
 export const orderPaymentRelations = relations(
   orderPaymentTable,
-  ({one}) => ({
+  ({ one }) => ({
     order: one(customerOrderTable, {
       references: [customerOrderTable.id],
-      fields:[orderPaymentTable.order_id]
-    })
-  })
+      fields: [orderPaymentTable.order_id],
+    }),
+  }),
 )
 
 export type SelectOrderPayment = typeof orderPaymentTable.$inferSelect
