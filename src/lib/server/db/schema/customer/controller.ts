@@ -327,6 +327,9 @@ export const customer = {
   insertOrderPayment: (data: InsertOrderPayment) => {
     return db.insert(orderPaymentTable).values(data)
   },
+  getOrderPayments:(id:number)=>{
+    return db.select().from(orderPaymentTable)
+  }
 }
 
 export type CurrentOrders = Awaited<

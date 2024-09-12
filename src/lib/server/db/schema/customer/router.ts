@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { publicProcedure, router } from '$trpc/t'
 
 import { z } from 'zod'
@@ -90,7 +91,7 @@ export const customer = router({
     return await customerController.getCustomersWithAddress()
   }),
 
-  insertOrder: publicProcedure
+    insertOrder: publicProcedure
     .use(middleware.auth)
     .use(middleware.logged)
     .input(
@@ -289,6 +290,11 @@ export const customer = router({
     .input(insertOrderPaymentSchema)
     .mutation(async ({ input }) => {
       return await customerController.insertOrderPayment(input).returning()
+    }),
+
+    getOrderPayments:publicProcedure
+    .use(middleware.logged).input(z.number()).query(async({input})=>{
+      return await customerController.getOrderPayments(input)
     }),
 
   //TODO: updateOrderPaymentStatus
