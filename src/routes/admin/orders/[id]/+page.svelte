@@ -1,22 +1,27 @@
 <script lang="ts">
   import PaymentCashier from '$lib/components/PaymentCashier.svelte'
-import type { PageData } from './$types'
-import {getImagePath} from '$utils/image'
+  import type { PageData } from './$types'
+  import { getImagePath } from '$utils/image'
 
   export let data: PageData
 
   let order_details = data.order_details
 
   let isOpenModal: HTMLDialogElement | null = null
+  async function createPayment() {
+    
+  }
 </script>
 
 {#if order_details}
   <section
     class="container mx-auto flex flex-col-reverse gap-5 py-8 antialiased md:py-16 lg:flex-row"
   >
-    <div class=" px-4 {order_details.address ? 'lg:w-2/3' : 'w-full'}  2xl:px-0">
+    <div
+      class=" px-4 {order_details.address ? 'lg:w-2/3' : 'w-full'}  2xl:px-0"
+    >
       <h2 class="text-xl font-semibold text-opacity-90 sm:text-2xl">
-        Resumo do pedido
+        Detalhes do pedido
       </h2>
 
       <div class="mt-6 sm:mt-8">
@@ -42,14 +47,16 @@ import {getImagePath} from '$utils/image'
                     </div>
                   </td>
 
-                  <td class="p-4 text-base font-normal text-opacity-90 text-right">
-                    {item.quantity}x R${(item.price/100).toFixed(2)}
+                  <td
+                    class="p-4 text-right text-base font-normal text-opacity-90"
+                  >
+                    {item.quantity}x R${(item.price / 100).toFixed(2)}
                   </td>
 
                   <td
                     class="p-4 text-right text-base font-bold text-opacity-90"
                   >
-                    R${(item.price*item.quantity/100).toFixed(2)}
+                    R${((item.price * item.quantity) / 100).toFixed(2)}
                   </td>
                 </tr>
               {/each}
@@ -66,7 +73,11 @@ import {getImagePath} from '$utils/image'
           </dl>
 
           <div class="gap-4 sm:flex sm:items-center">
-            <button type="button" class="btn btn-primary w-full" on:click={()=> isOpenModal?.showModal()}>
+            <button
+              type="button"
+              class="btn btn-primary w-full"
+              on:click={() => isOpenModal?.showModal()}
+            >
               Pagamento
             </button>
           </div>
@@ -109,8 +120,9 @@ import {getImagePath} from '$utils/image'
               <dl>
                 <dd class="mt-1 text-base font-normal text-opacity-50">
                   {order_details.address.street}, {order_details.address.number}
-                  {order_details.address.complement}, {order_details.address.neighborhood}, {order_details
-                    .address.city} - {order_details.address.state}, CEP: {order_details.address.cep}
+                  {order_details.address.complement}, {order_details.address
+                    .neighborhood}, {order_details.address.city} - {order_details
+                    .address.state}, CEP: {order_details.address.cep}
                 </dd>
               </dl>
               <!-- <div class="flex justify-end">
@@ -131,7 +143,7 @@ import {getImagePath} from '$utils/image'
 
 <dialog class="modal" bind:this={isOpenModal}>
   <div class="modal-box max-w-2xl">
-    <PaymentCashier total_pedido={order_details?.total}/>
+    <PaymentCashier total_pedido={order_details?.total} />
   </div>
 
   <form method="dialog" class="modal-backdrop">
