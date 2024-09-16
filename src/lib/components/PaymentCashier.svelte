@@ -4,6 +4,7 @@
   import type { InsertOrderPayment } from '$lib/server/db/schema'
   import { icons } from '$lib/utils'
   import { toast } from 'svelte-sonner'
+  import CardPayments from './cards/CardPayments.svelte'
 
   export let total_pedido = 0
 
@@ -39,7 +40,7 @@
   }
 
   function addPayment() {
-    if (!metodo_pagamento) {
+    if (metodo_pagamento === null) {
       toast.error('Nenhum metodo de pagamento selecionado!')
       return
     }
@@ -68,7 +69,7 @@
       amount_paid: isDinheiro ? valor_recebido_dinheiro : valor_a_pagar,
       status: metodo_pagamento === 'fiado' ? 'PENDING' : 'CONFIRMED',
       payment_method: metodo_pagamento,
-      troco: troco ? troco : null,
+      troco: isDinheiro ? troco : null,
     })
     isDinheiro = false
     isPago = false
@@ -237,9 +238,9 @@
           on:click={addPayment}
           disabled={!(metodo_pagamento === 'dinheiro'
             ? valor_recebido_dinheiro >= valor_a_pagar
-            : metodo_pagamento) || !metodo_pagamento}
+            : metodo_pagamento) || metodo_pagamento === null}
         >
-         ADICIONAR PAGAMENTO
+          ADICIONAR PAGAMENTO
         </button>
       {/if}
     </div>
@@ -273,23 +274,7 @@
 
       <h3 class="mb-2 text-lg font-medium">Pagamentos feitos:</h3>
       {#each payments as payment, i}
-        <div class="mb-4 rounded-lg border bg-base-200 p-4 shadow-sm">
-          Pagamento #{i + 1}
-          <p class="bg-opacity-60">
-            <span class="font-semibold">Quantidade paga:</span>
-            R${(payment.amount_paid / 100).toFixed(2)}
-          </p>
-          <p class="bg-opacity-60">
-            <span class="font-semibold">Método de pagamento:</span>
-            {payment.payment_method}
-          </p>
-          {#if payment.payment_method === 'dinheiro'}
-            <p class="bg-opacity-60">
-              <span class="font-semibold">Troco:</span>
-              R${payment.troco ? (payment?.troco / 100).toFixed(2) : null}
-            </p>
-          {/if}
-        </div>
+        <CardPayments {payment} {i}/>
       {/each}
     </div>
   {/if}
