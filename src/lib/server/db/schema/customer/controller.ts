@@ -116,11 +116,10 @@ export const customer = {
   //       // }
 
   //       default: {
-         
+
   //         break
   //       }
   //     }
-    
 
   //   const resp = await db.transaction(async tx => {
   //     const [order] = await tx
@@ -181,7 +180,7 @@ export const customer = {
   //           })
   //           break
   //         }
-        
+
   //       }
   //       // payments.push({
   //       //   ...payment,
@@ -327,9 +326,31 @@ export const customer = {
   insertOrderPayment: (data: InsertOrderPayment) => {
     return db.insert(orderPaymentTable).values(data)
   },
-  getOrderPayments:(id:number)=>{
-    return db.select().from(orderPaymentTable)
-  }
+  getOrderPayments: (id: number) => {
+    return db
+      .select()
+      .from(orderPaymentTable)
+      .where(eq(orderPaymentTable.id, id))
+  },
+  getNotPaidOrders: () => {
+    return db.query.orderPaymentTable.findMany({
+      where: t => eq(t.status, 'PENDING'),
+      with: {
+        order: {
+          with: {
+            customer: true,
+            items: true,
+          },
+        },
+      },
+    })
+  },
+  updateOrderPayment: async (id: number, data: Partial<InsertOrderPayment>) => {
+    return db
+      .update(orderPaymentTable)
+      .set(data)
+      .where(eq(orderPaymentTable.id, id))
+  },
 }
 
 export type CurrentOrders = Awaited<

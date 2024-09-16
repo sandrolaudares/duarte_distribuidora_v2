@@ -91,7 +91,7 @@ export const customer = router({
     return await customerController.getCustomersWithAddress()
   }),
 
-    insertOrder: publicProcedure
+  insertOrder: publicProcedure
     .use(middleware.auth)
     .use(middleware.logged)
     .input(
@@ -292,12 +292,23 @@ export const customer = router({
       return await customerController.insertOrderPayment(input).returning()
     }),
 
-    getOrderPayments:publicProcedure
-    .use(middleware.logged).input(z.number()).query(async({input})=>{
+  getOrderPayments: publicProcedure
+    .use(middleware.logged)
+    .input(z.number())
+    .query(async ({ input }) => {
       return await customerController.getOrderPayments(input)
     }),
 
-  //TODO: updateOrderPaymentStatus
+  updateOrderPayment: publicProcedure
+    .use(middleware.auth)
+    .use(middleware.logged)
+    .input(z.object({
+      id: z.number(),
+      data:insertOrderPaymentSchema.partial()}))
+    .mutation(({ input }) => {
+      const {id,data} = input
+      return customerController.updateOrderPayment(id,data)
+    }),
 
   getCurrentOrders: publicProcedure.use(middleware.logged).query(() => {
     return customerController.getCurrentOrders()
