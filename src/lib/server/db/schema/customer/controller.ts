@@ -19,7 +19,7 @@ import type {
   InsertOrderPayment,
 } from './index'
 import { db } from '$db'
-import { eq, ne, or, sql } from 'drizzle-orm'
+import { and, eq, ne, or, sql } from 'drizzle-orm'
 
 import { stock, bugReport } from '$db/controller'
 import { cashierTransactionTable } from '../distribuidora'
@@ -335,6 +335,19 @@ export const customer = {
   getNotPaidOrders: () => {
     return db.query.orderPaymentTable.findMany({
       where: t => eq(t.status, 'PENDING'),
+      with: {
+        order: {
+          with: {
+            customer: true,
+            items: true,
+          },
+        },
+      },
+    })
+  },
+  getNotPaidOrdersById: (id:number) => {
+    return db.query.orderPaymentTable.findMany({
+      where: t => and(eq(t.status, 'PENDING'),eq(t.order_id,id)),
       with: {
         order: {
           with: {
