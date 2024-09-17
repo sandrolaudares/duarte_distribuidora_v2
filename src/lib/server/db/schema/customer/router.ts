@@ -299,15 +299,27 @@ export const customer = router({
       return await customerController.getOrderPayments(input)
     }),
 
+  getAllNotPaidOrders: publicProcedure.query(async () => {
+    return await customerController.getNotPaidOrders()
+  }),
+
+  getNotPaidOrdersById: publicProcedure.input(z.number()).query(async ({ input }) => {
+    const id = input
+    return await customerController.getNotPaidOrdersById(id)
+  }),
+
   updateOrderPayment: publicProcedure
     .use(middleware.auth)
     .use(middleware.logged)
-    .input(z.object({
-      id: z.number(),
-      data:insertOrderPaymentSchema.partial()}))
+    .input(
+      z.object({
+        id: z.number(),
+        data: insertOrderPaymentSchema.partial(),
+      }),
+    )
     .mutation(({ input }) => {
-      const {id,data} = input
-      return customerController.updateOrderPayment(id,data)
+      const { id, data } = input
+      return customerController.updateOrderPayment(id, data)
     }),
 
   getCurrentOrders: publicProcedure.use(middleware.logged).query(() => {
