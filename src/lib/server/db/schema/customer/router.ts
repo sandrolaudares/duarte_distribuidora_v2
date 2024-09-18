@@ -220,10 +220,10 @@ export const customer = router({
                   },
                 })
               }
-              await tx.insert(orderPaymentTable).values({
-                ...payment,
-                order_id: order.id,
-              })
+              // await tx.insert(orderPaymentTable).values({
+              //   ...payment,
+              //   order_id: order.id,
+              // })
               break
             }
           }
