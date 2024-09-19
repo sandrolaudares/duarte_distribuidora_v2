@@ -53,7 +53,8 @@
     return acc + item.item[item.is_retail ? 'retail_price': 'wholesale_price'] * item.quantity
     }, 0)
     try {  
-        const resp = await trpc($page).customer.insertOrder.mutate({
+      // TODO: add new cases
+        const resp = await trpc($page).customer.order.insetPaidOrder.mutate({
           order_info: {
             customer_id: clienteSelecionado?.id,
             address_id: clienteSelecionado?.adresses[0].id,
@@ -249,7 +250,6 @@ onDestroy(() =>  {
           Criado por: <span class="font-bold text-primary">{user?.email}</span>
         </p>
       </div>
-      <!--TODO: Poder adicionar cliente no modal-->
       <div class="flex md:flex-col flex-col-reverse  gap-2">
         {#if clienteSelecionado}
           <div class="flex items-center justify-between">
@@ -324,8 +324,6 @@ onDestroy(() =>  {
     </div>
   </div>
 {/if}
-
-<!-- <pre>{JSON.stringify(data, null, 2)}</pre> -->
 
 <dialog class="modal" bind:this={isOpenModal}>
   <div class="modal-box max-w-4xl">

@@ -3,9 +3,10 @@ import {
   sqliteTable,
   text,
   integer,
+  index,
   // customType,
 } from 'drizzle-orm/sqlite-core'
-import { sql, relations } from 'drizzle-orm'
+import { sql, relations, gt, gte } from 'drizzle-orm'
 
 import {
   userTable,
@@ -17,7 +18,7 @@ import { createInsertSchema } from 'drizzle-zod'
 
 import { product } from '$db/controller'
 
-export const customerTable = sqliteTable('customer', {
+export const customerTable = sqliteTable('cliente', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   // .$defaultFn(() => generateId(15)),
   is_retail: integer('is_retail', { mode: 'boolean' }).notNull(),
@@ -33,7 +34,6 @@ export const customerTable = sqliteTable('customer', {
   cpf_cnpj: text('cpf_cnpj'),
   rg_ie: text('rg_ie'),
   max_credit: integer('max_credit').notNull().default(50000),
-  used_credit: integer('used_credit').notNull().default(0),
 })
 export const customerRelations = relations(customerTable, ({ one, many }) => ({
   adresses: many(addressTable),
@@ -55,7 +55,6 @@ export const updateCustomerSchema = insertCustomerSchema.pick({
   phone: true,
   is_retail: true,
   max_credit: true,
-  used_credit: true,
 })
 export type SelectCustomer = typeof customerTable.$inferSelect
 export type InsertCustomer = typeof customerTable.$inferInsert
@@ -67,7 +66,9 @@ export const fiadoTransactionTable = sqliteTable('fiado_transaction',{
   amount:integer('amount').notNull(),
   amount_paid:integer('amount_paid').default(0).notNull(),
   obsertation:text('observation')
-})
+}, (t)=>({
+  paid: index('paid_index').on(t.amount_paid).where(gte(t.amount_paid,t.amount)),
+}))
 
 export const fiadoTransactionRelations = relations(
   fiadoTransactionTable, ({one,many})=> ({
@@ -85,7 +86,7 @@ export const fiadoTransactionRelations = relations(
 export type InsertFiadoTransaction = typeof fiadoTransactionTable.$inferInsert
 export type SelectFiadoTransaction = typeof fiadoTransactionTable.$inferSelect
 
-export const addressTable = sqliteTable('address', {
+export const addressTable = sqliteTable('endereco', {
   id: integer('id').notNull().primaryKey({ autoIncrement: true }),
   // .$defaultFn(() => generateId(15)),
   created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
@@ -140,7 +141,7 @@ export const orderStatusEnum = [
   'ENDED',
 ] as const
 
-export const customerOrderTable = sqliteTable('customer_order', {
+export const customerOrderTable = sqliteTable('pedidos', {
   id: integer('id').notNull().primaryKey({ autoIncrement: true }),
   // .$defaultFn(() => generateId(15)),
   created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
@@ -178,7 +179,7 @@ export const customerOrderRelations = relations(
 export type SelectCustomerOrder = typeof customerOrderTable.$inferSelect
 export type InsertCustomerOrder = typeof customerOrderTable.$inferInsert
 
-export const orderItemTable = sqliteTable('order_item', {
+export const orderItemTable = sqliteTable('item_pedido', {
   id: integer('id').notNull().primaryKey({ autoIncrement: true }),
   created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
   updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
@@ -211,7 +212,7 @@ export const orderItemRelations = relations(
 export type SelectOrderItem = typeof orderItemTable.$inferSelect
 export type InsertOrderItem = typeof orderItemTable.$inferInsert
 
-export const orderPaymentTable = sqliteTable('order_payment', {
+export const orderPaymentTable = sqliteTable('pagamentos', {
   id: integer('id').primaryKey({ autoIncrement: true }).notNull(),
   amount_paid: integer('amount_paid').notNull(),
   troco: integer('troco'),
@@ -221,7 +222,8 @@ export const orderPaymentTable = sqliteTable('order_payment', {
     .notNull(),
   status: text('status', { enum: paymentStatusEnum }).notNull(),
   observation:text('observation'),
-  fiado_id:integer('id').references(()=>fiadoTransactionTable.id)
+  fiado_id:integer('id').references(()=>fiadoTransactionTable.id),
+  cachier_id: integer('cachier_id').references(() => cashierTable.id),
 })
 
 export const orderPaymentRelations = relations(

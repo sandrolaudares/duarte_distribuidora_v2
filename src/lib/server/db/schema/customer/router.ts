@@ -2,7 +2,7 @@
 import { publicProcedure, router } from '$trpc/t'
 
 import { z } from 'zod'
-import { customer as customerController } from '$db/controller'
+import { customer as customerController, distribuidora } from '$db/controller'
 import {
   insertCustomerSchema,
   insertAddressSchema,
@@ -15,6 +15,7 @@ import {
   customerOrderTable,
   type InsertOrderPayment,
   orderItemTable,
+  fiadoTransactionTable,
 } from '$lib/server/db/schema'
 
 import { paramsSchema } from '$lib/components/table'
@@ -91,52 +92,225 @@ export const customer = router({
     return await customerController.getCustomersWithAddress()
   }),
 
-  insertOrder: publicProcedure
-    .use(middleware.auth)
-    .use(middleware.logged)
-    .input(
-      z.object({
-        order_items: z.array(
-          z.object({
-            product_id: z.number(),
-            quantity: z.number(),
-            price: z.number(),
+  // insertCashierOrder: publicProcedure
+  //   .use(middleware.auth)
+  //   .use(middleware.logged)
+  //   .input(
+  //     z.object({
+  //       order_items: z.array(
+  //         z.object({
+  //           product_id: z.number(),
+  //           quantity: z.number(),
+  //           price: z.number(),
+  //         }),
+  //       ),
+  //       order_info: z.object({
+  //         customer_id: z.number().optional(),
+  //         address_id: z.number().optional(),
+  //         total: z.number(),
+  //         observation: z.string(),
+  //         cachier_id: z.number().optional(),
+  //       }),
+  //       payment_info: insertOrderPaymentSchema.omit({ order_id: true }).array(),
+  //     }),
+  //   )
+  //   .mutation(async ({ input }) => {
+  //     const { order_items, order_info, payment_info } = input
+
+  //     const total_paid = payment_info.reduce(
+  //       (acc, payment) => acc + payment.amount_paid,
+  //       0,
+  //     )
+
+  //     if (total_paid < order_info.total) {
+  //       throw new TRPCError({
+  //         code: 'BAD_REQUEST',
+  //         message:
+  //           'Valor pago é menor que o total da compra, adicione mais pagamentos',
+  //       })
+  //     }
+
+  //     return await db.transaction(async tx => {
+  //       const [order] = await tx
+  //         .insert(customerOrderTable)
+  //         .values({
+  //           status: 'PENDING',
+  //           total: order_info.total,
+  //           customer_id: order_info.customer_id,
+  //           address_id: order_info.address_id,
+  //         })
+  //         .returning()
+
+  //       const items = order_items.map(item => ({
+  //         ...item,
+  //         order_id: order.id,
+  //       }))
+
+  //       const [customer] = order_info.customer_id
+  //         ? await tx
+  //             .select()
+  //             .from(customerTable)
+  //             .where(eq(customerTable.id, order_info.customer_id))
+  //         : [null]
+
+  //       const total_fiado = payment_info
+  //         .filter(payment => payment.payment_method === 'fiado')
+  //         .reduce((acc, payment) => acc + payment.amount_paid, 0)
+
+  //       if (
+  //         customer &&
+  //         customer.max_credit < total_fiado + customer.used_credit
+  //       ) {
+  //         throw new TRPCError({
+  //           code: 'BAD_REQUEST',
+  //           message: 'Cliente não possui crédito suficiente para esta compra',
+  //         })
+  //       }
+
+  //       for (const payment of payment_info || []) {
+  //         switch (payment.payment_method) {
+  //           case 'dinheiro': {
+  //             if (order_info.cachier_id && payment.troco) {
+  //               await tx.insert(cashierTransactionTable).values({
+  //                 cashier_id: order_info.cachier_id,
+  //                 amount: payment.amount_paid,
+  //                 observation: `Venda ${order.id}`,
+  //                 type: 'Entrada',
+  //                 meta_data: {
+  //                   order_id: order.id,
+  //                   payment_method: payment.payment_method,
+  //                 },
+  //               })
+  //               await tx.insert(cashierTransactionTable).values({
+  //                 cashier_id: order_info.cachier_id,
+  //                 amount: payment.troco,
+  //                 observation: `Venda ${order.id}`,
+  //                 type: 'Troco',
+  //                 meta_data: {
+  //                   order_id: order.id,
+  //                   payment_method: payment.payment_method,
+  //                 },
+  //               })
+  //             }
+
+  //             break
+  //           }
+  //           case 'fiado': {
+  //             break
+  //           }
+  //           // case 'credit_card': {
+  //           //   break
+  //           // }
+  //           // case 'debit_card': {
+  //           //   break
+  //           // }
+  //           // case 'pix': {
+  //           //   break
+  //           // }
+
+  //           default: {
+  //             if (order_info.cachier_id) {
+  //               await tx.insert(cashierTransactionTable).values({
+  //                 cashier_id: order_info.cachier_id,
+  //                 amount: payment.amount_paid,
+  //                 observation: `Venda ${order.id}`,
+  //                 type: 'PAGAMENTO',
+  //                 meta_data: {
+  //                   order_id: order.id,
+  //                   payment_method: payment.payment_method,
+  //                 },
+  //               })
+  //             }
+  //             // await tx.insert(orderPaymentTable).values({
+  //             //   ...payment,
+  //             //   order_id: order.id,
+  //             // })
+  //             break
+  //           }
+  //         }
+
+  //         await tx
+  //           .insert(orderPaymentTable)
+  //           .values({ ...payment, order_id: order.id })
+  //       }
+
+  //       await tx.insert(orderItemTable).values(items)
+  //       return {
+  //         order,
+  //         items,
+  //       }
+  //     })
+  //   }),
+
+  order: router({
+    insertFiado: publicProcedure
+      .use(middleware.logged)
+      .use(middleware.auth)
+      .input(
+        z.object({
+          order_items: z.array(
+            z.object({
+              product_id: z.number(),
+              quantity: z.number(),
+              price: z.number(),
+            }),
+          ),
+          order_info: z.object({
+            customer_id: z.number(),
+            address_id: z.number().optional(),
+            total: z.number(),
+            observation: z.string(),
+            cachier_id: z.number().optional(),
           }),
-        ),
-        order_info: z.object({
-          customer_id: z.number().optional(),
-          address_id: z.number().optional(),
-          total: z.number(),
-          observation: z.string(),
-          cachier_id: z.number().optional(),
         }),
-        payment_info: insertOrderPaymentSchema.omit({ order_id: true }).array(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      const { order_items, order_info, payment_info } = input
-
-      const total_paid = payment_info.reduce(
-        (acc, payment) => acc + payment.amount_paid,
-        0,
       )
+      .mutation(async ({ input }) => {
+        const { order_items, order_info } = input
+        const customer = await customerController.getCustomerById(
+          order_info.customer_id,
+        )
+        if (!customer) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Cliente não encontrado',
+          })
+        }
 
-      if (total_paid < order_info.total) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message:
-            'Valor pago é menor que o total da compra, adicione mais pagamentos',
-        })
-      }
+        const [{ used_credit }] =
+          await customerController.getCustomerUsedCredit(order_info.customer_id)
 
-      return await db.transaction(async tx => {
-        const [order] = await tx
+        let credit = 0
+
+        if (typeof used_credit !== 'number') {
+          const [{ count }] = await customerController.countFiadoTransactions(
+            order_info.customer_id,
+          )
+          if (count !== 0) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'Cliente não possui crédito',
+            })
+          }
+        } else {
+          credit = used_credit
+        }
+
+        if (customer?.max_credit < credit + order_info.total) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Cliente não possui crédito suficiente para esta compra',
+          })
+        }
+
+        const [order] = await db
           .insert(customerOrderTable)
           .values({
             status: 'PENDING',
             total: order_info.total,
             customer_id: order_info.customer_id,
             address_id: order_info.address_id,
+            cachier_id: order_info.cachier_id,
+            observation: order_info.observation,
           })
           .returning()
 
@@ -145,101 +319,143 @@ export const customer = router({
           order_id: order.id,
         }))
 
-        const [customer] = order_info.customer_id
-          ? await tx
-              .select()
-              .from(customerTable)
-              .where(eq(customerTable.id, order_info.customer_id))
-          : [null]
+        const order_items_db = await db
+          .insert(orderItemTable)
+          .values(items)
+          .returning()
 
-        const total_fiado = payment_info
-          .filter(payment => payment.payment_method === 'fiado')
-          .reduce((acc, payment) => acc + payment.amount_paid, 0)
+        const fiado_transaction = await db
+          .insert(fiadoTransactionTable)
+          .values({
+            order_id: order.id,
+            amount: order_info.total,
+            customer_id: order_info.customer_id,
+          })
+          .returning()
 
-        if (
-          customer &&
-          customer.max_credit < total_fiado + customer.used_credit
-        ) {
+        return {
+          order,
+          order_items: order_items_db,
+          fiado_transaction,
+        }
+      }),
+    insetPaidOrder: publicProcedure
+      .use(middleware.logged)
+      .use(middleware.auth)
+      .input(
+        z.object({
+          order_items: z.array(
+            z.object({
+              product_id: z.number(),
+              quantity: z.number(),
+              price: z.number(),
+            }),
+          ),
+          order_info: z.object({
+            customer_id: z.number().optional(),
+            address_id: z.number().optional(),
+            total: z.number(),
+            observation: z.string(),
+            cachier_id: z.number().optional(),
+            payment_info: insertOrderPaymentSchema.array(),
+          }),
+        }),
+      )
+      .mutation(async ({ ctx, input }) => {
+        const { order_items, order_info } = input
+
+        const total_paid: number = order_info.payment_info.reduce(
+          (acc, payment) => acc + payment.amount_paid,
+          0,
+        )
+
+        if (total_paid < order_info.total) {
           throw new TRPCError({
             code: 'BAD_REQUEST',
-            message: 'Cliente não possui crédito suficiente para esta compra',
+            message:
+              'Valor pago é menor que o total da compra, adicione mais pagamentos',
           })
         }
 
-        for (const payment of payment_info || []) {
+        const [order] = await db
+          .insert(customerOrderTable)
+          .values({
+            status: 'PENDING',
+            total: order_info.total,
+            customer_id: order_info.customer_id,
+            address_id: order_info.address_id,
+            cachier_id: order_info.cachier_id,
+            observation: order_info.observation,
+          })
+          .returning()
+
+        const items = order_items.map(item => ({
+          ...item,
+          order_id: order.id,
+        }))
+        const order_items_db = await db
+          .insert(orderItemTable)
+          .values(items)
+          .returning()
+
+        const payments = order_info.payment_info.map(payment => {
           switch (payment.payment_method) {
-            case 'dinheiro': {
-              if (order_info.cachier_id && payment.troco) {
-                await tx.insert(cashierTransactionTable).values({
-                  cashier_id: order_info.cachier_id,
-                  amount: payment.amount_paid,
-                  observation: `Venda ${order.id}`,
-                  type: 'Entrada',
-                  meta_data: {
-                    order_id: order.id,
-                    payment_method: payment.payment_method,
-                  },
-                })
-                await tx.insert(cashierTransactionTable).values({
-                  cashier_id: order_info.cachier_id,
-                  amount: payment.troco,
-                  observation: `Venda ${order.id}`,
-                  type: 'Troco',
-                  meta_data: {
-                    order_id: order.id,
-                    payment_method: payment.payment_method,
-                  },
-                })
-              }
+            case 'dinheiro':
 
-              break
-            }
-            case 'fiado': {
-              break
-            }
-            // case 'credit_card': {
-            //   break
-            // }
-            // case 'debit_card': {
-            //   break
-            // }
-            // case 'pix': {
-            //   break
-            // }
+            if(order_info.cachier_id){
 
-            default: {
-              if (order_info.cachier_id) {
-                await tx.insert(cashierTransactionTable).values({
-                  cashier_id: order_info.cachier_id,
-                  amount: payment.amount_paid,
-                  observation: `Venda ${order.id}`,
-                  type: 'PAGAMENTO',
-                  meta_data: {
-                    order_id: order.id,
-                    payment_method: payment.payment_method,
-                  },
-                })
-              }
-              // await tx.insert(orderPaymentTable).values({
-              //   ...payment,
-              //   order_id: order.id,
-              // })
-              break
+              distribuidora.insertCashierTransaction({
+                cashier_id: order_info.cachier_id,
+                type: 'PAGAMENTO',
+              })
             }
+              break;
+          
+            default:
+              break;
           }
+          return { ...payment, order_id: order.id }
+        })
 
-          await tx
-            .insert(orderPaymentTable)
-            .values({ ...payment, order_id: order.id })
-        }
+        const payments_db = await db
+          .insert(orderPaymentTable)
+          .values(payments)
+          .returning()
 
-        await tx.insert(orderItemTable).values(items)
         return {
           order,
-          items,
+          order_items: order_items_db,
+          payments: payments_db,
         }
-      })
+      }),
+    payments: router({
+      getPendingFiadoTransactions: publicProcedure
+        .use(middleware.logged)
+        .use(middleware.auth)
+        .query(async () => {
+          return await customerController.getPendingFiadoTransactions()
+        }),
+      getPayments: publicProcedure
+        .use(middleware.logged)
+        .use(middleware.auth)
+        .input(z.number())
+        .query(async ({ input }) => {
+          return await customerController.getOrderPayments(input)
+        }),
+      insertPayment: publicProcedure
+        .use(middleware.logged)
+        .use(middleware.auth)
+        .input(
+          z.object({
+            payment_info: insertOrderPaymentSchema,
+          }),
+        )
+        .mutation(async ({ input }) => {
+          const { payment_info } = input
+          return await customerController.insertOrderPayment(payment_info)
+        }),
     }),
+  }),
 
   updateOrderStatus: publicProcedure
     .use(middleware.logged)
@@ -303,10 +519,12 @@ export const customer = router({
     return await customerController.getNotPaidOrders()
   }),
 
-  getNotPaidOrdersById: publicProcedure.input(z.number()).query(async ({ input }) => {
-    const id = input
-    return await customerController.getNotPaidOrdersById(id)
-  }),
+  getNotPaidOrdersById: publicProcedure
+    .input(z.number())
+    .query(async ({ input }) => {
+      const id = input
+      return await customerController.getNotPaidOrdersById(id)
+    }),
 
   updateOrderPayment: publicProcedure
     .use(middleware.auth)

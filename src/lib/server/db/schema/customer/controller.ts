@@ -5,6 +5,7 @@ import {
   addressTable,
   orderItemTable,
   orderPaymentTable,
+  fiadoTransactionTable,
 } from './index'
 
 import type {
@@ -19,7 +20,7 @@ import type {
   InsertOrderPayment,
 } from './index'
 import { db } from '$db'
-import { and, eq, ne, or, sql } from 'drizzle-orm'
+import { and, count, eq, gte, ne, or, sql } from 'drizzle-orm'
 
 import { stock, bugReport } from '$db/controller'
 import { cashierTransactionTable } from '../distribuidora'
@@ -53,6 +54,41 @@ export const customer = {
     })
   },
 
+  getCustomerUsedCredit: async (id: SelectCustomer['id']) => {
+    return db
+      .select({
+        used_credit: sql`SUM(${fiadoTransactionTable.amount} - ${fiadoTransactionTable.amount_paid})`,
+      })
+      .from(fiadoTransactionTable)
+      .where(
+        and(
+          eq(fiadoTransactionTable.customer_id, id),
+          gte(fiadoTransactionTable.amount, fiadoTransactionTable.amount_paid),
+        ),
+      )
+  },
+  countFiadoTransactions: async (id: SelectCustomer['id']) => {
+    return db
+      .select({
+        count: count(fiadoTransactionTable.id),
+      })
+      .from(fiadoTransactionTable)
+      .where(
+        and(
+          eq(fiadoTransactionTable.customer_id, id),
+          gte(fiadoTransactionTable.amount, fiadoTransactionTable.amount_paid),
+        ),
+      )
+  },
+  getPendingFiadoTransactions: async () => {
+    return db.query.fiadoTransactionTable.findMany({
+      where: t => gte(t.amount, t.amount_paid),
+      with: {
+        customer: true,
+      },
+    })
+  },
+
   getCustomerByEmail: async (email: string) => {
     return db.query.customerTable.findFirst({
       where: eq(customerTable.email, email),
@@ -80,122 +116,6 @@ export const customer = {
       .from(addressTable)
       .where(eq(addressTable.customer_id, customerId))
   },
-  // insertOrder: async (input: {
-  //   order_info: Omit<
-  //     InsertCustomerOrder,
-  //     'status' | 'payment_method' | 'payment_status'
-  //   >
-  //   order_items: Omit<InsertOrderItem, 'order_id'>[]
-  //   payment_info?: Omit<InsertOrderPayment, 'order_id'>[]
-  //   is_order_delivery: boolean
-  // }) => {
-  //   const { order_info, order_items, payment_info } = input
-  //   for (const payment of payment_info || []) {
-  //     switch (payment.payment_method) {
-  //       case 'dinheiro': {
-  //         break
-  //       }
-  //       case 'fiado': {
-  //         if (!order_info.customer_id) {
-  //           throw new TRPCError({
-  //             code: 'BAD_REQUEST',
-  //             message: 'Customer ID is required for "fiado" payment',
-  //           })
-  //         }
-
-  //         break
-  //       }
-  //       // case 'credit_card': {
-  //       //   break
-  //       // }
-  //       // case 'debit_card': {
-  //       //   break
-  //       // }
-  //       // case 'pix': {
-  //       //   break
-  //       // }
-
-  //       default: {
-
-  //         break
-  //       }
-  //     }
-
-  //   const resp = await db.transaction(async tx => {
-  //     const [order] = await tx
-  //       .insert(customerOrderTable)
-  //       .values({
-  //         status: 'PENDING',
-  //         total: order_info.total,
-  //         customer_id: order_info.customer_id,
-  //         address_id: order_info.address_id,
-  //       })
-  //       .returning()
-
-  //     const items = order_items.map(item => ({
-  //       ...item,
-  //       order_id: order.id,
-  //     }))
-
-  //     const payments: InsertOrderPayment[] = []
-
-  //     for (const payment of payment_info || []) {
-  //       switch (payment.payment_method) {
-  //         case 'dinheiro': {
-  //           break
-  //         }
-  //         case 'fiado': {
-  //           if (!order_info.customer_id) {
-  //             tx.rollback()
-  //           }
-
-  //           break
-  //         }
-  //         // case 'credit_card': {
-  //         //   break
-  //         // }
-  //         // case 'debit_card': {
-  //         //   break
-  //         // }
-  //         // case 'pix': {
-  //         //   break
-  //         // }
-
-  //         default: {
-  //           if (order_info.cachier_id) {
-  //             await tx.insert(cashierTransactionTable).values({
-  //               cashier_id: order_info.cachier_id,
-  //               amount: payment.amount_paid,
-  //               observation: `Venda ${order.id}`,
-  //               type: 'PAGAMENTO',
-  //               meta_data: {
-  //                 order_id: order.id,
-  //                 payment_method: payment.payment_method,
-  //               },
-  //             })
-  //           }
-  //           await tx.insert(orderPaymentTable).values({
-  //             ...payment,
-  //             order_id: order.id,
-  //           })
-  //           break
-  //         }
-
-  //       }
-  //       // payments.push({
-  //       //   ...payment,
-  //       //   order_id: order.id,
-  //       // })
-  //     }
-
-  //     await tx.insert(orderItemTable).values(items)
-  //     return {
-  //       order,
-  //       items,
-  //     }
-  //   })
-  //   return resp
-  // },
 
   getOrderByID: async (order_id: SelectCustomerOrder['id']) => {
     return db.query.customerOrderTable.findFirst({
@@ -345,9 +265,9 @@ export const customer = {
       },
     })
   },
-  getNotPaidOrdersById: (id:number) => {
+  getNotPaidOrdersById: (id: number) => {
     return db.query.orderPaymentTable.findMany({
-      where: t => and(eq(t.status, 'PENDING'),eq(t.order_id,id)),
+      where: t => and(eq(t.status, 'PENDING'), eq(t.order_id, id)),
       with: {
         order: {
           with: {
