@@ -401,18 +401,36 @@ export const customer = router({
         const payments = order_info.payment_info.map(payment => {
           switch (payment.payment_method) {
             case 'dinheiro':
+              if (order_info.cachier_id) {
+                distribuidora
+                  .insertCashierTransaction({
+                    cashier_id: order_info.cachier_id,
+                    type: 'PAGAMENTO',
+                    order_id: order.id,
+                    meta_data: {
+                      customer: order_info.customer_id,
+                    },
+                    amount: payment.amount_paid,
+                  })
+                  .then()
+                if (payment.troco && payment.troco > 0) {
+                  distribuidora
+                    .insertCashierTransaction({
+                      cashier_id: order_info.cachier_id,
+                      type: 'Troco',
+                      order_id: order.id,
+                      meta_data: {
+                        customer: order_info.customer_id,
+                      },
+                      amount: payment.amount_paid,
+                    })
+                    .then()
+                }
+              }
+              break
 
-            if(order_info.cachier_id){
-
-              distribuidora.insertCashierTransaction({
-                cashier_id: order_info.cachier_id,
-                type: 'PAGAMENTO',
-              })
-            }
-              break;
-          
             default:
-              break;
+              break
           }
           return { ...payment, order_id: order.id }
         })
