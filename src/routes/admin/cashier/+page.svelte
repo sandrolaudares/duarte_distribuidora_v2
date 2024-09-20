@@ -28,7 +28,7 @@
           label: 'Quantidade em Caixa',
           name: 'currency',
           type: 'currency',
-          required: true,
+          required: false,
           value: 0,
         },
       ],
