@@ -88,6 +88,17 @@ export const customer = router({
       )
     }),
 
+  getPaginatedOrders: publicProcedure
+    .input(paramsSchema)
+    .query(async ({ input }) => {
+      return await tableHelper(
+        customerController.getAllOrderInfo().$dynamic(),
+        customerOrderTable,
+        'name',
+        input,
+      )
+    }),
+
   getCustomers: publicProcedure.query(async () => {
     return await customerController.getCustomersWithAddress()
   }),
