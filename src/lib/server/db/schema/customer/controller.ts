@@ -5,7 +5,7 @@ import {
   addressTable,
   orderItemTable,
   orderPaymentTable,
-  fiadoTransactionTable,
+  
 } from './index'
 
 import type {
@@ -25,6 +25,7 @@ import { and, count, eq, gte, ne, or, sql } from 'drizzle-orm'
 import { stock, bugReport } from '$db/controller'
 import { cashierTransactionTable } from '../distribuidora'
 import { TRPCError } from '@trpc/server'
+import { userTable } from '../user'
 
 export const customer = {
   tables: {
@@ -57,32 +58,32 @@ export const customer = {
   getCustomerUsedCredit: async (id: SelectCustomer['id']) => {
     return db
       .select({
-        used_credit: sql`SUM(${fiadoTransactionTable.amount} - ${fiadoTransactionTable.amount_paid})`,
+        used_credit: sql`SUM(${customerOrderTable.total} - ${customerOrderTable.amount_paid})`,
       })
-      .from(fiadoTransactionTable)
+      .from(customerOrderTable)
       .where(
         and(
-          eq(fiadoTransactionTable.customer_id, id),
-          gte(fiadoTransactionTable.amount, fiadoTransactionTable.amount_paid),
+          eq(customerOrderTable.customer_id, id),
+          gte(customerOrderTable.total, customerOrderTable.amount_paid),
         ),
       )
   },
   countFiadoTransactions: async (id: SelectCustomer['id']) => {
     return db
       .select({
-        count: count(fiadoTransactionTable.id),
+        count: count(customerOrderTable.id),
       })
-      .from(fiadoTransactionTable)
+      .from(customerOrderTable)
       .where(
         and(
-          eq(fiadoTransactionTable.customer_id, id),
-          gte(fiadoTransactionTable.amount, fiadoTransactionTable.amount_paid),
+          eq(customerOrderTable.customer_id, id),
+          gte(customerOrderTable.total, customerOrderTable.amount_paid),
         ),
       )
   },
   getPendingFiadoTransactions: async () => {
-    return db.query.fiadoTransactionTable.findMany({
-      where: t => gte(t.amount, t.amount_paid),
+    return db.query.customerOrderTable.findMany({
+      where: t => gte(t.total, t.amount_paid),
       with: {
         customer: true,
       },

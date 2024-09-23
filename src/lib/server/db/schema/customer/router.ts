@@ -15,7 +15,7 @@ import {
   customerOrderTable,
   type InsertOrderPayment,
   orderItemTable,
-  fiadoTransactionTable,
+  orderTypeEnum,
 } from '$lib/server/db/schema'
 
 import { paramsSchema } from '$lib/components/table'
@@ -260,6 +260,8 @@ export const customer = router({
             address_id: z.number().optional(),
             total: z.number(),
             observation: z.string(),
+            type: z.enum(orderTypeEnum),
+            motoboy_id: z.string().optional(),
             cachier_id: z.number().optional(),
           }),
         }),
@@ -306,7 +308,11 @@ export const customer = router({
           .insert(customerOrderTable)
           .values({
             status: 'PENDING',
+            is_fiado: true,
+            type: order_info.type,
             total: order_info.total,
+            amount_paid: 0,
+            motoboy_id: order_info.motoboy_id,
             customer_id: order_info.customer_id,
             address_id: order_info.address_id,
             cachier_id: order_info.cachier_id,
@@ -324,19 +330,19 @@ export const customer = router({
           .values(items)
           .returning()
 
-        const fiado_transaction = await db
-          .insert(fiadoTransactionTable)
-          .values({
-            order_id: order.id,
-            amount: order_info.total,
-            customer_id: order_info.customer_id,
-          })
-          .returning()
+        // const fiado_transaction = await db
+        //   .insert(fiadoTransactionTable)
+        //   .values({
+        //     order_id: order.id,
+        //     amount: order_info.total,
+        //     customer_id: order_info.customer_id,
+        //   })
+        //   .returning()
 
         return {
           order,
           order_items: order_items_db,
-          fiado_transaction,
+          // fiado_transaction,
         }
       }),
     insetPaidOrder: publicProcedure
@@ -357,6 +363,9 @@ export const customer = router({
             total: z.number(),
             observation: z.string(),
             cachier_id: z.number().optional(),
+            type: z.enum(orderTypeEnum),
+            motoboy_id: z.string().optional(),
+
             payment_info: insertOrderPaymentSchema.array(),
           }),
         }),
@@ -380,6 +389,10 @@ export const customer = router({
         const [order] = await db
           .insert(customerOrderTable)
           .values({
+            amount_paid: total_paid,
+            is_fiado: false,
+            type: order_info.type,
+            motoboy_id: order_info.motoboy_id,
             status: 'PENDING',
             total: order_info.total,
             customer_id: order_info.customer_id,

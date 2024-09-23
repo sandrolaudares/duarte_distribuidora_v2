@@ -42,7 +42,6 @@ export const customerRelations = relations(customerTable, ({ one, many }) => ({
     fields: [customerTable.email],
     references: [userTable.email],
   }),
-  fiado_transactions: many(fiadoTransactionTable)
 }))
 export const insertCustomerSchema = createInsertSchema(customerTable, {})
 export const updateCustomerSchema = insertCustomerSchema.pick({
@@ -58,33 +57,6 @@ export const updateCustomerSchema = insertCustomerSchema.pick({
 })
 export type SelectCustomer = typeof customerTable.$inferSelect
 export type InsertCustomer = typeof customerTable.$inferInsert
-
-export const fiadoTransactionTable = sqliteTable('fiado_transaction',{
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  customer_id:integer('customer_id').notNull().references(()=>customerTable.id),
-  order_id:integer('order_id').notNull().references(()=>customerOrderTable.id),
-  amount:integer('amount').notNull(),
-  amount_paid:integer('amount_paid').default(0).notNull(),
-  obsertation:text('observation')
-}, (t)=>({
-  paid: index('paid_index').on(t.amount_paid).where(gte(t.amount_paid,t.amount)),
-}))
-
-export const fiadoTransactionRelations = relations(
-  fiadoTransactionTable, ({one,many})=> ({
-    customer: one(customerTable,{
-      fields:[fiadoTransactionTable.customer_id],
-      references:[customerTable.id]
-    }),
-    order:one(customerOrderTable,{
-      fields:[fiadoTransactionTable.order_id],
-      references:[customerOrderTable.id]
-    }),
-  })
-)
-
-export type InsertFiadoTransaction = typeof fiadoTransactionTable.$inferInsert
-export type SelectFiadoTransaction = typeof fiadoTransactionTable.$inferSelect
 
 export const addressTable = sqliteTable('endereco', {
   id: integer('id').notNull().primaryKey({ autoIncrement: true }),
@@ -141,22 +113,43 @@ export const orderStatusEnum = [
   'ENDED',
 ] as const
 
-export const customerOrderTable = sqliteTable('pedidos', {
-  id: integer('id').notNull().primaryKey({ autoIncrement: true }),
-  // .$defaultFn(() => generateId(15)),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
-  updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => new Date(),
-  ),
-  customer_id: integer('customer_id').references(() => customerTable.id),
-  address_id: integer('address_id').references(() => addressTable.id),
-  cachier_id: integer('cachier_id').references(() => cashierTable.id),
-  observation: text('observation'),
-  total: integer('total').notNull(),
-  status: text('status', {
-    enum: orderStatusEnum,
-  }).notNull(),
-})
+export const orderTypeEnum = [
+  'DELIVERY',
+  'NO LOCAL',
+  'RETIRAR',
+  'ATACADO',
+] as const
+export const customerOrderTable = sqliteTable(
+  'pedidos',
+  {
+    id: integer('id').notNull().primaryKey({ autoIncrement: true }),
+    // .$defaultFn(() => generateId(15)),
+    created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+    updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
+      () => new Date(),
+    ),
+    is_fiado: integer('is_fiado', { mode: 'boolean' }).notNull(),
+
+    customer_id: integer('customer_id').references(() => customerTable.id),
+    address_id: integer('address_id').references(() => addressTable.id),
+    cachier_id: integer('cachier_id').references(() => cashierTable.id),
+    motoboy_id: text('motoboy_id').references(() => userTable.id),
+    observation: text('observation'),
+    amount_paid: integer('amount_paid').notNull(),
+    total: integer('total').notNull(),
+    status: text('status', {
+      enum: orderStatusEnum,
+    }).notNull(),
+    type: text('type', {
+      enum: orderTypeEnum,
+    }).notNull(),
+  },
+  t => ({
+    paid: index('paid_index')
+      .on(t.amount_paid)
+      .where(gte(t.amount_paid, t.total)),
+  }),
+)
 
 export const customerOrderRelations = relations(
   customerOrderTable,
@@ -173,7 +166,6 @@ export const customerOrderRelations = relations(
     transactions: many(stockTransactionTable),
 
     payments: many(orderPaymentTable),
-    fiado_transactions:many(fiadoTransactionTable)
   }),
 )
 export type SelectCustomerOrder = typeof customerOrderTable.$inferSelect
@@ -221,8 +213,8 @@ export const orderPaymentTable = sqliteTable('pagamentos', {
     .references(() => customerOrderTable.id)
     .notNull(),
   status: text('status', { enum: paymentStatusEnum }).notNull(),
-  observation:text('observation'),
-  fiado_id:integer('id').references(()=>fiadoTransactionTable.id),
+  observation: text('observation'),
+
   cachier_id: integer('cachier_id').references(() => cashierTable.id),
 })
 
