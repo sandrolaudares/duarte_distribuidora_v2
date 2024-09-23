@@ -5,7 +5,6 @@ import {
   addressTable,
   orderItemTable,
   orderPaymentTable,
-  
 } from './index'
 
 import type {
@@ -244,8 +243,11 @@ export const customer = {
       },
     })
   },
-  insertOrderPayment: (data: InsertOrderPayment) => {
-    return db.insert(orderPaymentTable).values(data)
+  insertOrderPayment: async (data: InsertOrderPayment) => {
+    await db.update(customerOrderTable).set({
+      amount_paid: sql`${customerOrderTable.amount_paid} + ${data.amount_paid}`,
+    })
+    return await db.insert(orderPaymentTable).values(data)
   },
   getOrderPayments: (id: number) => {
     return db

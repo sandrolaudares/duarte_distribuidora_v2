@@ -536,7 +536,7 @@ export const customer = router({
     .use(middleware.logged)
     .input(insertOrderPaymentSchema)
     .mutation(async ({ input }) => {
-      return await customerController.insertOrderPayment(input).returning()
+      return await customerController.insertOrderPayment(input)
     }),
 
   getOrderPayments: publicProcedure
