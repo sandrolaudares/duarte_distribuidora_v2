@@ -22,10 +22,10 @@
       console.log('setting amountFormatted to 0.00 --- BUT IT does not work ')
       amountFormatted = '0.00' // ERROR this never works
     } else {
-      // value = parseInt(cleanedInput, 10) // Assign the raw value
-      amountFormatted = (parseInt(cleanedInput, 10) / 100).toFixed(2);
+      value = parseInt(cleanedInput, 10) // Assign the raw value
+      amountFormatted = (value / 100).toFixed(2);
     }
-    // value = Number(amountFormatted.replace('.', ''))
+    value = Number(amountFormatted.replace('.', ''))
   }
 </script>
 
