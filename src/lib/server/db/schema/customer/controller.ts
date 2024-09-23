@@ -22,7 +22,7 @@ import { db } from '$db'
 import { and, count, eq, gte, ne, or, sql } from 'drizzle-orm'
 
 import { stock, bugReport } from '$db/controller'
-import { cashierTransactionTable } from '../distribuidora'
+import { cashierTable, cashierTransactionTable } from '../distribuidora'
 import { TRPCError } from '@trpc/server'
 import { userTable } from '../user'
 
@@ -286,6 +286,41 @@ export const customer = {
       .update(orderPaymentTable)
       .set(data)
       .where(eq(orderPaymentTable.id, id))
+  },
+
+  getAllOrderInfo: () => {
+    return db
+      .select({
+        //Order:
+        id: customerOrderTable.id,
+        created_at: customerOrderTable.created_at,
+        updated_at: customerOrderTable.updated_at,
+        is_fiado: customerOrderTable.is_fiado,
+        observation: customerOrderTable.observation,
+        amount_paid: customerOrderTable.amount_paid,
+        total: customerOrderTable.total,
+        status: customerOrderTable.status,
+        type: customerOrderTable.type,
+        
+        //customer:
+        name: customerTable.name,
+        email: customerTable.email,
+        cellphone: customerTable.cellphone,
+
+        //cashier
+        cashier: cashierTable.name,
+
+
+      })
+      .from(customerOrderTable)
+      .leftJoin(
+        customerTable,
+        eq(customerTable.id, customerOrderTable.customer_id),
+      )
+      .leftJoin(
+        cashierTable,
+        eq(cashierTable.id, customerOrderTable.cachier_id),
+      )
   },
 }
 

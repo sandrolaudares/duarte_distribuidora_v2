@@ -362,11 +362,11 @@ export const customer = router({
             address_id: z.number().optional(),
             total: z.number(),
             observation: z.string(),
-            cachier_id: z.number().optional(),
+            cashier_id: z.number().optional(),
             type: z.enum(orderTypeEnum),
             motoboy_id: z.string().optional(),
 
-            payment_info: insertOrderPaymentSchema.array(),
+            payment_info: insertOrderPaymentSchema.omit({order_id: true}).array(),
           }),
         }),
       )
@@ -397,7 +397,7 @@ export const customer = router({
             total: order_info.total,
             customer_id: order_info.customer_id,
             address_id: order_info.address_id,
-            cachier_id: order_info.cachier_id,
+            cachier_id: order_info.cashier_id,
             observation: order_info.observation,
           })
           .returning()
@@ -414,10 +414,10 @@ export const customer = router({
         const payments = order_info.payment_info.map(payment => {
           switch (payment.payment_method) {
             case 'dinheiro':
-              if (order_info.cachier_id) {
+              if (order_info.cashier_id) {
                 distribuidora
                   .insertCashierTransaction({
-                    cashier_id: order_info.cachier_id,
+                    cashier_id: order_info.cashier_id,
                     type: 'PAGAMENTO',
                     order_id: order.id,
                     meta_data: {
@@ -429,7 +429,7 @@ export const customer = router({
                 if (payment.troco && payment.troco > 0) {
                   distribuidora
                     .insertCashierTransaction({
-                      cashier_id: order_info.cachier_id,
+                      cashier_id: order_info.cashier_id,
                       type: 'Troco',
                       order_id: order.id,
                       meta_data: {

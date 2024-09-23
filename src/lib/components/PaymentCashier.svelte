@@ -5,6 +5,10 @@
   import { icons } from '$lib/utils'
   import { toast } from 'svelte-sonner'
   import CardPayments from './cards/CardPayments.svelte'
+  import { getCartContext } from '$lib/stores/cart'
+  import { trpc } from '$trpc/client'
+  import { page } from '$app/stores'
+  import { modal } from './modal'
 
   export let total_pedido = 0
 
@@ -14,7 +18,12 @@
 
   export let payments: Omit<InsertOrderPayment, 'order_id'>[] = []
 
-  export let save: (payments:Omit<InsertOrderPayment, 'order_id'>[],isChecked:boolean) => void
+  export let save: (
+    payments: Omit<InsertOrderPayment, 'order_id'>[],
+    isChecked: boolean,
+  ) => void
+
+  const cart = getCartContext()
 
   $: total_paid = payments.reduce(
     (acc, payment) => acc + payment.amount_paid,
@@ -32,6 +41,7 @@
   let isDiferent = false
   let isPago = false
   let isDinheiro = false
+  let isFiado = false
   export let isChecked = false
 
   function divideValor(n: number) {
@@ -67,14 +77,53 @@
 
     payments.push({
       amount_paid: isDinheiro ? valor_recebido_dinheiro : valor_a_pagar,
-      status: metodo_pagamento === 'fiado' ? 'PENDING' : 'CONFIRMED',
+      status: 'CONFIRMED',
       payment_method: metodo_pagamento,
       troco: isDinheiro ? troco : null,
     })
     isDinheiro = false
     isPago = false
     isDiferent = true
+    isFiado = false
+    metodo_pagamento = null
     payments = [...payments]
+  }
+
+  async function addOrderFiado() {
+    try {
+      if (cliente_selecionado) {
+        const respFiado = await trpc($page).customer.order.insertFiado.mutate({
+          order_items: Object.values($cart).map(item => ({
+            product_id: item.item.id,
+            quantity: item.quantity,
+            price:
+              item.item[item.is_retail ? 'retail_price' : 'wholesale_price'],
+          })),
+          order_info: {
+            customer_id: cliente_selecionado.id,
+            address_id: cliente_selecionado.adresses[0].id,
+            total: total_pedido,
+            observation: 'Este é um pedido FIADO!',
+            type:'ATACADO'
+            //TODO: Type
+          },
+        })
+        toast.success('Pedido fiado realizado com sucesso!')
+        modal.close()
+        cart.set({})
+        cliente_selecionado = null
+        if (isChecked) {
+          await trpc($page).customer.updateOrderStatus.mutate({
+            order_id: respFiado.order.id,
+            status: 'DELIVERED',
+          })
+          toast.info('Finalizando pedido..')
+        }
+      }
+    } catch (error: any) {
+      toast.error(error.message)
+      console.error(error.message)
+    }
   }
   $: console.log(metodo_pagamento)
 </script>
@@ -90,11 +139,14 @@
     : 'flex-col'}"
 >
   {#if total_pedido === total_paid || total_pedido < total_paid}
-    <div class="flex w-full flex-col items-center justify-center gap-2">
+    <div class="mt-3 flex w-full flex-col items-center justify-center gap-2">
       <div class="badge badge-success gap-2">
         Valor total to pedido foi pago!
       </div>
-      <button class="btn btn-secondary" on:click={()=> save(payments,isChecked)}>
+      <button
+        class="btn btn-secondary"
+        on:click={() => save(payments, isChecked)}
+      >
         CLIQUE AQUI PARA CONFIRMAR O PAGAMENTO
       </button>
     </div>
@@ -108,6 +160,7 @@
             isDiferent = false
             isPago = false
             isDinheiro = false
+            isFiado = false
             metodo_pagamento = null
             valor_recebido_dinheiro = 0
             valor_a_pagar = total_pedido
@@ -196,16 +249,23 @@
             class="btn btn-primary"
             on:click={() => {
               isDiferent = !isDiferent
+              isFiado = false
+              isDinheiro = false
+              isPago = false
+              metodo_pagamento = null
             }}
           >
             PAGAMENTO PARCIAL
           </button>
         {/if}
-        {#if cliente_selecionado}
+        {#if cliente_selecionado && !isDiferent}
           <button
-            class="btn btn-primary w-full"
+            class="btn {isFiado
+              ? 'btn-ghost btn-active'
+              : 'btn-primary'} w-full"
             on:click={() => {
-              metodo_pagamento = 'fiado'
+              isFiado = true
+              addOrderFiado()
             }}
           >
             FIADO
@@ -216,6 +276,7 @@
           on:click={() => {
             isPago = true
             isDinheiro = false
+            isFiado = false
           }}
         >
           PAGO
@@ -225,16 +286,17 @@
           on:click={() => {
             isDinheiro = true
             isPago = false
+            isFiado = false
             metodo_pagamento = 'dinheiro'
           }}
         >
           DINHEIRO
         </button>
       {/if}
-      {#if isDiferent || isPago || isDinheiro || metodo_pagamento === 'fiado'}
+      {#if isDiferent || isPago || isDinheiro || isFiado}
         <hr />
         <button
-          class="btn btn-primary w-full"
+          class="btn btn-secondary w-full"
           on:click={addPayment}
           disabled={!(metodo_pagamento === 'dinheiro'
             ? valor_recebido_dinheiro >= valor_a_pagar
@@ -249,10 +311,11 @@
     <div class="mt-5">
       {#if total_paid < total_pedido && total_paid != 0}
         <p>
-          Foi pago: R${(total_paid / 100).toFixed(2)} mas ainda faltam <span class="text-error">R${(
-            (total_pedido - total_paid) /
-            100
-          ).toFixed(2)}</span> para pagar o pedido!
+          Foi pago: R${(total_paid / 100).toFixed(2)} mas ainda faltam
+          <span class="text-error">
+            R${((total_pedido - total_paid) / 100).toFixed(2)}
+          </span>
+          para pagar o pedido!
         </p>
         <!-- <p class="mb-4">
           {#if cliente_selecionado}
@@ -274,7 +337,9 @@
 
       <h3 class="mb-2 text-lg font-medium">Pagamentos feitos:</h3>
       {#each payments as payment, i}
-        <CardPayments {payment} {i}/>
+        <div class="my-1 flex flex-col">
+          <CardPayments {payment} {i} />
+        </div>
       {/each}
     </div>
   {/if}
