@@ -97,7 +97,7 @@
                 <h1 class="text-center font-bold">
                   O pagamento ainda está pendente <span class="text-error">
                     pendentes!
-                  </span>
+                  </span> Ainda faltam <span class="text-success">R${(((order_details.total)-(order_details.amount_paid - troco))/100).toFixed(2)}</span> para pagar 
                 </h1>
                 <button
                   class="btn btn-primary"
