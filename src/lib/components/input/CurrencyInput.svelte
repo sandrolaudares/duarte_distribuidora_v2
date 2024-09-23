@@ -6,7 +6,8 @@
   }
 
   let amountFormatted = '0.00'
-  // $: amountFormatted = (value / 100).toFixed(2)
+
+  $: amountFormatted = (value / 100).toFixed(2)
   let currencyInput: HTMLInputElement
   // $: console.log('amountFormatted: ' + amountFormatted)
 

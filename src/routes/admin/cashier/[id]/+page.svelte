@@ -48,49 +48,58 @@
     isDelivery = !isDelivery
   }
 
-  async function createOrder(payments:Omit<InsertOrderPayment,'order_id'>[],isChecked:boolean) {
+ async function createOrder(
+    payments: Omit<InsertOrderPayment, 'order_id'>[],
+    isChecked: boolean,
+  ) {
     let total = Object.values($cart).reduce((acc, item) => {
-    return acc + item.item[item.is_retail ? 'retail_price': 'wholesale_price'] * item.quantity
+      return (
+        acc +
+        item.item[item.is_retail ? 'retail_price' : 'wholesale_price'] *
+          item.quantity
+      )
     }, 0)
-    try {  
+    try {
       // TODO: add new cases
         const resp = await trpc($page).customer.order.insetPaidOrder.mutate({
           order_info: {
             customer_id: clienteSelecionado?.id,
             address_id: clienteSelecionado?.adresses[0].id,
-            total:total,
+            total: total,
             observation: observacao,
+            type: 'ATACADO',
+            //TODO: Type
+            cashier_id: caixa.id,
+            payment_info: payments,
           },
           order_items: Object.values($cart).map(item => ({
-            product_id:item.item.id,
-            quantity:item.quantity,
-            price:item.item[item.is_retail ? 'retail_price':'wholesale_price']
+            product_id: item.item.id,
+            quantity: item.quantity,
+            price:
+              item.item[item.is_retail ? 'retail_price' : 'wholesale_price'],
           })),
-          payment_info:payments
         })
-
-        if(!resp){
+        if (!resp) {
           toast.error('Erro ao criar pedido')
           return
         }
-
-        toast.success('Pedido realizado com sucesso!')
-
-        if(isChecked){
-        await trpc($page).customer.updateOrderStatus.mutate({
+        if (isChecked) {
+          await trpc($page).customer.updateOrderStatus.mutate({
             order_id: resp.order.id,
-            status: 'DELIVERED'
-        })
-        toast.info('Finalizando pedido..')
+            status: 'DELIVERED',
+          })
+          toast.info('Finalizando pedido..')
         }
+      
+      toast.success('Pedido realizado com sucesso!')
 
-        setTimeout(() => {
-        modal.close();
+      setTimeout(() => {
+        modal.close()
         clienteSelecionado = null
         enderecoCliente = null
-        }, 300);
-        
-        cart.set({})
+      }, 300)
+
+      cart.set({})
     } catch (error: any) {
       toast.error(error.message)
     }
@@ -170,7 +179,7 @@ async function pagamentoModal(){
   modal.open(PaymentCashier, {
     cliente_selecionado: clienteSelecionado,
     total_pedido:total,
-    save:(payments,isChecked)=>{ createOrder(payments,isChecked)}
+    save:(payments,isChecked)=>{createOrder(payments,isChecked)}
   })
 }
 
@@ -228,7 +237,7 @@ onDestroy(() =>  {
             
           </div>
           {#if isDelivery}
-             (Modal selecionar motoboy)
+              (Modal selecionar motoboy)
           {/if}
         </div>
 

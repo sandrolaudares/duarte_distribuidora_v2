@@ -2,20 +2,33 @@
   import PaymentCashier from '$lib/components/PaymentCashier.svelte'
   import type { PageData } from './$types'
   import { getImagePath } from '$utils/image'
+  import CardPayments from '$lib/components/cards/CardPayments.svelte'
+  import PaymentFiado from '$lib/components/PaymentFiado.svelte'
+  import { trpc } from '$trpc/client'
+  import { page } from '$app/stores'
+  import { onMount } from 'svelte'
+  import type { SelectOrderPayment } from '$lib/server/db/schema'
 
   export let data: PageData
 
   let order_details = data.order_details
 
   let isOpenModal: HTMLDialogElement | null = null
-  async function createPayment() {
-    
-  }
+
+  let troco = 0
+
+  troco = order_details?.payments?.reduce(
+    (acc, payment) => acc + (payment.troco ?? 0),
+    0,
+  ) ?? 0
+
+  let amount_paid_order = (order_details?.amount_paid ?? 0) - troco
+
 </script>
 
 {#if order_details}
   <section
-    class="container mx-auto flex flex-col-reverse gap-5 py-8 antialiased md:py-16 lg:flex-row"
+    class="container mx-auto flex flex-col-reverse gap-5 pb-3 pt-8 antialiased md:pt-16 lg:flex-row"
   >
     <div
       class=" px-4 {order_details.address ? 'lg:w-2/3' : 'w-full'}  2xl:px-0"
@@ -71,15 +84,34 @@
               R${(order_details.total / 100).toFixed(2)}
             </dd>
           </dl>
-
-          <div class="gap-4 sm:flex sm:items-center">
-            <button
-              type="button"
-              class="btn btn-primary w-full"
-              on:click={() => isOpenModal?.showModal()}
-            >
-              Pagamento
-            </button>
+          <hr />
+          <div>
+            <h1 class="mb-3 text-lg font-semibold">Pagamentos:</h1>
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+              {#each order_details.payments as payment, i}
+                <CardPayments {payment} {i} />
+              {/each}
+            </div>
+            {#if order_details.is_fiado && order_details.amount_paid < order_details.total}
+              <div class="mt-5 flex flex-col gap-5">
+                <h1 class="text-center font-bold">
+                  O pagamento ainda está pendente <span class="text-error">
+                    pendentes!
+                  </span>
+                </h1>
+                <button
+                  class="btn btn-primary"
+                  on:click={() => isOpenModal?.showModal()}
+                >
+                  Realizar pagamento
+                </button>
+              </div>
+            {/if}
+            {#if order_details.amount_paid >= order_details.total}
+              <h1 class="my-2 text-lg font-semibold text-success">
+                &#128079; O pagamento já foi realizado para este pedido!
+              </h1>
+            {/if}
           </div>
         </div>
       </div>
@@ -128,7 +160,7 @@
               <!-- <div class="flex justify-end">
                 <button class="btn btn-link">Mudar endereço</button>
               </div> -->
-              <!--TODO: mudar endereco and if !endereco colocar pra vincular-->
+              <!--TODO: mudar endereco e se !endereco colocar pra vincular se pedido ainda nao estiver pronto-->
             </div>
           {/if}
         </div>
@@ -141,12 +173,19 @@
     {JSON.stringify(order_details, null, 2)}
 </pre> -->
 
-<dialog class="modal" bind:this={isOpenModal}>
-  <div class="modal-box max-w-2xl">
-    <PaymentCashier total_pedido={order_details?.total} />
-  </div>
+{#if order_details?.is_fiado}
+  <dialog class="modal" bind:this={isOpenModal}>
+    <div class="modal-box max-w-2xl">
+      <PaymentFiado
+        closeFn={() => isOpenModal?.close()}
+        total_pedido={order_details.total}
+        order_id={order_details.id}
+        {amount_paid_order}
+      />
+    </div>
 
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
-</dialog>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+{/if}
