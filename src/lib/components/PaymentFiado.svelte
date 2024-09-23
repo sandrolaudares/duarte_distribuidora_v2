@@ -248,9 +248,10 @@
               }}
             >
               PAGAMENTO PARCIAL
+              {@html icons.divide()}
             </button>
           {/if}
-          {#if cliente_selecionado && !isDiferent}
+          <!-- {#if cliente_selecionado && !isDiferent}
             <button
               class="btn btn-primary w-full"
               on:click={() => {
@@ -258,8 +259,9 @@
               }}
             >
               FIADO
+              {@html icons.fiado()}
             </button>
-          {/if}
+          {/if} -->
           <button
             class="btn btn-primary w-full"
             on:click={() => {
@@ -269,6 +271,7 @@
             }}
           >
             PAGO
+            {@html icons.paid()}
           </button>
           <button
             class="btn btn-primary w-full"
@@ -280,6 +283,7 @@
             }}
           >
             DINHEIRO
+            {@html icons.cashColor()}
           </button>
         {/if}
         {#if isDiferent || isPago || isDinheiro || isFiado}
