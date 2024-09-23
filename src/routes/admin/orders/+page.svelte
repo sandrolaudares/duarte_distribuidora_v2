@@ -5,7 +5,7 @@
   import type { RouterInputs, RouterOutputs } from '$trpc/router'
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
-  import { onMount } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
   import Loading from '$lib/components/Loading.svelte'
   //export let data: PageData
 
@@ -28,14 +28,21 @@
   ) 
   let notification: HTMLAudioElement
   
-  setInterval(async()=>{
-      await getOrders()
-  },5000)
-    
+
+  
+  let unsub_getOrders: NodeJS.Timeout
+
   onMount(async () => {
     await getOrders()
     pedidosFiltrados  = pedidos
+    unsub_getOrders = setInterval(async()=>{
+      await getOrders()
+  },5000)
     isLoading = false
+  })
+
+  onDestroy(()=>{
+    clearInterval(unsub_getOrders)
   })
 
   async function getOrders() {
@@ -45,7 +52,7 @@
 
       if(pedidos.length != newPedidos.length){
         toast.info("Novo pedido!")
-        notification.play()
+        notification?.play()
       }
 
       pedidos = newPedidos
