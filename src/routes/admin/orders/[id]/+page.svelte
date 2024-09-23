@@ -92,7 +92,7 @@
                 <CardPayments {payment} {i} />
               {/each}
             </div>
-            {#if order_details.is_fiado && order_details.amount_paid < order_details.total}
+            {#if order_details.is_fiado && order_details.amount_paid - troco < order_details.total}
               <div class="mt-5 flex flex-col gap-5">
                 <h1 class="text-center font-bold">
                   O pagamento ainda está pendente <span class="text-error">
@@ -107,7 +107,7 @@
                 </button>
               </div>
             {/if}
-            {#if order_details.amount_paid >= order_details.total}
+            {#if order_details.amount_paid - troco >= order_details.total}
               <h1 class="my-2 text-lg font-semibold text-success">
                 &#128079; O pagamento já foi realizado para este pedido!
               </h1>
