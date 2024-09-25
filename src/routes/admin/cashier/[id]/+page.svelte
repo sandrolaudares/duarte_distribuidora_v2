@@ -227,7 +227,7 @@ onDestroy(() =>  {
         </div>
 
 
-        <div class="flex gap-1 flex-col items-center mt-5 justify-center">
+        <!-- <div class="flex gap-1 flex-col items-center mt-5 justify-center">
           <div class="flex gap-3 items-center justify-center">
 
             <h1>É um pedido delivery?</h1>
@@ -239,7 +239,7 @@ onDestroy(() =>  {
           {#if isDelivery}
               (Modal selecionar motoboy)
           {/if}
-        </div>
+        </div> -->
 
       </div>
       <div
