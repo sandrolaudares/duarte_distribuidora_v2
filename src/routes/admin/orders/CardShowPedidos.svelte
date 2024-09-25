@@ -99,11 +99,11 @@
 
     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
       <div>
-        <div
+        <!-- <div
           class={`badge font-semibold ${paymentStatusColor(order.payment_status)}`}
         >
           {order.payment_status}
-        </div>
+        </div> -->
         <p>
           <span class="font-semibold">Criado em:</span>
           {order.created_at}
