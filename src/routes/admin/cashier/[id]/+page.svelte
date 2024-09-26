@@ -21,6 +21,7 @@
   import PaymentCashier from '$lib/components/PaymentCashier.svelte'
   import CardapioCaixa from './CardapioCaixa.svelte'
   import CaixaLeftColumn from './CaixaLeftColumn.svelte'
+  import ModalMotoboy from './ModalMotoboy.svelte'
 
   const cart = getCartContext()
 
@@ -40,6 +41,8 @@
   let enderecoCliente:
     | RouterOutputs['customer']['getCustomers'][0]['adresses'][0]
     | null = null
+
+  let motoboySelecionado: RouterOutputs['auth']['getMotoboys'][0] | null = null
 
   let isDelivery = false
 
@@ -62,7 +65,7 @@
           address_id: clienteSelecionado?.adresses[0].id,
           total: total,
           observation: observacao,
-          motoboy_id: isDelivery ? '' : undefined,
+          motoboy_id: isDelivery ? motoboySelecionado?.id : undefined,
           type: 'ATACADO',
           //TODO: Type
           cashier_id: caixa.id,
@@ -201,6 +204,7 @@
       bind:clienteSelecionado
       bind:enderecoCliente
       bind:isDelivery
+      bind:motoboySelecionado
     />
     <div
       class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-4"
