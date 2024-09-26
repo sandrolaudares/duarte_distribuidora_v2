@@ -30,6 +30,11 @@ function getUserByUsername(username: string) {
 function getUserById(userId: string) {
   return db.select().from(userTable).where(eq(userTable.id, userId)).limit(1)
 }
+
+function getMotoboys() {
+  return db.select().from(userTable).where(eq(userTable.role,'motoboy'))
+}
+
 function getUserByEmail(email: string) {
   return db.select().from(userTable).where(eq(userTable.email, email)).limit(1)
 }
@@ -197,4 +202,5 @@ export const user = {
   getMagicLinkToken,
   deleteMagicLinkToken,
   DEFAULT_PERMISSIONS,
+  getMotoboys
 }
