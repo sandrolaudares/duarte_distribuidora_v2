@@ -5,6 +5,7 @@
   import { getCartContext } from '$lib/stores/cart'
   import { icons } from '$lib/utils/icons'
   import type { RouterOutputs } from '$trpc/router'
+  import ModalMotoboy from './ModalMotoboy.svelte'
 
   export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
   export let caixa
@@ -17,6 +18,10 @@
     | null = null
 
   export let user
+
+  export let motoboySelecionado:
+    | RouterOutputs['auth']['getMotoboys'][0]
+    | null = null
 
   export let isDelivery = false
   const cart = getCartContext()
@@ -41,8 +46,20 @@
       },
     })
   }
+
+  function handleSelectMotoboy() {
+    modal.open(ModalMotoboy, {
+      selectedMotoboy: motoboy => {
+        motoboySelecionado = motoboy
+      },
+    })
+  }
   function toggleDelivery() {
     isDelivery = !isDelivery
+
+    if (!isDelivery) {
+      motoboySelecionado = null;
+    }
   }
 </script>
 
@@ -90,7 +107,24 @@
         />
       </div>
       {#if isDelivery}
-        <button class="btn btn-outline w-full">Selecione o motoboy</button>
+        {#if motoboySelecionado}
+          <div class="flex items-center justify-center gap-3 w-full m-2">
+            <p>Motoboy: <strong>{motoboySelecionado.username}</strong></p>
+            <button
+              class="btn btn-accent"
+              on:click={() => {
+                motoboySelecionado = null
+                isDelivery = false
+              }}
+            >
+              Desvincular
+            </button>
+          </div>
+        {:else}
+          <button class="btn btn-outline w-full" on:click={handleSelectMotoboy}>
+            Selecione o motoboy
+          </button>
+        {/if}
       {/if}
     </div>
   </div>

@@ -9,6 +9,7 @@
   import type { RouterOutputs } from '$trpc/router'
   import ModalEndereco from './ModalEndereco.svelte'
   import Loading from '$lib/components/Loading.svelte'
+  import { toast } from 'svelte-sonner'
 
   type Clientes = RouterOutputs['customer']['getCustomers']
 
@@ -16,8 +17,13 @@
 
   let clientes: Clientes = []
   onMount(async () => {
-    clientes = await trpc($page).customer.getCustomers.query()
-    console.log(clientes);
+    try {
+      clientes = await trpc($page).customer.getCustomers.query()
+      console.log(clientes);
+    } catch (error:any) {
+      console.error(error.message)
+      toast.error(error.message)
+    }
     
     isLoading = false
   })
