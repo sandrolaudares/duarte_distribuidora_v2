@@ -95,6 +95,7 @@
         modal.close()
         clienteSelecionado = null
         enderecoCliente = null
+        motoboySelecionado = null
       }, 300)
 
       cart.set({})
