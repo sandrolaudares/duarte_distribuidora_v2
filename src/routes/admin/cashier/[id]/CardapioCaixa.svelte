@@ -4,37 +4,22 @@
   import { icons } from '$lib/utils/icons'
   import Cardapio from '$lib/components/Cardapio.svelte'
 
-  export let filteredProducts
+  export let products
   export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
 
-  type ProductItem = {
-    id: number
-    name: string
-    image: string
-    retail_price: number
-    wholesale_price: number
-  }
+  let filteredResults = products;
 
-  type SubProduct = {
-    id: number
-    items: ProductItem[]
-  }
-
-  type Product = {
-    id: number
-    description: string
-    products: SubProduct[]
-  }
   //TODO:Fix types
 
   const cart = getCartContext()
+
 </script>
 
 <Cardapio
-  data={filteredProducts}
+  data={filteredResults}
   onFilterChange={value => {
-    filteredProducts
-      .map((product: Product) => {
+    filteredResults = products
+      .map((product) => {
         const filteredSubProducts = product.products.map(subProduct => {
           const filteredItems = subProduct.items.filter(item =>
             item.name.toLowerCase().includes(value),
@@ -44,7 +29,7 @@
 
         return { ...product, products: filteredSubProducts }
       })
-      .filter((product: Product) =>
+      .filter((product) =>
         product.products.some(subProduct => subProduct.items.length > 0),
       )
   }}

@@ -29,6 +29,8 @@
 
   let { caixa, user, products } = data
 
+  let filteredProducts = products
+
   let isOpenModal: HTMLDialogElement | null = null
 
   let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
@@ -104,6 +106,21 @@
     }
   }
   let dinheiro_caixa = 0
+
+  const filterProducts = (value:string) => {
+    filteredProducts = products.map((product) => {
+      const filteredSubProducts = product.products.map(subProduct => {
+        const filteredItems = subProduct.items.filter(item =>
+          item.name.toLowerCase().includes(value.toLowerCase())
+        );
+        return { ...subProduct, items: filteredItems };
+      });
+
+      return { ...product, products: filteredSubProducts };
+    }).filter((product) =>
+      product.products.some(subProduct => subProduct.items.length > 0)
+    );
+  };
 
   async function handleAbrirCaixa() {
     try {
@@ -248,7 +265,7 @@
 
 <dialog class="modal" bind:this={isOpenModal}>
   <div class="modal-box max-w-4xl">
-    <CardapioCaixa filteredProducts={products} {tipo_preco} />
+    <CardapioCaixa products={filteredProducts} {tipo_preco}/>
   </div>
   <form method="dialog" class="modal-backdrop">
     <button>close</button>
