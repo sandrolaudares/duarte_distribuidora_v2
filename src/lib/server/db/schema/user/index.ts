@@ -18,7 +18,7 @@ export const userTable = sqliteTable('user', {
   emailVerified: integer('email_verified', { mode: 'boolean' })
     .notNull()
     .default(false),
-  password_hash: text('password_hash').notNull(),
+  password_hash: text('password_hash'),
 
   role: text('role', { enum: ['admin', 'employee', 'customer', 'motoboy'] })
     .notNull()

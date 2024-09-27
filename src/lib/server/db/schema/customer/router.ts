@@ -289,7 +289,7 @@ export const customer = router({
           })
         }
 
-        const [{ used_credit }] =
+        const used_credit =
           await customerController.getCustomerUsedCredit(order_info.customer_id)
 
         let credit = 0
@@ -318,7 +318,7 @@ export const customer = router({
         const [order] = await db
           .insert(customerOrderTable)
           .values({
-            status: 'PENDING',
+            status: 'DELIVERED',
             is_fiado: true,
             type: order_info.type,
             total: order_info.total,
@@ -377,7 +377,9 @@ export const customer = router({
             type: z.enum(orderTypeEnum),
             motoboy_id: z.string().optional(),
 
-            payment_info: insertOrderPaymentSchema.omit({order_id: true}).array(),
+            payment_info: insertOrderPaymentSchema
+              .omit({ order_id: true })
+              .array(),
           }),
         }),
       )
@@ -396,7 +398,7 @@ export const customer = router({
               'Valor pago é menor que o total da compra, adicione mais pagamentos',
           })
         }
-
+        
         const [order] = await db
           .insert(customerOrderTable)
           .values({
@@ -404,7 +406,7 @@ export const customer = router({
             is_fiado: false,
             type: order_info.type,
             motoboy_id: order_info.motoboy_id,
-            status: 'PENDING',
+            status: order_info.motoboy_id ? 'CONFIRMED':'DELIVERED',
             total: order_info.total,
             customer_id: order_info.customer_id,
             address_id: order_info.address_id,
@@ -560,6 +562,13 @@ export const customer = router({
   getAllNotPaidOrders: publicProcedure.query(async () => {
     return await customerController.getNotPaidOrders()
   }),
+
+  getCustomerUsedCredits: publicProcedure
+    .input(z.number())
+    .query(async ({ input }) => {
+      const id = input
+      return await customerController.getCustomerUsedCredit(id)
+    }),
 
   getNotPaidOrdersById: publicProcedure
     .input(z.number())
