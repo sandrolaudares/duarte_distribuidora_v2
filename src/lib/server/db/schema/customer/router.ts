@@ -16,6 +16,7 @@ import {
   type InsertOrderPayment,
   orderItemTable,
   orderTypeEnum,
+  type InsertCashierTransaction,
 } from '$lib/server/db/schema'
 
 import { paramsSchema } from '$lib/components/table'
@@ -102,157 +103,6 @@ export const customer = router({
   getCustomers: publicProcedure.query(async () => {
     return await customerController.getCustomersWithAddress()
   }),
-
-  // insertCashierOrder: publicProcedure
-  //   .use(middleware.auth)
-  //   .use(middleware.logged)
-  //   .input(
-  //     z.object({
-  //       order_items: z.array(
-  //         z.object({
-  //           product_id: z.number(),
-  //           quantity: z.number(),
-  //           price: z.number(),
-  //         }),
-  //       ),
-  //       order_info: z.object({
-  //         customer_id: z.number().optional(),
-  //         address_id: z.number().optional(),
-  //         total: z.number(),
-  //         observation: z.string(),
-  //         cachier_id: z.number().optional(),
-  //       }),
-  //       payment_info: insertOrderPaymentSchema.omit({ order_id: true }).array(),
-  //     }),
-  //   )
-  //   .mutation(async ({ input }) => {
-  //     const { order_items, order_info, payment_info } = input
-
-  //     const total_paid = payment_info.reduce(
-  //       (acc, payment) => acc + payment.amount_paid,
-  //       0,
-  //     )
-
-  //     if (total_paid < order_info.total) {
-  //       throw new TRPCError({
-  //         code: 'BAD_REQUEST',
-  //         message:
-  //           'Valor pago é menor que o total da compra, adicione mais pagamentos',
-  //       })
-  //     }
-
-  //     return await db.transaction(async tx => {
-  //       const [order] = await tx
-  //         .insert(customerOrderTable)
-  //         .values({
-  //           status: 'PENDING',
-  //           total: order_info.total,
-  //           customer_id: order_info.customer_id,
-  //           address_id: order_info.address_id,
-  //         })
-  //         .returning()
-
-  //       const items = order_items.map(item => ({
-  //         ...item,
-  //         order_id: order.id,
-  //       }))
-
-  //       const [customer] = order_info.customer_id
-  //         ? await tx
-  //             .select()
-  //             .from(customerTable)
-  //             .where(eq(customerTable.id, order_info.customer_id))
-  //         : [null]
-
-  //       const total_fiado = payment_info
-  //         .filter(payment => payment.payment_method === 'fiado')
-  //         .reduce((acc, payment) => acc + payment.amount_paid, 0)
-
-  //       if (
-  //         customer &&
-  //         customer.max_credit < total_fiado + customer.used_credit
-  //       ) {
-  //         throw new TRPCError({
-  //           code: 'BAD_REQUEST',
-  //           message: 'Cliente não possui crédito suficiente para esta compra',
-  //         })
-  //       }
-
-  //       for (const payment of payment_info || []) {
-  //         switch (payment.payment_method) {
-  //           case 'dinheiro': {
-  //             if (order_info.cachier_id && payment.troco) {
-  //               await tx.insert(cashierTransactionTable).values({
-  //                 cashier_id: order_info.cachier_id,
-  //                 amount: payment.amount_paid,
-  //                 observation: `Venda ${order.id}`,
-  //                 type: 'Entrada',
-  //                 meta_data: {
-  //                   order_id: order.id,
-  //                   payment_method: payment.payment_method,
-  //                 },
-  //               })
-  //               await tx.insert(cashierTransactionTable).values({
-  //                 cashier_id: order_info.cachier_id,
-  //                 amount: payment.troco,
-  //                 observation: `Venda ${order.id}`,
-  //                 type: 'Troco',
-  //                 meta_data: {
-  //                   order_id: order.id,
-  //                   payment_method: payment.payment_method,
-  //                 },
-  //               })
-  //             }
-
-  //             break
-  //           }
-  //           case 'fiado': {
-  //             break
-  //           }
-  //           // case 'credit_card': {
-  //           //   break
-  //           // }
-  //           // case 'debit_card': {
-  //           //   break
-  //           // }
-  //           // case 'pix': {
-  //           //   break
-  //           // }
-
-  //           default: {
-  //             if (order_info.cachier_id) {
-  //               await tx.insert(cashierTransactionTable).values({
-  //                 cashier_id: order_info.cachier_id,
-  //                 amount: payment.amount_paid,
-  //                 observation: `Venda ${order.id}`,
-  //                 type: 'PAGAMENTO',
-  //                 meta_data: {
-  //                   order_id: order.id,
-  //                   payment_method: payment.payment_method,
-  //                 },
-  //               })
-  //             }
-  //             // await tx.insert(orderPaymentTable).values({
-  //             //   ...payment,
-  //             //   order_id: order.id,
-  //             // })
-  //             break
-  //           }
-  //         }
-
-  //         await tx
-  //           .insert(orderPaymentTable)
-  //           .values({ ...payment, order_id: order.id })
-  //       }
-
-  //       await tx.insert(orderItemTable).values(items)
-  //       return {
-  //         order,
-  //         items,
-  //       }
-  //     })
-  //   }),
-
   order: router({
     insertFiado: publicProcedure
       .use(middleware.logged)
@@ -373,11 +223,13 @@ export const customer = router({
             address_id: z.number().optional(),
             total: z.number(),
             observation: z.string(),
-            cashier_id: z.number().optional(),
+            cashier_id: z.number(),
             type: z.enum(orderTypeEnum),
             motoboy_id: z.string().optional(),
 
-            payment_info: insertOrderPaymentSchema.omit({order_id: true}).array(),
+            payment_info: insertOrderPaymentSchema
+              .omit({ order_id: true })
+              .array(),
           }),
         }),
       )
@@ -422,34 +274,44 @@ export const customer = router({
           .values(items)
           .returning()
 
+        const transaction: InsertCashierTransaction[] = []
+        for (const payment of order_info.payment_info) {
+          transaction.push({
+            cachier_id: order_info.cashier_id,
+            type: 'Entrada',
+            order_id: order.id,
+            meta_data: {
+              customer: order_info.customer_id,
+            },
+            amount: payment.amount_paid,
+          })
+          if (payment.troco) {
+            transaction.push({
+              cachier_id: order_info.cashier_id,
+              type: 'Troco',
+              order_id: order.id,
+              meta_data: {
+                customer: order_info.customer_id,
+              },
+              amount: payment.troco,
+            })
+          }
+        }
+
+        await distribuidora.insertCashierTransaction(transaction)
         const payments = order_info.payment_info.map(payment => {
           switch (payment.payment_method) {
             case 'dinheiro':
               if (order_info.cashier_id) {
-                distribuidora
-                  .insertCashierTransaction({
-                    cashier_id: order_info.cashier_id,
-                    type: 'PAGAMENTO',
-                    order_id: order.id,
-                    meta_data: {
-                      customer: order_info.customer_id,
-                    },
-                    amount: payment.amount_paid,
-                  })
-                  .then()
-                if (payment.troco && payment.troco > 0) {
-                  distribuidora
-                    .insertCashierTransaction({
-                      cashier_id: order_info.cashier_id,
-                      type: 'Troco',
-                      order_id: order.id,
-                      meta_data: {
-                        customer: order_info.customer_id,
-                      },
-                      amount: payment.amount_paid,
-                    })
-                    .then()
-                }
+                distribuidora.insertCashierTransaction({
+                  cachier_id: order_info.cashier_id,
+                  type: 'PAGAMENTO',
+                  order_id: order.id,
+                  meta_data: {
+                    customer: order_info.customer_id,
+                  },
+                  amount: payment.amount_paid,
+                })
               }
               break
 
