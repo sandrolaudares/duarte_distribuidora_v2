@@ -168,7 +168,7 @@ export const customer = router({
         const [order] = await db
           .insert(customerOrderTable)
           .values({
-            status: 'DELIVERED',
+            status:order_info.motoboy_id ?'CONFIRMED': 'DELIVERED',
             is_fiado: true,
             type: order_info.type,
             total: order_info.total,

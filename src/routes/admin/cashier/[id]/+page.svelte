@@ -83,13 +83,7 @@
         toast.error('Erro ao criar pedido')
         return
       }
-      if (isChecked) {
-        await trpc($page).customer.updateOrderStatus.mutate({
-          order_id: resp.order.id,
-          status: 'DELIVERED',
-        })
-        toast.info('Finalizando pedido..')
-      }
+
 
       toast.success('Pedido realizado com sucesso!')
 
@@ -165,6 +159,7 @@
     modal.open(PaymentCashier, {
       cliente_selecionado: clienteSelecionado,
       total_pedido: total,
+      motoboySelecionado:motoboySelecionado,
       save: (payments, isChecked) => {
         createOrder(payments, isChecked)
       },
@@ -182,7 +177,7 @@
   </button>
 </div>
 <h1 class="mb-1 text-center text-3xl font-semibold">Caixa:</h1>
-{#if caixa.status === 'Fechado'}
+{#if caixa.status === 'Aberto'}
   <div class="flex justify-center">
     <label class="form-control w-full max-w-xs gap-2">
       <div class="label justify-center">
