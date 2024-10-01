@@ -2,41 +2,43 @@
   import { page } from '$app/stores'
   import Loading from '$lib/components/Loading.svelte'
   import { modal } from '$lib/components/modal'
-  import type { UserMeta } from '$lib/server/db/schema'
+  import type { DatabaseUser } from '$lib/server/db/schema'
+  import { roleEnum } from '$lib/utils/permissions'
+  import type { Permission, Role } from '$lib/utils/permissions'
   import { trpc } from '$trpc/client'
   import { toast } from 'svelte-sonner'
 
-  export let permissions: UserMeta
   export let userId: string
+  export let userRole:Role
+  export let userName:string
 
   let dialog: HTMLDialogElement
-  let selectedRole: UserMeta['role'] = permissions.role
+  let selectedRole: Role
 
   let isLoading = false
 
   async function handleUpdateUserPermission() {
     isLoading = true
     try {
-      await trpc($page).auth.updateUserPermissions.mutate({
+      await trpc($page).auth.updateUserRole.mutate({
         userId: userId,
-        permissions: {
-          role: selectedRole,
-        },
+        role: selectedRole,
       })
       toast.success('Permissões editadas com sucesso!')
       setTimeout(() => {
         dialog.close()
         window.location.reload()
       }, 1000)
-    } catch (error) {
+    } catch (error:any) {
       isLoading = false
       toast.error('Falha ao editar permissões')
+      console.error(error.message)
     }
   }
 </script>
 
 <button class="btn btn-primary" onclick={() => dialog.showModal()}>
-  {permissions.role}
+  {userRole}
 </button>
 
 <dialog bind:this={dialog} id="my_modal_2" class="modal">
@@ -46,7 +48,7 @@
         ✕
       </button>
     </form>
-    <h3 class="text-lg font-bold">Edite as permissões</h3>
+    <h3 class="text-lg font-bold">Edite o cargo de {userName}</h3>
     {#if isLoading}
       <div class="my-10 flex items-center justify-center">
         <Loading />
@@ -54,23 +56,23 @@
     {:else}
       <label class="form-control my-3 w-full">
         <select class="select select-bordered" bind:value={selectedRole}>
-          <option disabled selected>Escolha o cargos desse usuario</option>
-          <option value="admin">Administrador</option>
-          <option value="user">Usuario</option>
-          <option value="customer">Cliente</option>
+          <option disabled selected>Escolha o cargo de {userName}</option>
+          {#each roleEnum as role}
+            <option value={role}>{role}</option>
+          {/each}
         </select>
-        {#if permissions.redirect}
+        <!-- {#if permissions.redirect}
           <select class="select select-bordered"></select>
-        {/if}
+        {/if} -->
       </label>
     {/if}
     <div class="flex justify-end">
       <button
         class="btn btn-primary"
-        disabled={isLoading}
+        disabled={isLoading || (selectedRole ? !roleEnum.includes(selectedRole) : true)}
         onclick={handleUpdateUserPermission}
       >
-        Salvar permissões
+        Salvar cargo
       </button>
     </div>
   </div>

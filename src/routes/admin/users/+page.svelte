@@ -42,11 +42,13 @@
       accessorKey: 'email',
     },
     {
-      header: 'Permissoes',
+      header: 'Cargo',
       cell: info =>
         renderComponent(EditRole, {
-          permissions: info.row.original.permissions,
+          // permissions: info.row.original.permissions,
+          userRole: info.row.original.role,
           userId: info.row.original.id,
+          userName:info.row.original.username
         }),
     },
 
