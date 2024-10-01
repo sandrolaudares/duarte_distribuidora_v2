@@ -9,6 +9,7 @@ import { relations, sql } from 'drizzle-orm'
 import { cashierTransactionTable } from '../distribuidora'
 import { logsTable } from '../bug-report'
 import { customerOrderTable, orderPaymentTable } from '../customer'
+import type { Permission, Role } from '$lib/utils/permissions'
 
 export const userTable = sqliteTable('user', {
   id: text('id').notNull().primaryKey(),
@@ -52,19 +53,8 @@ export interface DatabaseUser {
   email: string
   emailVerified: boolean
   meta: UserMeta
-  role: 'admin' | 'employee' | 'customer' | 'motoboy' | 'caixa'
+  role: Role
 }
-
-export const permissionsEnum = [
-  'receber_fiado',
-  'editar_produtos',
-  'editar_estoque',
-  'ver_relatorios',
-  'customer',
-  'motoboy',
-  'editar_caixas'
-] as const
-export type Permission = (typeof permissionsEnum)[number]
 
 export type UserMeta = {
   redirect?: string
