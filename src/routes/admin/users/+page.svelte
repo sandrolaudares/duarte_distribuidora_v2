@@ -54,6 +54,15 @@
       accessorFn: row => new Date(row.created_at ?? '').toLocaleString(),
     },
     {
+      header: 'Permissões',
+      cell: info =>
+        renderComponent(EditPermissions, {
+          userId: info.row.original.id,
+          userName:info.row.original.username,
+          userPermissions:info.row.original.meta.permissions ?? []
+        }),
+    },
+    {
       header: 'Cargo',
       cell: info =>
         renderComponent(EditRole, {
@@ -61,15 +70,6 @@
           userRole: info.row.original.role,
           userId: info.row.original.id,
           userName:info.row.original.username
-        }),
-    },
-    {
-      header: 'Permissões',
-      cell: info =>
-        renderComponent(EditPermissions, {
-          userId: info.row.original.id,
-          userName:info.row.original.username,
-          userPermissions:info.row.original.meta.permissions ?? []
         }),
     },
   ]

@@ -9,8 +9,8 @@
   import { toast } from 'svelte-sonner'
 
   export let userId: string
-  export let userRole:Role
-  export let userName:string
+  export let userRole: Role
+  export let userName: string
 
   let dialog: HTMLDialogElement
   let selectedRole: Role
@@ -29,7 +29,7 @@
         dialog.close()
         window.location.reload()
       }, 1000)
-    } catch (error:any) {
+    } catch (error: any) {
       isLoading = false
       toast.error('Falha ao editar permissões')
       console.error(error.message)
@@ -37,11 +37,29 @@
   }
 </script>
 
-<button class="btn btn-primary" onclick={() => dialog.showModal()}>
-  {userRole}
-</button>
+<div class="flex items-center gap-2">
+  <label class="form-control my-3 w-full">
+    <select class="select select-bordered" bind:value={selectedRole}>
+      <!-- <option disabled selected>Escolha o cargo de {userName}</option> -->
+      <option value={userRole}>{userRole}</option>
+      {#each roleEnum as role}
+        {#if role !== userRole}
+          <option value={role}>{role}</option>
+        {/if}
+      {/each}
+    </select>
+  </label>
 
-<dialog bind:this={dialog} id="my_modal_2" class="modal">
+  <button
+    class="btn btn-primary"
+    disabled={(selectedRole === userRole) || isLoading}
+    onclick={handleUpdateUserPermission}
+  >
+    Salvar
+  </button>
+</div>
+
+<!-- <dialog bind:this={dialog} id="my_modal_2" class="modal">
   <div class="modal-box">
     <form method="dialog">
       <button class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">
@@ -77,4 +95,4 @@
   <form method="dialog" class="modal-backdrop">
     <button>close</button>
   </form>
-</dialog>
+</dialog> -->
