@@ -149,12 +149,13 @@ export const customer = router({
           const [{ count }] = await customerController.countFiadoTransactions(
             order_info.customer_id,
           )
-          if (count !== 0) {
-            throw new TRPCError({
-              code: 'BAD_REQUEST',
-              message: 'Cliente não possui crédito',
-            })
-          }
+          // if (count !== 0) {
+          //   throw new TRPCError({
+          //     code: 'BAD_REQUEST',
+          //     message: 'Cliente não possui crédito',
+          //   })
+          // }
+          //TODO:TA DANDO ERRO QUANDO FAZ PEDIDO FIADO
         } else {
           credit = used_credit
         }
@@ -310,7 +311,9 @@ export const customer = router({
             })
           }
         }
-        await distribuidora.insertCashierTransaction(trocos, true)
+        if(trocos.length>0){
+          await distribuidora.insertCashierTransaction(trocos, true)
+        }
         await distribuidora.insertCashierTransaction(transactions)
         const payments = order_info.payment_info.map(payment => ({
           ...payment,
