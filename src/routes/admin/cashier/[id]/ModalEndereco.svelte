@@ -28,7 +28,7 @@
        <AddAdress customer_id={addresses[0].customer_id} on:addressAdded={handleAddressAdded}/>
        {:else}
        <span>
-         Deseja adicionar um novo endereço? <button on:click={()=> criarEndereco=true} class="underline text-info">Clique aqui!</button>
+         Deseja adicionar um novo endereço para esse cliente? <button on:click={()=> criarEndereco=true} class="underline text-info">Clique aqui!</button>
        </span>
     {/if}
     {#if addresses.length>0}
