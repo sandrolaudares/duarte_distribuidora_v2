@@ -26,6 +26,7 @@ import { middleware } from '$trpc/middleware'
 import { db } from '../..'
 import { eq } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
+import { geocodeAddress, getDistanceFromLatLonInKm } from '$lib/utils/distance'
 
 export const customer = router({
   insertCustomer: publicProcedure
@@ -311,7 +312,7 @@ export const customer = router({
             })
           }
         }
-        if(trocos.length>0){
+        if (trocos.length > 0) {
           await distribuidora.insertCashierTransaction(trocos, true)
         }
         await distribuidora.insertCashierTransaction(transactions)
@@ -455,4 +456,35 @@ export const customer = router({
   getCurrentOrders: publicProcedure.use(middleware.logged).query(() => {
     return customerController.getCurrentOrders()
   }),
+
+  calculateDistance: publicProcedure
+    .input(z.object({
+      cep: z.string(),
+      state:z.string(),
+      city:z.string(),
+      bairro:z.string(),
+      street: z.string(),
+      number:z.string(),
+      country:z.string()
+    }))
+    .mutation(async ({ input }) => {
+      const location = await geocodeAddress(input.street + input.number + input.city + input.bairro + input.state + input.cep + input.country  )
+
+      if (!location) {
+        throw new Error('Endereço não encontrado para calcular taxa de entrega!')
+      }
+      console.log(location)
+
+      const customerPosition = {
+        lat: location.lat,
+        lon: location.lng,
+      }
+
+      const distance = getDistanceFromLatLonInKm(
+        { lat: -19.960593872971, lon: -44.20183490372314 },
+        customerPosition,
+      )
+
+      return distance 
+    }),
 })

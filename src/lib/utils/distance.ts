@@ -1,5 +1,4 @@
 import { GOOGLE_MAPS_KEY } from '$env/static/private'
-import { customer } from '$lib/server/db/controller'
 import { Client } from '@googlemaps/google-maps-services-js'
 
 const maps_client = new Client({})
