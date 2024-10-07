@@ -15,6 +15,8 @@ import { emailTemplate, sendMail } from '$lib/server/email'
 import { paramsSchema } from '$lib/components/table'
 import { tableHelper } from '$lib/server/db/utils'
 import { userTable } from '$lib/server/db/schema'
+import { generateId } from 'lucia'
+import { roleEnum } from '$lib/utils/permissions'
 
 export const auth = router({
   logOut: publicProcedure.query(async ({ ctx }) => {
@@ -207,7 +209,7 @@ export const auth = router({
     .input(
       z.object({
         userId: z.string(),
-        role: z.enum(['admin', 'employee', 'customer', 'motoboy', 'caixa']),
+        role: z.enum(roleEnum),
       }),
     )
     .mutation(async ({ input }) => {
@@ -217,5 +219,19 @@ export const auth = router({
 
     getMotoboys: publicProcedure.query(() => {
       return userController.getMotoboys()
+    }),
+
+    insertUser: publicProcedure
+    .use(middleware.auth)
+    .use(middleware.logged)
+    .input(
+      z.object({
+        username:z.string(),
+        email:z.string(),
+        role:z.enum(roleEnum),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await userController.insertUser({...input,id:generateId(15)})
     }),
 })

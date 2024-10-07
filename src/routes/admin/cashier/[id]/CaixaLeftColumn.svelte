@@ -200,7 +200,7 @@
                 Motoboy: <strong>{motoboySelecionado.username}</strong>
               </span>
               {#if taxaEntrega}
-                <h1>Taxa de entrega: R${(taxaEntrega/1000).toFixed(2)}</h1>
+                <span>Taxa de entrega: R${(taxaEntrega/1000).toFixed(2)}</span>
               {/if}
             </p>
             <button

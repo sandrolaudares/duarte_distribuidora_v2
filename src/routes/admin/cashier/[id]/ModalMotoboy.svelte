@@ -6,6 +6,7 @@
   import { onMount } from 'svelte'
   import { toast } from 'svelte-sonner'
   import type { RouterOutputs } from '$trpc/router'
+  import { roleEnum, type Role } from '$lib/utils/permissions'
 
   type Motoboy = RouterOutputs['auth']['getMotoboys']
 
@@ -13,6 +14,16 @@
   let filteredMotoboys = motoboys
 
   let isLoading = false
+
+  let newMotoboy = {
+    username: '',
+    email:'',
+    role:'motoboy' as Role
+  }
+  let errors = {
+    emailError:'',
+    nameError: '',
+  }
 
   onMount(async () => {
     try {
@@ -37,11 +48,77 @@
     }))
   }
 
+  async function handleInsertMotoboy() {
+    if(newMotoboy.username.length <3){
+      errors.nameError = 'Nome do cliente deve conter mais de 3 caracteres'
+      return
+    }
+    try {
+      isLoading = true
+      newMotoboy.role = 'motoboy'
+      await trpc($page).auth.insertUser.mutate(newMotoboy)
+      newMotoboy.username = ''
+      newMotoboy.email = ''
+      toast.success('Motoboy inserido com sucesso!')
+      filteredMotoboys = await trpc($page).auth.getMotoboys.query()
+      isLoading = false
+    } catch (error: any) {
+      toast.error(error.message)
+      console.error(error.message)
+      isLoading = false
+    }
+  }
+
   export let selectedMotoboy: (motoboy: Motoboy[0]) => void
 </script>
 
 <Modal title="Motoboys">
   <div class="my-4 flex flex-col gap-4">
+    <h1>Criação rápida de motoboy</h1>
+      <div class="grid grid-cols-3 gap-2">
+      <label class="input input-bordered flex items-center gap-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 16 16"
+          fill="currentColor"
+          class="h-4 w-4 opacity-70"
+        >
+          <path
+            d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z"
+          />
+        </svg>
+        <input
+          type="text"
+          class="grow"
+          placeholder="Nome"
+          bind:value={newMotoboy.username}
+        />
+      </label>
+      <label class="input input-bordered flex items-center gap-2">
+        <input
+          type="text"
+          class="grow"
+          placeholder="Telefone"
+          bind:value={newMotoboy.email}
+        />
+      </label>
+      <button class="btn btn-primary" on:click={handleInsertMotoboy}>
+        Adicionar
+      </button>
+    </div>
+    <div>
+      {#if errors.nameError}
+      <p class="text-error">
+        {errors.nameError}
+      </p>
+      {/if}
+      {#if errors.emailError}
+      <p class="text-error">
+        {errors.emailError}
+      </p>
+      {/if}
+    </div>
+    <hr />
     <label class="input input-bordered flex items-center gap-2">
       <input
         type="text"
