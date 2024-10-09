@@ -59,6 +59,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@andre-brandao/svelte-headless-table": "^0.18.6",
     "@googlemaps/google-maps-services-js": "^3.4.0",
     "@inlang/paraglide-sveltekit": "0.10.9",
     "@libsql/client": "^0.6.2",
