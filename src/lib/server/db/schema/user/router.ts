@@ -16,7 +16,7 @@ import { paramsSchema } from '$lib/components/table'
 import { tableHelper } from '$lib/server/db/utils'
 import { userTable } from '$lib/server/db/schema'
 import { generateId } from 'lucia'
-import { roleEnum } from '$lib/utils/permissions'
+import { permissionsEnum, roleEnum } from '$lib/utils/permissions'
 
 export const auth = router({
   logOut: publicProcedure.query(async ({ ctx }) => {
@@ -195,7 +195,7 @@ export const auth = router({
         userId: z.string(),
         meta: z.object({
           redirect: z.string().optional(),
-          permissions: z.array(z.enum([ 'receber_fiado','editar_produtos','editar_estoque','ver_relatorios','customer','motoboy','editar_caixas']))
+          permissions: z.array(z.enum(permissionsEnum))
         }),
       }),
     )
@@ -233,5 +233,22 @@ export const auth = router({
     )
     .mutation(async ({ input }) => {
       return await userController.insertUser({...input,id:generateId(15)})
+    }),
+    updateUser: publicProcedure
+    .use(middleware.auth)
+    .use(middleware.logged)
+    .input(
+      z.object({
+        userId: z.string(),
+        user: z.object({
+          username: z.string().optional(),
+          email: z.string().optional(),
+          role: z.enum(roleEnum).optional(),
+        }),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { userId, user } = input;
+      return await userController.updateUser(userId, user);
     }),
 })
