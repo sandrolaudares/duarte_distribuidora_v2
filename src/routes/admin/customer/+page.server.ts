@@ -14,7 +14,7 @@ import { and, eq, getTableColumns, SQL, count, like } from 'drizzle-orm'
 export const load = (async ({ url }) => {
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
-  const pageSize = Number(searchParams.get('pageSize') ?? 5)
+  const pageSize = Number(searchParams.get('pageSize') ?? 6)
 
   const name = searchParams.get('name')
   const email = searchParams.get('email')
