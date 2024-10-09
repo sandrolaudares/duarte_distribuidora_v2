@@ -177,7 +177,8 @@
 </script>
 
 <section class="container mx-auto px-4">
-  <div class="mt-2 flex flex-col justify-end items-end">
+  <div class="mt-2 flex justify-between items-center ">
+    <h1 class="text-2xl font-semibold">Clientes:</h1>
     <button class="btn btn-primary min-w-96" onclick={add}>Criar cliente</button>
   </div>
 </section>
