@@ -57,6 +57,8 @@
     const date = new Date(data)
     return new Intl.DateTimeFormat('pt-BR').format(date)
   }
+
+
 </script>
 
 <h1 class="my-3 text-center text-3xl">Pedidos com pagamento pendente:</h1>
@@ -98,7 +100,7 @@
           <th>ID</th>
           <th>Data do Pedido</th>
           <th>Data de Vencimento</th>
-          <th>Status Pagamento</th>
+          <th>Status do pedido</th>
           <th>Dias para Vencimento</th>
 
           <th>Cliente</th>
