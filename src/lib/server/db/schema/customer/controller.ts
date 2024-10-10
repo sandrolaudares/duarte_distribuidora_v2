@@ -90,6 +90,7 @@ export const customer = {
       where: t => and(gt(t.total, t.amount_paid), eq(t.is_fiado, true)),
       with: {
         customer: true,
+        payments:true
       },
     })
   },
