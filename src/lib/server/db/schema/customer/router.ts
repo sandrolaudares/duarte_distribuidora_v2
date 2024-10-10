@@ -31,6 +31,7 @@ import { db } from '../..'
 import { eq } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { geocodeAddress, getDistanceFromLatLonInKm } from '$lib/utils/distance'
+import { env } from '$env/dynamic/private'
 
 export const customer = router({
   insertCustomer: publicProcedure
@@ -583,8 +584,11 @@ export const customer = router({
         lon: location.lng,
       }
 
+      const distribuidoraLat = parseFloat(env.DISTRIBUIDORA_LAT || '0');
+      const distribuidoraLong = parseFloat(env.DISTRIBUIDORA_LONG || '0');
+
       const distance = getDistanceFromLatLonInKm(
-        { lat: -19.960593872971, lon: -44.20183490372314 },
+        { lat: distribuidoraLat, lon: distribuidoraLong },
         customerPosition,
       )
 
