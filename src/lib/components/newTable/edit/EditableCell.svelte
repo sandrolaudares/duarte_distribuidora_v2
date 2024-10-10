@@ -32,8 +32,8 @@
 
 <div>
   {#if !isEditing}
-  <span on:click={() => (isEditing = true)} class="{value === null ? 'text-error' : ''}">
-    {value!==null ? value:'Não cadastrado'}
+  <span on:click={() => (isEditing = true)} class="{!value ? 'text-error' : ''}">
+    {value ? value:'Não cadastrado'}
   </span>
   {:else}
     <form on:submit|preventDefault={handleSubmit}>
