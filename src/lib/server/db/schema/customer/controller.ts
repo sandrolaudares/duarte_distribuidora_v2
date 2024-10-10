@@ -113,7 +113,8 @@ export const customer = {
     return db.select().from(customerTable)
   },
   insertAddress: async (input: InsertAddress) => {
-    return db.insert(addressTable).values(input)
+   const [newAddress]= await db.insert(addressTable).values(input).returning()
+   return newAddress
   },
   getCustomerAddress: async (customerId: SelectCustomer['id']) => {
     return db
@@ -339,7 +340,7 @@ export const customer = {
       .leftJoin(
         cashierTable,
         eq(cashierTable.id, customerOrderTable.cachier_id),
-      )
+      ).$dynamic()
   },
 }
 

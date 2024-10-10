@@ -59,11 +59,12 @@
       )
     }, 0)
     try {
+      console.log(enderecoCliente)
       // TODO: add new cases
       const resp = await trpc($page).customer.order.insetPaidOrder.mutate({
         order_info: {
           customer_id: clienteSelecionado?.id,
-          address_id: clienteSelecionado?.adresses[0].id,
+          address_id: enderecoCliente?.id,
           total: total,
           observation: observacao,
           motoboy_id: isDelivery ? motoboySelecionado?.id : undefined,

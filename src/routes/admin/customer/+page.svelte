@@ -247,7 +247,7 @@
                 console.log('change username', value)
 
                 Filters_update_many({
-                  username: value,
+                  name: value,
                   page: '1',
                 })
               },
