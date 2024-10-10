@@ -87,7 +87,7 @@ export const customer = {
   },
   getPendingFiadoTransactions: async () => {
     return db.query.customerOrderTable.findMany({
-      where: t => and(gte(t.total, t.amount_paid), eq(t.is_fiado, true)),
+      where: t => and(gt(t.total, t.amount_paid), eq(t.is_fiado, true)),
       with: {
         customer: true,
       },
