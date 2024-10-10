@@ -35,7 +35,7 @@
         clienteSelecionado = client
         modal.open(ModalEndereco, {
           addresses: client.adresses,
-          customer_id:clienteSelecionado.id,
+          customer_id: clienteSelecionado.id,
           selectedAddress: address => {
             enderecoCliente = address
             //TODO:ARRUMAR TIPO
@@ -80,15 +80,15 @@
           city: enderecoCliente?.city,
           street: enderecoCliente.street,
           number: enderecoCliente.number,
-          country:enderecoCliente.country
+          country: enderecoCliente.country,
         })
         taxaEntrega = distance * 1.5
         console.log(taxaEntrega)
         console.log(distance)
-        toast.success('Distancia: '+(distance/1000).toFixed(2)+'km')
+        toast.success('Distancia: ' + (distance / 1000).toFixed(2) + 'km')
       }
-    } catch (error:any) {
-        toast.error(error.message)
+    } catch (error: any) {
+      toast.error(error.message)
     }
   }
 </script>
@@ -178,7 +178,10 @@
         {#if distance}
           <h1>Distancia até endereço: {(distance / 1000).toFixed(2)}km</h1>
         {/if}
+        {#if taxaEntrega}
+          <span>Taxa de entrega: R${(taxaEntrega / 1000).toFixed(2)}</span>
         {/if}
+      {/if}
     </div>
     <div class="my-1 flex flex-col items-center justify-center gap-1">
       {#if clienteSelecionado && enderecoCliente}
@@ -199,9 +202,6 @@
               <span>
                 Motoboy: <strong>{motoboySelecionado.username}</strong>
               </span>
-              {#if taxaEntrega}
-                <span>Taxa de entrega: R${(taxaEntrega/1000).toFixed(2)}</span>
-              {/if}
             </p>
             <button
               class="btn btn-accent"
