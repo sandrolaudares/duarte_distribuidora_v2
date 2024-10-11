@@ -9,6 +9,7 @@
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
   import { toast } from 'svelte-sonner'
+  import { onMount } from 'svelte'
 
   export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
   export let caixa
@@ -31,6 +32,14 @@
   export let taxaEntrega = 0
   
   const cart = getCartContext()
+
+  let fee = 0
+
+  onMount(async ()=>{
+    const resp = await trpc($page).distribuidora.getFee.query()
+
+    fee = resp[0].taxa_por_km
+  })
 
   function handleSelectClient() {
     modal.open(ModalCliente, {
@@ -72,7 +81,6 @@
 
   let distance = 0
   
-
   async function getDistance() {
     try {
       if (enderecoCliente) {
@@ -85,7 +93,7 @@
           number: enderecoCliente.number,
           country: enderecoCliente.country,
         })
-        taxaEntrega = (distance / 1000) * 1.5;
+        taxaEntrega = (distance / 1000) * (fee/100);
         taxaEntrega *= 100
         taxaEntrega = Math.round(taxaEntrega);
         console.log(taxaEntrega)
