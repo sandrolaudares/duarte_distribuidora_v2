@@ -17,11 +17,11 @@
 
   let newMotoboy = {
     username: '',
-    email:'',
-    role:'motoboy' as Role
+    email: '',
+    role: 'motoboy' as Role,
   }
   let errors = {
-    emailError:'',
+    emailError: '',
     nameError: '',
   }
 
@@ -49,7 +49,7 @@
   }
 
   async function handleInsertMotoboy() {
-    if(newMotoboy.username.length <3){
+    if (newMotoboy.username.length < 3) {
       errors.nameError = 'Nome do cliente deve conter mais de 3 caracteres'
       return
     }
@@ -74,51 +74,7 @@
 
 <Modal title="Motoboys">
   <div class="my-4 flex flex-col gap-4">
-    <h1>Criação rápida de motoboy</h1>
-      <div class="grid grid-cols-3 gap-2">
-      <label class="input input-bordered flex items-center gap-2">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-          fill="currentColor"
-          class="h-4 w-4 opacity-70"
-        >
-          <path
-            d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z"
-          />
-        </svg>
-        <input
-          type="text"
-          class="grow"
-          placeholder="Nome"
-          bind:value={newMotoboy.username}
-        />
-      </label>
-      <label class="input input-bordered flex items-center gap-2">
-        <input
-          type="text"
-          class="grow"
-          placeholder="Telefone"
-          bind:value={newMotoboy.email}
-        />
-      </label>
-      <button class="btn btn-primary" on:click={handleInsertMotoboy}>
-        Adicionar
-      </button>
-    </div>
-    <div>
-      {#if errors.nameError}
-      <p class="text-error">
-        {errors.nameError}
-      </p>
-      {/if}
-      {#if errors.emailError}
-      <p class="text-error">
-        {errors.emailError}
-      </p>
-      {/if}
-    </div>
-    <hr />
+
     <label class="input input-bordered flex items-center gap-2">
       <input
         type="text"
@@ -146,36 +102,35 @@
       </div>
     {/if}
     {#if motoboys.length === 0}
-    <h1 class="text-center text-lg my-2">
-      Nenhum motoboy cadastrado no sistema
-    </h1>
+      <h1 class="my-2 text-center text-lg">
+        Nenhum motoboy cadastrado no sistema
+      </h1>
     {/if}
     {#if searchTerm && filteredMotoboys.length === 0}
-    <div class="mt-6 flex min-h-40 items-center rounded-lg text-center">
-      <div class="mx-auto flex w-full max-w-sm flex-col px-4">
-        <div class="mx-auto rounded-full bg-base-200 p-3">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="h-6 w-6"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-            />
-          </svg>
+      <div class="mt-6 flex min-h-40 items-center rounded-lg text-center">
+        <div class="mx-auto flex w-full max-w-sm flex-col px-4">
+          <div class="mx-auto rounded-full bg-base-200 p-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="h-6 w-6"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+              />
+            </svg>
+          </div>
+          <h1 class="mt-3 text-lg font-semibold">Nenhum motoboy encontrado</h1>
+          <p class="mt-2">
+            Sua busca não foi encontrada. Por favor tente novamente.
+          </p>
         </div>
-        <h1 class="mt-3 text-lg font-semibold">Nenhum motoboy encontrado</h1>
-        <p class="mt-2">
-          Sua busca não foi encontrada. Por
-          favor tente novamente.
-        </p>
       </div>
-    </div>
     {:else}
       {#each filteredMotoboys as motoboy}
         <div

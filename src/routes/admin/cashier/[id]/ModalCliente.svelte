@@ -127,7 +127,7 @@
       <input
         type="text"
         class="grow"
-        placeholder="Search"
+        placeholder="Telefone ou nome do cliente"
         bind:value={searchTerm}
         on:input={searchClientes}
       />
