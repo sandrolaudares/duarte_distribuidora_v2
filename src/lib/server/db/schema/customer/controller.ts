@@ -214,6 +214,7 @@ export const customer = {
       with: {
         address: true,
         customer: true,
+        payments:true,
         items: {
           with: {
             product: true,
@@ -253,7 +254,7 @@ export const customer = {
   insertOrderPayment: async (data: InsertOrderPayment) => {
     await db.update(customerOrderTable).set({
       amount_paid: sql`${customerOrderTable.amount_paid} + ${data.amount_paid}`,
-    })
+    }).where(eq(customerOrderTable.id, data.order_id))
     return await db.insert(orderPaymentTable).values(data)
   },
   getOrderPayments: (id: number) => {

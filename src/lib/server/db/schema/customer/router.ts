@@ -200,7 +200,9 @@ export const customer = router({
             status: order_info.motoboy_id ? 'CONFIRMED' : 'DELIVERED',
             is_fiado: true,
             type: order_info.type,
-            total: order_info.motoboy_id ? order_info.total + (order_info.taxa_entrega ?? 0) : order_info.total,
+            total: order_info.motoboy_id
+              ? order_info.total + (order_info.taxa_entrega ?? 0)
+              : order_info.total,
             amount_paid: 0,
             motoboy_id: order_info.motoboy_id,
             customer_id: order_info.customer_id,
@@ -296,7 +298,9 @@ export const customer = router({
             type: order_info.type,
             motoboy_id: order_info.motoboy_id,
             status: order_info.motoboy_id ? 'CONFIRMED' : 'DELIVERED',
-            total: order_info.motoboy_id ? order_info.total + (order_info.taxa_entrega ?? 0) : order_info.total,
+            total: order_info.motoboy_id
+              ? order_info.total + (order_info.taxa_entrega ?? 0)
+              : order_info.total,
             customer_id: order_info.customer_id,
             address_id: order_info.address_id,
             cachier_id: order_info.cashier_id,
@@ -378,6 +382,83 @@ export const customer = router({
           order,
           order_items: order_items_db,
           payments: payments_db,
+        }
+      }),
+      insertOrderWaiting: publicProcedure
+      .use(middleware.auth)
+      .use(middleware.logged)
+      .input(
+        z.object({
+          order_items: z.array(
+            z.object({
+              product_id: z.number(),
+              quantity: z.number(),
+              price: z.number(),
+            }),
+          ),
+          order_info: z.object({
+            customer_id: z.number(),
+            address_id: z.number(),
+            total: z.number(),
+            observation: z.string(),
+            type: z.enum(orderTypeEnum),
+            motoboy_id: z.string(),
+            cachier_id: z.number().optional(),
+            taxa_entrega: z.number().optional(),
+          }),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        const { order_items, order_info } = input
+        const customer = await customerController.getCustomerById(
+          order_info.customer_id,
+        )
+        if (!customer) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Cliente não encontrado',
+          })
+        }
+
+        if(!order_info.motoboy_id){
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Sem motoboy selecionado',
+          })
+        }
+        const [order] = await db
+          .insert(customerOrderTable)
+          .values({
+            status: 'CONFIRMED',
+            is_fiado: false,
+            type: order_info.type,
+            total: order_info.motoboy_id
+              ? order_info.total + (order_info.taxa_entrega ?? 0)
+              : order_info.total,
+            amount_paid: 0,
+            motoboy_id: order_info.motoboy_id,
+            customer_id: order_info.customer_id,
+            address_id: order_info.address_id,
+            cachier_id: order_info.cachier_id,
+            observation: order_info.observation,
+            taxa_entrega: order_info.taxa_entrega,
+          })
+          .returning()
+
+        const items = order_items.map(item => ({
+          ...item,
+          order_id: order.id,
+        }))
+
+        const order_items_db = await db
+          .insert(orderItemTable)
+          .values(items)
+          .returning()
+
+        return {
+          order,
+          order_items: order_items_db,
+          // fiado_transaction,
         }
       }),
     payments: router({
@@ -588,8 +669,8 @@ export const customer = router({
         lon: location.lng,
       }
 
-      const distribuidoraLat = parseFloat(env.DISTRIBUIDORA_LAT || '0');
-      const distribuidoraLong = parseFloat(env.DISTRIBUIDORA_LONG || '0');
+      const distribuidoraLat = parseFloat(env.DISTRIBUIDORA_LAT || '0')
+      const distribuidoraLong = parseFloat(env.DISTRIBUIDORA_LONG || '0')
 
       const distance = getDistanceFromLatLonInKm(
         { lat: distribuidoraLat, lon: distribuidoraLong },

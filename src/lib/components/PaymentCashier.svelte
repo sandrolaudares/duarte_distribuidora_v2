@@ -125,21 +125,13 @@
             observation: 'Este é um pedido FIADO!',
             motoboy_id: motoboySelecionado?.id,
             type: 'ATACADO',
-            taxa_entrega: isDelivery ? taxaEntrega : 0,
+            taxa_entrega: isDelivery ? taxaEntrega : undefined,
             //TODO: Type
           },
         })
         toast.success('Pedido fiado realizado com sucesso!')
+        handleNulls()
         modal.close()
-        cart.set({})
-        cliente_selecionado = null
-        // if (isChecked) {
-        //   await trpc($page).customer.updateOrderStatus.mutate({
-        //     order_id: respFiado.order.id,
-        //     status: 'DELIVERED',
-        //   })
-        //   toast.info('Finalizando pedido..')
-        // }
       }
       isLoading = false
     } catch (error: any) {
@@ -149,6 +141,10 @@
     }
   }
   $: console.log(metodo_pagamento)
+
+  export const handleNulls = () => {
+    console.log('handlenull')
+  }
 </script>
 
 <h1 class="mb-2 text-center">
@@ -172,6 +168,7 @@
         on:click={() => {
           isLoading = true
           save(payments)
+          handleNulls()
         }}
       >
         {isLoading
@@ -294,6 +291,7 @@
             on:click={() => {
               isFiado = true
               addOrderFiado()
+              handleNulls()
             }}
             disabled={isFiado}
           >
