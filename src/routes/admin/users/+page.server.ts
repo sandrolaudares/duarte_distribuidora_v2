@@ -14,7 +14,7 @@ import { and, eq, getTableColumns, SQL, count, like } from 'drizzle-orm'
 export const load = (async ({ url }) => {
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
-  const pageSize = Number(searchParams.get('pageSize') ?? 5)
+  const pageSize = Number(searchParams.get('pageSize') ?? 10)
 
   const username = searchParams.get('username')
   const email = searchParams.get('email')
@@ -44,9 +44,11 @@ export const load = (async ({ url }) => {
   try {
     const rows = await withPagination(query, page, pageSize)
 
-    const total = await db.select({ count: count() }).from(schema.userTable)
+    const total = await db.select({ count: count(schema.userTable.id) }).from(schema.userTable)
 
     return { rows: rows ?? [], count: total[0].count }
+    console.log('total',total)
+    
   } catch (error) {
     console.error(error)
     return { rows: [], count: 0 }

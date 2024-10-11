@@ -9,7 +9,9 @@ import {
   getOrderBy,
 } from '$lib/server/db/utils'
 import { db } from '$lib/server/db'
-import { and, eq, getTableColumns, SQL, count, like } from 'drizzle-orm'
+import { and, eq, getTableColumns, SQL, count, like, gt, lt, lte } from 'drizzle-orm'
+import { customer } from '$lib/server/db/controller'
+import { gte } from 'drizzle-orm'
 
 export const load = (async ({ url }) => {
   const { searchParams } = url
@@ -17,25 +19,31 @@ export const load = (async ({ url }) => {
   const pageSize = Number(searchParams.get('pageSize') ?? 10)
 
   const name = searchParams.get('name')
-  const email = searchParams.get('email')
+  const dateStart = searchParams.get('start')
+  const dateEnd = searchParams.get('end')
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_order')
 
-  let query = db
-    .select()
-    .from(schema.customerTable)
-    .where(
+  let query = customer.getAllOrderInfo().where(
+    and(
+      name ? like(schema.customerTable.name, `${name}%`) : undefined,
 
-        name ? like(schema.customerTable.name, `${name}%`) : undefined,
+      dateStart && dateEnd
+        ? and(
+            gte(schema.customerTable.created_at, dateStart),
+            lte(schema.customerTable.created_at, dateEnd),
+          )
+        : undefined,
+    ),
+  ).$dynamic()
 
-    )
-    .$dynamic()
+  console.log("Date Start:", dateStart, "Date End:", dateEnd);
 
   if (sortId && sortOrder) {
     query = withOrderBy2(
       query,
-      getSQLiteColumn(schema.customerTable, sortId),
+      getSQLiteColumn(schema.customerOrderTable, sortId),
       sortOrder,
     )
   }
@@ -43,7 +51,9 @@ export const load = (async ({ url }) => {
   try {
     const rows = await withPagination(query, page, pageSize)
 
-    const total = await db.select({ count: count() }).from(schema.customerTable)
+    const total = await db
+      .select({ count: count() })
+      .from(schema.customerOrderTable)
 
     return { rows: rows ?? [], count: total[0].count }
   } catch (error) {

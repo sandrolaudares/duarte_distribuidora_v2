@@ -14,7 +14,7 @@ import { and, eq, getTableColumns, SQL, count, like } from 'drizzle-orm'
 export const load = (async ({ url }) => {
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
-  const pageSize = Number(searchParams.get('pageSize') ?? 6)
+  const pageSize = Number(searchParams.get('pageSize') ?? 10)
 
   const name = searchParams.get('name')
   // const email = searchParams.get('email')
@@ -25,11 +25,11 @@ export const load = (async ({ url }) => {
   let query = db
     .select()
     .from(schema.supplierTable)
-    // .where(
+    .where(
 
-    //     // name ? like(schema.supplierTable.name, `${name}%`) : undefined,
+        name ? like(schema.supplierTable.name, `${name}%`) : undefined,
 
-    // )
+    )
     .$dynamic()
 
   if (sortId && sortOrder) {

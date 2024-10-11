@@ -341,7 +341,7 @@ export const customer = {
       .leftJoin(
         cashierTable,
         eq(cashierTable.id, customerOrderTable.cachier_id),
-      ).$dynamic()
+      )
   },
 }
 
