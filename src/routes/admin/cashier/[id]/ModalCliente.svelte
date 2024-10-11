@@ -46,7 +46,8 @@
   const searchClientes = () => {
     return (filteredClientes = clientes.filter(cliente => {
       let nome = cliente.name.toLowerCase()
-      return nome.includes(searchTerm.toLowerCase())
+      let telefone = cliente.phone?.toLowerCase()
+      return (nome.includes(searchTerm.toLowerCase()) || telefone?.includes(searchTerm.toLowerCase()))
     }))
   }
 
