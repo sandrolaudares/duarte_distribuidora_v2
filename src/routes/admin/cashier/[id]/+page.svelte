@@ -58,7 +58,7 @@
           item.quantity
       )
     }, 0)
-    if(isDelivery && !motoboySelecionado){
+    if (isDelivery && !motoboySelecionado) {
       toast.error('Selecione um motoboy para pedidos delivery')
       return
     }
@@ -91,19 +91,66 @@
 
       toast.success('Pedido realizado com sucesso!')
 
-      setTimeout(() => {
+      reset()
+    } catch (error: any) {
+      toast.error(error.message)
+    }
+  }
+
+  function reset() {
+    setTimeout(() => {
         modal.close()
         clienteSelecionado = null
         enderecoCliente = null
         motoboySelecionado = null
         isDelivery = false
       }, 300)
+    cart.set({})
+  }
 
-      cart.set({})
+  async function orderWaiting() {
+    let total = Object.values($cart).reduce((acc, item) => {
+      return (
+        acc +
+        item.item[item.is_retail ? 'retail_price' : 'wholesale_price'] *
+          item.quantity
+      )
+    }, 0)
+    if (isDelivery && !motoboySelecionado) {
+      toast.error('Selecione um motoboy para pedidos delivery')
+      return
+    }
+    try {
+      const resp = await trpc($page).customer.order.insertOrderWaiting.mutate({
+        order_info: {
+          customer_id: clienteSelecionado?.id || 0,
+          address_id: enderecoCliente?.id || 0,
+          total: total,
+          observation: observacao,
+          motoboy_id: motoboySelecionado?.id || '0',
+          type: 'ATACADO',
+          //TODO: Type
+          cachier_id: caixa.id,
+          taxa_entrega: isDelivery ? taxaEntrega : 0,
+        },
+        order_items: Object.values($cart).map(item => ({
+          product_id: item.item.id,
+          quantity: item.quantity,
+          price: item.item[item.is_retail ? 'retail_price' : 'wholesale_price'],
+        })),
+      })
+      if (!resp) {
+        toast.error('Erro ao criar pedido')
+        return
+      }
+
+      toast.success('Pedido realizado com sucesso!')
+      reset()
     } catch (error: any) {
       toast.error(error.message)
     }
   }
+
   let dinheiro_caixa = 0
 
   async function handleAbrirCaixa() {
@@ -162,13 +209,17 @@
     }, 0)
     modal.open(PaymentCashier, {
       cliente_selecionado: clienteSelecionado,
-      total_pedido:isDelivery? total + taxaEntrega:total,
+      total_pedido: isDelivery ? total + taxaEntrega : total,
       motoboySelecionado: motoboySelecionado,
       enderecoSelecionado: enderecoCliente,
-      isDelivery:isDelivery,
+      isDelivery: isDelivery,
+      taxaEntrega:taxaEntrega,
       save: payments => {
         createOrder(payments)
       },
+      handleNulls:()=> {
+        reset()
+      }
     })
   }
 
@@ -177,7 +228,7 @@
   })
 </script>
 
-<div class="m-4 flex justify-center">
+<div class="m-4 flex justify-center gap-3">
   <button class="btn btn-primary" on:click={seeTransactionsCaixa}>
     Ver transacoes do caixa
   </button>
@@ -215,7 +266,7 @@
     <div
       class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-4"
     >
-      <CaixaColumn bind:taxaEntrega bind:isDelivery/>
+      <CaixaColumn bind:taxaEntrega bind:isDelivery />
     </div>
 
     <div class="col-auto flex h-auto flex-col justify-between gap-2 md:w-96">
@@ -234,6 +285,13 @@
         ></textarea>
       </div>
       <div class="flex flex-col gap-2">
+        <button
+          class="btn btn-secondary w-full disabled:bg-opacity-50"
+          disabled={Object.values($cart).length === 0 || !motoboySelecionado}
+          on:click={orderWaiting}
+        >
+          <span class="mr-1">PREPARAR PARA ENTREGA</span>
+        </button>
         <button class="btn btn-primary w-full disabled:bg-opacity-50">
           <span class="mr-1">IMPRIMIR</span>
           {@html icons.print()}
