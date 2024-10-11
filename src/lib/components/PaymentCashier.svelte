@@ -17,7 +17,9 @@
     | RouterOutputs['customer']['getCustomers'][0]
     | null = null
 
-  export let motoboySelecionado: RouterOutputs['auth']['getMotoboys'][0] | null = null
+  export let motoboySelecionado:
+    | RouterOutputs['auth']['getMotoboys'][0]
+    | null = null
 
   export let payments: Omit<InsertOrderPayment, 'order_id'>[] = []
 
@@ -27,6 +29,10 @@
     payments: Omit<InsertOrderPayment, 'order_id'>[],
     // isChecked: boolean,
   ) => void
+
+  export let taxaEntrega = 0
+
+  export let isDelivery = false
 
   const cart = getCartContext()
 
@@ -98,6 +104,10 @@
   async function addOrderFiado() {
     try {
       isLoading = true
+      if (isDelivery && !motoboySelecionado) {
+        toast.error('Selecione um motoboy para pedidos delivery')
+        return
+      }
       if (cliente_selecionado) {
         await trpc($page).customer.order.insertFiado.mutate({
           order_items: Object.values($cart).map(item => ({
@@ -108,11 +118,14 @@
           })),
           order_info: {
             customer_id: cliente_selecionado.id,
-            address_id: enderecoSelecionado ? enderecoSelecionado.id : undefined,
+            address_id: enderecoSelecionado
+              ? enderecoSelecionado.id
+              : undefined,
             total: total_pedido,
             observation: 'Este é um pedido FIADO!',
             motoboy_id: motoboySelecionado?.id,
-            type:'ATACADO'
+            type: 'ATACADO',
+            taxa_entrega: isDelivery ? taxaEntrega : 0,
             //TODO: Type
           },
         })
@@ -130,7 +143,7 @@
       }
       isLoading = false
     } catch (error: any) {
-      isLoading=false
+      isLoading = false
       toast.error(error.message)
       console.error(error.message)
     }
@@ -159,10 +172,11 @@
         on:click={() => {
           isLoading = true
           save(payments)
-        }
-        }
+        }}
       >
-        {isLoading ? 'Criando pedido...' : 'CLIQUE AQUI PARA CONFIRMAR O PAGAMENTO'}
+        {isLoading
+          ? 'Criando pedido...'
+          : 'CLIQUE AQUI PARA CONFIRMAR O PAGAMENTO'}
       </button>
     </div>
   {:else}
@@ -276,13 +290,12 @@
         {/if}
         {#if cliente_selecionado && !isDiferent}
           <button
-            class="btn {isFiado
-              ? 'btn-ghost btn-active'
-              : 'btn-primary'} w-full"
+            class="btn btn-primary w-full"
             on:click={() => {
               isFiado = true
               addOrderFiado()
             }}
+            disabled={isFiado}
           >
             FIADO
             {@html icons.fiado()}

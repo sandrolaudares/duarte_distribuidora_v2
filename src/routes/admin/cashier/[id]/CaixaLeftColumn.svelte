@@ -27,6 +27,9 @@
     | null = null
 
   export let isDelivery = false
+
+  export let taxaEntrega = 0
+  
   const cart = getCartContext()
 
   function handleSelectClient() {
@@ -68,7 +71,7 @@
   }
 
   let distance = 0
-  let taxaEntrega = 0
+  
 
   async function getDistance() {
     try {
@@ -82,7 +85,9 @@
           number: enderecoCliente.number,
           country: enderecoCliente.country,
         })
-        taxaEntrega = distance * 1.5
+        taxaEntrega = (distance / 1000) * 1.5;
+        taxaEntrega *= 100
+        taxaEntrega = Math.round(taxaEntrega);
         console.log(taxaEntrega)
         console.log(distance)
         toast.success('Distancia: ' + (distance / 1000).toFixed(2) + 'km')
@@ -90,6 +95,10 @@
     } catch (error: any) {
       toast.error(error.message)
     }
+  }
+
+  $: if(enderecoCliente) {
+    isDelivery = true
   }
 </script>
 
@@ -155,6 +164,8 @@
             on:click={() => {
               clienteSelecionado = null
               enderecoCliente = null
+              distance = 0
+              taxaEntrega = 0
             }}
           >
             Desvincular
@@ -179,7 +190,7 @@
           <h1>Distancia até endereço: {(distance / 1000).toFixed(2)}km</h1>
         {/if}
         {#if taxaEntrega}
-          <span>Taxa de entrega: R${(taxaEntrega / 1000).toFixed(2)}</span>
+          <span>Taxa de entrega: R${(taxaEntrega / 100).toFixed(2)}</span>
         {/if}
       {/if}
     </div>

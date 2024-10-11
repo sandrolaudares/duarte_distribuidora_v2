@@ -150,6 +150,7 @@ export const customer = router({
             type: z.enum(orderTypeEnum),
             motoboy_id: z.string().optional(),
             cachier_id: z.number().optional(),
+            taxa_entrega: z.number().optional(),
           }),
         }),
       )
@@ -199,13 +200,14 @@ export const customer = router({
             status: order_info.motoboy_id ? 'CONFIRMED' : 'DELIVERED',
             is_fiado: true,
             type: order_info.type,
-            total: order_info.total,
+            total: order_info.motoboy_id ? order_info.total + (order_info.taxa_entrega ?? 0) : order_info.total,
             amount_paid: 0,
             motoboy_id: order_info.motoboy_id,
             customer_id: order_info.customer_id,
             address_id: order_info.address_id,
             cachier_id: order_info.cachier_id,
             observation: order_info.observation,
+            taxa_entrega: order_info.taxa_entrega,
           })
           .returning()
 
@@ -254,6 +256,7 @@ export const customer = router({
             cashier_id: z.number(),
             type: z.enum(orderTypeEnum),
             motoboy_id: z.string().optional(),
+            taxa_entrega: z.number().optional(),
 
             payment_info: insertOrderPaymentSchema
               .omit({ order_id: true })
@@ -293,12 +296,13 @@ export const customer = router({
             type: order_info.type,
             motoboy_id: order_info.motoboy_id,
             status: order_info.motoboy_id ? 'CONFIRMED' : 'DELIVERED',
-            total: order_info.total,
+            total: order_info.motoboy_id ? order_info.total + (order_info.taxa_entrega ?? 0) : order_info.total,
             customer_id: order_info.customer_id,
             address_id: order_info.address_id,
             cachier_id: order_info.cashier_id,
             observation: order_info.observation,
             created_by: userId,
+            taxa_entrega: order_info.taxa_entrega,
           })
           .returning()
 

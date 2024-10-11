@@ -48,9 +48,9 @@
 
   let isDelivery = false
 
-  async function createOrder(
-    payments: Omit<InsertOrderPayment, 'order_id'>[],
-  ) {
+  let taxaEntrega = 0
+
+  async function createOrder(payments: Omit<InsertOrderPayment, 'order_id'>[]) {
     let total = Object.values($cart).reduce((acc, item) => {
       return (
         acc +
@@ -58,6 +58,10 @@
           item.quantity
       )
     }, 0)
+    if(isDelivery && !motoboySelecionado){
+      toast.error('Selecione um motoboy para pedidos delivery')
+      return
+    }
     try {
       console.log(enderecoCliente)
       // TODO: add new cases
@@ -72,6 +76,7 @@
           //TODO: Type
           cashier_id: caixa.id,
           payment_info: payments,
+          taxa_entrega: isDelivery ? taxaEntrega : 0,
         },
         order_items: Object.values($cart).map(item => ({
           product_id: item.item.id,
@@ -84,7 +89,6 @@
         return
       }
 
-
       toast.success('Pedido realizado com sucesso!')
 
       setTimeout(() => {
@@ -92,6 +96,7 @@
         clienteSelecionado = null
         enderecoCliente = null
         motoboySelecionado = null
+        isDelivery = false
       }, 300)
 
       cart.set({})
@@ -100,7 +105,6 @@
     }
   }
   let dinheiro_caixa = 0
-
 
   async function handleAbrirCaixa() {
     try {
@@ -158,10 +162,11 @@
     }, 0)
     modal.open(PaymentCashier, {
       cliente_selecionado: clienteSelecionado,
-      total_pedido: total,
-      motoboySelecionado:motoboySelecionado,
-      enderecoSelecionado:enderecoCliente,
-      save: (payments) => {
+      total_pedido:isDelivery? total + taxaEntrega:total,
+      motoboySelecionado: motoboySelecionado,
+      enderecoSelecionado: enderecoCliente,
+      isDelivery:isDelivery,
+      save: payments => {
         createOrder(payments)
       },
     })
@@ -205,11 +210,12 @@
       bind:enderecoCliente
       bind:isDelivery
       bind:motoboySelecionado
+      bind:taxaEntrega
     />
     <div
       class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-4"
     >
-      <CaixaColumn />
+      <CaixaColumn bind:taxaEntrega bind:isDelivery/>
     </div>
 
     <div class="col-auto flex h-auto flex-col justify-between gap-2 md:w-96">
@@ -247,7 +253,7 @@
 
 <dialog class="modal" bind:this={isOpenModal}>
   <div class="modal-box max-w-4xl">
-    <CardapioCaixa products={filteredProducts} {tipo_preco}/>
+    <CardapioCaixa products={filteredProducts} {tipo_preco} />
   </div>
   <form method="dialog" class="modal-backdrop">
     <button>close</button>
