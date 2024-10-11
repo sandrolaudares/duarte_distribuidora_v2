@@ -86,6 +86,7 @@
   import { page } from '$app/stores'
   import { goto } from '$app/navigation'
   import { SSRFilter } from './index.svelte'
+  import NoResults from '$lib/components/NoResults.svelte'
 
   let {
     tableRows,
@@ -119,6 +120,9 @@
   }
 
   function Filters_update(name: string, value: string) {
+    if (typeof window === 'undefined') {
+      return
+    }
     const url = new URL(Filters)
     if (value !== '') url.searchParams.set(name, value)
     else url.searchParams.delete(name)
@@ -126,6 +130,9 @@
     goto(url, { keepFocus: true })
   }
   function Filters_update_many(params: Record<string, string>) {
+    if (typeof window === 'undefined') {
+      return
+    }
     const url = new URL(Filters)
     Object.entries(params).forEach(([name, value]) => {
       if (!value) {
@@ -162,8 +169,6 @@
   const { pageIndex, pageCount, pageSize, hasNextPage, hasPreviousPage } =
     pluginStates.page
 
-
-
   $effect(() => {
     pageIndex.set(Number($page.url.searchParams.get('page') ?? 1) - 1)
 
@@ -182,110 +187,121 @@
   $inspect($filterValues)
 </script>
 
-<section class="container px-4 mx-auto">
-  <div class="flex flex-col mt-4">
+<section class="container mx-auto px-4">
+  <div class="mt-4 flex flex-col">
     <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div class="overflow-hidden border border-base-300  md:rounded-lg">
-              <table {...$tableAttrs} class="min-w-full divide-y divide-base-300">
-                <thead class="bg-base-200 bg-opacity-60">
-                  {#each $headerRows as headerRow (headerRow.id)}
-                    <Subscribe rowAttrs={headerRow.attrs()} let:rowAttrs>
-                      <!-- HeaderRow props -->
-                      <tr {...rowAttrs}>
-                        {#each headerRow.cells as cell (cell.id)}
-                          <Subscribe
-                            attrs={cell.attrs()}
-                            let:attrs
-                            props={cell.props()}
-                            let:props
-                          >
-                            <th {...attrs} class="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-opacity-50 ">
-                              <div class="flex gap-3 items-center">
-                                <button onclick={props.sort.toggle}>
-                                  <Render of={cell.render()} />
-                                </button>
-                                {#if props.sort.order === 'asc'}
-                                  ⬇️
-                                {:else if props.sort.order === 'desc'}
-                                  ⬆️
-                                {/if}
-                                {#if props.filter?.render}
-                                  
-                                    <Render of={props.filter.render} />
-                                  
-                                {/if}
-                              </div>
-                            </th>
-                          </Subscribe>
-                        {/each}
-                      </tr>
-                    </Subscribe>
-                  {/each}
-                </thead>
-                <tbody {...$tableBodyAttrs} class="bg-base divide-y divide-base-300">
-                  {#each $rows as row (row.id)}
-                    <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-                      <tr {...rowAttrs}>
-                        {#each row.cells as cell (cell.id)}
-                          <Subscribe attrs={cell.attrs()} let:attrs>
-                            <td {...attrs} class="px-4 py-4 text-sm font-medium text-opacity-70 whitespace-nowrap">
+      <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+        <div class="overflow-hidden border border-base-300 md:rounded-lg">
+          <table {...$tableAttrs} class="min-w-full divide-y divide-base-300">
+            <thead class="bg-base-200 bg-opacity-60">
+              {#each $headerRows as headerRow (headerRow.id)}
+                <Subscribe rowAttrs={headerRow.attrs()} let:rowAttrs>
+                  <!-- HeaderRow props -->
+                  <tr {...rowAttrs}>
+                    {#each headerRow.cells as cell (cell.id)}
+                      <Subscribe
+                        attrs={cell.attrs()}
+                        let:attrs
+                        props={cell.props()}
+                        let:props
+                      >
+                        <th
+                          {...attrs}
+                          class="px-4 py-3.5 text-left text-sm font-normal text-opacity-50 rtl:text-right"
+                        >
+                          <div class="flex items-center gap-3">
+                            <button onclick={props.sort.toggle}>
                               <Render of={cell.render()} />
-                            </td>
-                          </Subscribe>
-                        {/each}
-                      </tr>
-                    </Subscribe>
-                  {/each}
-                </tbody>
-              </table>
-            
-              
-              
-            </div>
-          </div>
+                            </button>
+                            {#if props.sort.order === 'asc'}
+                              ⬇️
+                            {:else if props.sort.order === 'desc'}
+                              ⬆️
+                            {/if}
+                            {#if props.filter?.render}
+                              <Render of={props.filter.render} />
+                            {/if}
+                          </div>
+                        </th>
+                      </Subscribe>
+                    {/each}
+                  </tr>
+                </Subscribe>
+              {/each}
+            </thead>
+            <tbody
+              {...$tableBodyAttrs}
+              class="bg-base divide-y divide-base-300"
+            >
+              {#if $rows.length === 0}
+                <tr>
+                  <td colspan={100} class="p-4 text-center">
+                    <NoResults />
+                  </td>
+                </tr>
+              {:else}
+                {#each $rows as row (row.id)}
+                  <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
+                    <tr {...rowAttrs}>
+                      {#each row.cells as cell (cell.id)}
+                        <Subscribe attrs={cell.attrs()} let:attrs>
+                          <td
+                            {...attrs}
+                            class="whitespace-nowrap px-4 py-4 text-sm font-medium text-opacity-70"
+                          >
+                            <Render of={cell.render()} />
+                          </td>
+                        </Subscribe>
+                      {/each}
+                    </tr>
+                  </Subscribe>
+                {/each}
+              {/if}
+            </tbody>
+          </table>
         </div>
       </div>
-      <div class="flex items-center justify-between mt-4">
-        <div class="flex gap-2 items-center border border-base-300 rounded p-3">
-          <label for="pageSize">Page size</label>
-          <input
-            id="pageSize"
-            type="number"
-            class="w-3` input input-sm"
-            min={1}
-            max={100}
-            oninput={e => {
-              const value = (e.target as HTMLInputElement).value
-              Filters_update('pageSize',value )
-            }}
-          />
-        </div>
-        <div class="flex gap-5 items-center">
-          <button
-            class="btn btn-primary"
-            onclick={() => {
-              Filters_update('page', $pageIndex.toString())
-            }}
-            disabled={!$hasPreviousPage}
-          >
-            Previous page
-          </button>
-          {$pageIndex + 1} out of {$pageCount}
-          <button
-            class="btn btn-primary"
-            onclick={() => {
-              Filters_update('page', String($pageIndex + 2))
-            }}
-            disabled={!$hasNextPage}
-          >
-            Next page
-          </button>
-        </div>
-      </div>
+    </div>
+  </div>
+  <div class="mt-4 flex items-center justify-between">
+    <div class="flex items-center gap-2 rounded border border-base-300 p-3">
+      <label for="pageSize">Page size</label>
+      <input
+        id="pageSize"
+        type="number"
+        class="w-3` input input-sm"
+        min={1}
+        max={100}
+        oninput={e => {
+          const value = (e.target as HTMLInputElement).value
+          Filters_update('pageSize', value)
+        }}
+      />
+    </div>
+    <div class="flex items-center gap-5">
+      <button
+        class="btn btn-primary"
+        onclick={() => {
+          Filters_update('page', $pageIndex.toString())
+        }}
+        disabled={!$hasPreviousPage}
+      >
+        Previous page
+      </button>
+      {$pageIndex + 1} out of {$pageCount}
+      <button
+        class="btn btn-primary"
+        onclick={() => {
+          Filters_update('page', String($pageIndex + 2))
+        }}
+        disabled={!$hasNextPage}
+      >
+        Next page
+      </button>
+    </div>
+  </div>
 </section>
-<main class="container mx-auto overflow-x-auto">
-</main>
+<main class="container mx-auto overflow-x-auto"></main>
 
 <style>
   /* table {
