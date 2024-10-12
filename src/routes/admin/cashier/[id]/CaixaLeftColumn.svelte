@@ -10,6 +10,7 @@
   import { page } from '$app/stores'
   import { toast } from 'svelte-sonner'
   import { onMount } from 'svelte'
+  import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
 
   export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
   export let caixa
@@ -197,8 +198,11 @@
         {#if distance}
           <h1>Distancia até endereço: {(distance / 1000).toFixed(2)}km</h1>
         {/if}
-        {#if taxaEntrega}
+        {#if taxaEntrega !==null}
+        <div class="flex flex-col">
           <span>Taxa de entrega: R${(taxaEntrega / 100).toFixed(2)}</span>
+          <span class="mt-2">Definir manualmente valor da entrega: <CurrencyInput bind:value={taxaEntrega}/></span>
+        </div>
         {/if}
       {/if}
     </div>
