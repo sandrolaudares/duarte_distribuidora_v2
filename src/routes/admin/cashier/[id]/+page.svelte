@@ -104,8 +104,8 @@
         enderecoCliente = null
         motoboySelecionado = null
         isDelivery = false
+        cart.set({})
       }, 300)
-    cart.set({})
   }
 
   async function orderWaiting() {
@@ -217,7 +217,7 @@
       save: payments => {
         createOrder(payments)
       },
-      handleNulls:()=> {
+      nulla:() => {
         reset()
       }
     })

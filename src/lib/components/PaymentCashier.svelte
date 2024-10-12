@@ -30,6 +30,8 @@
     // isChecked: boolean,
   ) => void
 
+  export let nulla: () => void = () => {};
+
   export let taxaEntrega = 0
 
   export let isDelivery = false
@@ -129,8 +131,8 @@
             //TODO: Type
           },
         })
+        nulla()
         toast.success('Pedido fiado realizado com sucesso!')
-        handleNulls()
         modal.close()
       }
       isLoading = false
@@ -141,10 +143,6 @@
     }
   }
   $: console.log(metodo_pagamento)
-
-  export const handleNulls = () => {
-    console.log('handlenull')
-  }
 </script>
 
 <h1 class="mb-2 text-center">
@@ -168,7 +166,6 @@
         on:click={() => {
           isLoading = true
           save(payments)
-          handleNulls()
         }}
       >
         {isLoading
@@ -291,7 +288,7 @@
             on:click={() => {
               isFiado = true
               addOrderFiado()
-              handleNulls()
+              // nulla()
             }}
             disabled={isFiado}
           >
