@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types'
 import * as schema from '$lib/server/db/schema'
 import {
   withPagination,
-  withOrderBy2,
+  withOrderBy,
   getSQLiteColumn,
   getOrderBy,
 } from '$lib/server/db/utils'
@@ -34,7 +34,7 @@ export const load = (async ({ url }) => {
     .$dynamic()
 
   if (sortId && sortOrder) {
-    query = withOrderBy2(
+    query = withOrderBy(
       query,
       getSQLiteColumn(schema.userTable, sortId),
       sortOrder,

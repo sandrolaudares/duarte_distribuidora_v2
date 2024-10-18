@@ -36,6 +36,7 @@
   export interface SSRTableProps<Item> {
     tableRows: Writable<Item[]>
     count: Readable<number>
+    totalSum: number
     columns: (
       table: Table<Item, SSRTablePlugins<Item>>,
     ) => Column<Item, SSRTablePlugins<Item>>[]
@@ -92,6 +93,7 @@
     tableRows,
     count,
     columns: createColumns,
+    totalSum,
   }: SSRTableProps<Item> = $props()
 
   const table = createTable(tableRows, {
@@ -189,9 +191,17 @@
 
 <section class="container mx-auto px-4">
   <div class="mt-4 flex flex-col">
-    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+    {#if totalSum}
+      <div class="flex items-center justify-end">
+        Total:&nbsp;
+        <span class="text-xl font-bold text-success">
+          R${(totalSum / 100).toFixed(2)}
+        </span>
+      </div>
+    {/if}
+    <div class="-mx-4 -my-2 overflow-x-scroll sm:-mx-6 lg:-mx-8">
       <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-        <div class="overflow-hidden border border-base-300 md:rounded-lg">
+        <div class="overflow-scroll border border-base-300 md:rounded-lg">
           <table {...$tableAttrs} class="min-w-full divide-y divide-base-300">
             <thead class="bg-base-200 bg-opacity-60">
               {#each $headerRows as headerRow (headerRow.id)}

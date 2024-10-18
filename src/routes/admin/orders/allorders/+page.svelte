@@ -52,6 +52,7 @@
   import ShowNull from '$lib/components/newTable/ShowNull.svelte'
   import Currency from '$lib/components/newTable/Currency.svelte'
   import DateFilter from './DateFilter.svelte'
+  import Date from '$lib/components/newTable/Date.svelte'
 
   const usernameFilter = debounce(SSRFilter.update_many, 500)
   const emailFilter = debounce(SSRFilter.update_many, 500)
@@ -112,10 +113,10 @@
     goto(searchParams, { keepFocus: true })
   }
 </script>
-
 <SSRTable
   count={readable(data.count)}
   {tableRows}
+  totalSum={data.totalSum}
   columns={table => [
     table.column({
       header: 'ID',
@@ -171,6 +172,10 @@
     table.column({
       header: 'Data',
       accessor: 'created_at',
+      cell: ({ column, row, value }) =>
+        createRender(Date, {
+          date:value,
+        }),
       plugins: {
         sort: {
           invert: false,
