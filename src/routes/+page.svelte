@@ -56,12 +56,12 @@
     },
   })}
 />
-<main class="flex-1 p-10">
+<!-- <main class="flex-1 p-10">
   <div class="mb-8 text-2xl font-bold">Welcome to the Admin Panel</div>
   <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {#each routes as route}
       <div class="collapse bg-base-200">
-        <!-- <input type="checkbox" class="peer" /> -->
+        <input type="checkbox" class="peer" />
         <div
           class="bg-base p-3 text-primary-content peer-checked:bg-secondary peer-checked:text-secondary-content"
         >
@@ -79,11 +79,11 @@
       </div>
     {/each}
   </div>
-</main>
+</main> -->
 
 <!-- <Modal onClose={console.log} onOpen={console.log}>Teste Modal</Modal> -->
 <main class="flex flex-col gap-5 overflow-auto">
-  <!-- <HeroDuarte /> -->
+  <HeroDuarte />
 
   <!-- <div class="h-60 w-60">
     <RotatingGlobe></RotatingGlobe>
