@@ -124,7 +124,7 @@ export const customerOrderTable = sqliteTable(
   {
     id: integer('id').notNull().primaryKey({ autoIncrement: true }),
     // .$defaultFn(() => generateId(15)),
-    created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+    created_at: integer('created_at',{ mode: 'timestamp' }).$defaultFn(()=> new Date()).notNull(),
     updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
       () => new Date(),
     ),

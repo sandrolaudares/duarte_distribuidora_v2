@@ -1,36 +1,38 @@
-<script lang='ts'>
-  import { DatePicker } from '@svelte-plugins/datepicker';
-  import { format } from 'date-fns';
+<script lang="ts">
+  import { DatePicker } from '@svelte-plugins/datepicker'
+  import { format } from 'date-fns'
 
-  const today = new Date();
+  const today = new Date()
 
   export let onchange:
     | undefined
-    | ((dateStart: string, dateEnd: string) => void) = undefined
+    | ((dateStart: Date | string, dateEnd: Date | string) => void) = undefined
 
-  let startDate = today
-  let endDate = today;
-  let dateFormat = 'yyyy-MM-dd';
-  let isOpen = false;
+  let startDate: Date | string = today
+  let endDate: Date | string = today
+  let dateFormat = 'yyyy-MM-dd'
+  let isOpen = false
 
-  let formattedStartDate = '';
+  let formattedStartDate = ''
 
   const onClearDates = () => {
-    startDate = '';
-    endDate = '';
-  };
+    startDate = 'string'
+    endDate = 'string'
+  }
 
-  const toggleDatePicker = () => (isOpen = !isOpen);
-  const formatDate = (date) => date && format(new Date(date), dateFormat) || '';
+  const toggleDatePicker = () => (isOpen = !isOpen)
+  const formatDate = (date: Date | string) =>
+    (date && format(new Date(date), dateFormat)) || ''
 
-  $: formattedStartDate = formatDate(startDate);
-  $: formattedEndDate = formatDate(endDate);
+  $: formattedStartDate = formatDate(startDate)
+  $: formattedEndDate = formatDate(endDate)
+
   $: {
-    console.log('Raw dateStart:', startDate);
-    console.log('Raw endDate:', endDate);
-    console.log('Formatted start date:', formattedStartDate);
-    console.log('Formatted end date:', formattedEndDate);
-    onchange?.(formattedStartDate, formattedEndDate);
+    console.log('Raw dateStart:', startDate)
+    console.log('Raw endDate:', endDate)
+    console.log('Formatted start date:', formattedStartDate)
+    console.log('Formatted end date:', formattedEndDate)
+    onchange?.(startDate, endDate)
   }
 </script>
 
@@ -63,16 +65,20 @@
     gap: 8px;
     min-width: 100px;
     padding: 16px;
+    z-index: 9999;
   }
 
   .date-field.open {
     border-bottom: 1px solid #0087ff;
+    z-index: 9999;
   }
 
   .date-field .icon-calendar {
-    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAEmSURBVHgB7ZcPzcIwEMUfXz4BSCgKwAGgACRMAg6YBBxsOMABOAAHFAXgAK5Z2Y6lHbfQ8SfpL3lZaY/1rb01N+BHUKSMNBfEJjZWISA56Uo6C2KvVpkgFn9oRx9vICFtUT1JKO3tvRtZdjBxXQs+YY+1FenIfuesPUGVVLzfRWKvmrSzbbN19wS+kAb2+sCEuUxrYzkbe4YvCVM2Vr5NPAkVa+van7Wn38U95uTpN5TJ/A8ZKemAakmbmJJGpI0gVmwA0huieFItjG19DgTHtwIZhCfZq3ztCuzQYh+FKBSvusjAGs8PnLYkLgMf34JoIBqIBqKBaIAb0Kw9RlhMCTbzzPWAqYq7LsuPaGDUsYmznaOk5zChUJTNQ4TFVMkrOL4HPsoNn26PxROHCggAAAAASUVORK5CYII=) no-repeat center center;
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAEmSURBVHgB7ZcPzcIwEMUfXz4BSCgKwAGgACRMAg6YBBxsOMABOAAHFAXgAK5Z2Y6lHbfQ8SfpL3lZaY/1rb01N+BHUKSMNBfEJjZWISA56Uo6C2KvVpkgFn9oRx9vICFtUT1JKO3tvRtZdjBxXQs+YY+1FenIfuesPUGVVLzfRWKvmrSzbbN19wS+kAb2+sCEuUxrYzkbe4YvCVM2Vr5NPAkVa+van7Wn38U95uTpN5TJ/A8ZKemAakmbmJJGpI0gVmwA0huieFItjG19DgTHtwIZhCfZq3ztCuzQYh+FKBSvusjAGs8PnLYkLgMf34JoIBqIBqKBaIAb0Kw9RlhMCTbzzPWAqYq7LsuPaGDUsYmznaOk5zChUJTNQ4TFVMkrOL4HPsoNn26PxROHCggAAAAASUVORK5CYII=)
+      no-repeat center center;
     background-size: 14px 14px;
     height: 14px;
     width: 14px;
+    z-index: 9999;
   }
 </style>
