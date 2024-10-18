@@ -2,6 +2,7 @@
   import type { CurrentOrders } from '$db/schema/customer/controller.ts'
   import { getImagePath } from '$lib/utils'
   import PaymentFiado from '../PaymentFiado.svelte'
+  import { format } from 'date-fns';
 
   export let click_confirm = () => {}
   export let click_refuse = () => {}
@@ -20,15 +21,22 @@
 
 <div class="rounded-lg bg-base-200 bg-opacity-80 p-2 shadow-md">
   <div class="flex justify-between">
-    <div>
-      {#if order.is_fiado}
-        <p class="text-sm font-semibold text-error">É um pedido fiado!</p>
-      {/if}
+    <div class="flex items-center gap-3">
+      <span class="font-semibold">
+        {format(order.created_at,'dd/MM/yyyy')}
+      </span>
+        {#if order.is_fiado}
+          <p class="text-sm font-semibold text-error">É um pedido fiado!</p>
+        {/if}
+        <!-- {#if order.payments.length === 0}
+          <span class="text-sm text-warning">Pagamento ainda pendente</span>
+        {/if} -->
       <!-- {#if order.motoboy_id}
         <p class="text-sm font-semibold text-success">É um pedido delivery!</p>
       {/if} -->
     </div>
     <div class="badge badge-info bg-opacity-40">
+      <!--TODO: data-->
       <a
         href="/admin/orders/{order.id}"
         class="flex items-center gap-2 text-info-content"
@@ -51,19 +59,25 @@
   </div>
 
   <div class=" rounded-lg">
-    {#if order.customer}
-      <p class=" text-opacity-70">
-        <span class="font-semibold">Cliente:</span>
-        {order.customer.name}
-      </p>
-    {/if}
+    <div class="flex justify-between items-center">
+      {#if order.customer}
+        <p class=" text-opacity-70">
+          <span class="font-semibold">Cliente:</span>
+          {order.customer.name}
+        </p>
+        {/if}
+        {#if order.payments.length === 0}
+            <span class="text-sm text-error">Pagamento ainda pendente</span>
+          {/if}
+    </div>
     <div class="">
       <!-- <p class="text-opacity-60"><span class="font-semibold">Criado em:</span> {order.created_at}</p> -->
       <div class="flex flex-col items-start justify-between">
-        {#if order.taxa_entrega}
-          <span>Taxa entrega: <span class="font-bold text-success">R${(order?.taxa_entrega / 100).toFixed(2)}</span> </span>
-        {/if}
         <div class="flex items-center gap-2">
+          {#if order.taxa_entrega}
+            <span>Taxa entrega: <span class="font-bold text-neutral ">R${(order?.taxa_entrega / 100).toFixed(2)}</span> </span>
+          {/if}
+          -
           <span class="text-md font-semibold">Valor do pedido:</span>
           <span class="text-lg font-bold text-success">
             R${(order.total / 100).toFixed(2)}
