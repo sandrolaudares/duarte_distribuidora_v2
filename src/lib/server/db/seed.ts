@@ -6,9 +6,9 @@ import { product, user, distribuidora, customer, stock } from './controller'
 
 const main = async () => {
   await seedUsers()
-  // await seedCategories()
-  // await seedProducts()
-  // await seedCustomers()
+  await seedCategories()
+  await seedProducts()
+  await seedCustomers()
 
   // await seedOrders()
 }
@@ -158,26 +158,26 @@ async function seedCustomers() {
   console.log('customerTable seed END')
 }
 
-async function seedOrders() {
-  for (let i = 0; i < 20; i++) {
-    try {
-      await customer.insertOrder({
-        order_info: {
-          total: faker.number.int({ min: 0, max: 30000 }),
-        },
-        order_items: [
-          {
-            product_id: 1,
-            price: faker.number.int({ min: 0, max: 30000 }),
-            quantity: faker.number.int({ min: 0, max: 30000 }),
-          },
-        ],
-        payment_info: {
-          payment_status: 'PENDING',
-        },
-      })
-    } catch (error) {
-      console.error(`Failed to insert order ${i}:`, error)
-    }
-  }
-}
+// async function seedOrders() {
+//   for (let i = 0; i < 20; i++) {
+//     try {
+//       await customer.insertOrder({
+//         order_info: {
+//           total: faker.number.int({ min: 0, max: 30000 }),
+//         },
+//         order_items: [
+//           {
+//             product_id: 1,
+//             price: faker.number.int({ min: 0, max: 30000 }),
+//             quantity: faker.number.int({ min: 0, max: 30000 }),
+//           },
+//         ],
+//         payment_info: {
+//           payment_status: 'PENDING',
+//         },
+//       })
+//     } catch (error) {
+//       console.error(`Failed to insert order ${i}:`, error)
+//     }
+//   }
+// }

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { eq } from 'drizzle-orm'
 
-import { db } from '$lib/server/db'
 
 import {
   productTable,
@@ -17,9 +16,9 @@ import type {
   SelectProductItem,
 } from '$db/schema'
 import { getRowCount } from '$db/utils'
+import type { TenantDbType } from '../../tenant'
 
-export const product = {
-  tables: { productTable, productItemTable, productCategoryTable },
+export const product = (db:TenantDbType) =>  ({
   // Product
   insertProduct: (data: InsertProduct) => {
     return db.insert(productTable).values(data)
@@ -141,3 +140,4 @@ export const product = {
     })
   },
 }
+)

@@ -1,8 +1,6 @@
 <script lang="ts">
   import '../app.css'
   // INLANG
-  import { ParaglideJS } from '@inlang/paraglide-sveltekit'
-  import { i18n } from '$lib/i18n'
   // DAISY THEMES
   import { themes, changeTheme } from '$lib'
   import { onMount } from 'svelte'
@@ -15,9 +13,9 @@
   // COMPONENTS
   import { ModalContainer } from '$lib/components/modal'
   import DrawerContainer from '$lib/components/drawer/base/DrawerContainer.svelte'
-  import Transition from './Transition.svelte'
+  import Transition from '../../Transition.svelte'
   import type { LayoutData } from './$types'
-  import PreLoadingIndicator from './PreLoadingIndicator.svelte'
+  import PreLoadingIndicator from '../../PreLoadingIndicator.svelte'
   import { navigating } from '$app/stores'
 
   export let data: LayoutData
@@ -31,7 +29,6 @@
   })
 </script>
 
-<ParaglideJS {i18n}>
   {#if $navigating}
     <PreLoadingIndicator />
   {/if}
@@ -44,4 +41,3 @@
     </Transition>
   </NavBar>
   <!-- </DrawerContainer> -->
-</ParaglideJS>

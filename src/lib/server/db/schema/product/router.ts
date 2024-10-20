@@ -11,7 +11,6 @@ import {
 } from '$db/schema'
 
 // import { tableHelper } from '$db/utils'
-import { paramsSchema } from '$lib/components/table'
 import { middleware } from '$trpc/middleware'
 
 export const product = router({
@@ -42,8 +41,8 @@ export const product = router({
     .use(middleware.auth)
     //.use(middleware.allowPermissions(['admin', 'user']))
 
-    .mutation(async ({ input }) => {
-      return await productController.insertProduct(input).returning()
+    .mutation(async ({ input, ctx: {tenantDb} }) => {
+      return await productController(tenantDb).insertProduct(input).returning()
     }),
   updateProduct: publicProcedure
     .use(middleware.logged)
@@ -59,18 +58,18 @@ export const product = router({
         }),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx: {tenantDb} }) => {
       const { id, prod } = input
 
-      return await productController.updateProduct(id, prod).returning()
+      return await productController(tenantDb).updateProduct(id, prod).returning()
     }),
   deleteProduct: publicProcedure
     .use(middleware.logged)
     .use(middleware.auth)
 
     .input(z.number())
-    .mutation(async ({ input }) => {
-      return await productController.deleteProduct(input)
+    .mutation(async ({ input , ctx: {tenantDb}}) => {
+      return await productController(tenantDb).deleteProduct(input)
     }),
 
   insertProductItem: publicProcedure
@@ -78,8 +77,8 @@ export const product = router({
     .use(middleware.auth)
 
     .input(insertProductItemSchema)
-    .mutation(async ({ input }) => {
-      return await productController.insertProductItem(input)
+    .mutation(async ({ input, ctx: {tenantDb} }) => {
+      return await productController(tenantDb).insertProductItem(input)
     }),
   updateProductItem: publicProcedure
     .use(middleware.logged)
@@ -98,17 +97,17 @@ export const product = router({
         }),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input , ctx: {tenantDb}}) => {
       const { id, prod } = input
-      return await productController.updateProductItem(id, prod).returning()
+      return await productController(tenantDb).updateProductItem(id, prod).returning()
     }),
   deleteProductItem: publicProcedure
     .use(middleware.logged)
     .use(middleware.auth)
 
     .input(z.number())
-    .mutation(async ({ input }) => {
-      return await productController.deleteProductItem(input)
+    .mutation(async ({ input , ctx: {tenantDb}}) => {
+      return await productController(tenantDb).deleteProductItem(input)
     }),
 
   insertProductCategory: publicProcedure
@@ -116,8 +115,8 @@ export const product = router({
     .use(middleware.auth)
 
     .input(insertProductCategorySchema)
-    .mutation(async ({ input }) => {
-      return await productController.insertProductCategory(input).returning()
+    .mutation(async ({ input, ctx: {tenantDb} }) => {
+      return await productController(tenantDb).insertProductCategory(input).returning()
     }),
   updateProductCategory: publicProcedure
     .use(middleware.logged)
@@ -131,16 +130,16 @@ export const product = router({
         }),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx: {tenantDb} }) => {
       const { id, prod } = input
-      return await productController.updateProductCategory(id, prod)
+      return await productController(tenantDb).updateProductCategory(id, prod)
     }),
   deleteProductCategory: publicProcedure
     .use(middleware.logged)
     .use(middleware.auth)
 
     .input(z.number())
-    .mutation(async ({ input }) => {
-      return await productController.deleteProductCategory(input)
+    .mutation(async ({ input, ctx: {tenantDb} }) => {
+      return await productController(tenantDb).deleteProductCategory(input)
     }),
 })

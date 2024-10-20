@@ -26,7 +26,6 @@ const config = {
       $db: './src/lib/server/db',
       $trpc: './src/trpc',
       $modal: './src/lib/components/modal',
-      $msgs: './src//lib/paraglide/messages',
     },
   },
 }

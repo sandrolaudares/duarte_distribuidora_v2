@@ -1,5 +1,9 @@
 import type { AvailableLanguageTag } from '../../lib/paraglide/runtime'
 import type { ParaglideLocals } from '@inlang/paraglide-sveltekit'
+
+import type { SelectUser, SelectSession } from '$lib/server/db/schema'
+import type { SelectTenant } from '$lib/server/db/central/schema'
+
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
 declare global {
@@ -8,8 +12,14 @@ declare global {
     interface Locals {
       paraglide: ParaglideLocals<AvailableLanguageTag>
 
-      user: import('lucia').User | null
-      session: import('lucia').Session | null
+      tenantDb: import('$lib/server/db/tenant').TenantDbType | null
+      tenantInfo: SelectTenant | null
+      tenantAuthManager:
+        | import('$lib/server/auth/tenant/sessions').TenantAuthManagerType
+        | null
+
+      user: SelectUser | null
+      session: SelectSession | null
     }
     // interface PageData {}
     // interface PageState {}

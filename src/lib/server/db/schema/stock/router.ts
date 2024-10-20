@@ -14,25 +14,23 @@ import {
   stockTransactionTable,
 } from '$db/schema'
 
-import { paramsSchema } from '$lib/components/table'
-// import { tableHelper } from '$lib/server/db/utils'
 
 import { middleware } from '$trpc/middleware'
 import { TRPCError } from '@trpc/server'
-import { db } from '../..'
+
 import { eq } from 'drizzle-orm'
 
 export const stock = router({
-  getSKUs: publicProcedure.query(() => {
-    return stockController.getSKU()
+  getSKUs: publicProcedure.query(({ctx:{tenantDb}}) => {
+    return stockController(tenantDb).getSKU()
   }),
   insertSKU: publicProcedure
     .input(insertSKUschema)
     .use(middleware.auth)
     .use(middleware.logged)
 
-    .mutation(async ({ input }) => {
-      return stockController.insertSKU(input).returning()
+    .mutation(async ({ input, ctx:{tenantDb}}) => {
+      return stockController(tenantDb).insertSKU(input).returning()
     }),
 
   // paginatedSKUs: publicProcedure
@@ -67,8 +65,8 @@ export const stock = router({
   //     )
   //   }),
 
-  getSupplier: publicProcedure.query(() => {
-    return stockController.getSupplier()
+  getSupplier: publicProcedure.query(({ctx:{tenantDb}}) => {
+    return stockController(tenantDb).getSupplier()
   }),
 
   // paginatedSupplier: publicProcedure
@@ -86,8 +84,8 @@ export const stock = router({
     .use(middleware.logged)
     .use(middleware.auth)
     .input(insertSupplierSchema)
-    .mutation(async ({ input }) => {
-      return stockController.insertSupplier(input).returning()
+    .mutation(async ({ input, ctx:{tenantDb} }) => {
+      return stockController(tenantDb).insertSupplier(input).returning()
     }),
 
   updateSupplier: publicProcedure
@@ -106,9 +104,9 @@ export const stock = router({
         }),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input , ctx:{tenantDb}}) => {
       const { id, supplier } = input
-      return await stockController.updateSupplier(id, supplier)
+      return await stockController(tenantDb).updateSupplier(id, supplier)
     }),
 
   entradaEstoque: publicProcedure
@@ -127,11 +125,11 @@ export const stock = router({
     )
     .mutation(async ({ input, ctx }) => {
       const { sku_items } = input
-      const { user } = ctx.locals
+      const { user, tenantDb } = ctx
       const arr = []
       for (const item of sku_items) {
         try {
-          const resp = await stockController.insertStockTransaction({
+          const resp = await stockController(tenantDb).insertStockTransaction({
             sku: item.sku_id,
             quantity: item.quantity,
             cost_price: item.cost_price,
@@ -158,42 +156,21 @@ export const stock = router({
         sku: z.string(),
       }),
     )
-    .query(async ({ input }) => {
-      return await stockController.queryLastCostPrice(input.sku)
+    .query(async ({ input,ctx:{tenantDb} }) => {
+      return await stockController(tenantDb).queryLastCostPrice(input.sku)
     }),
 
   getRecentTransaoEstoque: publicProcedure
     .input(z.number())
-    .query(async ({ input }) => {
-      return await stockController.getRecentTransactionsCaixa(input)
+    .query(async ({ input, ctx:{tenantDb} }) => {
+      return await stockController(tenantDb).getRecentTransactionsCaixa(input)
     }),
 
-  getAllTransaoCaixa: publicProcedure.query(() => {
-    return stockController.getAllTransactionsCaixa()
+  getAllTransaoCaixa: publicProcedure.query(({ctx:{tenantDb}}) => {
+    return stockController(tenantDb).getAllTransactionsCaixa()
   }),
 
-  deleteItemStock: publicProcedure.input(z.string()).mutation(({ input }) => {
-    return stockController.deleteItemStock(input)
+  deleteItemStock: publicProcedure.input(z.string()).mutation(({ input, ctx:{tenantDb} }) => {
+    return stockController(tenantDb).deleteItemStock(input)
   }),
-
-  // getPaginatedTransacaoCaixa: publicProcedure
-  //   .input(paramsSchema)
-  //   .query(async ({ input }) => {
-  //     return await tableHelper(
-  //       db
-  //         .select({
-  //           cashier_name: cashierTable.name,
-  //           cashier_transaction: cashierTransactionTable,
-  //         })
-  //         .from(cashierTransactionTable)
-  //         .innerJoin(
-  //           cashierTable,
-  //           eq(cashierTransactionTable.cachier_id, cashierTable.id),
-  //         )
-  //         .$dynamic(),
-  //       cashierTransactionTable,
-  //       'name',
-  //       input,
-  //     )
-  //   }),
 })

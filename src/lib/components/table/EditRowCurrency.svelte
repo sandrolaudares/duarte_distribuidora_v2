@@ -1,4 +1,4 @@
-<script lang="ts" generics="T extends {id: any}">
+<!-- <script lang="ts" generics="T extends {id: any}">
   import { type EditableTypes, getRowChanges } from '.'
   import CurrencyInput from '../input/CurrencyInput.svelte'
   const rowChanges = getRowChanges<T>()
@@ -31,4 +31,4 @@
   </span>
 {:else}
   <CurrencyInput bind:value={changedRow[colID]} />
-{/if}
+{/if} -->

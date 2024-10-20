@@ -23,11 +23,8 @@ import {
   type InsertCashierTransaction,
 } from '$lib/server/db/schema'
 
-import { paramsSchema } from '$lib/components/table'
-// import { tableHelper } from '$lib/server/db/utils'
 
 import { middleware } from '$trpc/middleware'
-import { db } from '../..'
 import { eq } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { geocodeAddress, getDistanceFromLatLonInKm } from '$lib/utils/distance'
@@ -43,8 +40,10 @@ export const customer = router({
     .use(middleware.logged)
 
     .input(insertCustomerSchema)
-    .mutation(async ({ input }) => {
-      return await customerController.insertCustomer(input).returning()
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
+      return await customerController(tenantDb)
+        .insertCustomer(input)
+        .returning()
     }),
   updateCustomer: publicProcedure
     .meta({
@@ -67,9 +66,9 @@ export const customer = router({
         }),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
       const { id, customer } = input
-      return await customerController.updateCustomer(id, customer)
+      return await customerController(tenantDb).updateCustomer(id, customer)
     }),
 
   deleteCustomer: publicProcedure
@@ -80,8 +79,8 @@ export const customer = router({
     .use(middleware.auth)
     .use(middleware.logged)
     .input(z.number())
-    .mutation(async ({ input }) => {
-      return await customerController.deleteCustomerById(input)
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
+      return await customerController(tenantDb).deleteCustomerById(input)
     }),
 
   insertAddress: publicProcedure
@@ -92,9 +91,9 @@ export const customer = router({
     .use(middleware.auth)
     .use(middleware.logged)
     .input(insertAddressSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
       try {
-        return await customerController.insertAddress(input)
+        return await customerController(tenantDb).insertAddress(input)
       } catch (error) {
         console.error('Failed to insert address:', error)
       }
@@ -121,8 +120,8 @@ export const customer = router({
   //     )
   //   }),
 
-  getCustomers: publicProcedure.query(async () => {
-    return await customerController.getCustomersWithAddress()
+  getCustomers: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
+    return await customerController(tenantDb).getCustomersWithAddress()
   }),
   order: router({
     insertFiado: publicProcedure
@@ -154,9 +153,9 @@ export const customer = router({
           }),
         }),
       )
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx: { tenantDb } }) => {
         const { order_items, order_info } = input
-        const customer = await customerController.getCustomerById(
+        const customer = await customerController(tenantDb).getCustomerById(
           order_info.customer_id,
         )
         if (!customer) {
@@ -166,16 +165,16 @@ export const customer = router({
           })
         }
 
-        const used_credit = await customerController.getCustomerUsedCredit(
-          order_info.customer_id,
-        )
+        const used_credit = await customerController(
+          tenantDb,
+        ).getCustomerUsedCredit(order_info.customer_id)
 
         let credit = 0
 
         if (typeof used_credit !== 'number') {
-          const [{ count }] = await customerController.countFiadoTransactions(
-            order_info.customer_id,
-          )
+          const [{ count }] = await customerController(
+            tenantDb,
+          ).countFiadoTransactions(order_info.customer_id)
           // if (count !== 0) {
           //   throw new TRPCError({
           //     code: 'BAD_REQUEST',
@@ -194,7 +193,7 @@ export const customer = router({
           })
         }
 
-        const [order] = await db
+        const [order] = await tenantDb
           .insert(customerOrderTable)
           .values({
             status: order_info.motoboy_id ? 'CONFIRMED' : 'DELIVERED',
@@ -218,7 +217,7 @@ export const customer = router({
           order_id: order.id,
         }))
 
-        const order_items_db = await db
+        const order_items_db = await tenantDb
           .insert(orderItemTable)
           .values(items)
           .returning()
@@ -268,6 +267,7 @@ export const customer = router({
       )
       .mutation(async ({ ctx, input }) => {
         const userId = ctx.locals.user?.id
+        const { tenantDb } = ctx
         if (!userId) {
           throw new TRPCError({
             code: 'UNAUTHORIZED',
@@ -290,7 +290,7 @@ export const customer = router({
           })
         }
 
-        const [order] = await db
+        const [order] = await tenantDb
           .insert(customerOrderTable)
           .values({
             amount_paid: total_paid,
@@ -314,7 +314,7 @@ export const customer = router({
           ...item,
           order_id: order.id,
         }))
-        const order_items_db = await db
+        const order_items_db = await tenantDb
           .insert(orderItemTable)
           .values(items)
           .returning()
@@ -346,7 +346,7 @@ export const customer = router({
             })
           }
 
-          await bugReport.insertLogs({
+          await bugReport(tenantDb).insertLogs({
             text: `Pagamento de ${payment.amount_paid} para pedido ${order.id}${payment.troco ? ` com troco de ${payment.troco}` : ''}`,
             created_by: userId,
             metadata: {
@@ -363,9 +363,9 @@ export const customer = router({
           })
         }
         if (trocos.length > 0) {
-          await distribuidora.insertCashierTransaction(trocos, true)
+          await distribuidora(tenantDb).insertCashierTransaction(trocos, true)
         }
-        await distribuidora.insertCashierTransaction(transactions)
+        await distribuidora(tenantDb).insertCashierTransaction(transactions)
         const payments = order_info.payment_info.map(payment => ({
           ...payment,
           cachier_id: order_info.cashier_id,
@@ -373,7 +373,7 @@ export const customer = router({
           order_id: order.id,
         }))
 
-        const payments_db = await db
+        const payments_db = await tenantDb
           .insert(orderPaymentTable)
           .values(payments)
           .returning()
@@ -384,7 +384,7 @@ export const customer = router({
           payments: payments_db,
         }
       }),
-      insertOrderWaiting: publicProcedure
+    insertOrderWaiting: publicProcedure
       .use(middleware.auth)
       .use(middleware.logged)
       .input(
@@ -408,9 +408,9 @@ export const customer = router({
           }),
         }),
       )
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx: { tenantDb } }) => {
         const { order_items, order_info } = input
-        const customer = await customerController.getCustomerById(
+        const customer = await customerController(tenantDb).getCustomerById(
           order_info.customer_id,
         )
         if (!customer) {
@@ -420,13 +420,13 @@ export const customer = router({
           })
         }
 
-        if(!order_info.motoboy_id){
+        if (!order_info.motoboy_id) {
           throw new TRPCError({
             code: 'BAD_REQUEST',
             message: 'Sem motoboy selecionado',
           })
         }
-        const [order] = await db
+        const [order] = await tenantDb
           .insert(customerOrderTable)
           .values({
             status: 'CONFIRMED',
@@ -450,7 +450,7 @@ export const customer = router({
           order_id: order.id,
         }))
 
-        const order_items_db = await db
+        const order_items_db = await tenantDb
           .insert(orderItemTable)
           .values(items)
           .returning()
@@ -465,15 +465,17 @@ export const customer = router({
       getPendingFiadoTransactions: publicProcedure
         .use(middleware.logged)
         .use(middleware.auth)
-        .query(async () => {
-          return await customerController.getPendingFiadoTransactions()
+        .query(async ({ ctx: { tenantDb } }) => {
+          return await customerController(
+            tenantDb,
+          ).getPendingFiadoTransactions()
         }),
       getPayments: publicProcedure
         .use(middleware.logged)
         .use(middleware.auth)
         .input(z.number())
-        .query(async ({ input }) => {
-          return await customerController.getOrderPayments(input)
+        .query(async ({ input, ctx: { tenantDb } }) => {
+          return await customerController(tenantDb).getOrderPayments(input)
         }),
       insertPayment: publicProcedure
         .meta({
@@ -489,13 +491,14 @@ export const customer = router({
         )
         .mutation(async ({ input, ctx }) => {
           const { payment_info } = input
+          const { tenantDb } = ctx
           const userId = ctx.locals.user?.id
           const newPayment = {
             ...payment_info,
             created_by: userId,
           }
 
-          await bugReport.insertLogs({
+          await bugReport(tenantDb).insertLogs({
             text: `Pagamento de ${payment_info.amount_paid} para pedido ${payment_info.order_id}`,
             created_by: userId,
             metadata: {
@@ -508,7 +511,9 @@ export const customer = router({
             routeName: 'Pagamento',
             currency: payment_info.amount_paid,
           })
-          return await customerController.insertOrderPayment(payment_info)
+          return await customerController(tenantDb).insertOrderPayment(
+            payment_info,
+          )
         }),
     }),
   }),
@@ -536,8 +541,9 @@ export const customer = router({
     )
     .mutation(async ({ input, ctx }) => {
       const { order_id, status } = input
+      const { tenantDb } = ctx
       const user = ctx.locals.user
-      await bugReport.insertLogs({
+      await bugReport(tenantDb).insertLogs({
         text: `${user?.username} atualizou o status do pedido ${order_id} para ${status}`,
         created_by: user?.id,
         metadata: {
@@ -548,7 +554,10 @@ export const customer = router({
         pathname: '/TODO:ROUTE',
         routeName: 'Atualizar Pedido',
       })
-      return await customerController.updateOrderStatus(order_id, status)
+      return await customerController(tenantDb).updateOrderStatus(
+        order_id,
+        status,
+      )
     }),
 
   // updateOrderPaymentStatus: publicProcedure
@@ -586,7 +595,8 @@ export const customer = router({
     )
     .mutation(async ({ input, ctx }) => {
       const userID = ctx.locals.user?.id
-      return await customerController.insertOrderPayment({
+      const { tenantDb } = ctx
+      return await customerController(tenantDb).insertOrderPayment({
         ...input,
         created_by: userID,
       })
@@ -594,26 +604,26 @@ export const customer = router({
 
   getOrderPayments: publicProcedure
     .input(z.number())
-    .query(async ({ input }) => {
-      return await customerController.getOrderPayments(input)
+    .query(async ({ input, ctx: { tenantDb } }) => {
+      return await customerController(tenantDb).getOrderPayments(input)
     }),
 
-  getAllNotPaidOrders: publicProcedure.query(async () => {
-    return await customerController.getNotPaidOrders()
+  getAllNotPaidOrders: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
+    return await customerController(tenantDb).getNotPaidOrders()
   }),
 
   getCustomerUsedCredits: publicProcedure
     .input(z.number())
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx: { tenantDb } }) => {
       const id = input
-      return await customerController.getCustomerUsedCredit(id)
+      return await customerController(tenantDb).getCustomerUsedCredit(id)
     }),
 
   getNotPaidOrdersById: publicProcedure
     .input(z.number())
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx: { tenantDb } }) => {
       const id = input
-      return await customerController.getNotPaidOrdersById(id)
+      return await customerController(tenantDb).getNotPaidOrdersById(id)
     }),
 
   updateOrderPayment: publicProcedure
@@ -625,14 +635,16 @@ export const customer = router({
         data: insertOrderPaymentSchema.partial(),
       }),
     )
-    .mutation(({ input }) => {
+    .mutation(({ input, ctx: { tenantDb } }) => {
       const { id, data } = input
-      return customerController.updateOrderPayment(id, data)
+      return customerController(tenantDb).updateOrderPayment(id, data)
     }),
 
-  getCurrentOrders: publicProcedure.use(middleware.logged).query(() => {
-    return customerController.getCurrentOrders()
-  }),
+  getCurrentOrders: publicProcedure
+    .use(middleware.logged)
+    .query(({ ctx: { tenantDb } }) => {
+      return customerController(tenantDb).getCurrentOrders()
+    }),
 
   calculateDistance: publicProcedure
     .input(

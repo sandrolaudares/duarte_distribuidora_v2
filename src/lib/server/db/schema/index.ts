@@ -12,7 +12,6 @@ export * from './bug-report'
 
 export * from './stock'
 
-export * from './push-notification'
 
 export * from './customer'
 

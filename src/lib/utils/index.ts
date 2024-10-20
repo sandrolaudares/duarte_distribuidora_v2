@@ -24,3 +24,28 @@ export function debounce<T extends (...args: any[]) => void>(
     timeoutId = window.setTimeout(() => func(...args), delay)
   }
 }
+
+
+
+import { PUBLIC_DOMAIN } from '$env/static/public'
+
+export const subdomainRegex = new RegExp(
+  // eslint-disable-next-line no-useless-escape
+  `(.*)\.${PUBLIC_DOMAIN.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`,
+)
+
+interface Domain {
+  domain: string
+  type: 'subdomain' | 'customDomain' | 'appDomain'
+}
+
+export function getDomainAndType(host: string): Domain {
+  if (host === PUBLIC_DOMAIN) return { domain: host, type: 'appDomain' }
+
+  const domain = host.match(subdomainRegex)?.[1]
+  if (domain) {
+    return { domain, type: 'subdomain' }
+  }
+
+  return { domain: host, type: 'customDomain' }
+}

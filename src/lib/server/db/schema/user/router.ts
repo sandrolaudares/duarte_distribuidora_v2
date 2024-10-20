@@ -3,7 +3,6 @@ import { publicProcedure, router } from '$trpc/t'
 import { z } from 'zod'
 
 import { user as userController } from '$db/controller'
-import { lucia } from '$lib/server/auth'
 import { redirect } from '@sveltejs/kit'
 // import { hash, verify } from '@node-rs/argon2'
 
@@ -12,33 +11,30 @@ import { redirect } from '@sveltejs/kit'
 import { middleware } from '$trpc/middleware'
 
 import { emailTemplate, sendMail } from '$lib/server/email'
-import { paramsSchema } from '$lib/components/table'
 // import { tableHelper } from '$lib/server/db/utils'
-import { userTable } from '$lib/server/db/schema'
-import { generateId } from 'lucia'
+import { generateId } from '$lib/server/auth/utils'
 import { permissionsEnum, roleEnum } from '$lib/utils/permissions'
+import {
+  deleteSessionTokenCookie,
+  setSessionTokenCookie,
+} from '$lib/server/auth/cookies'
 
 export const auth = router({
   logOut: publicProcedure.query(async ({ ctx }) => {
-    const { cookies } = ctx
+    const { tenantAuthManager } = ctx
     const { session } = ctx.locals
     if (!session) {
       return {
         error: 'Not authenticated',
       }
     }
-    await lucia.invalidateSession(session.id)
-    const sessionCookie = lucia.createBlankSessionCookie()
-    cookies.set(sessionCookie.name, sessionCookie.value, {
-      path: '.',
-      ...sessionCookie.attributes,
-    })
-
+    await tenantAuthManager.invalidateSession(session.id)
+    deleteSessionTokenCookie(ctx)
     return redirect(302, '/login')
   }),
 
   resendEmailVerification: publicProcedure.query(async ({ ctx }) => {
-    const { locals } = ctx
+    const { locals, tenantDb } = ctx
 
     const localUser = locals.user
 
@@ -48,10 +44,9 @@ export const auth = router({
       }
     }
 
-    const verificationCode = await userController.generateEmailVerificationCode(
-      localUser.id,
-      localUser.email,
-    )
+    const verificationCode = await userController(
+      tenantDb,
+    ).generateEmailVerificationCode(localUser.id, localUser.email)
     await sendMail(
       localUser.email,
       emailTemplate.verificationCode(verificationCode),
@@ -71,7 +66,7 @@ export const auth = router({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { cookies, locals } = ctx
+      const {  locals, tenantDb, tenantAuthManager } = ctx
       const sessionId = locals.session?.id
       const { code } = input
 
@@ -82,7 +77,7 @@ export const auth = router({
         }
       }
 
-      const { user } = await lucia.validateSession(sessionId)
+      const { user } = await tenantAuthManager.validateSessionToken(sessionId)
       if (!user) {
         return {
           error: 'Not authenticated',
@@ -90,7 +85,10 @@ export const auth = router({
         }
       }
 
-      const validCode = await userController.verifyVerificationCode(user, code)
+      const validCode = await userController(tenantDb).verifyVerificationCode(
+        user,
+        code,
+      )
 
       if (!validCode) {
         return {
@@ -99,18 +97,13 @@ export const auth = router({
         }
       }
 
-      await lucia.invalidateUserSessions(user.id)
-      await userController.updateUser(user.id, {
+      await tenantAuthManager.invalidateUserSessions(user.id)
+      await userController(tenantDb).updateUser(user.id, {
         emailVerified: true,
       })
-
-      const session = await lucia.createSession(user.id, {})
-      const sessionCookie = lucia.createSessionCookie(session.id)
-      cookies.set(sessionCookie.name, sessionCookie.value, {
-        path: '.',
-        ...sessionCookie.attributes,
-      })
-
+      const token = tenantAuthManager.generateSessionToken()
+      const session = await tenantAuthManager.createSession(token, user.id)
+      setSessionTokenCookie(ctx, token, session.expiresAt)
       return {
         data: {
           message: 'Email verified',
@@ -123,10 +116,11 @@ export const auth = router({
     .input(z.object({ email: z.string().email() }))
     .query(async ({ input, ctx }) => {
       const { email } = input
-      const { url } = ctx
+      const { url, tenantDb } = ctx
 
       // const user = await db.table('user').where('email', '=', email).get()
-      const [{ id: userID }] = await userController.getUserByEmail(email)
+      const [{ id: userID }] =
+        await userController(tenantDb).getUserByEmail(email)
       if (!userID) {
         // If you want to avoid disclosing valid emails,
         // this can be a normal 200 response.
@@ -137,7 +131,7 @@ export const auth = router({
       }
 
       const verificationToken =
-        await userController.createPasswordResetToken(userID)
+        await userController(tenantDb).createPasswordResetToken(userID)
       // const verificationLink =
       //   'http://localhost:3000/reset-password/' + verificationToken
       const verificationLink = `${url.origin}/reset-password/${verificationToken}`
@@ -153,9 +147,10 @@ export const auth = router({
     .input(z.object({ email: z.string().email() }))
     .query(async ({ input, ctx }) => {
       const { email } = input
-      const { url } = ctx
+      const { url, tenantDb } = ctx
 
-      const [{ id: userId }] = await userController.getUserByEmail(email)
+      const [{ id: userId }] =
+        await userController(tenantDb).getUserByEmail(email)
 
       if (!userId) {
         return {
@@ -164,10 +159,9 @@ export const auth = router({
         }
       }
 
-      const verificationToken = await userController.createMagicLinkToken(
-        userId,
-        email,
-      )
+      const verificationToken = await userController(
+        tenantDb,
+      ).createMagicLinkToken(userId, email)
       const verificationLink = `${url.origin}/login/${verificationToken}`
       await sendMail(email, emailTemplate.magicLink(verificationLink))
       return {
@@ -195,16 +189,17 @@ export const auth = router({
         userId: z.string(),
         meta: z.object({
           redirect: z.string().optional(),
-          permissions: z.array(z.enum(permissionsEnum))
+          permissions: z.array(z.enum(permissionsEnum)),
         }),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const { userId, meta } = input
-      return await userController.updateUserPermissions(userId, meta)
+      const { tenantDb } = ctx
+      return await userController(tenantDb).updateUserPermissions(userId, meta)
     }),
 
-    updateUserRole:publicProcedure
+  updateUserRole: publicProcedure
     .use(middleware.admin)
     .input(
       z.object({
@@ -212,29 +207,32 @@ export const auth = router({
         role: z.enum(roleEnum),
       }),
     )
-    .mutation(async ({ input }) => {
-      const { userId,role } = input
-      return await userController.updateUserRole(userId, role)
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
+      const { userId, role } = input
+      return await userController(tenantDb).updateUserRole(userId, role)
     }),
 
-    getMotoboys: publicProcedure.query(() => {
-      return userController.getMotoboys()
-    }),
+  getMotoboys: publicProcedure.query(({ ctx: { tenantDb } }) => {
+    return userController(tenantDb).getMotoboys()
+  }),
 
-    insertUser: publicProcedure
+  insertUser: publicProcedure
     .use(middleware.auth)
     .use(middleware.logged)
     .input(
       z.object({
-        username:z.string(),
-        email:z.string(),
-        role:z.enum(roleEnum),
-      })
+        username: z.string(),
+        email: z.string(),
+        role: z.enum(roleEnum),
+      }),
     )
-    .mutation(async ({ input }) => {
-      return await userController.insertUser({...input,id:generateId(15)})
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
+      return await userController(tenantDb).insertUser({
+        ...input,
+        id: generateId(15),
+      })
     }),
-    updateUser: publicProcedure
+  updateUser: publicProcedure
     .use(middleware.auth)
     .use(middleware.logged)
     .input(
@@ -245,10 +243,10 @@ export const auth = router({
           email: z.string().optional(),
           role: z.enum(roleEnum).optional(),
         }),
-      })
+      }),
     )
-    .mutation(async ({ input }) => {
-      const { userId, user } = input;
-      return await userController.updateUser(userId, user);
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
+      const { userId, user } = input
+      return await userController(tenantDb).updateUser(userId, user)
     }),
 })

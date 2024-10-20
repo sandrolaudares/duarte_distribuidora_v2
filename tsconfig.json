@@ -23,7 +23,6 @@
       "$db/*": ["./src/lib/server/db/*"],
       "$modal": ["./src/lib/components/modal"],
       "$modal/*": ["./src/lib/components/modal/*"],
-      "$msgs": ["./src/lib/paraglide/messages"]
     }
   }
   // Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias

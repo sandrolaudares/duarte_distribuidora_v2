@@ -18,15 +18,15 @@ import type {
   SelectCustomer,
   InsertOrderPayment,
 } from './index'
-import { db } from '$db'
 import { and, count, eq, gt, gte, isNotNull, ne, or, sql } from 'drizzle-orm'
 
 import { stock, bugReport } from '$db/controller'
 import { cashierTable, cashierTransactionTable } from '../distribuidora'
 import { TRPCError } from '@trpc/server'
 import { userTable } from '../user'
+import type { TenantDbType } from '../../tenant'
 
-export const customer = {
+export const customer = (db: TenantDbType) => ({
   tables: {
     customerTable,
     addressTable,
@@ -65,13 +65,14 @@ export const customer = {
           eq(customerOrderTable.customer_id, id),
           gte(customerOrderTable.total, customerOrderTable.amount_paid),
         ),
-      ).get()
+      )
+      .get()
   },
   countFiadoTransactions: async (id: SelectCustomer['id']) => {
     return db
       .select({
-        count: count(customerOrderTable.id).mapWith((v)=>{
-          if (typeof v === 'number'){
+        count: count(customerOrderTable.id).mapWith(v => {
+          if (typeof v === 'number') {
             return v
           }
           return 0
@@ -90,7 +91,7 @@ export const customer = {
       where: t => and(gt(t.total, t.amount_paid), eq(t.is_fiado, true)),
       with: {
         customer: true,
-        payments:true
+        payments: true,
       },
     })
   },
@@ -114,8 +115,8 @@ export const customer = {
     return db.select().from(customerTable)
   },
   insertAddress: async (input: InsertAddress) => {
-   const [newAddress]= await db.insert(addressTable).values(input).returning()
-   return newAddress
+    const [newAddress] = await db.insert(addressTable).values(input).returning()
+    return newAddress
   },
   getCustomerAddress: async (customerId: SelectCustomer['id']) => {
     return db
@@ -147,7 +148,7 @@ export const customer = {
   ) => {
     console.log('Updating order status:', order_id, new_status)
     if (new_status === 'DELIVERED') {
-      const order = await customer.getOrderByID(order_id)
+      const order = await customer(db).getOrderByID(order_id)
       console.log('Order:', order)
 
       if (!order) {
@@ -168,7 +169,7 @@ export const customer = {
                 type: 'saida',
               },
             })
-            await stock.insertStockTransaction({
+            await stock(db).insertStockTransaction({
               sku: item.product.sku,
               type: 'Saida',
               quantity: -item.quantity * item.product.quantity,
@@ -214,7 +215,7 @@ export const customer = {
       with: {
         address: true,
         customer: true,
-        payments:true,
+        payments: true,
         items: {
           with: {
             product: true,
@@ -252,9 +253,12 @@ export const customer = {
     })
   },
   insertOrderPayment: async (data: InsertOrderPayment) => {
-    await db.update(customerOrderTable).set({
-      amount_paid: sql`${customerOrderTable.amount_paid} + ${data.amount_paid}`,
-    }).where(eq(customerOrderTable.id, data.order_id))
+    await db
+      .update(customerOrderTable)
+      .set({
+        amount_paid: sql`${customerOrderTable.amount_paid} + ${data.amount_paid}`,
+      })
+      .where(eq(customerOrderTable.id, data.order_id))
     return await db.insert(orderPaymentTable).values(data)
   },
   getOrderPayments: (id: number) => {
@@ -290,9 +294,9 @@ export const customer = {
     })
   },
 
-  getDeliveryOrders: ()=> {
+  getDeliveryOrders: () => {
     return db.query.customerOrderTable.findMany({
-      where:isNotNull(customerOrderTable.motoboy_id),
+      where: isNotNull(customerOrderTable.motoboy_id),
       with: {
         address: true,
         customer: true,
@@ -304,7 +308,7 @@ export const customer = {
       },
     })
   },
-  
+
   updateOrderPayment: async (id: number, data: Partial<InsertOrderPayment>) => {
     return db
       .update(orderPaymentTable)
@@ -344,8 +348,5 @@ export const customer = {
         eq(cashierTable.id, customerOrderTable.cachier_id),
       )
   },
-}
-
-export type CurrentOrders = Awaited<
-  ReturnType<typeof customer.getCurrentOrders>
->
+})
+export type CurrentOrders = ReturnType<typeof customer>['getCurrentOrders']

@@ -39,7 +39,7 @@ export const userRelations = relations(userTable, ({ many }) => ({
   cashier_transactions: many(cashierTransactionTable),
   logs: many(logsTable),
   orders_made: many(customerOrderTable, { relationName: 'orders_made' }),
-  entregou: many(customerOrderTable, { relationName: 'entregou' }), 
+  entregou: many(customerOrderTable, { relationName: 'entregou' }),
   payments_created: many(orderPaymentTable),
 }))
 
@@ -73,8 +73,9 @@ export const sessionTable = sqliteTable('session', {
     .references(() => userTable.id, {
       onDelete: 'cascade',
     }),
-  expiresAt: integer('expires_at').notNull(),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
 })
+export type SelectSession = typeof sessionTable.$inferSelect
 
 export const userVerificationCodeTable = sqliteTable('user_verification_code', {
   id: integer('id').notNull().primaryKey({ autoIncrement: true }),

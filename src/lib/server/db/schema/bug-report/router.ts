@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { bugReport } from '$lib/server/db/controller'
 import { TRPCError } from '@trpc/server'
 import { middleware } from '$trpc/middleware'
-import { paramsSchema } from '$lib/components/table'
 // import { tableHelper } from '$lib/server/db/utils'
 import { bugReportTable } from '$lib/server/db/schema'
 
@@ -19,6 +18,7 @@ export const bugReporter = router({
     )
     .query(async ({ input, ctx }) => {
       const { user } = ctx.locals
+      const { tenantDb } = ctx
       if (!user) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
@@ -26,14 +26,15 @@ export const bugReporter = router({
         })
       }
       try {
-        const [{ id }] = await bugReport.insertBugReport({
+        const [{ id }] = await bugReport(tenantDb).insertBugReport({
           text: input.text,
           created_by: user.id,
           metadata: input.metadata,
           status: 'TODO',
         })
 
-        await bugReport.insertLogs({
+        await bugReport(tenantDb).insertLogs({
+          type: 'ERROR',
           text: `${user.username} reportou um bug`,
           created_by:user.id,
           metadata: {
@@ -58,9 +59,9 @@ export const bugReporter = router({
         status: z.enum(['TODO', 'IN_PROGRESS', 'DONE']),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx: {tenantDb} }) => {
       try {
-        await bugReport.updateBugReportStatus(input.id, input.status)
+        await bugReport(tenantDb).updateBugReportStatus(input.id, input.status)
 
         return `Bug #${input.id} status updated to ${input.status}`
       } catch (error) {
