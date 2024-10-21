@@ -2,7 +2,6 @@
   import { getCartContext } from '$lib/stores/cart'
   import { getImagePath } from '$utils/image'
   import { icons } from '$utils'
-  import * as m from '$msgs'
 
   const cart = getCartContext()
 
@@ -69,7 +68,7 @@
             </div>
           {/each}
           {#if Object.keys($cart).length === 0}
-            <p class="text-center">{m.itens_carrinho()}</p>
+            <p class="text-center">Itens Carrinho</p>
           {:else}
             <button class="btn btn-outline w-full">Checkout</button>
           {/if}

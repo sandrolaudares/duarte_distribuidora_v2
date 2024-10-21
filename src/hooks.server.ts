@@ -31,6 +31,10 @@ const handleSession: Handle = async ({ event, resolve }) => {
   event.locals.tenantDb = tenant.tenantDb
   event.locals.tenantInfo = tenant.tenantInfo!
 
+  if (!tenant.tenantDb) {
+    return error(500, { message: 'Distribuidora nao encontrada' })
+  }
+
   /* authenticate users of tenants with lucia */
   const tenantAuthManager = createTenantAuthManager(tenant.tenantDb)
   event.locals.tenantAuthManager = tenantAuthManager

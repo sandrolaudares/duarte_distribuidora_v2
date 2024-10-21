@@ -6,7 +6,6 @@
   import { trpc } from '$trpc/client'
   import { toast } from 'svelte-sonner'
   import { TRPCClientError } from '@trpc/client'
-    import * as m from '$msgs'
 
   let bugReport = ''
 
@@ -53,8 +52,8 @@
       </a> -->
 
       <div class="flex gap-3">
-        <button class="btn btn-error" onclick={modal.close}>{m.cancel_button()}</button>
-        <button class="btn btn-success" onclick={save}>{m.send_button()}</button>
+        <button class="btn btn-error" onclick={modal.close}>Cancelar</button>
+        <button class="btn btn-success" onclick={save}>Enviar</button>
       </div>
     </div>
   </svelte:fragment>

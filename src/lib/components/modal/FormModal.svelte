@@ -5,7 +5,6 @@
 
   import { type Component, type ComponentProps } from 'svelte'
   import CurrencyInput from '../input/CurrencyInput.svelte'
-    import * as m from '$msgs'
 
   interface Field<
     T = any,
@@ -192,10 +191,10 @@
   <svelte:fragment slot="footer">
     <div class="flex justify-end w-full gap-2 mt-3">
       <button class="btn btn-error" onclick={handleCancel} disabled={isLoading}>
-        {m.cancel_button()}
+        Cancelar
       </button>
       <button class="btn btn-primary" onclick={handleConfirm} disabled={isLoading}>
-        {!isLoading ? m.save_button() : 'Loading...'}
+        {!isLoading ? "Salvar" : 'Loading...'}
       </button>
     </div>
   </svelte:fragment>

@@ -1,7 +1,5 @@
 <script lang="ts">
-  import type { User } from 'lucia'
   import ThemeSwiter from './ThemeSwiter.svelte'
-  import ChangeLanguage from './ChangeLanguage.svelte'
   import Cart from './Cart.svelte'
   import { website } from '$lib/config'
 
@@ -9,7 +7,6 @@
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
   import NavItems from './NavItems.svelte'
-  import * as m from '$msgs'
   import { icons } from '$lib/utils/icons'
   import { goto } from '$app/navigation'
   import Breadcrumbs from './Breadcrumbs.svelte'
@@ -81,20 +78,19 @@
               <li>
                 <button onclick={logout}>
                   {@html icons.logout()}
-                  {m.log_out()}
+                  Sair
                 </button>
               </li>
             </ul>
           </div>
         {:else}
-          <a class="btn" href="/login">{@html icons.login()}{m.login()}</a>
+          <a class="btn" href="/login">{@html icons.login()}Login</a>
         {/if}
 
         <Cart />
 
         <!-- <ThemeSwiter /> -->
 
-        <ChangeLanguage />
       </div>
     </div>
     <slot />

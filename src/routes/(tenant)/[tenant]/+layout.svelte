@@ -1,5 +1,5 @@
 <script lang="ts">
-  import '../app.css'
+ 
   // INLANG
   // DAISY THEMES
   import { themes, changeTheme } from '$lib'

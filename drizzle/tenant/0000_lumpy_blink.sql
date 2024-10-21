@@ -32,6 +32,8 @@ CREATE TABLE `user` (
 	`permissions` text DEFAULT '{}' NOT NULL
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `user_username_unique` ON `user` (`username`);--> statement-breakpoint
+CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);--> statement-breakpoint
 CREATE TABLE `user_verification_code` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`code` text NOT NULL,
@@ -148,37 +150,6 @@ CREATE TABLE `fornecedor` (
 	`cep` text
 );
 --> statement-breakpoint
-CREATE TABLE `notification_channel` (
-	`channel_id` text PRIMARY KEY NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP)
-);
---> statement-breakpoint
-CREATE TABLE `notification_channel_users` (
-	`channel_id` text PRIMARY KEY NOT NULL,
-	`user_id` text NOT NULL,
-	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
-CREATE TABLE `push_notification_device` (
-	`device_id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`user_id` text NOT NULL,
-	`subscription` text NOT NULL,
-	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
-CREATE TABLE `push_notification_log` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`device_id` integer,
-	`channel_id` text,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
-	`payload` text NOT NULL,
-	`http_status` integer NOT NULL,
-	`success` integer NOT NULL,
-	`err_message` text,
-	FOREIGN KEY (`device_id`) REFERENCES `push_notification_device`(`device_id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`channel_id`) REFERENCES `notification_channel`(`channel_id`) ON UPDATE no action ON DELETE no action
-);
---> statement-breakpoint
 CREATE TABLE `endereco` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
@@ -218,6 +189,7 @@ CREATE TABLE `pedidos` (
 	FOREIGN KEY (`motoboy_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE INDEX `paid_index` ON `pedidos` (`amount_paid`) WHERE "pedidos"."amount_paid" >= "pedidos"."total";--> statement-breakpoint
 CREATE TABLE `cliente` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`is_retail` integer NOT NULL,
@@ -233,6 +205,9 @@ CREATE TABLE `cliente` (
 	`max_credit` integer DEFAULT 50000 NOT NULL
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `cliente_email_unique` ON `cliente` (`email`);--> statement-breakpoint
+CREATE UNIQUE INDEX `cliente_cellphone_unique` ON `cliente` (`cellphone`);--> statement-breakpoint
+CREATE UNIQUE INDEX `cliente_phone_unique` ON `cliente` (`phone`);--> statement-breakpoint
 CREATE TABLE `item_pedido` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
@@ -293,12 +268,3 @@ CREATE TABLE `delivery_fee` (
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
 	`updated_at` integer
 );
---> statement-breakpoint
-CREATE UNIQUE INDEX `user_username_unique` ON `user` (`username`);--> statement-breakpoint
-CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);--> statement-breakpoint
-CREATE UNIQUE INDEX `notification_channel_channel_id_unique` ON `notification_channel` (`channel_id`);--> statement-breakpoint
-CREATE UNIQUE INDEX `push_notification_device_subscription_unique` ON `push_notification_device` (`subscription`);--> statement-breakpoint
-CREATE INDEX `paid_index` ON `pedidos` (`amount_paid`) WHERE "pedidos"."amount_paid" >= "pedidos"."total";--> statement-breakpoint
-CREATE UNIQUE INDEX `cliente_email_unique` ON `cliente` (`email`);--> statement-breakpoint
-CREATE UNIQUE INDEX `cliente_cellphone_unique` ON `cliente` (`cellphone`);--> statement-breakpoint
-CREATE UNIQUE INDEX `cliente_phone_unique` ON `cliente` (`phone`);

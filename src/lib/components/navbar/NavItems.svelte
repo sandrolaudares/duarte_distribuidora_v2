@@ -3,11 +3,6 @@
 
   import { modal } from '$lib/components/modal'
   import BugReportModal from '$lib/components/modal/BugReportModal.svelte'
-  import * as m from '$msgs'
-
-  import {
-    languageTag,
-  } from '$lib/paraglide/runtime'
 
   import { page } from '$app/stores'
 
@@ -38,45 +33,46 @@
   ]
 
   if ($user?.role === 'admin' && showDefaultItems) {
-    navItems.push({
-      name: 'Pessoas',
-      href: '/admin',
-      subItems: [
-        // {
-        //   name: m.products(),
-        //   href: '/admin/products',
-        //   // icon: icons.cube(),
-        // },
-        {
-          name: m.usuarios(),
-          href: '/admin/users',
-          // icon: icons.users(),
-        },
-        {
-          name: m.customers(),
-          href: '/admin/customer',
-          // icon: icons.users(),
-        },
-        // {
-        //   name: 'Financeiro',
-        //   href: '/admin/finance',
-        // },
-        // {
-        //   name: m.stock(),
-        //   href: '/admin/stock',
-        // },
-        {
-          name: 'Fornecedor',
-          href: '/admin/supplier',
-        },
-        // {
-        //   name: 'Caixa',
-        //   href: '/admin/cashier',
-        // },
-      ],
-    },
-    
-    {
+    navItems.push(
+      {
+        name: 'Pessoas',
+        href: '/admin',
+        subItems: [
+          // {
+          //   name: m.products(),
+          //   href: '/admin/products',
+          //   // icon: icons.cube(),
+          // },
+          {
+            name: 'Usuários',
+            href: '/admin/users',
+            // icon: icons.users(),
+          },
+          {
+            name: 'Clientes',
+            href: '/admin/customer',
+            // icon: icons.users(),
+          },
+          // {
+          //   name: 'Financeiro',
+          //   href: '/admin/finance',
+          // },
+          // {
+          //   name: m.stock(),
+          //   href: '/admin/stock',
+          // },
+          {
+            name: 'Fornecedor',
+            href: '/admin/supplier',
+          },
+          // {
+          //   name: 'Caixa',
+          //   href: '/admin/cashier',
+          // },
+        ],
+      },
+
+      {
         name: 'Pedidos',
         href: '',
         subItems: [
@@ -85,7 +81,7 @@
             href: '/admin/orders/allorders',
           },
           {
-            name: m.orders(),
+            name: 'Pedidos em aberto',
             href: '/admin/orders',
           },
           {
@@ -107,29 +103,24 @@
             href: '/admin/products',
           },
           {
-            name:'Estoque',
+            name: 'Estoque',
             href: '/admin/stock',
           },
         ],
       },
       {
-          name: 'Caixa',
-          href: '/admin/cashier',
-        },
+        name: 'Caixa',
+        href: '/admin/cashier',
+      },
     )
   }
 
   function isActive(href?: string) {
-    return (
-      $page.url.pathname === href ||
-      $page.url.pathname === '/' + languageTag() + href ||
-      ($page.url.pathname === '/' + languageTag() && href === '/')
-    )
+    return $page.url.pathname === href
   }
 </script>
 
 {#each navItems as navItem, i (i)}
-
   {@const { name, icon } = navItem}
   <li>
     {#if navItem.subItems}
@@ -142,20 +133,19 @@
         </summary>
         <ul>
           {#each navItem.subItems as subItem, i (subItem.href)}
-       
-              <li>
-                <a
-                  href={subItem.href}
-                  aria-current={isActive(subItem.href) ? 'page' : undefined}
-                  class:active={isActive(subItem.href)}
-                >
-                  <!-- {#if typeof navItem.icon === 'string'}
+            <li>
+              <a
+                href={subItem.href}
+                aria-current={isActive(subItem.href) ? 'page' : undefined}
+                class:active={isActive(subItem.href)}
+              >
+                <!-- {#if typeof navItem.icon === 'string'}
                     {@html icon}
                   {/if} -->
 
-                  {subItem.name}
-                </a>
-              </li>
+                {subItem.name}
+              </a>
+            </li>
           {/each}
         </ul>
       </details>
