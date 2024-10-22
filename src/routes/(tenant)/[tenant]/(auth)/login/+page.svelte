@@ -1,5 +1,4 @@
 <script lang="ts">
-  import * as m from '$msgs'
   import SEO, { getSEOProps } from '$lib/components/SEO/index.svelte'
 
   import { trpc } from '$trpc/client'
@@ -31,14 +30,14 @@
 
 <SEO
   {...getSEOProps({
-    title: m.title_sign_in(),
+    title: 'Sign in',
     description: 'Sign in to your account',
   })}
 />
 
 <main class="flex min-h-[90vh] items-center justify-center bg-base-200">
   <div class="w-full max-w-sm rounded-lg p-8 shadow-lg bg-base-100">
-    <h1 class="text-center text-2xl font-semibold">{m.title_sign_in()}</h1>
+    <h1 class="text-center text-2xl font-semibold">Cadastrar</h1>
     <div class="mt-6 flex flex-col gap-4">
       {#if isRequested && message.message}
         {#if message.success}
@@ -64,19 +63,19 @@
         onclick={sendMagicLink}
         disabled={isLoading}
       >
-        {m.magic_link()}
+        Enviar link magico
       </button>
     </div>
     <p class="mt-4 text-center text-sm">
-      {m.dont_have_acc()}
+      Não tem uma conta?
       <a href="/signup" class="text-primary hover:underline">
-        {m.create_an_acc()}
+        criar
       </a>
     </p>
 
     <p class="mt-4 text-center text-sm">
       <a href="/login/password" class="btn btn-outline ">
-        {m.login_password()}
+        Login com senha
       </a>
     </p>
   </div>

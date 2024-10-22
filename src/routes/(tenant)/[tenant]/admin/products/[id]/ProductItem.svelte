@@ -10,7 +10,6 @@
   import { icons } from '$lib/utils'
   import { modal } from '$lib/components/modal'
   import ModalSku from '$lib/components/modal/ModalSKU.svelte'
-  import * as m from '$msgs'
   import { onMount } from 'svelte'
   import type { RouterOutputs } from '$trpc/router'
   export let item: SelectProductItem
@@ -161,7 +160,7 @@
     />
     <div class="flex flex-col gap-2">
       <div class="flex items-center justify-between gap-3">
-        {m.wholesale_price()}:
+      Atacado:
 
         <CurrencyInput
           bind:value={item.wholesale_price}
@@ -169,7 +168,7 @@
         />
       </div>
       <div class="flex items-center justify-between gap-3">
-        {m.retail_price()}:
+        Varejo
         <CurrencyInput
           bind:value={item.retail_price}
           on:change={() => (isChanged = true)}
@@ -180,7 +179,7 @@
 
   {#if isChanged}
     <button class="btn btn-outline mt-2" on:click={updateProductItemInfo}>
-      {m.save_changes()}
+      Salvar alterações
     </button>
   {/if}
 </div>

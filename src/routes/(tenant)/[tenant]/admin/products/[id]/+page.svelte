@@ -6,7 +6,6 @@
   import { page } from '$app/stores'
   import ProductItem from './ProductItem.svelte'
   import ImageInput from '$lib/components/input/ImageInput.svelte'
-  import * as m from '$msgs'
 
   import { toast } from 'svelte-sonner'
   import { icons } from '$lib/utils'
@@ -25,27 +24,27 @@
       fields: [
         {
           name: 'name',
-          label: m.name(),
+          label: 'Nome',
           type: 'text',
           value: produto.name,
           required: true,
         },
         {
           name: 'quantity',
-          label: m.base_quantity(),
+          label: 'Quantidade base',
           type: 'number',
           value: 1,
           required: true,
         },
         {
           name: 'wholesale_price',
-          label: m.wholesale_price(),
+          label: 'Preço de atacado',
           type: 'currency',
           required: false,
         },
         {
           name: 'retail_price',
-          label: m.retail_price(),
+          label: 'Preço de varejo',
           type: 'currency',
           required: false,
         },
@@ -146,7 +145,7 @@
 
       <div class="flex flex-col items-end justify-center gap-2">
         <div class="md:flex-row flex-col flex items-center gap-2">
-          <label for="name">{m.name()}:</label>
+          <label for="name">Nome:</label>
           <input
             id="name"
             name="name"
@@ -157,7 +156,7 @@
           />
         </div>
         <div class="md:flex-row flex-col flex items-center gap-2">
-          <label for="description">{m.description()}:</label>
+          <label for="description">Descrição:</label>
           <input
             id="description"
             name="description"
@@ -180,7 +179,7 @@
           onclick={updateProductInfo}
           disabled={!isChanged}
         >
-        {m.save_button()}
+        Salvar
         </button>
       {/if}
 
@@ -192,7 +191,7 @@
         </button>
 
       <button class="btn btn-primary px-5" onclick={handleAddItem}>
-        {@html icons.plus()} {m.add_item()}
+        {@html icons.plus()} Adicionar item
       </button>
     </div>
   </div>

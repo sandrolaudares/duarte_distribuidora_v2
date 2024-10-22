@@ -6,7 +6,6 @@
   import { page } from '$app/stores'
   import { toast } from 'svelte-sonner'
   import type { SelectCustomer } from '$db/schema'
-  import * as m from '$msgs'
   import { createEventDispatcher } from 'svelte';
 
   const dispatch = createEventDispatcher();
@@ -190,9 +189,6 @@
 
 <div class="flex w-full justify-end">
   <div class="flex gap-3 w-full">
-    <!-- <button class="btn btn-error" on:click={modal.close}>
-      {m.cancel_button()}
-    </button> -->
     <button class="btn btn-primary w-full"disabled={isLoading} on:click={save}>{isLoading?'Adicionando...':'Salvar novo endereco'}</button>
   </div>
 </div>

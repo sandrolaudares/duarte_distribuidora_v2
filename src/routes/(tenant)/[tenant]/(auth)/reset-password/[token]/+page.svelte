@@ -3,7 +3,6 @@
   import { enhance } from '$app/forms'
 
   import type { ActionData } from './$types'
-  import * as m from '$msgs'
 
   export let form: ActionData
 
@@ -27,9 +26,9 @@
 <div class="bg-background flex h-full flex-col items-center justify-center">
   <div class="mx-auto w-full max-w-md space-y-6">
     <div class="text-center">
-      <h1 class="text-3xl font-bold">{m.password_reset()}</h1>
+      <h1 class="text-3xl font-bold">Resetar senha</h1>
       <p class="text-muted-foreground mt-2">
-        {m.enter_new_password()} {data.email}
+        Digite nova senha {data.email}
       </p>
     </div>
     <form
@@ -43,7 +42,7 @@
             class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             for="password"
           >
-            {m.password()}
+            Senha
           </label>
           <input
             bind:value={password}
@@ -57,7 +56,7 @@
             class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             for="password_c"
           >
-            {m.confirm_password()}
+            Confirmar senha
           </label>
           <input
             bind:value={password_confirm}
@@ -74,7 +73,7 @@
 
           <p class=" mt-2 text-center text-sm">{form?.message ?? ''}</p>
 
-          <button class="btn btn-outline w-full">{m.request_password_reset()}</button>
+          <button class="btn btn-outline w-full">Resetar senha</button>
         </div>
       </div>
     </form>

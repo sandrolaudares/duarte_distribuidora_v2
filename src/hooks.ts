@@ -1,7 +1,3 @@
-// file initialized by the Paraglide-SvelteKit CLI - Feel free to edit it
-
-
-// export const reroute = i18n.reroute()
 
 import { getDomainAndType } from '$lib/utils'
 import type { Reroute } from '@sveltejs/kit'

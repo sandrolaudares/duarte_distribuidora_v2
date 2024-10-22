@@ -14,14 +14,14 @@
     type TableOptions,
   } from '@tanstack/svelte-table'
   import Datatable from '$components/table/Datatable.svelte'
-  import {
-    type TableState,
-    getParams,
-    EditRowButton,
-    EditRowInput,
-    RowActions,
-    EditRowCurrency,
-  } from '$lib/components/table'
+  // import {
+  //   type TableState,
+  //   getParams,
+  //   EditRowButton,
+  //   EditRowInput,
+  //   RowActions,
+  //   EditRowCurrency,
+  // } from '$lib/components/table'
   import type { RouterOutputs, RouterInputs } from '$trpc/router'
 
   import type { metaEntrada, metaSaida, MetaUnion } from '$db/schema'
@@ -79,17 +79,17 @@
       header: 'Tipo',
       accessorKey: 'type',
     },
-    {
-      header: 'Custo',
-      accessorKey: 'cost_price',
-      cell: info =>
-        renderComponent(EditRowCurrency<Transaction>, {
-          id: info.row.original.id,
-          colID: 'cost_price',
-          editT: 'number',
-          value: info.getValue(),
-        }),
-    },
+    // {
+    //   header: 'Custo',
+    //   accessorKey: 'cost_price',
+    //   cell: info =>
+    //     renderComponent(EditRowCurrency<Transaction>, {
+    //       id: info.row.original.id,
+    //       colID: 'cost_price',
+    //       editT: 'number',
+    //       value: info.getValue(),
+    //     }),
+    // },
   ]
 
   async function load(s: TableState) {

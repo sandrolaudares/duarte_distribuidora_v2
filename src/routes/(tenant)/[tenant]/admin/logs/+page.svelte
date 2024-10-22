@@ -1,4 +1,4 @@
-<script lang="ts">
+<!-- <script lang="ts">
   import { toast } from 'svelte-sonner'
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
@@ -21,7 +21,6 @@
   } from '$lib/components/table'
   import type { RouterOutputs, RouterInputs } from '$trpc/router'
   import { goto } from '$app/navigation'
-  import EditRowCurrency from '$lib/components/table/EditRowCurrency.svelte'
 
   type Logs = RouterOutputs['bugReport']['paginatedLogs']['rows'][0]
 
@@ -69,4 +68,4 @@
 
 <div class=" h-[70vh] overflow-x-auto p-4">
   <Datatable columns={defaultColumns} {load} />
-</div>
+</div> -->

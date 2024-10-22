@@ -4,7 +4,6 @@
   import { getUserContext } from '$lib/stores/user'
   const user = getUserContext()
   export let data: PageData
-  import * as m from '$msgs'
 
   const { customerCount, orderCount, productCount, recentActivity } = data
 </script>
@@ -60,7 +59,7 @@
         data-v0-t="card"
       >
         <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-bold">{m.customers()}</h2>
+          <h2 class="text-2xl font-bold">Clientes</h2>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -87,7 +86,7 @@
         data-v0-t="card"
       >
         <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-bold">{m.products()}</h2>
+          <h2 class="text-2xl font-bold">Produtos</h2>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"

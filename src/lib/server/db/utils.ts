@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { asc, count, desc, like, type AnyColumn } from 'drizzle-orm'
+import { asc, count, desc, like, sql, type AnyColumn } from 'drizzle-orm'
 import {
   SQLiteTable,
   getTableConfig,
+  integer,
   type SQLiteSelect,
 } from 'drizzle-orm/sqlite-core'
-import { db } from '.'
-
-import type { TableState } from '$components/table'
 
 // export async function tableHelper<T extends SQLiteSelect>(
 //   qb: T,
@@ -78,6 +76,14 @@ export function withSearch<T extends SQLiteSelect>(
   return qb
 }
 
-export function getRowCount(table: SQLiteTable) {
-  return db.select({ count: count() }).from(table)
+export const timestamps = {
+  created_at: integer('created_at', {
+    mode: 'timestamp',
+  }).default(sql`(unixepoch())`),
+  updated_at: integer('updated_at', {
+    mode: 'timestamp',
+  }).$onUpdate(() => sql`(unixepoch())`),
+  deleted_at: integer('deleted_at', {
+    mode: 'timestamp',
+  }),
 }

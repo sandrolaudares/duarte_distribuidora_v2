@@ -17,7 +17,7 @@
   let taxa = data.taxa
 
   function handleAddCachier() {
-    modal.open(FormModal<RouterInputs['distribuidora']['insertCashier']>, {
+    modal.open(FormModal, {
       title: 'Adicionar Caixa',
       fields: [
         {

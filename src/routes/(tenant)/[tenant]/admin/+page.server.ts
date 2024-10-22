@@ -4,7 +4,7 @@ import { customerTable, productItemTable, customerOrderTable } from '$db/schema'
 
 import { bugReport } from '$lib/server/db/controller'
 import { error } from '@sveltejs/kit'
-export const load = (async () => {
+export const load = (async ({locals:{tenantDb}}) => {
   try {
     const [
       [{ count: customerCount }],
@@ -15,7 +15,7 @@ export const load = (async () => {
       getRowCount(customerTable),
       getRowCount(productItemTable),
       getRowCount(customerOrderTable),
-      bugReport.getLogs(),
+      bugReport(tenantDb!).getLogs(),
     ])
 
     console.log(recentActivity)

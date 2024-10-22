@@ -8,10 +8,9 @@ import {
   getSQLiteColumn,
   getOrderBy,
 } from '$lib/server/db/utils'
-import { db } from '$lib/server/db'
 import { and, eq, getTableColumns, SQL, count, like } from 'drizzle-orm'
 
-export const load = (async ({ url }) => {
+export const load = (async ({ url,locals:{tenantDb} }) => {
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
   const pageSize = Number(searchParams.get('pageSize') ?? 10 )
@@ -22,7 +21,7 @@ export const load = (async ({ url }) => {
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_order')
 
-  let query = db
+  let query = tenantDb!
     .select()
     .from(schema.skuTable)
     .where(name ? like(schema.skuTable.name, `${name}%`) : undefined)
@@ -41,7 +40,7 @@ export const load = (async ({ url }) => {
   try {
     const rows = await withPagination(query, page, pageSize)
 
-    const total = await db.select({ count: count() }).from(schema.skuTable)
+    const total = await tenantDb!.select({ count: count() }).from(schema.skuTable)
 
     return { rows: rows ?? [], count: total[0].count }
   } catch (error) {

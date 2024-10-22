@@ -1,13 +1,13 @@
-import { lucia } from '$lib/server/auth'
 import { fail, redirect } from '@sveltejs/kit'
-import { generateId } from 'lucia'
-import { hash } from '@node-rs/argon2'
+import { generateId } from '$lib/server/auth/utils'
+import { hash } from '$lib/server/db/schema/user/password'
 import { LibsqlError } from '@libsql/client'
 
 import type { Actions, PageServerLoad } from './$types'
 import { emailTemplate, sendMail } from '$lib/server/email'
 
 import { bugReport, user } from '$db/controller'
+import { setSessionTokenCookie } from '$lib/server/auth/cookies'
 
 export const load: PageServerLoad = async event => {
   if (event.locals.user) {
@@ -18,6 +18,7 @@ export const load: PageServerLoad = async event => {
 
 export const actions: Actions = {
   default: async event => {
+    const { tenantAuthManager, tenantDb } = event.locals
     const formData = await event.request.formData()
     const username = formData.get('username')
     const password = formData.get('password')
@@ -53,40 +54,30 @@ export const actions: Actions = {
     }
 
     try {
-      const passwordHash = await hash(password, {
-        // recommended minimum parameters
-        memoryCost: 19456,
-        timeCost: 2,
-        outputLen: 32,
-        parallelism: 1,
-      })
+      const passwordHash = await hash(password)
       const userId = generateId(15)
-      user.insertUser({
+      user(tenantDb!).insertUser({
         id: userId,
         username,
         email,
         emailVerified: false,
         password_hash: passwordHash,
-        role: username === 'administrador' ? 'admin':'customer',
+        role: username === 'administrador' ? 'admin' : 'customer',
       })
 
-      const verificationCode = await user.generateEmailVerificationCode(
-        userId,
-        email,
-      )
-      await bugReport.insertLogs({
+      const verificationCode = await user(
+        tenantDb!,
+      ).generateEmailVerificationCode(userId, email)
+      await bugReport(tenantDb!).insertLogs({
+        type: 'LOG',
         created_by: userId,
         text: `${username} se cadastrou`,
         error: '',
       })
       await sendMail(email, emailTemplate.verificationCode(verificationCode))
-
-      const session = await lucia.createSession(userId, {})
-      const sessionCookie = lucia.createSessionCookie(session.id)
-      event.cookies.set(sessionCookie.name, sessionCookie.value, {
-        path: '.',
-        ...sessionCookie.attributes,
-      })
+      const token = tenantAuthManager!.generateSessionToken()
+      const session = await tenantAuthManager!.createSession(token, userId)
+      setSessionTokenCookie(event, token, session.expiresAt)
     } catch (e) {
       if (e instanceof LibsqlError && e.code === 'SQLITE_CONSTRAINT_UNIQUE') {
         return fail(400, {

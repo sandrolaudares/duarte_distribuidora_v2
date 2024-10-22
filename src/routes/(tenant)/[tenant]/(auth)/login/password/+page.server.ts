@@ -1,6 +1,8 @@
-import { lucia } from '$lib/server/auth'
+import {
+  setSessionTokenCookie,
+} from '$lib/server/auth/cookies'
+import {  verify } from '$db/schema/user/password'
 import { fail, redirect } from '@sveltejs/kit'
-import { verify } from '@node-rs/argon2'
 
 import type { Actions, PageServerLoad } from './$types'
 
@@ -15,21 +17,12 @@ export const load: PageServerLoad = async event => {
 
 export const actions: Actions = {
   default: async event => {
+    const { tenantDb , tenantAuthManager} = event.locals
     const formData = await event.request.formData()
     // const username = formData.get('username')
     const password = formData.get('password')
     const email = formData.get('email')
 
-    // if (
-    //   typeof username !== 'string' ||
-    //   username.length < 3 ||
-    //   username.length > 31 ||
-    //   !/^[a-z0-9_-]+$/.test(username)
-    // ) {
-    //   return fail(400, {
-    //     message: 'Invalid username',
-    //   })
-    // }
     if (
       typeof email !== 'string' ||
       email.length < 3 ||
@@ -51,7 +44,13 @@ export const actions: Actions = {
       })
     }
 
-    const [existingUser] = await user.getUserByEmail(email)
+    const [existingUser] = await user(tenantDb!).getUserByEmail(email)
+
+    if(!existingUser.password_hash){
+      return fail(400,{
+        message: "Usuario nao tem uma senha tente recuperar ou magic link"
+      })
+    }
 
     if (!existingUser) {
       return fail(400, {
@@ -59,12 +58,7 @@ export const actions: Actions = {
       })
     }
 
-    const validPassword = await verify(existingUser.password_hash, password, {
-      memoryCost: 19456,
-      timeCost: 2,
-      outputLen: 32,
-      parallelism: 1,
-    })
+    const validPassword = await verify(existingUser.password_hash, password)
     if (!validPassword) {
       // NOTE:
       // Returning immediately allows malicious actors to figure out valid usernames from response times,
@@ -79,20 +73,15 @@ export const actions: Actions = {
         message: 'Incorrect password',
       })
     }
-
-    const session = await lucia.createSession(existingUser.id, {})
-    const sessionCookie = lucia.createSessionCookie(session.id)
-    event.cookies.set(sessionCookie.name, sessionCookie.value, {
-      path: '.',
-      ...sessionCookie.attributes,
-    })
-
+    const token = tenantAuthManager!.generateSessionToken()
+    const session = await tenantAuthManager!.createSession(token, existingUser.id)
+setSessionTokenCookie(event, token, session.expiresAt)
     if (!existingUser.emailVerified) {
       return redirect(302, '/verify-email')
     }
 
-    if (existingUser.permissions.redirect) {
-      return redirect(302, existingUser.permissions.redirect)
+    if (existingUser.meta.redirect) {
+      return redirect(302, existingUser.meta.redirect)
     }
 
     return redirect(302, '/')

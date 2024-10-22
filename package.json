@@ -57,7 +57,6 @@
     "@googlemaps/google-maps-services-js": "^3.4.0",
   
     "@libsql/client": "^0.14.0",
-    "@node-rs/argon2": "^2.0.0",
     "@svelte-plugins/datepicker": "^1.0.9",
     "@tanstack/svelte-table": "9.0.0-alpha.10",
     "@trpc/client": "^10.45.2",
