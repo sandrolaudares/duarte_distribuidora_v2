@@ -536,7 +536,7 @@
   }
 </script>
 
-<main class="container mx-auto h-full max-h-[calc(100vh-200px)]">
+<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
   <section class="container mx-auto px-4 mb-4">
     <div class="mt-2 flex justify-between items-center ">
       <h1 class="text-2xl font-semibold">Clientes:</h1>

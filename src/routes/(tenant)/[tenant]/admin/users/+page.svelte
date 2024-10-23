@@ -35,7 +35,7 @@
   })
 </script>
 
-<main class="container mx-auto h-full">
+<main class="container mx-auto h-full max-h-[calc(100vh-10vh)]">
   <Datatable {table}>
     <!-- {#snippet header()}
       <Search {table} />
@@ -50,17 +50,14 @@
           <ThSort {table} field="role">Cargo</ThSort>
           <ThSort {table} field="meta">Permissões</ThSort>
           <ThSort {table} field="emailVerified">Email verificado</ThSort>
-          <!-- <ThSort {table} field="created_at">Created At</ThSort> -->
         </tr>
         <tr>
           <Th />
           <ThFilter {table} field="username" />
           <ThFilter {table} field="email" />
-          <ThFilter {table} field="role" />
           <Th/>
-
+          <Th/>
           <Th />
-          <!-- <ThFilter {table} field="created_at" /> -->
           <Th />
         </tr>
       </thead>
@@ -73,7 +70,6 @@
             <td><b><EditRole userId={row.id} userName={row.username} userRole={row.role}/></b></td>
             <td><b><EditPermissions userId={row.id} userName={row.username} userPermissions={row.meta.permissions ?? []}/></b></td>
             <td><span>{row.emailVerified ? '✅' : '❌'}</span></td>
-            <!-- <td>{row.created_at}</td> -->
           </tr>
         {/each}
       </tbody>
