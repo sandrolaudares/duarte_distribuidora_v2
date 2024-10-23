@@ -40,10 +40,7 @@
   function handleAddProduct(category_id: number) {
     console.log('add product')
     modal.open(
-      FormModal<{
-        name: string
-        description: string
-      }>,
+      FormModal,
       {
         fields: [
           {
@@ -85,9 +82,7 @@
 
   function handleAddCategory() {
     modal.open(
-      FormModal<{
-        name: string
-      }>,
+      FormModal,
       {
         fields: [
           {

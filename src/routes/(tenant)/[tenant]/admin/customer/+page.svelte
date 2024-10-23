@@ -122,7 +122,7 @@
   }
 
   function add() {
-    modal.open(FormModal<RouterInputs['customer']['insertCustomer']>, {
+    modal.open(FormModal, {
       title: 'Create new Customer',
       fields: [
         {
@@ -183,7 +183,6 @@
   </div>
 </section>
 <SSRTable
-{totalSum}
   count={readable(data.count)}
   {tableRows}
   columns={table => [
@@ -206,238 +205,238 @@
     table.column({
       header: 'Name',
       accessor: 'name',
-      cell: ({ column, row, value }) =>
-        createRender(EditableCell, {
-          row,
-          column,
-          value,
-          onUpdateValue: async (
-            rowDataId: string,
-            columnId: string,
-            newValue: unknown,
-          ) => {
-            console.log(rowDataId, columnId, newValue)
-            // In this case, the dataId of each item is its index in $tableRows.
-            // You can also handle any server-synchronization necessary here.
-            const idx = parseInt(rowDataId)
-            const currentItem = $tableRows[idx]
-            const key = columnId // Cast as `keyof YourDataItem`
-            const newItem = { ...currentItem, [key]: newValue }
-            console.log(newItem)
-            $tableRows[idx] = newItem
-            $tableRows = $tableRows
+      // cell: ({ column, row, value }) =>
+      //   createRender(EditableCell, {
+      //     row,
+      //     column,
+      //     value,
+      //     onUpdateValue: async (
+      //       rowDataId: string,
+      //       columnId: string,
+      //       newValue: unknown,
+      //     ) => {
+      //       console.log(rowDataId, columnId, newValue)
+      //       // In this case, the dataId of each item is its index in $tableRows.
+      //       // You can also handle any server-synchronization necessary here.
+      //       const idx = parseInt(rowDataId)
+      //       const currentItem = $tableRows[idx]
+      //       const key = columnId // Cast as `keyof YourDataItem`
+      //       const newItem = { ...currentItem, [key]: newValue }
+      //       console.log(newItem)
+      //       $tableRows[idx] = newItem
+      //       $tableRows = $tableRows
 
-            handleUpdate(newItem, key, idx, currentItem)
+      //       handleUpdate(newItem, key, idx, currentItem)
 
-            // Handle any server-synchronization.
-          },
-        }),
+      //       // Handle any server-synchronization.
+      //     },
+      //   }),
       plugins: {
         sort: {
           invert: false,
           // disable: true,
         },
-        filter: {
-          initialFilterValue: '',
-          render: ({ filterValue, values, preFilteredValues }) =>
-            createRender(TextFilter, {
-              filterValue,
-              values,
-              preFilteredValues,
-              change: value => {
-                console.log('change username', value)
+        // filter: {
+        //   initialFilterValue: '',
+        //   render: ({ filterValue, values, preFilteredValues }) =>
+        //     createRender(TextFilter, {
+        //       filterValue,
+        //       values,
+        //       preFilteredValues,
+        //       change: value => {
+        //         console.log('change username', value)
 
-                Filters_update_many({
-                  name: value,
-                  page: '1',
-                })
-              },
-            }),
-        },
+        //         Filters_update_many({
+        //           name: value,
+        //           page: '1',
+        //         })
+        //       },
+        //     }),
+        // },
       },
     }),
     table.column({
       header: 'Email',
       accessor: 'email',
-      cell: ({ column, row, value }) =>
-        createRender(EditableCell, {
-          row,
-          column,
-          value,
-          onUpdateValue: (
-            rowDataId: string,
-            columnId: string,
-            newValue: unknown,
-          ) => {
-            console.log(rowDataId, columnId, newValue)
-            // In this case, the dataId of each item is its index in $tableRows.
-            // You can also handle any server-synchronization necessary here.
-            const idx = parseInt(rowDataId)
-            const currentItem = $tableRows[idx]
-            const key = columnId // Cast as `keyof YourDataItem`
-            const newItem = { ...currentItem, [key]: newValue }
-            console.log(newItem)
-            $tableRows[idx] = newItem
-            $tableRows = $tableRows
+      // cell: ({ column, row, value }) =>
+      //   createRender(EditableCell, {
+      //     row,
+      //     column,
+      //     value,
+      //     onUpdateValue: (
+      //       rowDataId: string,
+      //       columnId: string,
+      //       newValue: unknown,
+      //     ) => {
+      //       console.log(rowDataId, columnId, newValue)
+      //       // In this case, the dataId of each item is its index in $tableRows.
+      //       // You can also handle any server-synchronization necessary here.
+      //       const idx = parseInt(rowDataId)
+      //       const currentItem = $tableRows[idx]
+      //       const key = columnId // Cast as `keyof YourDataItem`
+      //       const newItem = { ...currentItem, [key]: newValue }
+      //       console.log(newItem)
+      //       $tableRows[idx] = newItem
+      //       $tableRows = $tableRows
 
-            handleUpdate(newItem, key, idx, currentItem)
-            // Handle any server-synchronization.
-          },
-        }),
+      //       handleUpdate(newItem, key, idx, currentItem)
+      //       // Handle any server-synchronization.
+      //     },
+      //   }),
       plugins: {
         sort: {
           invert: false,
           // disable: true,
         },
-        filter: {
-          initialFilterValue: '',
-          render: ({ filterValue, values, preFilteredValues }) =>
-            createRender(TextFilter, {
-              filterValue,
-              values,
-              preFilteredValues,
-              change: value =>
-                Filters_update_many({
-                  email: value,
-                  page: `1`,
-                }),
-            }),
-        },
+        // filter: {
+        //   initialFilterValue: '',
+        //   render: ({ filterValue, values, preFilteredValues }) =>
+        //     createRender(TextFilter, {
+        //       filterValue,
+        //       values,
+        //       preFilteredValues,
+        //       change: value =>
+        //         Filters_update_many({
+        //           email: value,
+        //           page: `1`,
+        //         }),
+        //     }),
+        // },
       },
     }),
     table.column({
       header: 'CPF/CNPJ',
       accessor: 'cpf_cnpj',
-      cell: ({ column, row, value }) =>
-        createRender(EditableCell, {
-          row,
-          column,
-          value,
-          onUpdateValue: (
-            rowDataId: string,
-            columnId: string,
-            newValue: unknown,
-          ) => {
-            console.log(rowDataId, columnId, newValue)
-            const idx = parseInt(rowDataId)
-            const currentItem = $tableRows[idx]
-            const key = columnId // Cast as `keyof YourDataItem`
-            const newItem = { ...currentItem, [key]: newValue }
-            console.log(newItem)
-            $tableRows[idx] = newItem
-            $tableRows = $tableRows
+      // cell: ({ column, row, value }) =>
+      //   createRender(EditableCell, {
+      //     row,
+      //     column,
+      //     value,
+      //     onUpdateValue: (
+      //       rowDataId: string,
+      //       columnId: string,
+      //       newValue: unknown,
+      //     ) => {
+      //       console.log(rowDataId, columnId, newValue)
+      //       const idx = parseInt(rowDataId)
+      //       const currentItem = $tableRows[idx]
+      //       const key = columnId // Cast as `keyof YourDataItem`
+      //       const newItem = { ...currentItem, [key]: newValue }
+      //       console.log(newItem)
+      //       $tableRows[idx] = newItem
+      //       $tableRows = $tableRows
 
-            handleUpdate(newItem, key, idx, currentItem)
-            // Handle any server-synchronization.
-          },
-        }),
+      //       handleUpdate(newItem, key, idx, currentItem)
+      //       // Handle any server-synchronization.
+      //     },
+      //   }),
     }),
     table.column({
       header: 'Tipo cliente',
       accessor: 'is_retail',
-      cell: ({ column, row, value }) =>
-        createRender(SimpleSelect, {
-          id: row.id,
-          value: value,
-        }),
+      // cell: ({ column, row, value }) =>
+        // createRender(SimpleSelect, {
+        //   id: row.id,
+        //   value: value,
+        // }),
     }),
     table.column({
       header: 'RG/IE',
       accessor: 'rg_ie',
-      cell: ({ column, row, value }) =>
-        createRender(EditableCell, {
-          row,
-          column,
-          value,
-          onUpdateValue: (
-            rowDataId: string,
-            columnId: string,
-            newValue: unknown,
-          ) => {
-            console.log(rowDataId, columnId, newValue)
-            const idx = parseInt(rowDataId)
-            const currentItem = $tableRows[idx]
-            const key = columnId // Cast as `keyof YourDataItem`
-            const newItem = { ...currentItem, [key]: newValue }
-            console.log(newItem)
-            $tableRows[idx] = newItem
-            $tableRows = $tableRows
+      // cell: ({ column, row, value }) =>
+      //   createRender(EditableCell, {
+      //     row,
+      //     column,
+      //     value,
+      //     onUpdateValue: (
+      //       rowDataId: string,
+      //       columnId: string,
+      //       newValue: unknown,
+      //     ) => {
+      //       console.log(rowDataId, columnId, newValue)
+      //       const idx = parseInt(rowDataId)
+      //       const currentItem = $tableRows[idx]
+      //       const key = columnId // Cast as `keyof YourDataItem`
+      //       const newItem = { ...currentItem, [key]: newValue }
+      //       console.log(newItem)
+      //       $tableRows[idx] = newItem
+      //       $tableRows = $tableRows
 
-            handleUpdate(newItem, key, idx, currentItem)
-            // Handle any server-synchronization.
-          },
-        }),
+      //       handleUpdate(newItem, key, idx, currentItem)
+      //       // Handle any server-synchronization.
+      //     },
+      //   }),
     }),
     table.column({
       header: 'Telefone',
       accessor: 'phone',
-      cell: ({ column, row, value }) =>
-        createRender(EditableCell, {
-          row,
-          column,
-          value,
-          onUpdateValue: (
-            rowDataId: string,
-            columnId: string,
-            newValue: unknown,
-          ) => {
-            console.log(rowDataId, columnId, newValue)
-            const idx = parseInt(rowDataId)
-            const currentItem = $tableRows[idx]
-            const key = columnId // Cast as `keyof YourDataItem`
-            const newItem = { ...currentItem, [key]: newValue }
-            console.log(newItem)
-            $tableRows[idx] = newItem
-            $tableRows = $tableRows
+      // cell: ({ column, row, value }) =>
+      //   createRender(EditableCell, {
+      //     row,
+      //     column,
+      //     value,
+      //     onUpdateValue: (
+      //       rowDataId: string,
+      //       columnId: string,
+      //       newValue: unknown,
+      //     ) => {
+      //       console.log(rowDataId, columnId, newValue)
+      //       const idx = parseInt(rowDataId)
+      //       const currentItem = $tableRows[idx]
+      //       const key = columnId // Cast as `keyof YourDataItem`
+      //       const newItem = { ...currentItem, [key]: newValue }
+      //       console.log(newItem)
+      //       $tableRows[idx] = newItem
+      //       $tableRows = $tableRows
 
-            handleUpdate(newItem, key, idx, currentItem)
-            // Handle any server-synchronization.
-          },
-        }),
+      //       handleUpdate(newItem, key, idx, currentItem)
+      //       // Handle any server-synchronization.
+      //     },
+      //   }),
     }),
-    table.column({
-      header: 'Creditos usados',
-      accessor: '',
-      cell: ({ column, row, value }) =>
-        createRender(UsedCredits, {
-          id: row.id,
-        }),
-    }),
+    // table.column({
+    //   header: 'Creditos usados',
+    //   accessor: '',
+    //   // cell: ({ column, row, value }) =>
+    //   //   createRender(UsedCredits, {
+    //   //     id: row.id,
+    //   //   }),
+    // }),
     table.column({
       header: 'Crédito Máximo',
       accessor: 'max_credit',
-      cell: ({ column, row, value }) =>
-        createRender(EditableCurrency, {
-          row,
-          column,
-          value,
-          onUpdateValue: (
-            rowDataId: string,
-            columnId: string,
-            newValue: unknown,
-          ) => {
-            console.log(rowDataId, columnId, newValue)
-            const idx = parseInt(rowDataId)
-            const currentItem = $tableRows[idx]
-            const key = columnId // Cast as `keyof YourDataItem`
-            const newItem = { ...currentItem, [key]: newValue }
-            console.log(newItem)
-            $tableRows[idx] = newItem
-            $tableRows = $tableRows
+      // cell: ({ column, row, value }) =>
+        // createRender(EditableCurrency, {
+        //   row,
+        //   column,
+        //   value,
+        //   onUpdateValue: (
+        //     rowDataId: string,
+        //     columnId: string,
+        //     newValue: unknown,
+        //   ) => {
+        //     console.log(rowDataId, columnId, newValue)
+        //     const idx = parseInt(rowDataId)
+        //     const currentItem = $tableRows[idx]
+        //     const key = columnId // Cast as `keyof YourDataItem`
+        //     const newItem = { ...currentItem, [key]: newValue }
+        //     console.log(newItem)
+        //     $tableRows[idx] = newItem
+        //     $tableRows = $tableRows
 
-            handleUpdate(newItem, key, idx, currentItem)
-            // Handle any server-synchronization.
-          },
-        }),
+        //     handleUpdate(newItem, key, idx, currentItem)
+        //     // Handle any server-synchronization.
+        //   },
+        // }),
     }),
     table.column({
       header: 'Ver detalhes',
       accessor: item => item,
-      cell: ({ value }) =>
-        createRender(GoToDetails, {
-          value: `/admin/customer/${value.id}`,
-          text: 'Ir para detalhes',
-        }),
+      // cell: ({ value }) =>
+      //   createRender(GoToDetails, {
+      //     value: `/admin/customer/${value.id}`,
+      //     text: 'Ir para detalhes',
+      //   }),
     }),
   ]}
 />
