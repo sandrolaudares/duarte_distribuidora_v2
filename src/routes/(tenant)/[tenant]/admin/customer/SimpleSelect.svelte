@@ -37,4 +37,4 @@
     <option value={false}>Pessoa juridica</option>
     <option value={true}>Pessoa fisica</option>
   </select>
-<!-- {/if} -->
+{/if}

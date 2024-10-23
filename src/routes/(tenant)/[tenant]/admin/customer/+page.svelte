@@ -1,4 +1,4 @@
-<script lang="ts">
+<!-- <script lang="ts">
   import type { PageData } from './$types'
 
   let { data }: { data: PageData } = $props()
@@ -439,4 +439,149 @@
       //   }),
     }),
   ]}
-/>
+/> -->
+<script lang="ts">
+  import { navigating } from '$app/stores'
+  import { SSRFilters } from '$lib/components/datatable/filter.svelte'
+  import { modal, FormModal } from '$lib/components/modal'
+  import { page } from '$app/stores'
+  import {
+    TableHandler,
+    Datatable,
+    ThSort,
+    ThFilter,
+    Pagination,
+    RowsPerPage,
+    Th,
+    Search,
+    type State,
+  } from '@vincjo/datatables/server'
+
+  import type { PageData } from './$types'
+  import { toast } from 'svelte-sonner'
+  import { trpc } from '$trpc/client'
+
+  let { data }: { data: PageData } = $props()
+
+  const filters = new SSRFilters()
+
+  const table = new TableHandler(data.rows, {
+    rowsPerPage: 10,
+    totalRows: data.count,
+  })
+
+  table.setPage(Number(filters.get('page')) || 1)
+  table.load(async s => {
+    console.log(s)
+    filters.fromState(s)
+    await $navigating?.complete
+    return data.rows
+  })
+
+  function add() {
+    modal.open(FormModal, {
+      title: 'Create new Customer',
+      fields: [
+        {
+          name: 'is_retail',
+          label: 'Pessoa Fisica',
+          type: 'checkbox',
+        },
+        {
+          label: 'Name',
+          name: 'name',
+          type: 'text',
+          required: true,
+        },
+        {
+          label: 'Phone',
+          name: 'phone',
+          type: 'text',
+        },
+        {
+          name: 'cellphone',
+          label: 'CellPhone',
+          type: 'text',
+        },
+        {
+          label: 'Email',
+          name: 'email',
+          type: 'email',
+        },
+        {
+          name: 'cpf_cnpj',
+          label: 'CPF/CNPJ',
+          type: 'text',
+        },
+      ],
+      save: async toSave => {
+        try {
+          const resp = await trpc($page).customer.insertCustomer.mutate(toSave)
+
+          if (resp) {
+            toast.success('Cliente criado')
+            // invalidate()
+            window.location.reload()
+          }
+        } catch (error: any) {
+          toast.error(error.message)
+          return error.message
+        }
+        // invalidate()
+      },
+    })
+  }
+</script>
+
+<main class="container mx-auto h-full">
+  <section class="container mx-auto px-4 mb-4">
+    <div class="mt-2 flex justify-between items-center ">
+      <h1 class="text-2xl font-semibold">Clientes:</h1>
+      <button class="btn btn-primary min-w-96" onclick={add}>Criar cliente</button>
+    </div>
+  </section>
+  <Datatable {table}>
+    <!-- {#snippet header()}
+      <Search {table} />
+     
+    {/snippet} -->
+    <table class="table table-zebra">
+      <thead>
+        <tr>
+          <ThSort {table} field="id">ID</ThSort>
+          <ThSort {table} field="name">Nome</ThSort>
+          <ThSort {table} field="email">Email</ThSort>
+          <ThSort {table} field="cpf_cnpj">CPF/CNPJ</ThSort>
+          <ThSort {table} field="is_retail">Tipo pessoa</ThSort>
+          <Th>Ver detalhes</Th>
+        </tr>
+        <tr>
+          <Th />
+          <ThFilter {table} field="name" />
+          <ThFilter {table} field="email" />
+          <ThFilter {table} field="cpf_cnpj" />
+          <ThFilter {table} field="is_retail" />
+          <Th/>
+        </tr>
+      </thead>
+      <tbody>
+        {#each table.rows as row}
+          <tr>
+            <td>{row.id}</td>
+            <td><b>{row.name}</b></td>
+            <td><b>{row.email}</b></td>
+            <td><b>{row.cpf_cnpj}</b></td>
+            <td><b>{row.is_retail}</b></td>
+            <td><a href="/admin/customer/{row.id}" class="badge badge-primary">Ver detalhes</a></td>
+            <!-- <td><b><SimpleSelect id={row.id} value={row.is_retail}/> TODO</b></td> -->
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+    {#snippet footer()}
+      <RowsPerPage {table} />
+      <div></div>
+      <Pagination {table} />
+    {/snippet}
+  </Datatable>
+</main>
