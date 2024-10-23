@@ -1,352 +1,104 @@
 <script lang="ts">
+  import { navigating } from '$app/stores'
+  import { SSRFilters } from '$lib/components/datatable/filter.svelte'
+  import { modal, FormModal } from '$lib/components/modal'
+      import ModalSupplierComplete from './ModalSupplierComplete.svelte'
+  import { page } from '$app/stores'
+  import {
+    TableHandler,
+    Datatable,
+    ThSort,
+    ThFilter,
+    Pagination,
+    RowsPerPage,
+    Th,
+    Search,
+    type State,
+  } from '@vincjo/datatables/server'
+
   import type { PageData } from './$types'
+  import { toast } from 'svelte-sonner'
+  import { trpc } from '$trpc/client'
+  import { tr } from 'date-fns/locale'
+  import NoResults from '$lib/components/NoResults.svelte'
 
   let { data }: { data: PageData } = $props()
 
-  import {
-    createTable,
-    Subscribe,
-    Render,
-    createRender,
-    type DataLabel,
-    type Column,
-    type Table,
-  } from '@andre-brandao/svelte-headless-table'
-  import {
-    addSortBy,
-    addColumnOrder,
-    addColumnFilters,
-    addSelectedRows,
-    addResizedColumns,
-    addGridLayout,
-    addPagination,
-  } from '@andre-brandao/svelte-headless-table/plugins'
-  import {
-    readable,
-    writable,
-    type Writable,
-    type Readable,
-  } from 'svelte/store'
-  import TextFilter from '$lib/components/newTable/filters/TextFilter.svelte'
-  import { page } from '$app/stores'
+  const filters = new SSRFilters()
 
-  import SelectIndicator from '$lib/components/newTable/edit/SelectIndicator.svelte'
-  import EditableCell from '$lib/components/newTable/edit/EditableCell.svelte'
-  import { goto } from '$app/navigation'
-  // import type { SelectUser } from '$drizzle/schema'
-  import { onDestroy, onMount } from 'svelte'
-  import {
-    SSRTable,
-    SSRFilter,
-    type SSRTableProps,
-  } from '$lib/components/newTable/ssr/index.svelte'
-  import { debounce } from '$lib/utils'
-  import EditableCurrency from '$lib/components/newTable/edit/EditableCurrency.svelte'
-  import GoToDetails from '$lib/components/newTable/goToDetails.svelte'
-  import { toast } from 'svelte-sonner'
-  import { trpc } from '$trpc/client'
-  import { modal, FormModal } from '$lib/components/modal'
-  import type { RouterInputs } from '$trpc/router'
-  import { invalidate } from '$app/navigation'
-  import ModalSupplierComplete from './ModalSupplierComplete.svelte'
-
-  const usernameFilter = debounce(SSRFilter.update_many, 500)
-  const emailFilter = debounce(SSRFilter.update_many, 500)
-  console.log(data)
-
-  const tableRows = writable(data.rows ?? [])
-
-  $effect(() => {
-    console.log('data.rows', data.rows)
-
-    tableRows.set(data.rows)
+  const table = new TableHandler(data.rows, {
+    rowsPerPage: 10,
+    totalRows: data.count,
   })
 
-  let Filters = $derived($page.url)
-
-  function Filters_get(name: string) {
-    return Filters.searchParams.get(name)
-  }
-
-  function Filters_update(name: string, value: string) {
-    const url = new URL(Filters)
-    if (value !== '') url.searchParams.set(name, value)
-    else url.searchParams.delete(name)
-
-    goto(url, { keepFocus: true })
-  }
-
-  function Filters_clear(...params: string[]) {
-    const url = new URL(Filters)
-    params.forEach(p => url.searchParams.delete(p))
-    goto(url, { keepFocus: true })
-  }
-
-  function Filters_isFiltered(...params: string[]) {
-    return params.length > 0 && params.some(p => Filters.searchParams.has(p))
-  }
-
-  function Filters_update_many(params: Record<string, string>) {
-    const url = new URL(Filters)
-    Object.entries(params).forEach(([name, value]) => {
-      if (!value) {
-        url.searchParams.delete(name)
-      }
-      if (value !== '') url.searchParams.set(name, value)
-      else url.searchParams.delete(name)
-    })
-
-    const searchParams = url.pathname + url.search
-    goto(searchParams, { keepFocus: true })
-  }
+  table.setPage(Number(filters.get('page')) || 1)
+  table.load(async s => {
+    console.log(s)
+    filters.fromState(s)
+    await $navigating?.complete
+    return data.rows
+  })
 
   function add() {
     modal.open(ModalSupplierComplete, {})
   }
-
-  async function handleUpdate(
-    newItem: any,
-    key: string,
-    idx: number,
-    currentItem: any,
-  ) {
-    try {
-      await trpc($page).stock.updateSupplier.mutate({
-        id: newItem.id,
-        supplier: { [key]: newItem[key] },
-      })
-      toast.success('Atualizado com sucesso!')
-    } catch (error: any) {
-      toast.error('Erro ao atualizar')
-      console.error(error)
-      $tableRows[idx] = currentItem
-    }
-    $tableRows = $tableRows
-  }
 </script>
 
-<section class="container mx-auto px-4">
-  <div class="mt-2 flex items-center justify-between">
-    <h1 class="text-2xl font-semibold">Fornecedores:</h1>
-    <button class="btn btn-primary min-w-96" onclick={add}>
-      Criar fornecedor
-    </button>
-  </div>
-</section>
-<SSRTable
-  count={readable(data.count)}
-  {tableRows}
-  columns={table => [
-    // table.display({
-    //   id: 'selected',
-    //   header: '',
-    //   cell: ({ row, column }, { pluginStates }) => {
-    //     const { isSomeSubRowsSelected, isSelected } =
-    //       pluginStates.select.getRowState(row)
-    //     return createRender(SelectIndicator, {
-    //       isSelected,
-    //       isSomeSubRowsSelected,
-    //     })
-    //   },
-    // }),
-    table.column({
-      header: 'ID',
-      accessor: 'id',
-    }),
-    table.column({
-      header: 'Name',
-      accessor: 'name',
-      cell: ({ column, row, value }) =>
-        createRender(EditableCell, {
-          row,
-          column,
-          value,
-          onUpdateValue: async (
-            rowDataId: string,
-            columnId: string,
-            newValue: unknown,
-          ) => {
-            console.log(rowDataId, columnId, newValue)
-            // In this case, the dataId of each item is its index in $tableRows.
-            // You can also handle any server-synchronization necessary here.
-            const idx = parseInt(rowDataId)
-            const currentItem = $tableRows[idx]
-            const key = columnId // Cast as `keyof YourDataItem`
-            const newItem = { ...currentItem, [key]: newValue }
-            console.log(newItem)
-            $tableRows[idx] = newItem
-            $tableRows = $tableRows
-
-            handleUpdate(newItem, key, idx, currentItem)
-
-            // Handle any server-synchronization.
-          },
-        }),
-      plugins: {
-        sort: {
-          invert: false,
-          // disable: true,
-        },
-        filter: {
-          initialFilterValue: '',
-          render: ({ filterValue, values, preFilteredValues }) =>
-            createRender(TextFilter, {
-              filterValue,
-              values,
-              preFilteredValues,
-              change: value => {
-                console.log('change username', value)
-
-                Filters_update_many({
-                  name: value,
-                  page: '1',
-                })
-              },
-            }),
-        },
-      },
-    }),
-    table.column({
-      header: 'Razão social',
-      accessor: 'razao_social',
-      cell: ({ column, row, value }) =>
-        createRender(EditableCell, {
-          row,
-          column,
-          value,
-          onUpdateValue: (
-            rowDataId: string,
-            columnId: string,
-            newValue: unknown,
-          ) => {
-            console.log(rowDataId, columnId, newValue)
-            // In this case, the dataId of each item is its index in $tableRows.
-            // You can also handle any server-synchronization necessary here.
-            const idx = parseInt(rowDataId)
-            const currentItem = $tableRows[idx]
-            const key = columnId // Cast as `keyof YourDataItem`
-            const newItem = { ...currentItem, [key]: newValue }
-            console.log(newItem)
-            $tableRows[idx] = newItem
-            $tableRows = $tableRows
-
-            handleUpdate(newItem, key, idx, currentItem)
-            // Handle any server-synchronization.
-          },
-        }),
-    }),
-    table.column({
-      header: 'CPF/CNPJ',
-      accessor: 'cnpj_cpf',
-      cell: ({ column, row, value }) =>
-        createRender(EditableCell, {
-          row,
-          column,
-          value,
-          onUpdateValue: (
-            rowDataId: string,
-            columnId: string,
-            newValue: unknown,
-          ) => {
-            console.log(rowDataId, columnId, newValue)
-            const idx = parseInt(rowDataId)
-            const currentItem = $tableRows[idx]
-            const key = columnId // Cast as `keyof YourDataItem`
-            const newItem = { ...currentItem, [key]: newValue }
-            console.log(newItem)
-            $tableRows[idx] = newItem
-            $tableRows = $tableRows
-
-            handleUpdate(newItem, key, idx, currentItem)
-            // Handle any server-synchronization.
-          },
-        }),
-    }),
-    table.column({
-      header: 'RG/IE',
-      accessor: 'ie_rg',
-      cell: ({ column, row, value }) =>
-        createRender(EditableCell, {
-          row,
-          column,
-          value,
-          onUpdateValue: (
-            rowDataId: string,
-            columnId: string,
-            newValue: unknown,
-          ) => {
-            console.log(rowDataId, columnId, newValue)
-            const idx = parseInt(rowDataId)
-            const currentItem = $tableRows[idx]
-            const key = columnId // Cast as `keyof YourDataItem`
-            const newItem = { ...currentItem, [key]: newValue }
-            console.log(newItem)
-            $tableRows[idx] = newItem
-            $tableRows = $tableRows
-
-            handleUpdate(newItem, key, idx, currentItem)
-            // Handle any server-synchronization.
-          },
-        }),
-    }),
-    table.column({
-      header: 'Telefone',
-      accessor: 'telephone_1',
-      cell: ({ column, row, value }) =>
-        createRender(EditableCell, {
-          row,
-          column,
-          value,
-          onUpdateValue: (
-            rowDataId: string,
-            columnId: string,
-            newValue: unknown,
-          ) => {
-            console.log(rowDataId, columnId, newValue)
-            const idx = parseInt(rowDataId)
-            const currentItem = $tableRows[idx]
-            const key = columnId // Cast as `keyof YourDataItem`
-            const newItem = { ...currentItem, [key]: newValue }
-            console.log(newItem)
-            $tableRows[idx] = newItem
-            $tableRows = $tableRows
-
-            handleUpdate(newItem, key, idx, currentItem)
-            // Handle any server-synchronization.
-          },
-        }),
-    }),
-    table.column({
-      header: 'CEP',
-      accessor: 'cep',
-      cell: ({ column, row, value }) =>
-        createRender(EditableCell, {
-          row,
-          column,
-          value,
-          onUpdateValue: (
-            rowDataId: string,
-            columnId: string,
-            newValue: unknown,
-          ) => {
-            console.log(rowDataId, columnId, newValue)
-            const idx = parseInt(rowDataId)
-            const currentItem = $tableRows[idx]
-            const key = columnId // Cast as `keyof YourDataItem`
-            const newItem = { ...currentItem, [key]: newValue }
-            console.log(newItem)
-            $tableRows[idx] = newItem
-            $tableRows = $tableRows
-
-            handleUpdate(newItem, key, idx, currentItem)
-            // Handle any server-synchronization.
-          },
-        }),
-    }),
-    // table.column({
-    //   header: 'Criado em',
-    //   accessor: 'created_at',
-      
-    // }),
-  ]}
-/>
+<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+  <section class="container mx-auto px-4 mb-4">
+    <div class="mt-2 flex justify-between items-center ">
+      <h1 class="text-2xl font-semibold">Fornecedores:</h1>
+      <button class="btn btn-primary min-w-96" onclick={add}>Criar fornecedor</button>
+    </div>
+  </section>
+  <Datatable {table}>
+    <!-- {#snippet header()}
+      <Search {table} />
+     
+    {/snippet} -->
+    <table class="table table-zebra">
+      <thead>
+        <tr>
+          <ThSort {table} field="id">ID</ThSort>
+          <ThSort {table} field="name">Nome</ThSort>
+          <Th>Razão social</Th>
+          <Th>CPF/CNPJ</Th>
+          <Th>RG/IE</Th>
+          <Th>Telefone</Th>
+          <Th>CEP</Th>
+        </tr>
+        <tr>
+          <Th />
+          <ThFilter {table} field="name" />
+          <ThFilter {table} field="razao_social" />
+          <Th/>
+          <Th/>
+          <ThFilter {table} field="telephone_1"/>
+          <Th />
+          <Th />
+        </tr>
+      </thead>
+      <tbody>
+        {#each table.rows as row}
+        <tr>
+          <td>{row.id}</td>
+          <td><b>{row.name}</b></td>
+          <td><b>{row.razao_social}</b></td>
+          <td><b>{row.cnpj_cpf}</b></td>
+          <td><b>{row.ie_rg}</b></td>
+          <td><b>{row.telephone_1}</b></td>
+          <td><b>{row.cep}</b></td>
+        </tr>
+        {/each}
+      </tbody>
+    </table>
+      {#if table.rows.length ===0}
+        <NoResults/>
+      {/if}
+    {#snippet footer()}
+      <RowsPerPage {table} />
+      <div></div>
+      <Pagination {table} />
+    {/snippet}
+  </Datatable>
+</main>

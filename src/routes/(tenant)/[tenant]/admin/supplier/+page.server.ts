@@ -16,7 +16,8 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
   const pageSize = Number(searchParams.get('pageSize') ?? 10)
 
   const name = searchParams.get('name')
-  // const email = searchParams.get('email')
+  const razao_social = searchParams.get('razao_social')
+  const telephone_1 = searchParams.get('telephone_1')
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_order')
@@ -25,9 +26,11 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
     .select()
     .from(schema.supplierTable)
     .where(
-
+      and(
         name ? like(schema.supplierTable.name, `${name}%`) : undefined,
-
+        razao_social ? like(schema.supplierTable.razao_social, `${razao_social}%`) : undefined,
+        telephone_1 ? like(schema.supplierTable.telephone_1, `${telephone_1}%`) : undefined,
+      )
     )
     .$dynamic()
 
