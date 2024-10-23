@@ -444,6 +444,7 @@
   import { navigating } from '$app/stores'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import { modal, FormModal } from '$lib/components/modal'
+    import UsedCredits from './UsedCredits.svelte'
   import { page } from '$app/stores'
   import {
     TableHandler,
@@ -460,6 +461,8 @@
   import type { PageData } from './$types'
   import { toast } from 'svelte-sonner'
   import { trpc } from '$trpc/client'
+  import { tr } from 'date-fns/locale'
+  import NoResults from '$lib/components/NoResults.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -533,7 +536,7 @@
   }
 </script>
 
-<main class="container mx-auto h-full">
+<main class="container mx-auto h-full max-h-[calc(100vh-200px)]">
   <section class="container mx-auto px-4 mb-4">
     <div class="mt-2 flex justify-between items-center ">
       <h1 class="text-2xl font-semibold">Clientes:</h1>
@@ -551,8 +554,12 @@
           <ThSort {table} field="id">ID</ThSort>
           <ThSort {table} field="name">Nome</ThSort>
           <ThSort {table} field="email">Email</ThSort>
-          <ThSort {table} field="cpf_cnpj">CPF/CNPJ</ThSort>
+          <Th>CPF/CNPJ</Th>
           <ThSort {table} field="is_retail">Tipo pessoa</ThSort>
+          <Th>RG/IE</Th>
+          <Th>Telefone</Th>
+          <Th>Créditos usados</Th>
+          <ThSort {table} field="max_credit">Máximo de créditos</ThSort>
           <Th>Ver detalhes</Th>
         </tr>
         <tr>
@@ -560,24 +567,35 @@
           <ThFilter {table} field="name" />
           <ThFilter {table} field="email" />
           <ThFilter {table} field="cpf_cnpj" />
-          <ThFilter {table} field="is_retail" />
+          <Th/>
+          <Th/>
+          <ThFilter {table} field="phone"/>
+          <Th/>
+          <Th/>
           <Th/>
         </tr>
       </thead>
       <tbody>
         {#each table.rows as row}
-          <tr>
-            <td>{row.id}</td>
-            <td><b>{row.name}</b></td>
-            <td><b>{row.email}</b></td>
-            <td><b>{row.cpf_cnpj}</b></td>
-            <td><b>{row.is_retail}</b></td>
-            <td><a href="/admin/customer/{row.id}" class="badge badge-primary">Ver detalhes</a></td>
-            <!-- <td><b><SimpleSelect id={row.id} value={row.is_retail}/> TODO</b></td> -->
-          </tr>
+        <tr>
+          <td>{row.id}</td>
+          <td><b>{row.name}</b></td>
+          <td><b>{row.email}</b></td>
+          <td><b>{row.cpf_cnpj}</b></td>
+          <td><b>{row.is_retail}</b></td>
+          <td><b>{row.rg_ie}</b></td>
+          <td><b>{row.phone}</b></td>
+          <td><b><UsedCredits id={row.id}/></b></td>
+          <td><b>R${(row.max_credit/100).toFixed(2)}</b></td>
+          <td><a href="/admin/customer/{row.id}" class="badge badge-primary">Detalhes</a></td>
+          <!-- <td><b><SimpleSelect id={row.id} value={row.is_retail}/> TODO</b></td> -->
+        </tr>
         {/each}
       </tbody>
     </table>
+      {#if table.rows.length ===0}
+        <NoResults/>
+      {/if}
     {#snippet footer()}
       <RowsPerPage {table} />
       <div></div>

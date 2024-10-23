@@ -17,6 +17,8 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
 
   const name = searchParams.get('name')
   const email = searchParams.get('email')
+  const phone = searchParams.get('phone')
+  const cpf_cnpj= searchParams.get('cpf_cnpj')
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_order')
@@ -25,8 +27,12 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
     .select()
     .from(schema.customerTable)
     .where(
-
+      and(
         name ? like(schema.customerTable.name, `${name}%`) : undefined,
+        email ? like (schema.customerTable.email, `${email}%`): undefined,
+        phone ? like (schema.customerTable.phone, `${phone}%`): undefined,
+        cpf_cnpj ? like (schema.customerTable.cpf_cnpj, `${cpf_cnpj}%`): undefined,
+      )
 
     )
     .$dynamic()
