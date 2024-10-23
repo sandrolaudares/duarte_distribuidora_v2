@@ -121,18 +121,6 @@
   count={readable(data.count)}
   {tableRows}
   columns={table => [
-    // table.display({
-    //   id: 'selected',
-    //   header: '',
-    //   cell: ({ row, column }, { pluginStates }) => {
-    //     const { isSomeSubRowsSelected, isSelected } =
-    //       pluginStates.select.getRowState(row)
-    //     return createRender(SelectIndicator, {
-    //       isSelected,
-    //       isSomeSubRowsSelected,
-    //     })
-    //   },
-    // }),
     table.column({
       header: 'ID',
       accessor: 'id',

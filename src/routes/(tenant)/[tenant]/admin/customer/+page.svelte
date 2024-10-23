@@ -183,6 +183,7 @@
   </div>
 </section>
 <SSRTable
+{totalSum}
   count={readable(data.count)}
   {tableRows}
   columns={table => [
