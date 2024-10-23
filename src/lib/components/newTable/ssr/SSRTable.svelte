@@ -36,7 +36,7 @@
   export interface SSRTableProps<Item> {
     tableRows: Writable<Item[]>
     count: Readable<number>
-    totalSum: number
+    totalSum?: number
     columns: (
       table: Table<Item, SSRTablePlugins<Item>>,
     ) => Column<Item, SSRTablePlugins<Item>>[]
@@ -88,6 +88,7 @@
   import { goto } from '$app/navigation'
   import { SSRFilter } from './index.svelte'
   import NoResults from '$lib/components/NoResults.svelte'
+  import { SSRFilters } from '../filters/ssr.svelte'
 
   let {
     tableRows,
@@ -115,39 +116,7 @@
     // grid: addGridLayout(),
   })
 
-  let Filters = $derived($page.url)
-
-  function Filters_get(name: string) {
-    return Filters.searchParams.get(name)
-  }
-
-  function Filters_update(name: string, value: string) {
-    if (typeof window === 'undefined') {
-      return
-    }
-    const url = new URL(Filters)
-    if (value !== '') url.searchParams.set(name, value)
-    else url.searchParams.delete(name)
-
-    goto(url, { keepFocus: true })
-  }
-  function Filters_update_many(params: Record<string, string>) {
-    if (typeof window === 'undefined') {
-      return
-    }
-    const url = new URL(Filters)
-    Object.entries(params).forEach(([name, value]) => {
-      if (!value) {
-        url.searchParams.delete(name)
-      }
-      if (value !== '') url.searchParams.set(name, value)
-      else url.searchParams.delete(name)
-    })
-
-    const searchParams = url.pathname + url.search
-    goto(searchParams, { keepFocus: true })
-  }
-
+  let Filters = new SSRFilters()
   const columns = createColumns(table)
 
   const { headerRows, rows, tableAttrs, tableBodyAttrs, pluginStates } =
@@ -177,9 +146,9 @@
     const [sort] = $sortKeys
 
     if (!sort) {
-      Filters_update_many({ sort_id: '', sort_order: '' })
+      Filters.update({ sort_id: '', sort_order: '' })
     } else {
-      Filters_update_many({ sort_id: sort.id, sort_order: sort.order })
+      Filters.update({ sort_id: sort.id, sort_order: sort.order })
     }
   })
   // $inspect($tableBodyAttrs)
@@ -201,7 +170,9 @@
     {/if}
     <div class="-mx-4 -my-2 overflow-x-scroll sm:-mx-6 lg:-mx-8">
       <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-        <div class="overflow-scroll min-h-[50vh] border border-base-300 md:rounded-lg">
+        <div
+          class="min-h-[50vh] overflow-scroll border border-base-300 md:rounded-lg"
+        >
           <table {...$tableAttrs} class="min-w-full divide-y divide-base-300">
             <thead class="bg-base-200 bg-opacity-60">
               {#each $headerRows as headerRow (headerRow.id)}
@@ -284,7 +255,7 @@
         max={100}
         oninput={e => {
           const value = (e.target as HTMLInputElement).value
-          Filters_update('pageSize', value)
+          Filters.update({ pageSize: value })
         }}
       />
     </div>
@@ -292,7 +263,7 @@
       <button
         class="btn btn-primary"
         onclick={() => {
-          Filters_update('page', $pageIndex.toString())
+          Filters.update({ page: $pageIndex.toString() })
         }}
         disabled={!$hasPreviousPage}
       >
@@ -302,7 +273,7 @@
       <button
         class="btn btn-primary"
         onclick={() => {
-          Filters_update('page', String($pageIndex + 2))
+          Filters.update({ page: String($pageIndex + 2) })
         }}
         disabled={!$hasNextPage}
       >

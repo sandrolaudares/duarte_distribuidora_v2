@@ -23,18 +23,15 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
 
   let query = tenantDb!
     .select()
-    .from(schema.customerTable)
-    .where(
-
-        name ? like(schema.customerTable.name, `${name}%`) : undefined,
-
-    )
+    .from(schema.logsTable)
+    .leftJoin(schema.customerOrderTable,eq(schema.customerOrderTable.id,1))
+    .where(eq(schema.logsTable.type,'CAIXA'))
     .$dynamic()
 
   if (sortId && sortOrder) {
     query = withOrderBy(
       query,
-      getSQLiteColumn(schema.customerTable, sortId),
+      getSQLiteColumn(schema.logsTable, sortId),
       sortOrder,
     )
   }
@@ -42,7 +39,7 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
   try {
     const rows = await withPagination(query, page, pageSize)
 
-    const total = await tenantDb!.select({ count: count() }).from(schema.customerTable)
+    const total = await tenantDb!.select({ count: count() }).from(schema.logsTable)
 
     return { rows: rows ?? [], count: total[0].count }
   } catch (error) {
