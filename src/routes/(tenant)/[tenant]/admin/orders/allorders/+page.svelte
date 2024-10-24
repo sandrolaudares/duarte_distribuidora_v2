@@ -5,7 +5,6 @@
     import DateFilter from './DateFilter.svelte'
   import { page } from '$app/stores'
 
-  import Date from '$lib/components/newTable/Date.svelte'
   import {
     TableHandler,
     Datatable,
@@ -23,6 +22,7 @@
   import { trpc } from '$trpc/client'
   import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
+  import { format } from 'date-fns'
 
   let { data }: { data: PageData } = $props()
 
@@ -80,7 +80,7 @@
             <td><b>{row.name}</b></td>
             <td><b>{row.cashier}</b></td>
             <td><b>{row.observation}</b></td>
-            <td><b><Date date={row.created_at}/></b></td>
+            <td><b>{format(row.created_at,'dd/MM/yyyy')}</b></td>
             <td><b class="text-xl text-success">R${(row.total/100)}</b></td>
 
             <td>

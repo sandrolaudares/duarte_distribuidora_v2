@@ -123,11 +123,11 @@
             address_id: enderecoSelecionado
               ? enderecoSelecionado.id
               : undefined,
-            total: total_pedido,
+            total: total_pedido - taxaEntrega,
             observation: 'Este é um pedido FIADO!',
             motoboy_id: motoboySelecionado?.id,
             type: 'ATACADO',
-            taxa_entrega: isDelivery ? taxaEntrega : undefined,
+            taxa_entrega: isDelivery ? taxaEntrega : 0,
             //TODO: Type
           },
         })

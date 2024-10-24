@@ -128,6 +128,11 @@ export const customerOrderTable = sqliteTable(
     updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
       () => new Date(),
     ),
+    expire_at:integer('expire_at',{mode:'timestamp'}).$defaultFn(() => {
+      const createdAt = new Date();
+      createdAt.setDate(createdAt.getDate() + 7);
+      return createdAt;
+    }),
     is_fiado: integer('is_fiado', { mode: 'boolean' }).notNull(),
 
     customer_id: integer('customer_id').references(() => customerTable.id),

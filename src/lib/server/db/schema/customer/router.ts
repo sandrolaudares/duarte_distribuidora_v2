@@ -200,9 +200,7 @@ export const customer = router({
             status: order_info.motoboy_id ? 'CONFIRMED' : 'DELIVERED',
             is_fiado: true,
             type: order_info.type,
-            total: order_info.motoboy_id
-              ? order_info.total + (order_info.taxa_entrega ?? 0)
-              : order_info.total,
+            total: order_info.total + (order_info.taxa_entrega ?? 0),
             amount_paid: 0,
             motoboy_id: order_info.motoboy_id,
             customer_id: order_info.customer_id,
@@ -311,9 +309,7 @@ export const customer = router({
             type: order_info.type,
             motoboy_id: order_info.motoboy_id,
             status: order_info.motoboy_id ? 'CONFIRMED' : 'DELIVERED',
-            total: order_info.motoboy_id
-              ? order_info.total + (order_info.taxa_entrega ?? 0)
-              : order_info.total,
+            total: order_info.total + (order_info.taxa_entrega ?? 0),
             customer_id: order_info.customer_id,
             address_id: order_info.address_id,
             cachier_id: order_info.cashier_id,
@@ -445,9 +441,7 @@ export const customer = router({
             status: 'CONFIRMED',
             is_fiado: false,
             type: order_info.type,
-            total: order_info.motoboy_id
-              ? order_info.total + (order_info.taxa_entrega ?? 0)
-              : order_info.total,
+            total: order_info.total + (order_info.taxa_entrega ?? 0),
             amount_paid: 0,
             motoboy_id: order_info.motoboy_id,
             customer_id: order_info.customer_id,
