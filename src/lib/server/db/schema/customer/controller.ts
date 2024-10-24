@@ -329,6 +329,7 @@ export const customer = (db: TenantDbType) => ({
         total: customerOrderTable.total,
         status: customerOrderTable.status,
         type: customerOrderTable.type,
+        expire_at: customerOrderTable.expire_at,
 
         //customer:
         name: customerTable.name,

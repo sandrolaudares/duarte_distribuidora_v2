@@ -32,6 +32,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const name = searchParams.get('name')
   const dateStart = searchParams.get('created_at_start')
   const dateEnd = searchParams.get('created_at_end')
+  const expire_at = searchParams.get('expire_at')
   console.log(dateStart, dateEnd)
 
   const sortId = searchParams.get('sort_id')
@@ -46,6 +47,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
       and(
         gt(schema.customerOrderTable.total, schema.customerOrderTable.amount_paid), eq(schema.customerOrderTable.is_fiado, true),
         name ? like(schema.customerTable.name, `${name}%`) : undefined,
+        expire_at ? like(schema.customerOrderTable.expire_at, `${expire_at}%`) : undefined,
         dateStart && dateEnd
           ? and(
               gte(schema.customerOrderTable.created_at, inicioDia),
@@ -87,6 +89,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         and(
           gt(schema.customerOrderTable.total, schema.customerOrderTable.amount_paid), eq(schema.customerOrderTable.is_fiado, true),
           name ? like(schema.customerTable.name, `${name}%`) : undefined,
+          expire_at ? like(schema.customerOrderTable.expire_at, `${expire_at}%`) : undefined,
           dateStart && dateEnd
             ? and(
                 gte(schema.customerOrderTable.created_at, inicioDia),

@@ -101,7 +101,7 @@
   }
 
   function add() {
-    modal.open(FormModal<RouterInputs['stock']['insertSKU']>, {
+    modal.open(FormModal, {
       title: 'Create',
       fields: [
         {

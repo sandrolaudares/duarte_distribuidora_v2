@@ -56,8 +56,8 @@
 
 <div class="date-filter">
   <Datepicker bind:isOpen bind:startDate bind:endDate isRange showPresets>
-    <div class="date-field" on:click={toggleDatePicker} class:open={isOpen}>
-      <i class="icon-calendar" />
+    <span class="date-field" on:click={toggleDatePicker} class:open={isOpen}>
+      <i class="icon-calendar" ></i>
       <div class="date">
         {#if startDate}
           {formattedStartDate} - {formattedEndDate}
@@ -66,11 +66,11 @@
         {/if}
       </div>
       {#if startDate}
-        <span on:click={onClearDates}>
-          <i class="os-icon-x" />
-        </span>
+        <button on:click={onClearDates}>
+          <i class="os-icon-x" ></i>
+        </button>
       {/if}
-    </div>
+      </span>
   </Datepicker>
 </div>
 
