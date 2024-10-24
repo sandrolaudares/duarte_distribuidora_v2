@@ -1,10 +1,10 @@
 import { customer } from '$lib/server/db/controller';
 import type { PageServerLoad } from './$types';
 
-export const load = (async ({params}) => {
+export const load = (async ({params,locals:{tenantDb}}) => {
     const orderID = Number(params.id)
 
-    const order_details = await customer.getOrderByID(orderID)
+    const order_details = await customer(tenantDb!).getOrderByID(orderID)
 
     if (!order_details) {
         return {

@@ -1,43 +1,61 @@
 <script lang="ts">
-  import { DatePicker } from '@svelte-plugins/datepicker'
+  import Datepicker from '$lib/components/input/date/datepicker.svelte'
+
+  // import { DatePicker } from '@svelte-plugins/datepicker'
+  import type { TableHandler } from '@vincjo/datatables/server'
   import { format } from 'date-fns'
 
   const today = new Date()
 
-  export let onchange:
-    | undefined
-    | ((dateStart: Date | string, dateEnd: Date | string) => void) = undefined
+  interface Props {
+    table: TableHandler
+    field: string
+  }
 
-  let startDate: Date | string = today
-  let endDate: Date | string = today
+  let { table, field }: Props = $props()
+
+  const filterStart = table.createFilter(field + '_start')
+  const filterEnd = table.createFilter(field + '_end')
+  // export let onchange:
+  //   | undefined
+  //   | ((dateStart: Date | string, dateEnd: Date | string) => void) = undefined
+
+  let startDate: Date = $state(today)
+  let endDate: Date = $state(today)
   let dateFormat = 'dd/MM/yyyy'
-  let isOpen = false
+  let isOpen = $state(false)
 
-  let formattedStartDate = ''
+  // let formattedStartDate = $state('')
 
   const onClearDates = () => {
-    startDate = 'string'
-    endDate = 'string'
+    startDate = today
+    endDate = today
   }
 
   const toggleDatePicker = () => (isOpen = !isOpen)
   const formatDate = (date: Date | string) =>
     (date && format(new Date(date), dateFormat)) || ''
 
-  $: formattedStartDate = formatDate(startDate)
-  $: formattedEndDate = formatDate(endDate)
+  $effect(() => {
+    filterStart.value = startDate.toString()
+    filterEnd.value = endDate.toString()
+    // filterStart.set()
+    // filterEnd.set()
 
-  $: {
-    console.log('Raw dateStart:', startDate)
-    console.log('Raw endDate:', endDate)
-    console.log('Formatted start date:', formattedStartDate)
-    console.log('Formatted end date:', formattedEndDate)
-    onchange?.(startDate, endDate)
-  }
+    console.log('Raw:', startDate)
+    console.log('Raw:', endDate)
+    console.log('Formatted:', formattedStartDate)
+    console.log('Formatted:', formattedEndDate)
+    console.log(filterStart)
+    console.log(filterEnd)
+  })
+
+  let formattedStartDate = $derived(formatDate(startDate))
+  let formattedEndDate = $derived(formatDate(endDate))
 </script>
 
 <div class="date-filter">
-  <DatePicker bind:isOpen bind:startDate bind:endDate isRange showPresets>
+  <Datepicker bind:isOpen bind:startDate bind:endDate isRange showPresets>
     <div class="date-field" on:click={toggleDatePicker} class:open={isOpen}>
       <i class="icon-calendar" />
       <div class="date">
@@ -53,7 +71,7 @@
         </span>
       {/if}
     </div>
-  </DatePicker>
+  </Datepicker>
 </div>
 
 <style>
@@ -69,7 +87,7 @@
   }
 
   .date-field.open {
-    border-bottom: 1px solid #0087ff;
+    border-bottom: 1px solid oklch(var(--p));
     z-index: 9999;
   }
 

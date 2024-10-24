@@ -1,214 +1,104 @@
 <script lang="ts">
+  import { navigating } from '$app/stores'
+  import { SSRFilters } from '$lib/components/datatable/filter.svelte'
+  import { modal, FormModal } from '$lib/components/modal'
+    import DateFilter from './DateFilter.svelte'
+  import { page } from '$app/stores'
+
+  import Date from '$lib/components/newTable/Date.svelte'
+  import {
+    TableHandler,
+    Datatable,
+    ThSort,
+    ThFilter,
+    Pagination,
+    RowsPerPage,
+    Th,
+    Search,
+    type State,
+  } from '@vincjo/datatables/server'
+
   import type { PageData } from './$types'
+  import { toast } from 'svelte-sonner'
+  import { trpc } from '$trpc/client'
+  import { tr } from 'date-fns/locale'
+  import NoResults from '$lib/components/NoResults.svelte'
 
   let { data }: { data: PageData } = $props()
 
-  import {
-    createTable,
-    Subscribe,
-    Render,
-    createRender,
-    type DataLabel,
-    type Column,
-    type Table,
-  } from '@andre-brandao/svelte-headless-table'
-  import {
-    addSortBy,
-    addColumnOrder,
-    addColumnFilters,
-    addSelectedRows,
-    addResizedColumns,
-    addGridLayout,
-    addPagination,
-  } from '@andre-brandao/svelte-headless-table/plugins'
-  import {
-    readable,
-    writable,
-    type Writable,
-    type Readable,
-  } from 'svelte/store'
-  import TextFilter from '$lib/components/newTable/filters/TextFilter.svelte'
-  import { page } from '$app/stores'
+  const filters = new SSRFilters()
 
-  import SelectIndicator from '$lib/components/newTable/edit/SelectIndicator.svelte'
-  import EditableCell from '$lib/components/newTable/edit/EditableCell.svelte'
-  import { goto } from '$app/navigation'
-  // import type { SelectUser } from '$drizzle/schema'
-  import { onDestroy, onMount } from 'svelte'
-  import {
-    SSRTable,
-    SSRFilter,
-    type SSRTableProps,
-  } from '$lib/components/newTable/ssr/index.svelte'
-  import { debounce } from '$lib/utils'
-
-  import EditableCurrency from '$lib/components/newTable/edit/EditableCurrency.svelte'
-  import GoToDetails from '$lib/components/newTable/goToDetails.svelte'
-  import { toast } from 'svelte-sonner'
-  import { trpc } from '$trpc/client'
-  import { modal, FormModal } from '$lib/components/modal'
-  import type { RouterInputs } from '$trpc/router'
-  import { invalidate } from '$app/navigation'
-  import ShowNull from '$lib/components/newTable/ShowNull.svelte'
-  import Currency from '$lib/components/newTable/Currency.svelte'
-  import DateFilter from './DateFilter.svelte'
-  import Date from '$lib/components/newTable/Date.svelte'
-
-  const usernameFilter = debounce(SSRFilter.update_many, 500)
-  const emailFilter = debounce(SSRFilter.update_many, 500)
-  console.log(data)
-
-  const tableRows = writable(data.rows ?? [])
-
-  $effect(() => {
-    console.log('data.rows', data.rows)
-
-    tableRows.set(data.rows)
+  const table = new TableHandler(data.rows, {
+    rowsPerPage: 10,
+    totalRows: data.count,
   })
 
-  let Filters = $derived($page.url)
-
-  function Filters_get(name: string) {
-    return Filters.searchParams.get(name)
-  }
-
-  function Filters_update(name: string, value: string) {
-    if(typeof window=== 'undefined'){
-      return
-    }
-    const url = new URL(Filters)
-    if (value !== '') url.searchParams.set(name, value)
-    else url.searchParams.delete(name)
-
-    goto(url, { keepFocus: true })
-  }
-
-  function Filters_clear(...params: string[]) {
-    if(typeof window=== 'undefined'){
-      return
-    }
-    const url = new URL(Filters)
-    params.forEach(p => url.searchParams.delete(p))
-    goto(url, { keepFocus: true })
-  }
-
-  function Filters_isFiltered(...params: string[]) {
-    return params.length > 0 && params.some(p => Filters.searchParams.has(p))
-  }
-
-  function Filters_update_many(params: Record<string, string>) {
-    if(typeof window=== 'undefined'){
-      return
-    }
-    const url = new URL(Filters)
-    Object.entries(params).forEach(([name, value]) => {
-      if (!value) {
-        url.searchParams.delete(name)
-      }
-      if (value !== '') url.searchParams.set(name, value)
-      else url.searchParams.delete(name)
-    })
-
-    const searchParams = url.pathname + url.search
-    goto(searchParams, { keepFocus: true })
-  }
+  table.setPage(Number(filters.get('page')) || 1)
+  table.load(async s => {
+    console.log(s)
+    filters.fromState(s)
+    await $navigating?.complete
+    return data.rows
+  })
 </script>
-<SSRTable
-  count={readable(data.count)}
-  {tableRows}
-  totalSum={data.totalSum}
-  columns={table => [
-    table.column({
-      header: 'ID',
-      accessor: 'id',
-    }),
-    table.column({
-      header: 'Cliente',
-      accessor: 'name',
-      cell: ({ column, row, value }) =>
-        createRender(ShowNull, {
-          value,
-        }),
-      plugins: {
-        sort: {
-          invert: false,
-          // disable: true,
-        },
-        filter: {
-          initialFilterValue: '',
-          render: ({ filterValue, values, preFilteredValues }) =>
-            createRender(TextFilter, {
-              filterValue,
-              values,
-              preFilteredValues,
-              change: value => {
-                console.log('change username', value)
 
-                Filters_update_many({
-                  name: value,
-                  page: '1',
-                })
-              },
-            }),
-        },
-      },
-    }),
-    table.column({
-      header: 'Tipo',
-      accessor: 'type',
-    }),
-    table.column({
-      header: 'Caixa',
-      accessor: 'cashier',
-      cell: ({ column, row, value }) =>
-        createRender(ShowNull, {
-          value,
-        }),
-    }),
-    table.column({
-      header: 'Observações',
-      accessor: 'observation',
-    }),
-    table.column({
-      header: 'Data',
-      accessor: 'created_at',
-      cell: ({ column, row, value }) =>
-        createRender(Date, {
-          date:value,
-        }),
-      plugins: {
-        sort: {
-          invert: false,
-          // disable: true,
-        },
-        filter: {
-          initialFilterValue: '',
-          render: ({ filterValue, values, preFilteredValues }) =>
-            createRender(DateFilter, {
-              onchange: (start, end) => {
-                console.log('onchange called with:', start, end)
-                Filters_update_many({ start, end, page: '1' })
-              },
-            }),
-        },
-      },
-    }),
-    table.column({
-      header: 'Total',
-      accessor: 'total',
-      cell: ({ column, row, value }) =>
-        createRender(Currency, {
-          value,
-        }),
-    }),
-    table.column({
-      header: 'Ver detalhes do pedido',
-      accessor: item => item,
-      cell: ({ value }) =>
-        createRender(GoToDetails, {
-          value: `/admin/orders/${value.id}`,
-          text: 'Ir para detalhes',
-        }),
-    }),
-  ]}
-/>
+<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+  <Datatable {table}>
+    <!-- {#snippet header()}
+      <Search {table} />
+     
+    {/snippet} -->
+    <table class="table table-zebra">
+      <thead>
+        <tr>
+          <ThSort {table} field="id">ID</ThSort>
+          <Th>Cliente</Th>
+          <Th>Caixa</Th>
+          <Th>Observações</Th>
+          <Th>
+            <DateFilter {table} field='created_at'/>
+          </Th>
+          <ThSort {table} field="total">Valor do pedido</ThSort>
+
+          <Th>Ver detalhes</Th>
+        </tr>
+        <tr>
+          <Th />
+          <ThFilter {table} field="name" />
+          <ThFilter {table} field="cashier" />
+          <Th />
+          <Th />
+          <Th />
+
+          <Th />
+        </tr>
+      </thead>
+      <tbody>
+        {#each table.rows as row}
+          <tr>
+            <td>{row.id}</td>
+            <td><b>{row.name}</b></td>
+            <td><b>{row.cashier}</b></td>
+            <td><b>{row.observation}</b></td>
+            <td><b><Date date={row.created_at}/></b></td>
+            <td><b class="text-xl text-success">R${(row.total/100)}</b></td>
+
+            <td>
+              <a href="/admin/orders/{row.id}" class="badge badge-primary">
+                Detalhes
+              </a>
+            </td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+    {#if table.rows.length === 0}
+      <NoResults />
+    {/if}
+    {#snippet footer()}
+      <RowsPerPage {table} />
+      <div></div>
+      <Pagination {table} />
+    {/snippet}
+  </Datatable>
+</main>

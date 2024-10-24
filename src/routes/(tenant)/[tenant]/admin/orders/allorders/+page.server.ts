@@ -8,7 +8,6 @@ import {
   getSQLiteColumn,
   getOrderBy,
 } from '$lib/server/db/utils'
-import { db } from '$lib/server/db'
 import {
   and,
   eq,
@@ -25,25 +24,24 @@ import {
 import { customer } from '$lib/server/db/controller'
 import { gte } from 'drizzle-orm'
 
-export const load = (async ({ url }) => {
+export const load = (async ({ url, locals: { tenantDb } }) => {
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
   const pageSize = Number(searchParams.get('pageSize') ?? 15)
 
   const name = searchParams.get('name')
-  const dateStart = searchParams.get('start')
-  const dateEnd = searchParams.get('end')
+  const dateStart = searchParams.get('created_at_start')
+  const dateEnd = searchParams.get('created_at_end')
+  console.log(dateStart, dateEnd)
+  const cashier = searchParams.get('cashier')
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_order')
 
   const inicioDia = new Date(Number(dateStart))
-  inicioDia.setHours(0, 0, 0, 0)
 
   const fimDia = new Date(Number(dateEnd))
-  fimDia.setHours(23, 59, 59, 999)
-
-  let query = customer
+  let query = customer(tenantDb!)
     .getAllOrderInfo()
     .where(
       and(
@@ -51,10 +49,11 @@ export const load = (async ({ url }) => {
 
         dateStart && dateEnd
           ? and(
-            gte(schema.customerOrderTable.created_at, inicioDia),
-            lte(schema.customerOrderTable.created_at, fimDia),
+              gte(schema.customerOrderTable.created_at, inicioDia),
+              lte(schema.customerOrderTable.created_at, fimDia),
             )
           : undefined,
+        cashier ? like(schema.cashierTable.name, `${cashier}%`) : undefined,
       ),
     )
     .$dynamic()
@@ -72,11 +71,11 @@ export const load = (async ({ url }) => {
   try {
     const rows = await withPagination(query, page, pageSize)
 
-    const total = await db
+    const total = await tenantDb!
       .select({ count: count() })
       .from(schema.customerOrderTable)
 
-    const totalSumResult = await db
+    const totalSumResult = await tenantDb!
       .select({
         totalSum: sql<number>`SUM(${schema.customerOrderTable.total})`,
       })
@@ -90,8 +89,8 @@ export const load = (async ({ url }) => {
           name ? like(schema.customerTable.name, `${name}%`) : undefined,
           dateStart && dateEnd
             ? and(
-              gte(schema.customerOrderTable.created_at, inicioDia),
-              lte(schema.customerOrderTable.created_at, fimDia),
+                gte(schema.customerOrderTable.created_at, inicioDia),
+                lte(schema.customerOrderTable.created_at, fimDia),
               )
             : undefined,
         ),
