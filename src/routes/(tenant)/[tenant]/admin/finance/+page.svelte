@@ -111,16 +111,16 @@
       </thead>
       <tbody>
         {#each filteredPedidos as fiado}
-          <tr class={fiado.created_at ? getBgColor(fiado.created_at) : ''}>
+          <tr class={fiado.created_at ? getBgColor(fiado.created_at.toString()) : ''}>
             <td>{fiado.id}</td>
             <td>{formatarData(fiado.created_at) ?? 'Data não disponível'}</td>
             <td>
-              {fiado.created_at ? getExpirationDate(fiado.created_at) : 'N/A'}
+              {fiado.created_at ? getExpirationDate(fiado.created_at.toString()) : 'N/A'}
             </td>
             <td>{fiado.status}</td>
             <td>
-              {#if fiado.created_at && getDaysToExpiry(fiado.created_at) >= 0}
-                {getDaysToExpiry(fiado.created_at)} dias
+              {#if fiado.created_at && getDaysToExpiry(fiado.created_at.toString()) >= 0}
+                {getDaysToExpiry(fiado.created_at.toString())} dias
               {:else}
                 Expirado
               {/if}
