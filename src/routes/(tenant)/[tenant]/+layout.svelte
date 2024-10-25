@@ -24,9 +24,7 @@
   // $: user.set(data.user)
   const cart = createCartContext()
 
-  onMount(() => {
-    changeTheme('bumblebee')
-  })
+
 </script>
 
   {#if $navigating}

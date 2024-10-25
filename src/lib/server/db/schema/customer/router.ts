@@ -170,22 +170,8 @@ export const customer = router({
           tenantDb,
         ).getCustomerUsedCredit(order_info.customer_id)
 
-        let credit = 0
+        const credit = used_credit?.used_credit ?? 0
 
-        if (typeof used_credit !== 'number') {
-          const [{ count }] = await customerController(
-            tenantDb,
-          ).countFiadoTransactions(order_info.customer_id)
-          // if (count !== 0) {
-          //   throw new TRPCError({
-          //     code: 'BAD_REQUEST',
-          //     message: 'Cliente não possui crédito',
-          //   })
-          // }
-          //TODO:TA DANDO ERRO QUANDO FAZ PEDIDO FIADO
-        } else {
-          credit = used_credit
-        }
 
         if (customer?.max_credit < credit + order_info.total) {
           throw new TRPCError({

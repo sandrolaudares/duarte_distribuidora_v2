@@ -57,7 +57,7 @@ export const customer = (db: TenantDbType) => ({
   getCustomerUsedCredit: async (id: SelectCustomer['id']) => {
     return db
       .select({
-        used_credit: sql<number>`SUM(${customerOrderTable.total} - ${customerOrderTable.amount_paid}) as integer`,
+        used_credit: sql<number>`CAST(SUM(${customerOrderTable.total} - ${customerOrderTable.amount_paid}) as integer)`,
       })
       .from(customerOrderTable)
       .where(

@@ -57,7 +57,7 @@
       <div class="hidden flex-none lg:block">
         <ul class="menu menu-horizontal space-x-1">
           <!-- Navbar top menu content here -->
-          {#key $user?.meta}
+          {#key $user}
             <NavItems />
           {/key}
         </ul>
@@ -103,7 +103,7 @@
     ></label>
     <ul class="menu min-h-full w-80 bg-base-200 p-4">
       <!-- Sidebar content here -->
-      {#key $user?.meta}
+      {#key $user}
         <NavItems />
       {/key}
     </ul>

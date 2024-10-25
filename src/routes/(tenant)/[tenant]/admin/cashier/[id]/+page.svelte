@@ -223,9 +223,6 @@
     })
   }
 
-  onDestroy(() => {
-    cart.set({})
-  })
 </script>
 
 <div class="m-4 flex justify-center gap-3">
