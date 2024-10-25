@@ -2,7 +2,7 @@
   import { navigating } from '$app/stores'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import { modal, FormModal } from '$lib/components/modal'
-    import DateFilter from './DateFilter.svelte'
+  import DateFilter from './DateFilter.svelte'
   import { page } from '$app/stores'
 
   import {
@@ -23,6 +23,7 @@
   import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
   import { format } from 'date-fns'
+  import { goto } from '$app/navigation';
 
   let { data }: { data: PageData } = $props()
 
@@ -40,14 +41,16 @@
     await $navigating?.complete
     return data.rows
   })
+
 </script>
 
 <main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
-  <Datatable {table}>
+  <Datatable {table} >
     <!-- {#snippet header()}
       <Search {table} />
      
     {/snippet} -->
+    <!-- svelte-ignore component_name_lowercase -->
     <table class="table table-zebra">
       <thead>
         <tr>
@@ -55,9 +58,9 @@
           <Th>Cliente</Th>
           <Th>Caixa</Th>
           <Th>Observações</Th>
-          <Th>
-            <DateFilter {table} field='created_at'/>
-          </Th>
+          <ThSort {table} field="created_at">
+            Data do pedido
+          </ThSort>
           <ThSort {table} field="total">Valor do pedido</ThSort>
 
           <Th>Ver detalhes</Th>
@@ -67,14 +70,20 @@
           <ThFilter {table} field="name" />
           <ThFilter {table} field="cashier" />
           <Th />
-          <Th />
+          <Th>
+          <DateFilter onchange={(start,end)=>{
+            let startDate= start.toString()
+            let endDate = end.toString()
+            filters.update({startDate,endDate})
+            }}/>
+          </Th>
           <Th />
 
           <Th />
         </tr>
       </thead>
       <tbody>
-        {#each table.rows as row}
+        {#each data.rows as row}
           <tr>
             <td>{row.id}</td>
             <td><b>{row.name}</b></td>
@@ -90,9 +99,22 @@
             </td>
           </tr>
         {/each}
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="text-xl font-bold">
+            Total: <span class="text-secondary">
+              R${(data.totalSum / 100).toFixed(2)}
+            </span>
+          </td>
+          <td></td>
+        </tr>
       </tbody>
     </table>
-    {#if table.rows.length === 0}
+    {#if data.rows.length === 0}
       <NoResults />
     {/if}
     {#snippet footer()}

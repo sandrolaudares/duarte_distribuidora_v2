@@ -1,63 +1,52 @@
 <script lang="ts">
+  import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import Datepicker from '$lib/components/input/date/datepicker.svelte'
-
-  // import { DatePicker } from '@svelte-plugins/datepicker'
-  import type { TableHandler } from '@vincjo/datatables/server'
   import { format } from 'date-fns'
 
   const today = new Date()
+  const filters = new SSRFilters()
 
-  interface Props {
-    table: TableHandler
-    field: string
-  }
+  export let onchange:
+    | undefined
+    | ((dateStart: number, dateEnd: number) => void) = undefined
 
-  let { table, field }: Props = $props()
-
-  const filterStart = table.createFilter(field + '_start')
-  const filterEnd = table.createFilter(field + '_end')
-  // export let onchange:
-  //   | undefined
-  //   | ((dateStart: Date | string, dateEnd: Date | string) => void) = undefined
-
-  let startDate: Date = $state(today)
-  let endDate: Date = $state(today)
+  let startDate: Date  = today
+  let endDate: Date  = today
   let dateFormat = 'dd/MM/yyyy'
-  let isOpen = $state(false)
+  let isOpen = false
 
-  // let formattedStartDate = $state('')
+  let formattedStartDate = ''
 
   const onClearDates = () => {
     startDate = today
     endDate = today
+    onchange?.(start, end);
   }
 
   const toggleDatePicker = () => (isOpen = !isOpen)
-  const formatDate = (date: Date | string) =>
+  const formatDate = (date: Date) =>
     (date && format(new Date(date), dateFormat)) || ''
 
-  $effect(() => {
-    filterStart.value = startDate.toString()
-    filterEnd.value = endDate.toString()
-    // filterStart.set()
-    // filterEnd.set()
+  $: formattedStartDate = formatDate(startDate)
+  $: formattedEndDate = formatDate(endDate)
 
-    console.log('Raw:', startDate)
-    console.log('Raw:', endDate)
-    console.log('Formatted:', formattedStartDate)
-    console.log('Formatted:', formattedEndDate)
-    console.log(filterStart)
-    console.log(filterEnd)
-  })
+  $: start = new Date(startDate).setHours(0, 0, 0, 0)
+  $: end = new Date(endDate).setHours(23, 59, 59, 999)
 
-  let formattedStartDate = $derived(formatDate(startDate))
-  let formattedEndDate = $derived(formatDate(endDate))
+
+  $: {
+    if(endDate != null){
+      onchange?.(start, end)
+    }
+  }
 </script>
 
 <div class="date-filter">
-  <Datepicker bind:isOpen bind:startDate bind:endDate isRange showPresets>
-    <span class="date-field" on:click={toggleDatePicker} class:open={isOpen}>
-      <i class="icon-calendar" ></i>
+  <Datepicker bind:isOpen bind:startDate bind:endDate isRange showPresets >
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="date-field" on:click={toggleDatePicker} class:open={isOpen}>
+      <i class="icon-calendar" />
       <div class="date">
         {#if startDate}
           {formattedStartDate} - {formattedEndDate}
@@ -66,11 +55,11 @@
         {/if}
       </div>
       {#if startDate}
-        <button on:click={onClearDates}>
-          <i class="os-icon-x" ></i>
-        </button>
+        <span on:click={onClearDates}>
+          <i class="os-icon-x" />
+        </span>
       {/if}
-      </span>
+    </div>
   </Datepicker>
 </div>
 
@@ -87,7 +76,7 @@
   }
 
   .date-field.open {
-    border-bottom: 1px solid oklch(var(--p));
+    border-bottom: 1px solid #0087ff;
     z-index: 9999;
   }
 
