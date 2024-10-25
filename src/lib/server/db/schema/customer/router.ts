@@ -653,13 +653,7 @@ export const customer = router({
     )
     .mutation(async ({ input }) => {
       const location = await geocodeAddress(
-        input.street +
-          input.number +
-          input.city +
-          input.bairro +
-          input.state +
-          input.cep +
-          input.country,
+        `${input.street}, ${input.number}, ${input.city}, ${input.bairro}, ${input.state}, ${input.cep}, ${input.country}`
       )
 
       if (!location) {
@@ -671,7 +665,7 @@ export const customer = router({
 
       const customerPosition = {
         lat: location.lat,
-        lon: location.lng,
+        lon: location.lon,
       }
 
       const distribuidoraLat = parseFloat(env.DISTRIBUIDORA_LAT || '0')

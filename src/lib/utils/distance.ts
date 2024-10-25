@@ -1,19 +1,15 @@
-import { GOOGLE_MAPS_KEY } from '$env/static/private'
-import { Client } from '@googlemaps/google-maps-services-js'
-
-const maps_client = new Client({})
-
 export async function geocodeAddress(address: string) {
   console.log('Geocodificando' + address)
   try {
-    const result = await maps_client.geocode({
-      params: {
-        address: address,
-        key: GOOGLE_MAPS_KEY,
-      },
-    })
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURI(address)}&format=json&addressdetails=1`)
+    const result = await response.json()
 
-    const location = result.data.results[0]?.geometry.location
+    console.log('RESULT: ',result)
+    
+    const location = {
+      lat: result[0].lat,
+      lon: result[0].lon,
+    }
     return location
   } catch (e) {
     console.error(e)
