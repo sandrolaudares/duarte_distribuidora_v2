@@ -68,7 +68,9 @@
   }
 </script>
 
-<h1 class="my-5 text-center text-2xl font-medium">Pedidos com pagamento pendente:</h1>
+<h1 class="my-5 text-center text-2xl font-medium">
+  Pedidos com pagamento pendente:
+</h1>
 <main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
   <Datatable {table} headless>
     <!-- {#snippet header()}
@@ -82,8 +84,8 @@
         <tr>
           <ThSort {table} field="id">ID</ThSort>
           <Th>Data do pedido</Th>
-          <Th>Data de vencimento</Th>
-          <ThSort {table} field="expire_at">Dias para vencimento</ThSort>
+          <ThSort {table} field="expire_at">Data de vencimento</ThSort>
+          <Th>Dias para vencimento</Th>
           <Th>Status do pedido</Th>
           <Th>Cliente</Th>
           <ThSort {table} field="total">Valor do pedido</ThSort>
@@ -95,9 +97,11 @@
           <Th>
             <DateFilter
               onchange={(start, end) => {
-                let startDate = start.toString()
-                let endDate = end.toString()
-                filters.update({ startDate, endDate })
+                if (start != null && end != null) {
+                  let startDate = start.toString()
+                  let endDate = end.toString()
+                  filters.update({ startDate, endDate })
+                }
               }}
             />
           </Th>

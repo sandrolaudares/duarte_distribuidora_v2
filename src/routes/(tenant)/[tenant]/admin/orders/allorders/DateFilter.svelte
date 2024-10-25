@@ -8,18 +8,18 @@
 
   export let onchange:
     | undefined
-    | ((dateStart: number, dateEnd: number) => void) = undefined
+    | ((dateStart: number | null, dateEnd: number | null) => void) = undefined
 
-  let startDate: Date  = today
-  let endDate: Date  = today
+  let startDate: Date | null  = null
+  let endDate: Date |null  = null
   let dateFormat = 'dd/MM/yyyy'
   let isOpen = false
 
   let formattedStartDate = ''
 
   const onClearDates = () => {
-    startDate = today
-    endDate = today
+    startDate = null
+    endDate = null
     onchange?.(start, end);
   }
 
@@ -27,15 +27,14 @@
   const formatDate = (date: Date) =>
     (date && format(new Date(date), dateFormat)) || ''
 
-  $: formattedStartDate = formatDate(startDate)
-  $: formattedEndDate = formatDate(endDate)
+  $: formattedStartDate = startDate ? formatDate(startDate) : '';
+  $: formattedEndDate = endDate ? formatDate(endDate) : '';
 
-  $: start = new Date(startDate).setHours(0, 0, 0, 0)
-  $: end = new Date(endDate).setHours(23, 59, 59, 999)
-
+  $: start = startDate ? new Date(startDate).setHours(0, 0, 0, 0) : null;
+  $: end = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : null;
 
   $: {
-    if(endDate != null){
+    if(endDate != null && startDate !=null){
       onchange?.(start, end)
     }
   }
@@ -51,7 +50,7 @@
         {#if startDate}
           {formattedStartDate} - {formattedEndDate}
         {:else}
-          Pick a date
+          Escolha uma data
         {/if}
       </div>
       {#if startDate}
@@ -76,7 +75,7 @@
   }
 
   .date-field.open {
-    border-bottom: 1px solid #0087ff;
+    border-bottom: 1px solid oklch(var(--p));
     z-index: 9999;
   }
 
