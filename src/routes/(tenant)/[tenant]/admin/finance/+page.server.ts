@@ -27,31 +27,29 @@ import { gte } from 'drizzle-orm'
 export const load = (async ({ url, locals: { tenantDb } }) => {
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
-  const pageSize = Number(searchParams.get('pageSize') ?? 15)
+  const pageSize = Number(searchParams.get('pageSize') ?? 10)
 
   const name = searchParams.get('name')
-  const dateStart = searchParams.get('created_at_start')
-  const dateEnd = searchParams.get('created_at_end')
   const expire_at = searchParams.get('expire_at')
-  console.log(dateStart, dateEnd)
-
+  
+  
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_order')
+  
+  const dateStart = searchParams.get('startDate')
+  const dateEnd = searchParams.get('endDate')
 
-  const inicioDia = new Date(Number(dateStart))
-
-  const fimDia = new Date(Number(dateEnd))
   let query = customer(tenantDb!)
     .getAllOrderInfo()
     .where(
       and(
         gt(schema.customerOrderTable.total, schema.customerOrderTable.amount_paid), eq(schema.customerOrderTable.is_fiado, true),
         name ? like(schema.customerTable.name, `${name}%`) : undefined,
-        expire_at ? like(schema.customerOrderTable.expire_at, `${expire_at}%`) : undefined,
+        
         dateStart && dateEnd
           ? and(
-              gte(schema.customerOrderTable.created_at, inicioDia),
-              lte(schema.customerOrderTable.created_at, fimDia),
+              gte(schema.customerOrderTable.created_at, new Date(Number(dateStart))),
+              lte(schema.customerOrderTable.created_at, new Date(Number(dateEnd))),
             )
           : undefined,
        
@@ -89,11 +87,10 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         and(
           gt(schema.customerOrderTable.total, schema.customerOrderTable.amount_paid), eq(schema.customerOrderTable.is_fiado, true),
           name ? like(schema.customerTable.name, `${name}%`) : undefined,
-          expire_at ? like(schema.customerOrderTable.expire_at, `${expire_at}%`) : undefined,
           dateStart && dateEnd
             ? and(
-                gte(schema.customerOrderTable.created_at, inicioDia),
-                lte(schema.customerOrderTable.created_at, fimDia),
+              gte(schema.customerOrderTable.created_at, new Date(Number(dateStart))),
+              lte(schema.customerOrderTable.created_at, new Date(Number(dateEnd))),
               )
             : undefined,
            

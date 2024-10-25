@@ -44,14 +44,15 @@
 
 </script>
 
+<h1 class="my-5 text-center text-2xl font-medium">Todos os pedidos:</h1>
 <main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
-  <Datatable {table} >
+  <Datatable {table} headless>
     <!-- {#snippet header()}
       <Search {table} />
      
     {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table table-zebra">
+    <table class="table table-zebra border">
       <thead>
         <tr>
           <ThSort {table} field="id">ID</ThSort>

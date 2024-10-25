@@ -1,148 +1,173 @@
 <script lang="ts">
+  import { navigating } from '$app/stores'
+  import { SSRFilters } from '$lib/components/datatable/filter.svelte'
+  import { modal, FormModal } from '$lib/components/modal'
+  import { page } from '$app/stores'
+  import {
+    TableHandler,
+    Datatable,
+    ThSort,
+    ThFilter,
+    Pagination,
+    RowsPerPage,
+    Th,
+    Search,
+    type State,
+  } from '@vincjo/datatables/server'
+
+  import type { PageData } from './$types'
   import { toast } from 'svelte-sonner'
   import { trpc } from '$trpc/client'
-  import type { PageData } from './$types'
-  import { page } from '$app/stores'
+  import { tr } from 'date-fns/locale'
+  import NoResults from '$lib/components/NoResults.svelte'
+  import DateFilter from '../orders/allorders/DateFilter.svelte'
+  import { format } from 'date-fns'
 
-  export let data: PageData
+  let { data }: { data: PageData } = $props()
 
-  let pedidos_fiados = data.pending_orders
-  let filteredPedidos = pedidos_fiados
+  const filters = new SSRFilters()
 
-  let searchTerm = ''
+  const table = new TableHandler(data.rows, {
+    rowsPerPage: 10,
+    totalRows: data.count,
+  })
 
-  const searchFiado = () => {
-    return (filteredPedidos = pedidos_fiados.filter(pedido => {
-      let customerName = pedido.customer?.name.toLowerCase()
-      return customerName?.includes(searchTerm.toLowerCase())
-    }))
-  }
+  table.setPage(Number(filters.get('page')) || 1)
+  table.load(async s => {
+    console.log(s)
+    filters.fromState(s)
+    await $navigating?.complete
+    return data.rows
+  })
 
-  function calculateDaysDiff(createdAt: string): number {
-    const createdDate = new Date(createdAt)
+  function differenceInDays(expireAt: Date): number {
     const today = new Date()
-    const diffTime = today.getTime() - createdDate.getTime()
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24))
+    const expirationDate = new Date(expireAt)
+
+    today.setHours(0, 0, 0, 0)
+    expirationDate.setHours(0, 0, 0, 0)
+
+    const timeDifference = expirationDate.getTime() - today.getTime()
+    const dayDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24))
+
+    return dayDifference
   }
 
-  function getExpirationDate(createdAt: string): string {
-    const createdDate = new Date(createdAt)
-    const expirationDate = new Date(createdDate)
-    expirationDate.setDate(createdDate.getDate() + 7)
-    return expirationDate.toLocaleDateString()
-  }
+  function getBgColor(expireAt: Date) {
+    const daysDiff = differenceInDays(expireAt)
+    console.log(daysDiff)
 
-  function getDaysToExpiry(createdAt: string): number {
-    const createdDate = new Date(createdAt)
-    const expirationDate = new Date(createdDate)
-    expirationDate.setDate(createdDate.getDate() + 6)
-    const today = new Date()
-    const diffTime = expirationDate.getTime() - today.getTime()
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  }
-
-  function getBgColor(createdAt: string): string {
-    const daysDiff = calculateDaysDiff(createdAt)
-
-    if (daysDiff >= 7) {
-      return 'bg-error text-error-content'
-    } else if (daysDiff >= 5) {
-      return 'bg-warning text-warning-content'
-    } else {
+    if (daysDiff < 0) {
+      return 'bg-error text-error-content bg-opacity-50'
+    } else if (daysDiff <= 4) {
+      return 'bg-warning text-warning-content bg-opacity-50'
+    } else if (daysDiff <= 7) {
       return 'table-zebra'
     }
+    return 'table-zebra'
   }
-
-  function formatarData(data: any) {
-    const date = new Date(data)
-    return new Intl.DateTimeFormat('pt-BR').format(date)
-  }
-
-
 </script>
 
-<h1 class="my-3 text-center text-3xl">Pedidos com pagamento pendente:</h1>
-
-<div class="mx-3 mb-3 flex justify-end gap-2">
-  <label class="input input-bordered flex items-center gap-2">
-    <input
-      type="text"
-      class="grow"
-      placeholder="Procurar cliente"
-      bind:value={searchTerm}
-      on:input={searchFiado}
-    />
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 16 16"
-      fill="currentColor"
-      class="h-4 w-4 opacity-70"
-    >
-      <path
-        fill-rule="evenodd"
-        d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
-        clip-rule="evenodd"
-      />
-    </svg>
-  </label>
-</div>
-
-<div class="overflow-x-auto">
-  {#if searchTerm && filteredPedidos.length === 0}
-    <p class="text-center text-xl">
-      <strong>Nenhum cliente encontrado.</strong>
-      Tente novamente!
-    </p>
-  {:else if pedidos_fiados.length > 0}
-    <table class="table table-zebra">
+<h1 class="my-5 text-center text-2xl font-medium">Pedidos com pagamento pendente:</h1>
+<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+  <Datatable {table} headless>
+    <!-- {#snippet header()}
+      <Search {table} />
+     
+    {/snippet} -->
+    <div class="spinner" class:active={table.isLoading}></div>
+    <!-- svelte-ignore component_name_lowercase -->
+    <table class="table border">
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Data do Pedido</th>
-          <th>Data de Vencimento</th>
-          <th>Status do pedido</th>
-          <th>Dias para Vencimento</th>
+          <ThSort {table} field="id">ID</ThSort>
+          <Th>Data do pedido</Th>
+          <Th>Data de vencimento</Th>
+          <ThSort {table} field="expire_at">Dias para vencimento</ThSort>
+          <Th>Status do pedido</Th>
+          <Th>Cliente</Th>
+          <ThSort {table} field="total">Valor do pedido</ThSort>
 
-          <th>Cliente</th>
-          <th>Total do pedido</th>
+          <Th>Ver detalhes</Th>
+        </tr>
+        <tr>
+          <Th />
+          <Th>
+            <DateFilter
+              onchange={(start, end) => {
+                let startDate = start.toString()
+                let endDate = end.toString()
+                filters.update({ startDate, endDate })
+              }}
+            />
+          </Th>
+          <Th />
+          <Th />
+          <Th />
+          <ThFilter {table} field="name" />
+          <Th />
 
-          <th>Pedido</th>
+          <Th />
         </tr>
       </thead>
       <tbody>
-        {#each filteredPedidos as fiado}
-          <tr class={fiado.created_at ? getBgColor(fiado.created_at.toString()) : ''}>
-            <td>{fiado.id}</td>
-            <td>{formatarData(fiado.created_at) ?? 'Data não disponível'}</td>
+        {#each data.rows as row}
+          <tr class={row.expire_at ? getBgColor(row.expire_at) : ''}>
+            <td>{row.id}</td>
+            <td><b>{format(row.created_at, 'dd/MM/yyyy')}</b></td>
             <td>
-              {fiado.created_at ? getExpirationDate(fiado.created_at.toString()) : 'N/A'}
-            </td>
-            <td>{fiado.status}</td>
-            <td>
-              {#if fiado.created_at && getDaysToExpiry(fiado.created_at.toString()) >= 0}
-                {getDaysToExpiry(fiado.created_at.toString())} dias
-              {:else}
-                Expirado
-              {/if}
+              <b>
+                {row.expire_at
+                  ? format(new Date(row.expire_at), 'dd/MM/yyyy')
+                  : 'Não registrado'}
+              </b>
             </td>
             <td>
-              {fiado.customer?.name}
+              <b>
+                {#if row.expire_at}
+                  {#if differenceInDays(row.expire_at) < 0}
+                    VENCIDO!
+                  {:else if differenceInDays(row.expire_at) === 0}
+                    Vence hoje!
+                  {:else}
+                    {differenceInDays(row.expire_at) + ' dias'}
+                  {/if}
+                {/if}
+              </b>
             </td>
-            <td class="font-bold">
-              R${(fiado.total / 100).toFixed(2)}
-            </td>
+            <td><b>{row.status}</b></td>
+            <td><b>{row.name}</b></td>
+            <td><b class="text-xl text-success">R${row.total / 100}</b></td>
+
             <td>
-              <a href="/admin/orders/{fiado.id}" class="badge badge-primary">
-                VISUALIZAR PEDIDO
+              <a href="/admin/orders/{row.id}" class="badge badge-primary">
+                Detalhes
               </a>
             </td>
           </tr>
         {/each}
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="text-xl font-bold">
+            Total: <span class="text-secondary">
+              R${(data.totalSum / 100).toFixed(2)}
+            </span>
+          </td>
+        </tr>
       </tbody>
     </table>
-  {:else}
-    <h1 class="mt-10 text-center text-4xl">
-      Nenhum pagamento está pendente!!!
-    </h1>
-  {/if}
-</div>
+    {#if data.rows.length === 0}
+      <NoResults />
+    {/if}
+    {#snippet footer()}
+      <RowsPerPage {table} />
+      <div></div>
+      <Pagination {table} />
+    {/snippet}
+  </Datatable>
+</main>
