@@ -133,3 +133,42 @@ npm run db:check
 # Contributing
 
 Feel free to submit issues or pull requests. Contributions are welcome!
+
+
+## TODOs
+
+- TELA CLIENTE TROCAR CARD POR TABLE DE PEDIDOS
+- TELA RESUMO DE CADA MOTOBOY ENTREGAS
+- ARREDONDAR VALOR DA TAXA DE ENTREGA
+- DIMENSÕES TELA CAIA, CABER EM TELAS MENORES
+- NOME MOTOBOY NO CARD TELA PEDIDOS
+- FILTRAR POR MOTOBOY NA TELA DE PEDIDOS
+- PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS
+- ADICIONAR NO METADATA DO USUARIO UM CAIXA DESIGNADO A ELE
+- TELA FIADO FILTRAR PAGAMENTOS ATRASADOS
+- EDITAR DATA VENCIMENTO (EXIPIRE_AT)
+- MOSTRAR CRÉDITO DO CLIENTE NA TELA DO CAIXA
+- SALVAR LAT E LONG DA DISTRIBUIDORA NO DB
+- REPASSE ESTOQUE ENTRE DISTRIBUIDORAS
+- CADASTRAR MOTOBOY
+- TRANSAÇÕES DO CAIXA (TELAS)
+- Alerta de compra em excesso ex, bloqueio automático caso tenha notas em atraso. (Desbloqueio somente com senha de gerente). 
+- SCORE DO CLIENTE/PONTUACAO. - Cliente pagou fiado em dia ganha 5 pontos, pagou atrasado perde 5 pontos. Esse score atualiza automaticamente toda vez que ele efetuar um pagamento. Pra auxiliar na tomada de decisões junto aos clientes pj que compram fiado.
+- Opção de emissão de Nota Fiscal eletrônica e Cupom Fiscal (Opcionais). Emissão de .xml para enviar para contabilidade.
+- Parte do cliente fazer pedido
+- Adicionar campo taxa entrega na tabela endereço (calcular ao adicionar endereço talvez)
+- CHECKBOX TABELA FIADO PRA MOSTRAR TOTAL APENAS DAS SELECIONADAS
+- COMPONENTE PARA EDITAR DADOS NAS TABLES
+- PODER PAGAR PARCIAL COM FIADO: EX: PAGAR APENAS PARTE DO PEDIDO E DEIXAR O RESTO FIADO
+
+
+# RELATORIOS:
+- Vendas por período.
+- Recebimentos por períodos, dia e semana, mês.
+- Cliente inadimplentes.
+- Vendas comparando dia atual com mesmo dia do mês passado, mês atual com mesmo mês do ano passado.
+- Relatório de estoque crítico, baseado na venda.
+- Relatório venda x recebimento por período.
+- Relatório de delivery por motoboy por período.
+- Relatório estoque preço de custo, e preço de venda
+
