@@ -1,10 +1,18 @@
 import type { PageServerLoad } from './$types'
-import { getRowCount } from '$db/utils'
 import { customerTable, productItemTable, customerOrderTable } from '$db/schema'
 
 import { bugReport } from '$lib/server/db/controller'
 import { error } from '@sveltejs/kit'
-export const load = (async () => {
+import { count } from 'drizzle-orm'
+import type { SQLiteTable } from 'drizzle-orm/sqlite-core'
+
+
+export const load = (async ({locals:{tenantDb}}) => {
+
+  function getRowCount(table:SQLiteTable){
+    return tenantDb!.select({count: count()}).from(table)
+  }
+
   try {
     const [
       [{ count: customerCount }],
@@ -15,10 +23,8 @@ export const load = (async () => {
       getRowCount(customerTable),
       getRowCount(productItemTable),
       getRowCount(customerOrderTable),
-      bugReport.getLogs(),
+      bugReport(tenantDb!).getLogs(),
     ])
-
-    console.log(recentActivity)
 
     return {
       customerCount,

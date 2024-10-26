@@ -7,7 +7,6 @@
   import { page } from '$app/stores'
   import { invalidate } from '$app/navigation'
   import { icons } from '$lib/utils/icons'
-  import * as m from '$msgs'
 
   export let data: PageData
 
@@ -41,10 +40,7 @@
   function handleAddProduct(category_id: number) {
     console.log('add product')
     modal.open(
-      FormModal<{
-        name: string
-        description: string
-      }>,
+      FormModal,
       {
         fields: [
           {
@@ -86,9 +82,7 @@
 
   function handleAddCategory() {
     modal.open(
-      FormModal<{
-        name: string
-      }>,
+      FormModal,
       {
         fields: [
           {
@@ -128,7 +122,7 @@
 <div class="mx-auto flex items-center justify-center gap-3">
   <p>Produtos</p>
   <button class="btn btn-primary" onclick={handleAddCategory}>
-    {m.add_category()}
+    Adicionar categoria
   </button>
 </div>
 <!--TODO: Ao mover de uma categoria para outra não ta movendo, ao atualizar a pagina sai-->

@@ -1,50 +1,56 @@
 <script lang="ts">
-  import { DatePicker } from '@svelte-plugins/datepicker'
+  import { SSRFilters } from '$lib/components/datatable/filter.svelte'
+  import Datepicker from '$lib/components/input/date/datepicker.svelte'
   import { format } from 'date-fns'
 
   const today = new Date()
+  const filters = new SSRFilters()
 
   export let onchange:
     | undefined
-    | ((dateStart: Date | string, dateEnd: Date | string) => void) = undefined
+    | ((dateStart: number | null, dateEnd: number | null) => void) = undefined
 
-  let startDate: Date | string = today
-  let endDate: Date | string = today
+  let startDate: Date | null  = null
+  let endDate: Date |null  = null
   let dateFormat = 'dd/MM/yyyy'
   let isOpen = false
 
   let formattedStartDate = ''
 
   const onClearDates = () => {
-    startDate = 'string'
-    endDate = 'string'
+    startDate = null
+    endDate = null
+    onchange?.(start, end);
   }
 
   const toggleDatePicker = () => (isOpen = !isOpen)
-  const formatDate = (date: Date | string) =>
+  const formatDate = (date: Date) =>
     (date && format(new Date(date), dateFormat)) || ''
 
-  $: formattedStartDate = formatDate(startDate)
-  $: formattedEndDate = formatDate(endDate)
+  $: formattedStartDate = startDate ? formatDate(startDate) : '';
+  $: formattedEndDate = endDate ? formatDate(endDate) : '';
+
+  $: start = startDate ? new Date(startDate).setHours(0, 0, 0, 0) : null;
+  $: end = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : null;
 
   $: {
-    console.log('Raw dateStart:', startDate)
-    console.log('Raw endDate:', endDate)
-    console.log('Formatted start date:', formattedStartDate)
-    console.log('Formatted end date:', formattedEndDate)
-    onchange?.(startDate, endDate)
+    if(endDate != null && startDate !=null){
+      onchange?.(start, end)
+    }
   }
 </script>
 
 <div class="date-filter">
-  <DatePicker bind:isOpen bind:startDate bind:endDate isRange showPresets>
+  <Datepicker bind:isOpen bind:startDate bind:endDate isRange showPresets >
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="date-field" on:click={toggleDatePicker} class:open={isOpen}>
       <i class="icon-calendar" />
       <div class="date">
         {#if startDate}
           {formattedStartDate} - {formattedEndDate}
         {:else}
-          Pick a date
+          Escolha uma data
         {/if}
       </div>
       {#if startDate}
@@ -53,7 +59,7 @@
         </span>
       {/if}
     </div>
-  </DatePicker>
+  </Datepicker>
 </div>
 
 <style>
@@ -69,7 +75,7 @@
   }
 
   .date-field.open {
-    border-bottom: 1px solid #0087ff;
+    border-bottom: 1px solid oklch(var(--p));
     z-index: 9999;
   }
 

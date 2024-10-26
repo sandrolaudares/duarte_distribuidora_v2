@@ -1,5 +1,4 @@
 <script>
-  import * as m from '$msgs'
 
   import RetroGrid from '../../animation/RetroGrid.svelte'
   import RotatingGlobe from '../globe/RotatingGlobe.svelte'
@@ -12,7 +11,7 @@
     <span
       class="text-7xl"
     >
-      {m.hero_title()}
+      title
     </span>
     <div style="width: 400px; height: 400px; z-index: 100;">
       <RotatingGlobe />

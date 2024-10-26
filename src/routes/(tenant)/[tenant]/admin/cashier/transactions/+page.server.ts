@@ -15,7 +15,7 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
   const page = Number(searchParams.get('page') ?? 1)
   const pageSize = Number(searchParams.get('pageSize') ?? 10)
 
-  const username = searchParams.get('username')
+  const name = searchParams.get('name')
   const email = searchParams.get('email')
 
   const sortId = searchParams.get('sort_id')
@@ -23,19 +23,15 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
 
   let query = tenantDb!
     .select()
-    .from(schema.userTable)
-    .where(
-      and(
-        username ? like(schema.userTable.username, `${username}%`) : undefined,
-        email ? like(schema.userTable.email, `${email}%`) : undefined,
-      ),
-    )
+    .from(schema.logsTable)
+    .leftJoin(schema.customerOrderTable,eq(schema.customerOrderTable.id,1))
+    .where(eq(schema.logsTable.type,'CAIXA'))
     .$dynamic()
 
   if (sortId && sortOrder) {
     query = withOrderBy(
       query,
-      getSQLiteColumn(schema.userTable, sortId),
+      getSQLiteColumn(schema.logsTable, sortId),
       sortOrder,
     )
   }
@@ -43,11 +39,9 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
   try {
     const rows = await withPagination(query, page, pageSize)
 
-    const total = await tenantDb!.select({ count: count(schema.userTable.id) }).from(schema.userTable)
+    const total = await tenantDb!.select({ count: count() }).from(schema.logsTable)
 
     return { rows: rows ?? [], count: total[0].count }
-    console.log('total',total)
-    
   } catch (error) {
     console.error(error)
     return { rows: [], count: 0 }

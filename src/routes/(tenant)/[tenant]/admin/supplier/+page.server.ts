@@ -8,27 +8,29 @@ import {
   getSQLiteColumn,
   getOrderBy,
 } from '$lib/server/db/utils'
-import { db } from '$lib/server/db'
 import { and, eq, getTableColumns, SQL, count, like } from 'drizzle-orm'
 
-export const load = (async ({ url }) => {
+export const load = (async ({ url,locals:{tenantDb} }) => {
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
   const pageSize = Number(searchParams.get('pageSize') ?? 10)
 
   const name = searchParams.get('name')
-  // const email = searchParams.get('email')
+  const razao_social = searchParams.get('razao_social')
+  const telephone_1 = searchParams.get('telephone_1')
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_order')
 
-  let query = db
+  let query = tenantDb!
     .select()
     .from(schema.supplierTable)
     .where(
-
+      and(
         name ? like(schema.supplierTable.name, `${name}%`) : undefined,
-
+        razao_social ? like(schema.supplierTable.razao_social, `${razao_social}%`) : undefined,
+        telephone_1 ? like(schema.supplierTable.telephone_1, `${telephone_1}%`) : undefined,
+      )
     )
     .$dynamic()
 
@@ -43,7 +45,7 @@ export const load = (async ({ url }) => {
   try {
     const rows = await withPagination(query, page, pageSize)
 
-    const total = await db.select({ count: count() }).from(schema.supplierTable)
+    const total = await tenantDb!.select({ count: count() }).from(schema.supplierTable)
 
     return { rows: rows ?? [], count: total[0].count }
   } catch (error) {

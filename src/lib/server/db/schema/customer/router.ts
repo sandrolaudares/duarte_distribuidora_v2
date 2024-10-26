@@ -153,7 +153,8 @@ export const customer = router({
           }),
         }),
       )
-      .mutation(async ({ input, ctx: { tenantDb } }) => {
+      .mutation(async ({ input, ctx: { tenantDb,locals } }) => {
+        const userId = locals.user?.id
         const { order_items, order_info } = input
         const customer = await customerController(tenantDb).getCustomerById(
           order_info.customer_id,
@@ -169,22 +170,8 @@ export const customer = router({
           tenantDb,
         ).getCustomerUsedCredit(order_info.customer_id)
 
-        let credit = 0
+        const credit = used_credit?.used_credit ?? 0
 
-        if (typeof used_credit !== 'number') {
-          const [{ count }] = await customerController(
-            tenantDb,
-          ).countFiadoTransactions(order_info.customer_id)
-          // if (count !== 0) {
-          //   throw new TRPCError({
-          //     code: 'BAD_REQUEST',
-          //     message: 'Cliente não possui crédito',
-          //   })
-          // }
-          //TODO:TA DANDO ERRO QUANDO FAZ PEDIDO FIADO
-        } else {
-          credit = used_credit
-        }
 
         if (customer?.max_credit < credit + order_info.total) {
           throw new TRPCError({
@@ -199,9 +186,7 @@ export const customer = router({
             status: order_info.motoboy_id ? 'CONFIRMED' : 'DELIVERED',
             is_fiado: true,
             type: order_info.type,
-            total: order_info.motoboy_id
-              ? order_info.total + (order_info.taxa_entrega ?? 0)
-              : order_info.total,
+            total: order_info.total + (order_info.taxa_entrega ?? 0),
             amount_paid: 0,
             motoboy_id: order_info.motoboy_id,
             customer_id: order_info.customer_id,
@@ -230,6 +215,18 @@ export const customer = router({
         //     customer_id: order_info.customer_id,
         //   })
         //   .returning()
+
+        await bugReport(tenantDb).insertLogs({
+          text: `Pedido fiado`,
+          created_by: userId,
+          metadata: {
+            order_id: order.id,
+            customer_id: order_info.customer_id,
+          },
+          type: 'CAIXA',
+          pathname: '/TODO:ROUTE',
+          routeName: 'Fiado',
+        })
 
         return {
           order,
@@ -298,9 +295,7 @@ export const customer = router({
             type: order_info.type,
             motoboy_id: order_info.motoboy_id,
             status: order_info.motoboy_id ? 'CONFIRMED' : 'DELIVERED',
-            total: order_info.motoboy_id
-              ? order_info.total + (order_info.taxa_entrega ?? 0)
-              : order_info.total,
+            total: order_info.total + (order_info.taxa_entrega ?? 0),
             customer_id: order_info.customer_id,
             address_id: order_info.address_id,
             cachier_id: order_info.cashier_id,
@@ -432,9 +427,7 @@ export const customer = router({
             status: 'CONFIRMED',
             is_fiado: false,
             type: order_info.type,
-            total: order_info.motoboy_id
-              ? order_info.total + (order_info.taxa_entrega ?? 0)
-              : order_info.total,
+            total: order_info.total + (order_info.taxa_entrega ?? 0),
             amount_paid: 0,
             motoboy_id: order_info.motoboy_id,
             customer_id: order_info.customer_id,

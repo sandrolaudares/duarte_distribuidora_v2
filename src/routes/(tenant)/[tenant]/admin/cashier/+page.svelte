@@ -17,7 +17,7 @@
   let taxa = data.taxa
 
   function handleAddCachier() {
-    modal.open(FormModal<RouterInputs['distribuidora']['insertCashier']>, {
+    modal.open(FormModal, {
       title: 'Adicionar Caixa',
       fields: [
         {
@@ -82,6 +82,7 @@
   async function updateCashierDeliveryFee() {
     try {
       await trpc($page).distribuidora.updateAllKm.mutate(taxa[0].taxa_por_km)
+      Math.round(taxa[0].taxa_por_km)
       console.log(taxa[0].taxa_por_km)
       toast.success('Taxa de entrega atualizada!')
       isTaxaChanged = false

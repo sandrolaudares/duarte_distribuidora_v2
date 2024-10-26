@@ -5,7 +5,6 @@
   import { page } from '$app/stores'
   import { toast } from 'svelte-sonner'
   import { goto } from '$app/navigation'
-    import * as m from '$msgs'
 
   import SEO, { getSEOProps } from '$lib/components/SEO/index.svelte'
 
@@ -40,9 +39,9 @@
 <div class="bg-background flex h-full flex-col items-center justify-center">
   <div class="mx-auto w-full max-w-md space-y-6">
     <div class="text-center">
-      <h1 class="text-3xl font-bold">{m.password_reset()}</h1>
+      <h1 class="text-3xl font-bold">Resetar senha!</h1>
       <p class="text-muted-foreground mt-2">
-        {m.receive_password()}
+        senha
       </p>
     </div>
     <div
@@ -68,10 +67,10 @@
             onclick={resetPassword}
             class="btn btn-outline w-full"
           >
-            {m.request_password_reset()}
+            Resetar senha
           </button>
           <div class="flex items-center justify-center">
-            <a href="/login" class="link-hover link">{m.back_login()}</a>
+            <a href="/login" class="link-hover link">Login</a>
           </div>
         </div>
       </div>

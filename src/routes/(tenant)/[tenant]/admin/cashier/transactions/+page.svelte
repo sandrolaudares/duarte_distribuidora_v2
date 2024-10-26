@@ -1,64 +1,36 @@
-<!-- <script lang="ts">
-  import { toast } from 'svelte-sonner'
-  import { onMount } from 'svelte'
-  import { page } from '$app/stores'
-  import { trpc } from '$trpc/client'
+<script lang="ts">
+    import type { PageData } from './$types';
+    
+    export let data: PageData;
 
-  import type { RouterOutputs } from '$trpc/router'
-  import Datatable from '$components/table/Datatable.svelte'
-  import {
-    renderComponent,
-    type ColumnDef,
-    type TableOptions,
-  } from '@tanstack/svelte-table'
-  import {
-    type TableState,
-    getParams,
-    EditRowButton,
-    EditRowInput,
-    RowActions,
-  } from '$lib/components/table'
-
-  const defaultColumns: ColumnDef<
-    RouterOutputs['stock']['getPaginatedTransacaoCaixa']['rows']
-  >[] = [
-    {
-      header: 'ID',
-      accessorKey: 'cashier_transaction.id',
-      footer: info => info.column.id,
-    },
-    {
-      header: 'Criado em',
-      accessorKey: 'cashier_transaction.created_at',
-    },
-    {
-      header: 'caixa',
-      accessorKey: 'cashier_name',
-    },
-    {
-      header: 'Tipo',
-      accessorKey: 'cashier_transaction.type',
-    },
-    {
-      header: 'Valor',
-      accessorKey: 'cashier_transaction.amount',
-    },
-    {
-      header: 'Observacão',
-      accessorKey: 'cashier_transaction.observation',
-    },
-  ]
-
-  async function load(s: TableState) {
-    const resp = await trpc($page).stock.getPaginatedTransacaoCaixa.query(s)
-    return {
-      data: resp.rows ?? [],
-      count: resp.total ?? 0,
-    }
-  }
+    let transactions = data.rows
 </script>
-
-
-<div class="container mx-auto my-3 overflow-x-auto p-2">
-  <Datatable columns={defaultColumns} {load} />
-</div> -->
+<table class="table table-zebra">
+    <thead>
+      <tr>
+        <th>Text</th>
+        <th>ID</th>
+        <th>Created At</th>
+        <th>Type</th>
+        <th>Created By</th>
+        <th>Currency</th>
+        <th>Pathname</th>
+        <th>Route Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      {#each transactions as transaction}
+        <tr>
+          <td>{transaction.text}</td>
+          <td>{transaction.id}</td>
+          <td>{transaction.created_at}</td>
+          <td>{transaction.type}</td>
+          <td>{transaction.created_by}</td>
+          <td>{transaction.currency}</td>
+          <td>{transaction.pathname}</td>
+          <td>{transaction.routeName}</td>
+        </tr>
+      {/each}
+    </tbody>
+  </table>
+  

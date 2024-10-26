@@ -21,12 +21,10 @@
   export let data: LayoutData
 
   const user = createUserContext(data.user)
-  $: user.set(data.user)
+  // $: user.set(data.user)
   const cart = createCartContext()
 
-  onMount(() => {
-    changeTheme('bumblebee')
-  })
+
 </script>
 
   {#if $navigating}

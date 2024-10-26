@@ -20,7 +20,6 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^9.0.3",
-   
     "@playwright/test": "^1.48.1",
     "@sveltejs/adapter-auto": "^3.2.5",
     "@sveltejs/adapter-vercel": "^5.4.5",
@@ -30,6 +29,7 @@
     "@types/eslint": "^9.6.1",
     "@types/nodemailer": "^6.4.16",
     "@types/web-push": "^3.6.3",
+    "@vincjo/datatables": "^2.0.0-runes.45",
     "autoprefixer": "^10.4.20",
     "daisyui": "^4.12.13",
     "drizzle-kit": "^0.26.2",
@@ -55,9 +55,9 @@
   "dependencies": {
     "@andre-brandao/svelte-headless-table": "^0.18.6",
     "@googlemaps/google-maps-services-js": "^3.4.0",
-  
     "@libsql/client": "^0.14.0",
-    "@node-rs/argon2": "^2.0.0",
+    "@oslojs/crypto": "^1.0.1",
+    "@oslojs/encoding": "^1.1.0",
     "@svelte-plugins/datepicker": "^1.0.9",
     "@tanstack/svelte-table": "9.0.0-alpha.10",
     "@trpc/client": "^10.45.2",
@@ -80,8 +80,6 @@
     "tailwind-merge": "^2.5.4",
     "trpc-sveltekit": "^3.6.2",
     "web-push": "^3.6.7",
-    "zod": "^3.23.8",
-    "@oslojs/crypto": "^1.0.1",
-    "@oslojs/encoding": "^1.1.0"
+    "zod": "^3.23.8"
   }
 }

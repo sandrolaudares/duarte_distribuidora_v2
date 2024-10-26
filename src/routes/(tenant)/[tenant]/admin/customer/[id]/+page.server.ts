@@ -2,12 +2,12 @@ import { customer } from '$lib/server/db/controller'
 import { error } from '@sveltejs/kit'
 import type { PageServerLoad } from './$types'
 
-export const load = (async ({ params }) => {
+export const load = (async ({ params,locals:{tenantDb} }) => {
   const customerID = Number(params.id)
 
   const [cliente, orders] = await Promise.all([
-    customer.getCustomerById(customerID),
-    customer.getCustomerOrders(customerID),
+    customer(tenantDb!).getCustomerById(customerID),
+    customer(tenantDb!).getCustomerOrders(customerID),
   ])
 
   if (!cliente) {
