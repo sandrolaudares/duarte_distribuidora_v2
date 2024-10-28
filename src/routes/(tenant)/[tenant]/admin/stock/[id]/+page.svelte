@@ -13,7 +13,7 @@
     type ColumnDef,
     type TableOptions,
   } from '@tanstack/svelte-table'
-  import Datatable from '$components/table/Datatable.svelte'
+  // import Datatable from '$components/table/Datatable.svelte'
   // import {
   //   type TableState,
   //   getParams,
@@ -34,7 +34,7 @@
     Bars,
     Area,
     Tooltip,
-    TooltipItem,
+    // TooltipItem,
   } from 'layerchart'
   import { toast } from 'svelte-sonner'
 
@@ -92,19 +92,19 @@
     // },
   ]
 
-  async function load(s: TableState) {
-    const resp = await trpc($page).stock.paginatedTransactions.query({
-      sku: estoque.sku,
-      table_state: s,
-    })
+  // async function load(s: TableState) {
+  //   const resp = await trpc($page).stock.paginatedTransactions.query({
+  //     sku: estoque.sku,
+  //     table_state: s,
+  //   })
 
-    transactions = resp.rows
+  //   transactions = resp.rows
 
-    return {
-      data: resp.rows ?? [],
-      count: resp.total ?? 0,
-    }
-  }
+  //   return {
+  //     data: resp.rows ?? [],
+  //     count: resp.total ?? 0,
+  //   }
+  // }
 
   async function handleDeleteStockItem(sku:string){
     try {
@@ -115,6 +115,7 @@
       toast.error('Ocorreu um erro ao deletar!')
     }
   }
+  //TODO: NEW TABLE
 </script>
 
 <div class="">
@@ -162,7 +163,7 @@
       <div
         class=" h-[70vh] w-full max-w-[50%] overflow-x-auto rounded-box border border-base-300"
       >
-        <Datatable columns={defaultColumns} {load} />
+        <!-- <Datatable columns={defaultColumns} {load} /> -->
       </div>
 
       <div class="w-full max-w-[50%] rounded-box border p-4">
@@ -198,10 +199,10 @@
               />
             </Svg>
 
-            <Tooltip header={data => data.created_at} let:data>
+            <!-- <Tooltip header={data => data.created_at} let:data>
               <TooltipItem label="Quantidade Transacao" value={data.quantity} />
               <TooltipItem label="Total em estoque no momento" value={data.total_log} />
-            </Tooltip>
+            </Tooltip> -->
           </Chart>
         </div>
       </div>
