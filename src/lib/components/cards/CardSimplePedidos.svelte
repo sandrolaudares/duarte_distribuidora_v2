@@ -10,7 +10,8 @@
   export let button_text = ''
   export let button_recusar = ''
   export let order: CurrentOrders[0]
-  export let columns = 1
+  export let motoboy = ''
+  // export let columns = 1
 
   export let troco = 0
   
@@ -70,6 +71,10 @@
             <span class="text-sm text-error">Pagamento ainda pendente</span>
           {/if}
     </div>
+    <span class="font-semibold">
+      Motoboy:
+    </span>
+     {motoboy ? motoboy:''}
     <div class="">
       <!-- <p class="text-opacity-60"><span class="font-semibold">Criado em:</span> {order.created_at}</p> -->
       <div class="flex flex-col items-start justify-between">
