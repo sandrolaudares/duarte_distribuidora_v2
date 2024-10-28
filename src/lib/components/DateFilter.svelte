@@ -15,6 +15,10 @@
   let dateFormat = 'dd/MM/yyyy'
   let isOpen = false
 
+  export let enableFutureDates = false
+  export let enablePastDates = true
+  export let isRange = true
+
   let formattedStartDate = ''
 
   const onClearDates = () => {
@@ -41,7 +45,7 @@
 </script>
 
 <div class="date-filter">
-  <Datepicker bind:isOpen bind:startDate bind:endDate isRange showPresets >
+  <Datepicker bind:isOpen bind:startDate bind:endDate {isRange} showPresets {enablePastDates} {enableFutureDates}>
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="date-field" on:click={toggleDatePicker} class:open={isOpen}>
