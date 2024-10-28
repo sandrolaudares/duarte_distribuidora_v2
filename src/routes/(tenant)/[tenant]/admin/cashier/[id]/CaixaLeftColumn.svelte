@@ -11,6 +11,7 @@
   import { toast } from 'svelte-sonner'
   import { onMount } from 'svelte'
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
+  import Loading from '$lib/components/Loading.svelte'
 
   export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
   export let caixa
@@ -81,8 +82,11 @@
   }
 
   let distance = 0
+
+  let isLoading = false
   
   async function getDistance() {
+    isLoading= true
     try {
       if (enderecoCliente) {
         distance = await trpc($page).customer.calculateDistance.mutate({
@@ -94,15 +98,17 @@
           number: enderecoCliente.number,
           country: enderecoCliente.country,
         })
-        taxaEntrega = (distance / 1000) * (fee/100);
-        taxaEntrega *= 100
-        taxaEntrega = Math.round(taxaEntrega);
+        taxaEntrega = (distance / 1000) * (fee / 100);
+        taxaEntrega *= 100;
+        taxaEntrega = Math.round(taxaEntrega / 100) * 100;
         console.log(taxaEntrega)
         console.log(distance)
         toast.success('Distancia: ' + (distance / 1000).toFixed(2) + 'km')
+        isLoading=false
       }
     } catch (error: any) {
       toast.error(error.message)
+      isLoading = false
     }
   }
 
@@ -198,7 +204,9 @@
         {#if distance}
           <h1>Distancia até endereço: {(distance / 1000).toFixed(2)}km</h1>
         {/if}
-        {#if taxaEntrega !==null}
+        {#if isLoading === true}
+          Taxa de entrega carregando...
+        {:else if taxaEntrega !== null}
         <div class="flex flex-col">
           <span>Taxa de entrega: R${(taxaEntrega / 100).toFixed(2)}</span>
           <span class="mt-2">Definir manualmente valor da entrega: <CurrencyInput bind:value={taxaEntrega}/></span>
