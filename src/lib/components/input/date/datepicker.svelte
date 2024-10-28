@@ -145,7 +145,7 @@
      * An array of preset date range labels.
      * @type {string[]}
      */
-    export let presetLabels = ['Hoje', 'Últimos 7 dias', 'Últimos 30 dias', 'Últimos 60 dias', 'Últimos 90 dias', 'Últimos ano'];
+    export let presetLabels = ['Hoje', '7 dias atrás', '30 dias atrás', '60 dias atrás', '90 dias atrás', '1 ano atás'];
   
     /**
      * An array of day-of-week labels.
@@ -228,7 +228,14 @@
         label: presetLabels[5],
         start: getDateFromToday(364),
         end: getDateFromToday(0)
-      }
+      },
+      {
+        label: presetLabels[6],
+        start: 1704067200000,
+        end: getDateFromToday(0)
+        //TODO: Distribuiodate.created_at
+      },
+
     ];
   
     /**
