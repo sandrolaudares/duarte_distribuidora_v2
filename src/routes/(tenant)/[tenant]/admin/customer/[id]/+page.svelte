@@ -6,11 +6,10 @@
 
   import type { RouterInputs } from '$trpc/router'
 
-  export let data: PageData
-
+  
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
-
+  
   import { toast } from 'svelte-sonner'
   import AddressModal from '$lib/components/modal/AddressModal.svelte'
   import CardShowPedidos from '$lib/components/cards/CardShowPedidos.svelte'
@@ -30,11 +29,20 @@
   import ThCalendar from './ThCalendar.svelte'
   import InfoCliente from './InfoCliente.svelte'
   import PedidoCliente from './PedidoCliente.svelte'
+  
+  // export let data: PageData
+  let { data }: { data: PageData } = $props()
 
   let { customer, orders } = data
 
   // let filtered = orders
   const table = new TableHandler(orders, { rowsPerPage: 7 })
+
+
+  // $: sum = table.createCalculation('total').sum()
+
+  const sum = $derived(table.createCalculation('total').sum())
+  //TODO: SOMA
 
   // let filteredOrders = (start: number, end: number) => {
   //   return orders.filter(order => {
@@ -49,5 +57,5 @@
 <main class=" mt-20 h-full max-h-[calc(100vh-35vh)]">
   <InfoCliente {customer} />
 
-  <PedidoCliente {table}/>
+  <PedidoCliente {table} />
 </main>

@@ -162,6 +162,8 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - COMPONENTE PARA EDITAR DADOS NAS TABLES
 - PODER PAGAR PARCIAL COM FIADO: EX: PAGAR APENAS PARTE DO PEDIDO E DEIXAR O RESTO FIADO
 
+- CHECAR O SUM PAGINA CUSTOMER/ID
+
 
 # RELATORIOS:
 - Vendas por período.

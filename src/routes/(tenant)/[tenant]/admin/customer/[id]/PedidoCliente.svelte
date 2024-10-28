@@ -31,6 +31,8 @@
   import PedidoCliente from './PedidoCliente.svelte'
 
   export let table
+
+  export let total = 0
 </script>
 
 <div class="mt-10 h-full max-h-[calc(100vh-38vh)]">
@@ -92,7 +94,7 @@
             <td></td>
             <td class="text-xl font-bold">
               Total: <span class="text-secondary">
-                <!-- R${(table.rows.reduce((acc, total) => acc + total.total, 0) / 100).toFixed(2)} -->
+                R${(total/ 100).toFixed(2)}
               </span>
             </td>
             <!--TODO: FIX TOTAL ta mostrando total das rows renderizadas, não de tudo-->
