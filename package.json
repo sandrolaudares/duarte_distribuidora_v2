@@ -29,7 +29,7 @@
     "@types/eslint": "^9.6.1",
     "@types/nodemailer": "^6.4.16",
     "@types/web-push": "^3.6.3",
-    "@vincjo/datatables": "^2.0.4",
+    "@vincjo/datatables": "^2.0.5",
     "autoprefixer": "^10.4.20",
     "daisyui": "^4.12.13",
     "drizzle-kit": "^0.26.2",
