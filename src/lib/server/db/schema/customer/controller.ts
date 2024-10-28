@@ -227,6 +227,7 @@ export const customer = (db: TenantDbType) => ({
             product: true,
           },
         },
+        motoboy:true,
       },
     })
   },
