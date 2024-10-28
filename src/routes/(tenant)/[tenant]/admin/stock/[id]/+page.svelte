@@ -1,4 +1,4 @@
-<script lang="ts">
+<!-- <script lang="ts">
   import type { PageData } from './$types'
 
   export let data: PageData
@@ -137,9 +137,7 @@
               ></path>
             </svg>
           </div>
-          <!-- <div class="stat-title">{stock.distribuidora.name}</div> -->
           <div class="stat-value">{estoque.name}</div>
-          <!-- <div class="stat-desc">Jan 1st - Feb 1st</div> -->
         </div>
 
         <div class="stat">
@@ -148,7 +146,6 @@
           </div>
           <div class="stat-title">Quantidade em Estoque</div>
           <div class="stat-value flex justify-center">{estoque.quantity}</div>
-          <!-- <div class="stat-desc">↗︎ 400 (22%)</div> -->
         </div>
       </div>
       <button class="btn btn-circle btn-error w-20 h-20"  on:click={()=>{
@@ -199,7 +196,6 @@
                 class="fill-secondary/20"
                 line={{ class: 'stroke-secondary' }}
               />
-              <!-- <Highlight area /> -->
             </Svg>
 
             <Tooltip header={data => data.created_at} let:data>
@@ -211,4 +207,4 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->

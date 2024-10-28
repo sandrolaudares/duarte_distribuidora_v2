@@ -2,10 +2,19 @@
   import type { PageData } from './$types'
 
   import { getUserContext } from '$lib/stores/user'
+  import { Axis, Bars, Chart, Highlight, Svg, Tooltip } from 'layerchart'
+  import * as scale from 'd3-scale'
   const user = getUserContext()
   export let data: PageData
 
   const { customerCount, orderCount, productCount, recentActivity } = data
+
+  const {
+    topCustomerOrders,
+    topCustomers,
+    topOrderedProducts,
+    topRevenueProducts,
+  } = data.dash
 </script>
 
 <div
@@ -201,6 +210,102 @@
             <a class="btn btn-primary" href="/admin/users">Users</a>
           {/if}
         </div>
+      </div>
+    </div>
+
+    <div>
+      Top Clientes por Gastos
+      <div class="group h-[300px] rounded border p-4">
+        <Chart
+          
+          data={topCustomers}
+          x="total_spent"
+          xDomain={[0, null]}
+          xNice
+          y="customer_name"
+          yScale={scale.scaleBand().padding(0.2)}
+          padding={{ left: 46, bottom: 24 }}
+          tooltip={{ mode: 'band' }}
+        >
+          <Svg>
+            <Axis
+              placement="bottom"
+              grid
+              rule
+              format={d => `R$${(d / 100).toFixed(2)}`}
+            />
+            <Axis placement="left" format={d => d} rule />
+            <Bars
+              radius={4}
+              strokeWidth={1}
+              class="fill-primary transition-colors group-hover:fill-gray-300"
+            />
+            <Highlight
+              area
+              bar={{ class: 'fill-primary', strokeWidth: 1, radius: 4 }}
+            />
+          </Svg>
+          <Tooltip.Root let:data>
+            {@const total_spend = (data.total_spent / 100).toFixed(2)}
+            <Tooltip.Header>
+              {data.customer_name}
+            </Tooltip.Header>
+            <Tooltip.List>
+              <Tooltip.Item label="Email" value={data.customer_email} />
+              <Tooltip.Item label="Phone" value={data.customer_phone} />
+
+              <Tooltip.Item label="Gastos" value={`R$${total_spend}`} />
+            </Tooltip.List>
+          </Tooltip.Root>
+        </Chart>
+      </div>
+    </div>
+
+    <div>
+      Top Clientes por Quantidade de Pedidos
+      <div class="group h-[300px] rounded border p-4">
+        <Chart
+          
+          data={topCustomerOrders}
+          x="total_orders"
+          xDomain={[0, null]}
+          xNice
+          y="customer_name"
+          yScale={scale.scaleBand().padding(0.2)}
+          padding={{ left: 46, bottom: 24 }}
+          tooltip={{ mode: 'band' }}
+        >
+          <Svg>
+            <Axis
+              placement="bottom"
+              grid
+              rule
+              format={d => `R$${(d / 100).toFixed(2)}`}
+            />
+            <Axis placement="left" format={d => d} rule />
+            <Bars
+              radius={4}
+              strokeWidth={1}
+              class="fill-primary transition-colors group-hover:fill-gray-300"
+            />
+            <Highlight
+              area
+              bar={{ class: 'fill-primary', strokeWidth: 1, radius: 4 }}
+            />
+          </Svg>
+          <Tooltip.Root let:data>
+            {@const total_spend = data.total_orders}
+            <Tooltip.Header>
+              {data.customer_name}
+            </Tooltip.Header>
+            <Tooltip.List>
+              <Tooltip.Item label="Email" value={data.customer_email} />
+              <Tooltip.Item label="Phone" value={data.customer_phone} />
+
+              <Tooltip.Item label="Pedidos" value={`${total_spend}`} />
+            </Tooltip.List>
+          </Tooltip.Root>
+        </Chart>
       </div>
     </div>
   </div>
