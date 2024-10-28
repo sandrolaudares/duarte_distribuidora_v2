@@ -2,7 +2,7 @@
   import { navigating } from '$app/stores'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import { modal, FormModal } from '$lib/components/modal'
-  import DateFilter from './DateFilter.svelte'
+  import DateFilter from '$lib/components/DateFilter.svelte'
   import { page } from '$app/stores'
 
   import {

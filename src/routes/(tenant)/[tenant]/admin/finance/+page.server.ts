@@ -31,35 +31,46 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
 
   const name = searchParams.get('name')
   const expire_at = searchParams.get('expire_at')
-  
-  
+
   const sortId = searchParams.get('sort_id')
-  const sortOrder = searchParams.get('sort_order')
-  
+  const sortOrder = searchParams.get('sort_direction')
+
   const dateStart = searchParams.get('startDate')
   const dateEnd = searchParams.get('endDate')
+  
 
   let query = customer(tenantDb!)
     .getAllOrderInfo()
     .where(
       and(
-        gt(schema.customerOrderTable.total, schema.customerOrderTable.amount_paid), eq(schema.customerOrderTable.is_fiado, true),
+        gt(
+          schema.customerOrderTable.total,
+          schema.customerOrderTable.amount_paid,
+        ),
+        eq(schema.customerOrderTable.is_fiado, true),
         name ? like(schema.customerTable.name, `${name}%`) : undefined,
-        
+
         dateStart && dateEnd
           ? and(
-              gte(schema.customerOrderTable.created_at, new Date(Number(dateStart))),
-              lte(schema.customerOrderTable.created_at, new Date(Number(dateEnd))),
+              gte(
+                schema.customerOrderTable.created_at,
+                new Date(Number(dateStart)),
+              ),
+              lte(
+                schema.customerOrderTable.created_at,
+                new Date(Number(dateEnd)),
+              ),
             )
           : undefined,
-       
       ),
     )
     .$dynamic()
 
   console.log('Date Start:', dateStart, 'Date End:', dateEnd)
+  console.log(sortId, sortOrder)
 
   if (sortId && sortOrder) {
+
     query = withOrderBy(
       query,
       getSQLiteColumn(schema.customerOrderTable, sortId),
@@ -85,15 +96,24 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
       )
       .where(
         and(
-          gt(schema.customerOrderTable.total, schema.customerOrderTable.amount_paid), eq(schema.customerOrderTable.is_fiado, true),
+          gt(
+            schema.customerOrderTable.total,
+            schema.customerOrderTable.amount_paid,
+          ),
+          eq(schema.customerOrderTable.is_fiado, true),
           name ? like(schema.customerTable.name, `${name}%`) : undefined,
           dateStart && dateEnd
             ? and(
-              gte(schema.customerOrderTable.created_at, new Date(Number(dateStart))),
-              lte(schema.customerOrderTable.created_at, new Date(Number(dateEnd))),
+                gte(
+                  schema.customerOrderTable.created_at,
+                  new Date(Number(dateStart)),
+                ),
+                lte(
+                  schema.customerOrderTable.created_at,
+                  new Date(Number(dateEnd)),
+                ),
               )
             : undefined,
-           
         ),
       )
 

@@ -20,7 +20,7 @@
   import { trpc } from '$trpc/client'
   import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
-  import DateFilter from '../orders/allorders/DateFilter.svelte'
+  import DateFilter from '$lib/components/DateFilter.svelte'
   import { format } from 'date-fns'
 
   let { data }: { data: PageData } = $props()
@@ -31,6 +31,7 @@
     rowsPerPage: 10,
     totalRows: data.count,
   })
+
 
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
@@ -105,7 +106,18 @@
               }}
             />
           </Th>
-          <Th />
+          <Th >
+            <!-- <DateFilter
+            enableFutureDates={true}
+            enablePastDates={false}
+            isRange={false}
+            onchange={(start, end) => {
+                let expireAt = start.toString()
+                let endExpire = end.toString()
+                filters.update({ expireAt, endExpire  })
+            }}
+          /> -->
+        </Th>
           <Th />
           <Th />
           <ThFilter {table} field="name" />

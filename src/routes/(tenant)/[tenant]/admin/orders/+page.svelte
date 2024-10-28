@@ -8,9 +8,11 @@
   import { onDestroy, onMount } from 'svelte'
   import Loading from '$lib/components/Loading.svelte'
   import CardSimplePedidos from '$lib/components/cards/CardSimplePedidos.svelte'
-  //export let data: PageData
+  export let data: PageData
 
   let pedidos: RouterOutputs['customer']['getCurrentOrders'] = []
+
+  let motoboys = data.motoboys
 
   let newPedidos = pedidos
 
@@ -28,8 +30,6 @@
     pedido => pedido.status === 'PENDING',
   ) 
   let notification: HTMLAudioElement
-  
-
   
   let unsub_getOrders: NodeJS.Timeout
 
@@ -65,16 +65,24 @@
     }
   }
 
-  const pedidosPorStatus = () => {
-    if (pedidoSelecionado === 'all') {
+  // const pedidosPorStatus = () => {
+  //   if (pedidoSelecionado === 'all') {
+  //     return pedidos
+  //   }
+
+  //   return pedidos.filter(pedido => pedido.status === pedidoSelecionado)
+  // }
+
+  const motoboySelecionado = () =>{
+    if(pedidoSelecionado === 'all'){
       return pedidos
     }
 
-    return pedidos.filter(pedido => pedido.status === pedidoSelecionado)
+    return pedidos.filter(pedido => pedido.motoboy_id === pedidoSelecionado)
   }
 
   $: if (pedidoSelecionado) {
-    pedidosFiltrados = pedidosPorStatus()
+    pedidosFiltrados = motoboySelecionado()
   }
 
   function togglePendente() {
@@ -125,7 +133,7 @@
           {#if pedidoSelecionado === 'all'}
           <h1 class="text-3xl font-bold">Pedidos:</h1>
           {:else}
-          <h1 class="text-3xl font-bold">Pedidos {pedidoSelecionado}:</h1>
+          <h1 class="text-3xl font-bold">Pedidos:</h1>
           {/if}
           {#if isFetching}
           <div class="flex items-center gap-3">
@@ -145,22 +153,24 @@
               class="rounded-lg border bg-white p-2"
               bind:value={pedidoSelecionado}
             >
-              <option value="all">Todos pedidos</option>
+              <option value="all">Todos motoboys</option>
               <!--<option value="varejo">Varejo</option>
-                <option value="atacado">Atacado</option> -->
+              <option value="atacado">Atacado</option> -->
               <hr />
-              <option value="CONFIRMED">Pedidos aceitos</option>
-              <option value="ON THE WAY">A caminho</option>
+              {#each motoboys as motoboy}
+              <option value={motoboy.id}>{motoboy.username}</option>
+              {/each}
+              <!-- <option value="CONFIRMED">Pedidos aceitos</option>
+              <option value="ON THE WAY">A caminho</option> -->
             </select>
           </div>
         </div>
       </div>
   
-      {#if pedidoSelecionado != 'all' && pedidoSelecionado != 'varejo' && pedidoSelecionado != 'atacado'}
+      <!-- {#if pedidoSelecionado != 'all' && pedidoSelecionado != 'varejo' && pedidoSelecionado != 'atacado'}
         {#each pedidosFiltrados as pedido}
-          <CardSimplePedidos order={pedido} columns={4} />
-        {/each}
-      {:else if pedidoSelecionado === 'all' || pedidoSelecionado === 'varejo' || pedidoSelecionado === 'atacado'}
+          <CardSimplePedidos order={pedido} motoboy={pedido.motoboy?.username}/>
+        {/each} -->
         <div class="grid grid-cols-1 gap-2 xl:grid-cols-3">
           <div
             class={`overflow-y-auto rounded-lg bg-error p-1 ${pedidosAbertos.length > 0 ? 'max-h-[71vh]' : 'max-h-[78vh]'}`}
@@ -168,10 +178,10 @@
             <h1 class="text-center text-black">Pedidos Pendentes:</h1>
             <div class="flex-col flex gap-2">
 
-              {#each pedidos as pedido}
+              {#each pedidosFiltrados as pedido}
                 {#if pedido.status === 'PENDING'}
                   <CardSimplePedidos
-                  columns={1}
+                  motoboy={pedido.motoboy?.username}
                     button_text="Aceitar pedido"
                     button_recusar="Recusar pedido"
                     order={pedido}
@@ -203,10 +213,10 @@
             <h1 class="text-center text-black">Pedidos aceitos:</h1>
             <div class="flex-col flex gap-2">
 
-              {#each pedidos as pedido}
+              {#each pedidosFiltrados as pedido}
                 {#if pedido.status === 'CONFIRMED'}
                   <CardSimplePedidos
-                  columns={1}
+                  motoboy={pedido.motoboy?.username}
                     button_text="A caminho"
                     order={pedido}
                     click_confirm={async () => {
@@ -228,10 +238,10 @@
             <h1 class="text-center text-black">A caminho:</h1>
             <div class="flex-col flex gap-2">
 
-              {#each pedidos as pedido}
+              {#each pedidosFiltrados as pedido}
                 {#if pedido.status === 'ON THE WAY'}
                   <CardSimplePedidos
-                  columns={1}
+                  motoboy={pedido.motoboy?.username}
                     button_text="Entregue"
                     order={pedido}
                     click_confirm={async () => {
@@ -247,29 +257,7 @@
               {/each}
             </div>
           </div>
-          <!-- <div
-            class={`overflow-y-auto rounded-lg bg-success p-1 ${pedidosAbertos.length > 0 ? 'max-h-[71vh]' : 'max-h-[78vh]'}`}
-          >
-            <h1 class="text-center text-black">Entregue:</h1>
-            {#each pedidosFiltrados as pedido}
-              {#if pedido.status === 'DELIVERED'}
-                <CardShowPedidos
-                  button_text="Finalizar"
-                  order={pedido}
-                  click_confirm={async () => {
-                    console.log('click aceitar')
-                    pedido.status = 'ENDED'
-                    await changeStatusPedido({
-                      order_id: pedido.id,
-                      status: 'ENDED',
-                    })
-                  }}
-                />
-              {/if}
-            {/each}
-          </div> -->
         </div>
-      {/if}
     </div>
   </main>
 {/if}
