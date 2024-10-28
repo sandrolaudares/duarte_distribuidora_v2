@@ -16,18 +16,15 @@
   import CardShowPedidos from '$lib/components/cards/CardShowPedidos.svelte'
   import { onMount } from 'svelte'
   import DateFilter from '../../orders/allorders/DateFilter.svelte'
+  import { TableHandler, Datatable, ThSort, ThFilter,Th,RowsPerPage,Pagination } from '@vincjo/datatables'
+  import NoResults from '$lib/components/NoResults.svelte'
+  import { format } from 'date-fns'
 
   let { customer, orders } = data
   let newcustomer = customer
 
   let selectedFilter = 'all';
 
-
-  $: filteredOrders = selectedFilter === 'fiado'
-    ? orders.filter(order => order.is_fiado)
-    : orders;
-
-  $: total = filteredOrders.reduce((acc, order) => acc + order.total, 0);
   let isChanged = false
 
   customer = { ...newcustomer }
@@ -93,16 +90,19 @@
       toast.error(error.message)
     }
   }
+  let filtered = orders
+  const table = new TableHandler(filtered, { rowsPerPage: 7 })
+  let filteredOrders = (start:number,end:number) => {
+        return orders.filter(order => {
+            return order.created_at.getTime() >= start && order.created_at.getTime() <= end;
+          });
+        };
+        
+  $: filteredTotal = filtered.reduce((acc,total)=> acc + total.total,0)
+  $:console.log(filteredTotal,filtered)
+  //TODO: fix filtered total
 </script>
-
-<!-- <pre>
-  {JSON.stringify(data.customer, null, 2)}
-</pre> -->
-<!-- <pre>
-  {JSON.stringify(data.orders, null, 2)}
-</pre> -->
-
-<main class="mt-10 min-h-screen">
+<main class=" h-full max-h-[calc(100vh-35vh)] mt-20">
   <div class="mx-4 flex justify-between items-center">
     <h1 class="text-xl font-bold">Informacões do cliente:</h1>
     <div class="flex gap-2">
@@ -285,29 +285,77 @@
     </div>
   </div>
 
-  {#if orders.length > 0}
-  <div class="flex justify-between m-3 items-center">
-    <h2 class="text-2xl font-bold">Pedidos de {customer.name}: TOTAL: R${(total/100).toFixed(2)}</h2>
-    <DateFilter/>
-    <select bind:value={selectedFilter} class="select select-bordered w-full max-w-xs">
-      <option disabled selected>Filtrar pedidos</option>
-      <option value="all">Todos</option>
-      <option value="fiado">Pedidos fiado</option>
-    </select>
+  <div class="mt-10 h-full max-h-[calc(100vh-40vh)]">
+
+    <Datatable basic {table} headless>
+      {#snippet header()}
+  {/snippet}
+      <table class="table table-zebra">
+          <thead>
+              <tr>
+                  <ThSort {table} field="id">ID</ThSort>
+                  <Th>Status</Th>
+                  <Th>Data:</Th>
+                  <Th>Observações:</Th>
+                  <ThSort {table} field="total">Total do pedido</ThSort>
+                  <Th>Detalhes</Th>
+              </tr>
+              <tr>
+                  <ThFilter {table} field="id"/>
+                  <ThFilter {table} field="status" />
+                  <Th><DateFilter onchange={(start,end)=>{ 
+                    if(start && end ){
+                      filtered = filteredOrders(start,end)
+                      console.log(filtered)
+                      table.setRows(filtered)
+                    }
+                    }}/>
+                  </Th>
+                  <ThFilter {table} field="observation"/>
+                  <Th/>
+                  <Th/>
+              </tr>
+          </thead>
+          <tbody>
+              {#each table.rows as row}
+                  <tr>
+                      <td>{row.id}</td>
+                      <td>{row.status}</td>
+                      <td>{format(row.created_at,'dd/MM/yyyy')}</td>
+                      <td>{row.observation}</td>
+                      <td class="text-lg font-semibold">R${(row.total/100).toFixed(2)}</td>
+                      <td>
+                        <a href="/admin/orders/{row.id}" class="badge badge-primary">
+                          Detalhes
+                        </a>
+                      </td>
+                  </tr>
+              {/each}
+              <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="text-xl font-bold">
+                  Total: <span class="text-secondary">
+                    R${(filteredTotal / 100).toFixed(2)}
+                  </span>
+                  fix total
+                </td>
+                <td></td>
+              </tr>
+          </tbody>
+      </table>
+      {#if table.rows.length === 0}
+        <NoResults type={'Pedido'}/>
+      {/if}
+      {#snippet footer()}
+        <Pagination {table} />
+      {/snippet}
+  </Datatable>
   </div>
-
-    <div class="grid grid-cols-3 gap-2 mx-3 mb-3">
-      {#each filteredOrders as order}
-          <CardShowPedidos {order} {customer} columns={4} />
-      {/each}
-    </div>
-  {:else}
-    <h1 class="my-2 text-center text-xl">
-      Este cliente não possui nenhum pedido...
-    </h1>
-  {/if}
 </main>
-
+<!-- 
 <style>
   .editable-input {
     border: none;
@@ -344,4 +392,4 @@
     border-bottom: 1px solid transparent;
     transition: border-bottom-color 0.2s;
   }
-</style>
+</style> -->

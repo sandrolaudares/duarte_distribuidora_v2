@@ -191,18 +191,24 @@ export const customer = (db: TenantDbType) => ({
       .where(eq(customerOrderTable.id, order_id))
   },
 
-  getCustomerOrders: async (customerId: SelectCustomer['id']) => {
-    return db.query.customerOrderTable.findMany({
-      where: eq(customerOrderTable.customer_id, customerId),
-      with: {
-        address: true,
-        items: {
-          with: {
-            product: true,
-          },
-        },
-      },
-    })
+  // getCustomerOrders: (customerId: SelectCustomer['id']) => {
+  //   return db.query.customerOrderTable.findMany({
+  //     where: eq(customerOrderTable.customer_id, customerId),
+  //     with: {
+  //       address: true,
+  //       items: {
+  //         with: {
+  //           product: true,
+  //         },
+  //       },
+  //     },
+  //   })
+  // },
+  getCustomerOrders: (customerId: SelectCustomer['id']) => {
+    return db
+      .select()
+      .from(customerOrderTable)
+      .where(eq(customerOrderTable.customer_id, customerId))
   },
 
   getCurrentOrders: async () => {
