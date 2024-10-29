@@ -12,6 +12,7 @@
   import { onMount } from 'svelte'
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
   import Loading from '$lib/components/Loading.svelte'
+  import UsedCredits from '$lib/components/UsedCredits.svelte'
 
   export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
   export let caixa
@@ -171,9 +172,12 @@
     <div class=" rounded-box bg-base-200 p-4">
       {#if clienteSelecionado}
         <div class="flex items-center justify-between gap-2">
-          <p class="font-bold">
-            {clienteSelecionado.name} - {clienteSelecionado.email}
-          </p>
+          <span>
+            <p class="font-bold">
+              {clienteSelecionado.name} - {clienteSelecionado.email}
+            </p>
+            Créditos usados: <UsedCredits id={clienteSelecionado.id}/>
+          </span>
           <button
             class="btn btn-primary"
             on:click={() => {
