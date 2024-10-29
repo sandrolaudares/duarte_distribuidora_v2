@@ -76,6 +76,7 @@ export const addressTable = sqliteTable('endereco', {
   city: text('city').notNull(),
   state: text('state').notNull(),
   country: text('country').notNull(),
+  distance: integer('distance')
 })
 
 export const addressRelations = relations(addressTable, ({ one, many }) => ({

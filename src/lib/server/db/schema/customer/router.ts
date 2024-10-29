@@ -98,6 +98,39 @@ export const customer = router({
         console.error('Failed to insert address:', error)
       }
     }),
+    updateAddress: publicProcedure
+    .meta({
+      routeName: 'Atualizar Endereço',
+      permission: 'editar_clientes',
+    })
+    .use(middleware.auth)
+    .use(middleware.logged)
+    .input(
+      z.object({
+        id: z.number(),
+        address: z.object({
+          cep: z.string().optional(),
+          street: z.string().optional(),
+          number: z.string().optional(),
+          complement: z.string().optional(),
+          neighborhood: z.string().optional(),
+          city: z.string().optional(),
+          state: z.string().optional(),
+          country: z.string().optional(),
+          distance: z.number().optional(),
+        }),
+      }),
+    )
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
+      if(input.id){
+        const { id, address } = input
+        try {
+          return await customerController(tenantDb).updateAddress(id,address)
+        } catch (error) {
+          console.error('Failed to insert address:', error)
+        }
+      }
+    }),
   // getPaginatedCustomers: publicProcedure
   //   .input(paramsSchema)
   //   .query(async ({ input }) => {

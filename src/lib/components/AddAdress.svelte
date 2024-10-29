@@ -39,7 +39,7 @@
   async function addAddress() {
     isLoading = true
     try {
-      const newAddress = await trpc($page).customer.insertAddress.mutate({
+      let newAddress = await trpc($page).customer.insertAddress.mutate({
         customer_id: customer_id,
         cep: formEndereco.cep,
         street: formEndereco.street,
@@ -49,20 +49,42 @@
         city: formEndereco.city,
         state: formEndereco.state, //select
         country: 'BR',
+        distance: 0,
       })
       toast.success('Endereco adicionado com sucesso!')
-
+      
       if(!newAddress) return
-
+      
       formEndereco.id = newAddress.id
-
+      
       console.log(formEndereco);
-
+      
       dispatch('addressAdded', {
         customer_id,
         newAddress: formEndereco})
         isLoading=false
-    //   window.location.reload()
+      let distance = await trpc($page).customer.calculateDistance.mutate({ 
+        cep: formEndereco.cep,
+        street: formEndereco.street,
+        number: formEndereco.number,
+        bairro: formEndereco.neighborhood,
+        city: formEndereco.city,
+        state: formEndereco.state, //select
+        country: 'BR',
+      })
+
+      distance = Math.round(distance)
+
+      if(distance && newAddress) {
+        await trpc($page).customer.updateAddress.mutate({
+          id:newAddress.id,
+          address:{
+            distance:distance,
+          }
+        })
+      }
+
+        //   window.location.reload() 
     } catch (error: any) {
       toast.error(error.message)
       return error.message

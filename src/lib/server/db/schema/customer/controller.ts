@@ -118,6 +118,12 @@ export const customer = (db: TenantDbType) => ({
     const [newAddress] = await db.insert(addressTable).values(input).returning()
     return newAddress
   },
+  updateAddress: (
+    id: number,
+    input: Partial<InsertAddress>,
+  ) => {
+    return db.update(addressTable).set(input).where(eq(addressTable.id, id))
+  },
   getCustomerAddress: async (customerId: SelectCustomer['id']) => {
     return db
       .select()
