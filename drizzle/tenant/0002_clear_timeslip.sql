@@ -1,0 +1,1 @@
+ALTER TABLE `endereco` ADD `distance` integer;
