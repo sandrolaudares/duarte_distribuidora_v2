@@ -20,6 +20,8 @@ import {
   lte,
   sum,
   sql,
+  asc,
+  desc,
 } from 'drizzle-orm'
 import { customer } from '$lib/server/db/controller'
 import { gte } from 'drizzle-orm'
@@ -53,7 +55,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         : undefined,
         cashier ? like(schema.cashierTable.name, `${cashier}%`) : undefined,
       ),
-    )
+    ).orderBy(desc(schema.customerOrderTable.created_at))
     .$dynamic();
 
   if (sortId && sortOrder) {

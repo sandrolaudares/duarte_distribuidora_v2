@@ -105,11 +105,11 @@
         <tr>
           <Th />
           <ThSort {table} field="id">ID</ThSort>
+          <Th>Cliente</Th>
           <Th>Data do pedido</Th>
           <ThSort {table} field="expire_at">Data de vencimento</ThSort>
           <Th>Dias para vencimento</Th>
           <Th>Status do pedido</Th>
-          <Th>Cliente</Th>
           <ThSort {table} field="total">Valor do pedido</ThSort>
 
           <Th>Ver detalhes</Th>
@@ -117,6 +117,7 @@
         <tr>
           <Th />
           <Th />
+          <ThFilter {table} field="name" />
           <Th>
             <DateFilter
               onchange={(start, end) => {
@@ -131,7 +132,6 @@
           <Th></Th>
           <Th />
           <Th />
-          <ThFilter {table} field="name" />
           <Th />
 
           <Th />
@@ -152,6 +152,7 @@
               <!--TODO: Show the sum of the selected rows-->
             </td>
             <td>{row.id}</td>
+            <td><b>{row.name}</b></td>
             <td><b>{format(row.created_at, 'dd/MM/yyyy')}</b></td>
             <td>
               <b>
@@ -177,7 +178,6 @@
               </b>
             </td>
             <td><b>{row.status}</b></td>
-            <td><b>{row.name}</b></td>
             <td><b class="text-xl text-success">R${row.total / 100}</b></td>
 
             <td>

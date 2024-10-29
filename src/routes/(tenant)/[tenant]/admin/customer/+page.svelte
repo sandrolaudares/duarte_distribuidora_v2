@@ -130,10 +130,10 @@
         <tr>
           <ThSort {table} field="id">ID</ThSort>
           <ThSort {table} field="name">Nome</ThSort>
-          <ThSort {table} field="email">Email</ThSort>
-          <Th>CPF/CNPJ</Th>
+          <!-- <ThSort {table} field="email">Email</ThSort>
+          <Th>CPF/CNPJ</Th> -->
           <ThSort {table} field="is_retail">Tipo pessoa</ThSort>
-          <Th>RG/IE</Th>
+          <!-- <Th>RG/IE</Th> -->
           <Th>Telefone</Th>
           <Th>Créditos usados</Th>
           <ThSort {table} field="max_credit">Máximo de créditos</ThSort>
@@ -142,10 +142,10 @@
         <tr>
           <Th />
           <ThFilter {table} field="name" />
-          <ThFilter {table} field="email" />
-          <ThFilter {table} field="cpf_cnpj" />
+          <!-- <ThFilter {table} field="email" />
+          <ThFilter {table} field="cpf_cnpj" /> -->
           <Th />
-          <Th />
+          <!-- <Th /> -->
           <ThFilter {table} field="phone" />
           <Th />
           <Th />
@@ -166,7 +166,7 @@
                 />
               </b>
             </td>
-            <td>
+            <!-- <td>
               <b>
                 <EditableCell
                   value={row.email}
@@ -176,9 +176,9 @@
                 />
               </b>
             </td>
-            <td><b>{row.cpf_cnpj}</b></td>
-            <td><b>{row.is_retail}</b></td>
-            <td><b>{row.rg_ie}</b></td>
+            <td><b>{row.cpf_cnpj}</b></td> -->
+            <td><b>{row.is_retail ? 'Pessoa física': 'Pessoa Juridica'}</b></td>
+            <!-- <td><b>{row.rg_ie}</b></td> -->
             <td><b>{row.phone}</b></td>
             <td><b><UsedCredits id={row.id} /></b></td>
             <td><b>R${(row.max_credit / 100).toFixed(2)}</b></td>
