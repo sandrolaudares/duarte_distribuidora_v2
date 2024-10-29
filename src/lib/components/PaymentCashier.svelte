@@ -124,11 +124,12 @@
               ? enderecoSelecionado.id
               : undefined,
             total: total_pedido - taxaEntrega,
-            observation: 'Este é um pedido FIADO!',
+            observation: 'TO DO',
             motoboy_id: motoboySelecionado?.id,
             type: 'ATACADO',
             taxa_entrega: isDelivery ? taxaEntrega : 0,
             //TODO: Type
+            //TODO: Observation
           },
         })
         nulla()
