@@ -22,6 +22,7 @@
   import NoResults from '$lib/components/NoResults.svelte'
   import DateFilter from '$lib/components/DateFilter.svelte'
   import { format } from 'date-fns'
+  import ChangeExpireDate from './ChangeExpireDate.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -31,7 +32,6 @@
     rowsPerPage: 10,
     totalRows: data.count,
   })
-
 
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
@@ -67,6 +67,26 @@
     }
     return 'table-zebra'
   }
+
+  async function handleUpdate(
+    newItem: any,
+    key: string,
+    idx: number,
+    currentItem: any,
+  ) {
+    try {
+      await trpc($page).customer.updateCustomer.mutate({
+        id: newItem.id,
+        customer: { [key]: newItem[key] },
+      })
+      toast.success('Atualizado com sucesso!')
+    } catch (error: any) {
+      toast.error('Erro ao atualizar')
+      console.error(error)
+      table.rows[idx] = currentItem
+    }
+    table.rows = table.rows
+  }
 </script>
 
 <h1 class="my-5 text-center text-2xl font-medium">
@@ -83,6 +103,7 @@
     <table class="table border">
       <thead>
         <tr>
+          <Th />
           <ThSort {table} field="id">ID</ThSort>
           <Th>Data do pedido</Th>
           <ThSort {table} field="expire_at">Data de vencimento</ThSort>
@@ -95,6 +116,7 @@
         </tr>
         <tr>
           <Th />
+          <Th />
           <Th>
             <DateFilter
               onchange={(start, end) => {
@@ -106,18 +128,7 @@
               }}
             />
           </Th>
-          <Th >
-            <!-- <DateFilter
-            enableFutureDates={true}
-            enablePastDates={false}
-            isRange={false}
-            onchange={(start, end) => {
-                let expireAt = start.toString()
-                let endExpire = end.toString()
-                filters.update({ expireAt, endExpire  })
-            }}
-          /> -->
-        </Th>
+          <Th></Th>
           <Th />
           <Th />
           <ThFilter {table} field="name" />
@@ -128,7 +139,18 @@
       </thead>
       <tbody>
         {#each data.rows as row}
-          <tr class={row.expire_at ? getBgColor(row.expire_at) : ''}>
+          <tr
+            class={row.expire_at ? getBgColor(row.expire_at) : ''}
+            class:bg-opacity-30={table.selected.includes(row.id)}
+          >
+            <td>
+              <input
+                type="checkbox"
+                checked={table.selected.includes(row.id)}
+                onclick={() => table.select(row.id)}
+              />
+              <!--TODO: Show the sum of the selected rows-->
+            </td>
             <td>{row.id}</td>
             <td><b>{format(row.created_at, 'dd/MM/yyyy')}</b></td>
             <td>
@@ -136,6 +158,9 @@
                 {row.expire_at
                   ? format(new Date(row.expire_at), 'dd/MM/yyyy')
                   : 'Não registrado'}
+                <!-- <ChangeExpireDate value={format(new Date(row.expire_at),'dd/MM/yyyy')} onUpdateValue={async()=>{
+                
+                  }}/> -->
               </b>
             </td>
             <td>
