@@ -1,97 +1,35 @@
 <script lang="ts">
-  import { enhance } from '$app/forms'
-  // import Info from '$lib/client/components/Info.svelte'
-
-  import { website } from '$lib/config'
-  import { icons } from '$lib/utils'
-  import type { PageData, ActionData } from './$types'
-
+  import type { PageData } from './$types'
+  import { page } from '$app/stores'
+  import { format } from 'date-fns'
   export let data: PageData
-
-  export let form: ActionData
 </script>
 
-<main class="container mx-auto">
-  <h1 class="text-center text-4xl">
-    {website.siteTitle} - Create Tenant
-  </h1>
 
-  <form
-    method="post"
-    action="?/create_tenant"
-    use:enhance
-    class="flex flex-col"
-  >
-    {#if form}
-      <pre>
-    {JSON.stringify(form, null, 2)}
-  </pre>
-    {/if}
-
-    {#if form?.data?.domain}
-      <!-- succsess your domain can be found here  -->
-      <a href={form.data.domain} target="_blank" class="btn mt-4">
-        {form.data.domain}
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-4xl font-bold mb-8 text-center ">Distribuidoras</h1>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    {#each data.tenats as tenant}
+      <a 
+        href="http://{tenant.subdomain}.localhost:5173"
+        class="block group"
+      >
+        <div class="bg-base-200 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          
+          <div class="p-6">
+            <h2 class="text-2xl font-semibold mb-3  group-hover:text-primary transition-colors duration-300">
+              {tenant.name}
+            </h2>
+            <p class="text-sm  mb-2 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+              Subdomínio: {tenant.subdomain}
+            </p>
+          </div>
+        </div>
       </a>
-    {:else}
-      <label for="tenantName">Company Name</label>
-      <input
-        type="text"
-        id="tenantName"
-        name="tenantName"
-        class="input input-bordered"
-        required
-        value={form?.form?.tenantName ?? ''}
-      />
+    {/each}
+  </div>
+</div>
 
-      <label for="subdomain">Subdomain</label>
-      <input
-        type="text"
-        id="subdomain"
-        name="subdomain"
-        class="input input-bordered"
-        required
-        value={form?.form?.subdomain ?? ''}
-      />
-
-      <label for="name">Name</label>
-      <input
-        type="text"
-        id="name"
-        name="name"
-        class="input input-bordered"
-        required
-        value={form?.form?.name ?? ''}
-      />
-
-      <label for="email">Email</label>
-      <input
-        type="email"
-        id="email"
-        name="email"
-        class="input input-bordered"
-        required
-        value={form?.form?.email ?? ''}
-      />
-
-      <label for="password">Password</label>
-      <input
-        type="password"
-        id="password"
-        name="password"
-        class="input input-bordered"
-        required
-      />
-
-      <label for="confirmPassword">Confirm Password</label>
-      <input
-        type="password"
-        id="confirmPassword"
-        name="confirmPassword"
-        class="input input-bordered"
-        required
-      />
-      <button type="submit" class="btn mt-4">Submit</button>
-    {/if}
-  </form>
-</main>

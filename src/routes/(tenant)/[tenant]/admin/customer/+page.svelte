@@ -202,3 +202,8 @@
     {/snippet}
   </Datatable>
 </main>
+<style>
+  thead {
+    background-color: oklch(var(--b1)) !important;
+  }
+</style>

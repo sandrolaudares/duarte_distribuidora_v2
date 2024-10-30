@@ -13,7 +13,7 @@
             <a href="/" class="block py-2 px-3  rounded  p-0">home</a>
           </li>
           <li>
-            <a href="/distribuidoras" class="block py-2 px-3  rounded  p-0" aria-current="page">distribuidoras</a>
+            <a href="/create" class="block py-2 px-3  rounded  p-0" aria-current="page">criar distribuidoras</a>
           </li>
           <li>
             <a href="/transferir" class="block py-2 px-3  rounded  p-0">transferir estoque</a>
