@@ -2,14 +2,19 @@ import { fail, redirect } from '@sveltejs/kit'
 import type { PageServerLoad, Actions } from './$types'
 
 import { isWithinExpirationDate } from 'oslo'
-import { hash } from '@node-rs/argon2'
+import { hash } from '$lib/server/db/schema/user/password'
 import { sha256 } from 'oslo/crypto'
 import { encodeHex } from 'oslo/encoding'
 
 import { user } from '$db/controller'
-import { lucia } from '$lib/server/auth'
+import { setSessionTokenCookie } from '$lib/server/auth/cookies'
 
-export const load = (async ({ params, setHeaders }) => {
+export const load = (async event => {
+  const {
+    params,
+    setHeaders,
+    locals: { tenantDb },
+  } = event
   const verificationToken = params.token
   console.log(verificationToken)
 
@@ -21,9 +26,9 @@ export const load = (async ({ params, setHeaders }) => {
     await sha256(new TextEncoder().encode(verificationToken)),
   )
 
-  const [token] = await user.getPasswordResetToken(tokenHash)
+  const [token] = await user(tenantDb!).getPasswordResetToken(tokenHash)
 
-  const [resetUser] = await user.getUserById(token.userId)
+  const [resetUser] = await user(tenantDb!).getUserById(token.userId)
 
   return {
     email: resetUser.email,
@@ -32,7 +37,15 @@ export const load = (async ({ params, setHeaders }) => {
 }) satisfies PageServerLoad
 
 export const actions: Actions = {
-  default: async ({ request, params, cookies, setHeaders }) => {
+  default: async event => {
+    const {
+      request,
+      params,
+
+      setHeaders,
+      locals: { tenantAuthManager, tenantDb },
+    } = event
+
     const formData = await request.formData()
     const password = formData.get('password')
 
@@ -61,14 +74,14 @@ export const actions: Actions = {
     //   .where('token_hash', '=', tokenHash)
     //   .get()
 
-    const [token] = await user.getPasswordResetToken(tokenHash)
+    const [token] = await user(tenantDb!).getPasswordResetToken(tokenHash)
 
     if (token) {
       // await db
       //   .table('password_reset_token')
       //   .where('token_hash', '=', tokenHash)
       //   .delete()
-      await user.deletePasswordResetToken(tokenHash)
+      await user(tenantDb!).deletePasswordResetToken(tokenHash)
     }
 
     if (!token || !isWithinExpirationDate(token.expiresAt)) {
@@ -77,27 +90,28 @@ export const actions: Actions = {
       })
     }
 
-    await lucia.invalidateUserSessions(token.userId)
-    const passwordHash = await hash(password, {
-      // recommended minimum parameters
-      memoryCost: 19456,
-      timeCost: 2,
-      outputLen: 32,
-      parallelism: 1,
-    })
+    await tenantAuthManager!.invalidateUserSessions(token.userId)
+    const passwordHash = await hash(password)
     // await db.table('user').where('id', '=', token.user).update({
     //   password_hash: passwordHash,
     // })
-    await user.updateUser(token.userId, {
+    await user(tenantDb!).updateUser(token.userId, {
       password_hash: passwordHash,
     })
 
-    const session = await lucia.createSession(token.userId, {})
-    const sessionCookie = lucia.createSessionCookie(session.id)
-    cookies.set(sessionCookie.name, sessionCookie.value, {
-      path: '.',
-      ...sessionCookie.attributes,
-    })
+    const sessionToken = tenantAuthManager!.generateSessionToken()
+    const session = await tenantAuthManager?.createSession(
+      sessionToken,
+      token.userId,
+    )
+    setSessionTokenCookie(event, sessionToken, session!.expiresAt)
+
+    // const session = await tenantAuthManager!.createSession(token.userId, {})
+    // const sessionCookie = tenantAuthManager!.createSessionCookie(session.id)
+    // cookies.set(sessionCookie.name, sessionCookie.value, {
+    //   path: '.',
+    //   ...sessionCookie.attributes,
+    // })
 
     return redirect(302, '/myprofile')
   },
