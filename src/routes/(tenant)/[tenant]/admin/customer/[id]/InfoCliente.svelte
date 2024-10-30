@@ -235,6 +235,7 @@
             <th>Numero</th>
             <th>Complemento</th>
             <th>UF</th>
+            <th>Distancia</th>
           </tr>
         </thead>
         <tbody>
@@ -251,6 +252,7 @@
                 {address.complement}
               </td>
               <td>{address.state}</td>
+              <td>{(address.distance/1000).toFixed(0)}Km</td>
             </tr>
           {/each}
         </tbody>

@@ -31,6 +31,7 @@
   const table = new TableHandler(data.rows, {
     rowsPerPage: 10,
     totalRows: data.count,
+    selectBy: 'id',
   })
 
   table.setPage(Number(filters.get('page')) || 1)
@@ -59,13 +60,13 @@
     console.log(daysDiff)
 
     if (daysDiff < 0) {
-      return 'bg-error text-error-content bg-opacity-50'
+      return 'bg-error text-error-content bg-opacity-50 '
     } else if (daysDiff <= 4) {
-      return 'bg-warning text-warning-content bg-opacity-50'
+      return 'bg-warning text-warning-content bg-opacity-50 '
     } else if (daysDiff <= 7) {
-      return 'table-zebra'
+      return 'table-zebra '
     }
-    return 'table-zebra'
+    return 'table-zebra '
   }
 
   async function handleUpdate(
@@ -87,6 +88,12 @@
     }
     table.rows = table.rows
   }
+  function calculateSum() {
+    return data.rows
+      .filter(row => table.selected.includes(row.id))
+      .reduce((sum, row) => sum + row.total, 0)
+  }
+  let sum = $derived(calculateSum())
 </script>
 
 <h1 class="my-5 text-center text-2xl font-medium">
@@ -140,14 +147,17 @@
       <tbody>
         {#each data.rows as row}
           <tr
-            class={row.expire_at ? getBgColor(row.expire_at) : ''}
-            class:bg-opacity-30={table.selected.includes(row.id)}
+          class={table.selected.includes(row.id)
+            ? 'selected'
+            : row.expire_at ? getBgColor(row.expire_at) : ''}
           >
             <td>
               <input
                 type="checkbox"
                 checked={table.selected.includes(row.id)}
-                onclick={() => table.select(row.id)}
+                onclick={() => {
+                  table.select(row.id)
+                }}
               />
               <!--TODO: Show the sum of the selected rows-->
             </td>
@@ -194,9 +204,12 @@
           <td></td>
           <td></td>
           <td></td>
+          <td></td>
           <td class="text-xl font-bold">
             Total: <span class="text-secondary">
-              R${(data.totalSum / 100).toFixed(2)}
+              R${sum
+                ? (sum / 100).toFixed(2)
+                : (data.totalSum / 100).toFixed(2)}
             </span>
           </td>
         </tr>
@@ -212,3 +225,9 @@
     {/snippet}
   </Datatable>
 </main>
+
+<style>
+  thead {
+    background-color: oklch(var(--b1)) !important;
+  }
+</style>

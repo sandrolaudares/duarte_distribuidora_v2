@@ -56,6 +56,9 @@
 
 <main class=" mt-20 h-full max-h-[calc(100vh-35vh)]">
   <InfoCliente {customer} />
-
+  <hr class="mx-10 my-3">
+<h1 class="text-xl m-3 font-medium">
+  Pedidos de {customer.name}:
+</h1>
   <PedidoCliente {table} />
 </main>
