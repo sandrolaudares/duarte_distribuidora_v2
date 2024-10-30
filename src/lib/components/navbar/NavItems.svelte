@@ -112,6 +112,10 @@
         name: 'Caixa',
         href: '/admin/cashier',
       },
+      {
+        name: 'LOGS',
+        href:'/admin/logs'
+      }
     )
   }
 
