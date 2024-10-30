@@ -59,6 +59,8 @@ export interface DatabaseUser {
 export type UserMeta = {
   redirect?: string
   permissions?: Permission[]
+
+  caixa_id?: string
 }
 
 export const DEFAULT_PERMISSIONS: UserMeta = {

@@ -1,14 +1,18 @@
 import type { Theme } from '$lib'
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
-import { timestamps } from '../utils'
+import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+// import { timestamps } from '../utils'
 
 export const tenants = sqliteTable('tenants', {
-  ...timestamps,
+  // ...timestamps,
   tenantId: integer('tenant_id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
   subdomain: text('subdomain').notNull().unique(),
   databaseName: text('database_name').notNull().unique(),
   theme: text('theme').notNull().$type<Theme>().default('winter'),
+  address: text('address'),
+  phone: text('phone'),
+  lat: real('lat'),
+  lng: real('lng'),
 })
 
 export type SelectTenant = typeof tenants.$inferSelect

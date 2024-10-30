@@ -135,35 +135,38 @@ npm run db:check
 Feel free to submit issues or pull requests. Contributions are welcome!
 
 
-## TODOs
-
+## AGORA
 - TELA CLIENTE TROCAR CARD POR TABLE DE PEDIDOS - ✅
-- TELA RESUMO DE CADA MOTOBOY ENTREGAS
 - ARREDONDAR VALOR DA TAXA DE ENTREGA ✅
-- DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES
 - NOME MOTOBOY NO CARD TELA PEDIDOS ✅
 - FILTRAR POR MOTOBOY NA TELA DE PEDIDOS ✅
+- MOSTRAR CRÉDITO DO CLIENTE NA TELA DO CAIXA ✅
+- ADICIONAR NO METADATA DO USUARIO UM CAIXA DESIGNADO A ELE ✅
+  -- Falta adicionar a opcao na tela de permissoes
+- REFATORAR ONDE MOSTRA AS INFOS DO CLINTE NA PAGINA DO CAIXA
+- DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES
 - PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS
-- ADICIONAR NO METADATA DO USUARIO UM CAIXA DESIGNADO A ELE
+- CADASTRAR MOTOBOY
+- CHECAR O SUM PAGINA CUSTOMER/ID
 - TELA FIADO FILTRAR PAGAMENTOS ATRASADOS 
 - EDITAR DATA VENCIMENTO (EXIPIRE_AT)
-- MOSTRAR CRÉDITO DO CLIENTE NA TELA DO CAIXA ✅
-- SALVAR LAT E LONG DA DISTRIBUIDORA NO DB
+
+- SALVAR LAT E LONG DA DISTRIBUIDORA NO DB 
 - REPASSE ESTOQUE ENTRE DISTRIBUIDORAS
-- CADASTRAR MOTOBOY
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE
 - TRANSAÇÕES DO CAIXA (TELAS)
-- Alerta de compra em excesso ex, bloqueio automático caso tenha notas em atraso. (Desbloqueio somente com senha de gerente). 
-- SCORE DO CLIENTE/PONTUACAO. - Cliente pagou fiado em dia ganha 5 pontos, pagou atrasado perde 5 pontos. Esse score atualiza automaticamente toda vez que ele efetuar um pagamento. Pra auxiliar na tomada de decisões junto aos clientes pj que compram fiado.
-- Opção de emissão de Nota Fiscal eletrônica e Cupom Fiscal (Opcionais). Emissão de .xml para enviar para contabilidade.
 - Parte do cliente fazer pedido
 - Adicionar campo de distancia na tabela endereço (calcular ao adicionar endereço talvez)
 - CHECKBOX TABELA FIADO PRA MOSTRAR TOTAL APENAS DAS SELECIONADAS
 - COMPONENTE PARA EDITAR DADOS NAS TABLES ✅
 - APLICAR EDITABLECELL NAS TABLES EXISTENTES
 - TABLE FIADO PODER SELECIONAR E MOSTRAR TOTAL DOS SELECIONADOS ✅
-- CHECAR O SUM PAGINA CUSTOMER/ID
-- REFATORAR ONDE MOSTRA AS INFOS DO CLINTE NA PAGINA DO CAIXA
+- Alerta de compra em excesso ex, bloqueio automático caso tenha notas em atraso. (Desbloqueio somente com senha de gerente). 
+
+- TELA RESUMO DE CADA MOTOBOY ENTREGAS
+
+## DEPOIS
+- SCORE DO CLIENTE/PONTUACAO. - Cliente pagou fiado em dia ganha 5 pontos, pagou atrasado perde 5 pontos. Esse score atualiza automaticamente toda vez que ele efetuar um pagamento. Pra auxiliar na tomada de decisões junto aos clientes pj que compram fiado.
 
 
 # RELATORIOS:
@@ -175,4 +178,7 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - Relatório venda x recebimento por período.
 - Relatório de delivery por motoboy por período.
 - Relatório estoque preço de custo, e preço de venda
+
+# SANDRO
+- Opção de emissão de Nota Fiscal eletrônica e Cupom Fiscal (Opcionais). Emissão de .xml para enviar para contabilidade.
 
