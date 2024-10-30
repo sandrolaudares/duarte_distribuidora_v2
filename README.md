@@ -136,13 +136,20 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 
 
 ## AGORA
+- TABLE FIADO PODER SELECIONAR E MOSTRAR TOTAL DOS SELECIONADOS ✅
+- SALVAR LAT E LONG DA DISTRIBUIDORA NO DB  ✅
 - TELA CLIENTE TROCAR CARD POR TABLE DE PEDIDOS - ✅
 - ARREDONDAR VALOR DA TAXA DE ENTREGA ✅
 - NOME MOTOBOY NO CARD TELA PEDIDOS ✅
+- COMPONENTE PARA EDITAR DADOS NAS TABLES ✅
 - FILTRAR POR MOTOBOY NA TELA DE PEDIDOS ✅
 - MOSTRAR CRÉDITO DO CLIENTE NA TELA DO CAIXA ✅
+
+
 - ADICIONAR NO METADATA DO USUARIO UM CAIXA DESIGNADO A ELE ✅
   -- Falta adicionar a opcao na tela de permissoes
+  -- Butao do caixa admin na navbar dar redirect direto pro caixa dele
+- COPIAR SIDE BAR SHADCN
 - REFATORAR ONDE MOSTRA AS INFOS DO CLINTE NA PAGINA DO CAIXA
 - DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES
 - PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS
@@ -150,19 +157,19 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - CHECAR O SUM PAGINA CUSTOMER/ID
 - TELA FIADO FILTRAR PAGAMENTOS ATRASADOS 
 - EDITAR DATA VENCIMENTO (EXIPIRE_AT)
-
-- SALVAR LAT E LONG DA DISTRIBUIDORA NO DB 
-- REPASSE ESTOQUE ENTRE DISTRIBUIDORAS
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE
-- TRANSAÇÕES DO CAIXA (TELAS)
-- Parte do cliente fazer pedido
-- Adicionar campo de distancia na tabela endereço (calcular ao adicionar endereço talvez)
 - CHECKBOX TABELA FIADO PRA MOSTRAR TOTAL APENAS DAS SELECIONADAS
-- COMPONENTE PARA EDITAR DADOS NAS TABLES ✅
 - APLICAR EDITABLECELL NAS TABLES EXISTENTES
-- TABLE FIADO PODER SELECIONAR E MOSTRAR TOTAL DOS SELECIONADOS ✅
-- Alerta de compra em excesso ex, bloqueio automático caso tenha notas em atraso. (Desbloqueio somente com senha de gerente). 
 
+- TRANSAÇÕES DO CAIXA (TELAS)
+
+- Alerta de compra em excesso ex, bloqueio automático caso tenha notas em atraso. (Desbloqueio somente com senha de gerente). 
+- REPASSE ESTOQUE ENTRE DISTRIBUIDORAS
+- Adicionar campo de distancia na tabela endereço (calcular ao adicionar endereço talvez) acho legal adicionar um butao de recalcular
+
+
+
+- Parte do cliente fazer pedido
 - TELA RESUMO DE CADA MOTOBOY ENTREGAS
 
 ## DEPOIS
