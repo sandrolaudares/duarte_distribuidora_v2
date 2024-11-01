@@ -17,6 +17,7 @@
   import type { LayoutData } from './$types'
   import PreLoadingIndicator from '../../PreLoadingIndicator.svelte'
   import { navigating } from '$app/stores'
+  import SideBar from '$lib/components/sidebar/SideBar.svelte'
 
   export let data: LayoutData
 
@@ -32,10 +33,12 @@
   {/if}
   <Toaster richColors closeButton />
   <!-- <DrawerContainer> -->
-  <NavBar>
-    <ModalContainer />
-    <Transition key={data.transition_key}>
-      <slot />
-    </Transition>
-  </NavBar>
+  <!-- <NavBar> -->
+   <SideBar activeTeam={data.tenant}>
+     <ModalContainer />
+     <Transition key={data.transition_key}>
+       <slot />
+     </Transition>
+   </SideBar>
+  <!-- </NavBar> -->
   <!-- </DrawerContainer> -->

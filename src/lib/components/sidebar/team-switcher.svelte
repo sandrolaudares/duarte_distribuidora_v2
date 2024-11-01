@@ -10,10 +10,10 @@
 
 	// This should be `Component` after lucide-svelte updates types
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let { teams }: { teams: SelectTenant[] } = $props();
+	let { teams,activeTeam }: { teams: SelectTenant[],activeTeam:SelectTenant } = $props();
 	const sidebar = useSidebar();
 
-	let activeTeam = $state(teams[0]);
+	// let activeTeam = $state(teams[0]);
 	//TODO: SELECTED DISTRIBUIDORA
 </script>
 
@@ -35,9 +35,9 @@
 						</div>
 						<div class="grid flex-1 text-left text-sm leading-tight">
 							<span class="truncate font-semibold">
-								{activeTeam.name}
+								{activeTeam[0].name}
 							</span>
-							<!-- <span class="truncate text-xs">{activeTeam.plan}</span> -->
+							<!-- <span class="truncate text-xs">{activeTeam.name}</span> -->
 						</div>
 						<ChevronsUpDown class="ml-auto" />
 					</Sidebar.MenuButton>
@@ -50,9 +50,9 @@
 				sideOffset={4}
 			>
 				<DropdownMenu.Label class=" text-xs">Distribuidoras</DropdownMenu.Label>
-				{#each teams as team, index (team.name)}
+				{#each teams as team, index}
 				<a href="http://{team.subdomain}.localhost:5173">
-					<DropdownMenu.Item onSelect={() => (activeTeam = team)} class="gap-2 p-2">
+					<DropdownMenu.Item class="gap-2 p-2">
 						<div class="flex size-6 items-center justify-center rounded-sm border">
 							<!-- <team.logo class="size-4 shrink-0" /> -->
 							<Beer class="size-4"/>

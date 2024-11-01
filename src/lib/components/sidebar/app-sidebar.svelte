@@ -63,15 +63,15 @@
   import { page } from '$app/stores'
   import type { SelectTenant } from '$lib/server/db/central/schema'
   
-
   const user = getUserContext()
-
+  
   let {
     ref = $bindable(null),
     collapsible = 'icon',
+    activeTeam,
     ...restProps
-  }: ComponentProps<typeof Sidebar.Root> = $props()
-
+  }: ComponentProps<typeof Sidebar.Root> & {activeTeam:SelectTenant}= $props()
+    
   if ($user?.role === 'admin') {
     data.navMain.push(
       
@@ -148,7 +148,7 @@
 
 <Sidebar.Root bind:ref {collapsible} {...restProps}>
   <Sidebar.Header>
-    <!-- <TeamSwitcher teams={tenats} /> -->
+    <TeamSwitcher teams={tenats} {activeTeam}/>
   </Sidebar.Header>
   <Sidebar.Content>
     {#if data.navMain && data.projects && $user?.role === 'admin'}

@@ -4,7 +4,7 @@ import { centralDb as db } from '$db/central'
 export const load = (async () => {
   const tenats = await db.query.tenants.findMany({
     columns: {
-      id: true,
+      tenantId: true,
       name: true,
       subdomain: true,
     },
