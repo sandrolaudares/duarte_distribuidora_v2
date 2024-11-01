@@ -13,128 +13,124 @@
 	// This is sample data.
 	const data = {
 		user: {
-			name: "shadcn",
+			name: "todo",
 			email: "m@example.com",
 			avatar: "/avatars/shadcn.jpg",
 		},
-		teams: [
-			{
-				name: "Acme Inc",
-				logo: GalleryVerticalEnd,
-				plan: "Enterprise",
-			},
-			{
-				name: "Acme Corp.",
-				logo: AudioWaveform,
-				plan: "Startup",
-			},
-			{
-				name: "Evil Corp.",
-				logo: Command,
-				plan: "Free",
-			},
-		],
+		// teams: [
+		// 	{
+		// 		name: "Acme Inc",
+		// 		logo: GalleryVerticalEnd,
+		// 		plan: "Enterprise",
+		// 	},
+		// 	{
+		// 		name: "Acme Corp.",
+		// 		logo: AudioWaveform,
+		// 		plan: "Startup",
+		// 	},
+		// 	{
+		// 		name: "Evil Corp.",
+		// 		logo: Command,
+		// 		plan: "Free",
+		// 	},
+		// ],
 		navMain: [
 			{
-				title: "Playground",
-				url: "#",
+				title: "Pessoas",
+				url: "/admin",
 				icon: SquareTerminal,
 				isActive: true,
 				items: [
 					{
-						title: "History",
-						url: "#",
+						title: "Usuários",
+						url: "/admin/users",
 					},
 					{
-						title: "Starred",
-						url: "#",
+						title: "Clientes",
+						url: "/admin/customer",
 					},
 					{
-						title: "Settings",
-						url: "#",
+						title: "Fornecedores",
+						url: "/admin/supplier",
 					},
 				],
 			},
 			{
-				title: "Models",
+				title: "Pedidos",
 				url: "#",
 				icon: Bot,
 				items: [
 					{
-						title: "Genesis",
-						url: "#",
+						title: "Todos pedidos",
+						url: "/admin/orders/allorders",
 					},
 					{
-						title: "Explorer",
-						url: "#",
+						title: "Pedidos em aberto",
+						url: "/admin/orders",
 					},
 					{
-						title: "Quantum",
-						url: "#",
+						title: "Pedidos fiado",
+						url: "/admin/finance",
 					},
+					// {
+					// 	title: "Pedidos delivery",
+					// 	url: "/admin/orders/delivery",
+					// },
 				],
 			},
 			{
-				title: "Documentation",
-				url: "#",
+				title: "Produtos",
+				url: "/admin/products'",
 				icon: BookOpen,
 				items: [
 					{
-						title: "Introduction",
-						url: "#",
+						title: "Produtos",
+						url: "/admin/products'",
 					},
 					{
-						title: "Get Started",
-						url: "#",
-					},
-					{
-						title: "Tutorials",
-						url: "#",
-					},
-					{
-						title: "Changelog",
-						url: "#",
+						title: "Estoque",
+						url: "/admin/stock",
 					},
 				],
 			},
-			{
-				title: "Settings",
-				url: "#",
-				icon: Settings2,
-				items: [
-					{
-						title: "General",
-						url: "#",
-					},
-					{
-						title: "Team",
-						url: "#",
-					},
-					{
-						title: "Billing",
-						url: "#",
-					},
-					{
-						title: "Limits",
-						url: "#",
-					},
-				],
-			},
+			// {
+			// 	title: "Caixa",
+			// 	url: "/admin/cashier",
+			// 	icon: Settings2,
+			// 	items: [
+			// 		{
+			// 			title: "General",
+			// 			url: "#",
+			// 		},
+			// 		{
+			// 			title: "Team",
+			// 			url: "#",
+			// 		},
+			// 		{
+			// 			title: "Billing",
+			// 			url: "#",
+			// 		},
+			// 		{
+			// 			title: "Limits",
+			// 			url: "#",
+			// 		},
+			// 	],
+			// },
 		],
 		projects: [
 			{
-				name: "Design Engineering",
-				url: "#",
+				name: "Caixas",
+				url: "/admin/cashier",
 				icon: Frame,
 			},
 			{
-				name: "Sales & Marketing",
-				url: "#",
+				name: "Logs",
+				url: "/admin/logs",
 				icon: ChartPie,
 			},
 			{
-				name: "Travel",
-				url: "#",
+				name: "Admin",
+				url: "/admin",
 				icon: Map,
 			},
 		],
@@ -144,7 +140,7 @@
 <script lang="ts">
 	import NavMain from "$lib/components/sidebar/nav-main.svelte";
 	import NavProjects from "$lib/components/sidebar/nav-projects.svelte";
-	// import NavUser from "$lib/registry/new-york/block/sidebar-07/components/nav-user.svelte";
+	import NavUser from "$lib/components/sidebar/nav-user.svelte";
 	// import TeamSwitcher from "$lib/registry/new-york/block/sidebar-07/components/team-switcher.svelte";
 	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
 	import type { ComponentProps } from "svelte";
@@ -164,7 +160,7 @@
 		<NavProjects projects={data.projects} />
 	</Sidebar.Content>
 	<Sidebar.Footer>
-		<!-- <NavUser user={data.user} /> -->
+		<NavUser user={data.user} />
 	</Sidebar.Footer>
 	<Sidebar.Rail />
 </Sidebar.Root>
