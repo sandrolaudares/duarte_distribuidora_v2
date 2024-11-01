@@ -144,12 +144,12 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - COMPONENTE PARA EDITAR DADOS NAS TABLES ✅
 - FILTRAR POR MOTOBOY NA TELA DE PEDIDOS ✅
 - MOSTRAR CRÉDITO DO CLIENTE NA TELA DO CAIXA ✅
+- COPIAR SIDE BAR SHADCN ✅
 
 
 - ADICIONAR NO METADATA DO USUARIO UM CAIXA DESIGNADO A ELE ✅
   -- Falta adicionar a opcao na tela de permissoes
   -- Butao do caixa admin na navbar dar redirect direto pro caixa dele
-- COPIAR SIDE BAR SHADCN
 - PODER EDITAR INFOS DISTRIBUIDORA NO /TENANT - perfil da distribuidora
 - REFATORAR ONDE MOSTRA AS INFOS DO CLINTE NA PAGINA DO CAIXA
 - DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES

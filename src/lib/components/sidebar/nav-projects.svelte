@@ -1,5 +1,5 @@
 <script lang="ts">
-	// import * as DropdownMenu from "$lib/components";
+	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index";
 	import { useSidebar } from "$lib/components/ui/sidebar/context.svelte.js";
     import * as Sidebar from "$lib/components/ui/sidebar/index.js";
 	import Ellipsis from "lucide-svelte/icons/ellipsis";
@@ -66,11 +66,5 @@
 				</DropdownMenu.Root> -->
 			</Sidebar.MenuItem>
 		{/each}
-		<Sidebar.MenuItem>
-			<Sidebar.MenuButton class="text-sidebar-foreground/70">
-				<Ellipsis class="text-sidebar-foreground/70" />
-				<span>More</span>
-			</Sidebar.MenuButton>
-		</Sidebar.MenuItem>
 	</Sidebar.Menu>
 </Sidebar.Group>
