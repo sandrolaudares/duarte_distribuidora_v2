@@ -17,6 +17,8 @@ import type {
 
 import { eq, sql } from 'drizzle-orm'
 import type { TenantDbType } from '../../tenant'
+import { centralDb } from '$db/central'
+import { tenants } from '../../central/schema'
 
 export const distribuidora = (db: TenantDbType) => ({
   insertCashier: function insertCashier(data: InsertCashier) {
@@ -100,7 +102,11 @@ export const distribuidora = (db: TenantDbType) => ({
   ) {
     return db.update(deliveryFeeTable).set({ taxa_por_km: newTaxaPorKm })
   },
-  getFee: function getFee() {
+  getFee: ()=> {
     return db.select().from(deliveryFeeTable)
   },
+
+  getDistribuidoras: ()=>{
+    return centralDb.select().from(tenants)
+  }
 })

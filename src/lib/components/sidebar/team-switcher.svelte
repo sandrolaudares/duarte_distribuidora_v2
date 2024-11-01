@@ -4,13 +4,17 @@
 	import { useSidebar } from "$lib/components/ui/sidebar/index.js";
 	import ChevronsUpDown from "lucide-svelte/icons/chevrons-up-down";
 	import Plus from "lucide-svelte/icons/plus";
+	import Beer from 'lucide-svelte/icons/beer'
+  import type { SelectTenant } from "$lib/server/db/central/schema"
+
 
 	// This should be `Component` after lucide-svelte updates types
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let { teams }: { teams: { name: string; logo: any; plan: string }[] } = $props();
+	let { teams }: { teams: SelectTenant[] } = $props();
 	const sidebar = useSidebar();
 
 	let activeTeam = $state(teams[0]);
+	//TODO: SELECTED DISTRIBUIDORA
 </script>
 
 <Sidebar.Menu>
@@ -26,13 +30,14 @@
 						<div
 							class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
 						>
-							<activeTeam.logo class="size-4" />
+						<Beer class="size-4"/>
+							<!-- <activeTeam.logo class="size-4" /> -->
 						</div>
 						<div class="grid flex-1 text-left text-sm leading-tight">
 							<span class="truncate font-semibold">
 								{activeTeam.name}
 							</span>
-							<span class="truncate text-xs">{activeTeam.plan}</span>
+							<!-- <span class="truncate text-xs">{activeTeam.plan}</span> -->
 						</div>
 						<ChevronsUpDown class="ml-auto" />
 					</Sidebar.MenuButton>
@@ -44,17 +49,20 @@
 				side={sidebar.isMobile ? "bottom" : "right"}
 				sideOffset={4}
 			>
-				<DropdownMenu.Label class="text-muted-foreground text-xs">Teams</DropdownMenu.Label>
+				<DropdownMenu.Label class=" text-xs">Distribuidoras</DropdownMenu.Label>
 				{#each teams as team, index (team.name)}
+				<a href="http://{team.subdomain}.localhost:5173">
 					<DropdownMenu.Item onSelect={() => (activeTeam = team)} class="gap-2 p-2">
 						<div class="flex size-6 items-center justify-center rounded-sm border">
-							<team.logo class="size-4 shrink-0" />
+							<!-- <team.logo class="size-4 shrink-0" /> -->
+							<Beer class="size-4"/>
 						</div>
 						{team.name}
-						<DropdownMenu.Shortcut>⌘{index + 1}</DropdownMenu.Shortcut>
+						<DropdownMenu.Shortcut>{index + 1}</DropdownMenu.Shortcut>
 					</DropdownMenu.Item>
+				</a>
 				{/each}
-				<DropdownMenu.Separator />
+				<!-- <DropdownMenu.Separator />
 				<DropdownMenu.Item class="gap-2 p-2">
 					<div
 						class="bg-background flex size-6 items-center justify-center rounded-md border"
@@ -62,7 +70,7 @@
 						<Plus class="size-4" />
 					</div>
 					<div class="text-muted-foreground font-medium">Add team</div>
-				</DropdownMenu.Item>
+				</DropdownMenu.Item> -->
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 	</Sidebar.MenuItem>

@@ -13,23 +13,12 @@
   export let showDefaultItems = true
 
   const data = {
-    teams: [
-      {
-        name: 'Acme Inc',
-        logo: HandCoins,
-        plan: 'Enterprise',
-      },
-      {
-        name: 'Acme Corp.',
-        logo: AudioWaveform,
-        plan: 'Startup',
-      },
-      {
-        name: 'Evil Corp.',
-        logo: Command,
-        plan: 'Free',
-      },
-    ],
+    // teams: [
+    //   {
+    //     name: tenats.nome,
+    //     logo: beer,
+    //   },
+    // ],
     navMain: [
 		{
         title: 'Pessoas',
@@ -68,8 +57,11 @@
   import NavUser from '$lib/components/sidebar/nav-user.svelte'
   import TeamSwitcher from '$lib/components/sidebar/team-switcher.svelte'
   import * as Sidebar from '$lib/components/ui/sidebar/index.js'
-  import type { ComponentProps } from 'svelte'
+  import { onMount, type ComponentProps } from 'svelte'
   import { getUserContext } from '$lib/stores/user'
+    import { trpc } from '$trpc/client'
+  import { page } from '$app/stores'
+  import type { SelectTenant } from '$lib/server/db/central/schema'
   
 
   const user = getUserContext()
@@ -138,11 +130,25 @@
       },
     )
   }
+
+  let tenats:SelectTenant[] = $state([])
+
+  onMount(async()=>{
+    try {
+      tenats = await trpc($page).distribuidora.getDistribuidoras.query()
+      if(!tenats){
+        return
+      }
+    } catch (error:any) {
+      console.error(error.message)
+    }
+  })
+
 </script>
 
 <Sidebar.Root bind:ref {collapsible} {...restProps}>
   <Sidebar.Header>
-    <TeamSwitcher teams={data.teams} />
+    <!-- <TeamSwitcher teams={tenats} /> -->
   </Sidebar.Header>
   <Sidebar.Content>
     {#if data.navMain && data.projects && $user?.role === 'admin'}

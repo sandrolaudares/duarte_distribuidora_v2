@@ -131,4 +131,7 @@ export const distribuidora = router({
   getFee: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
     return await distribuidoraController(tenantDb).getFee()
   }),
+  getDistribuidoras: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
+    return await distribuidoraController(tenantDb).getDistribuidoras()
+  }),
 })
