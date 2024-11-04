@@ -57,10 +57,10 @@ export default {
 					foreground: 'oklch(var(--bc) / <alpha-value>)',
 					primary: 'oklch(var(--p) / <alpha-value>)',
 					'primary-foreground': 'oklch(var(--pc) / <alpha-value>)',
-					accent: 'oklch(var(--a) / <alpha-value>)',
-					'accent-foreground': 'oklch(var(--ac) / <alpha-value>)',
-					border: 'oklch(var(--in) / <alpha-value>)',
-					ring: 'oklch(var(--in) / <alpha-value>)'
+					accent: 'oklch(var(--p) / <alpha-value>)',
+					'accent-foreground': 'oklch(var(--pc))/ <alpha-value>)',
+					border: 'oklch(var(--bc) / <alpha-value>)',
+					ring: 'oklch(var(--bc) / <alpha-value>)'
 				}
       },
       // https://animation-svelte.vercel.app/luxe/usage

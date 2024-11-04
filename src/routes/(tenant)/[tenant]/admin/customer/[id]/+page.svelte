@@ -44,14 +44,6 @@
   const sum = $derived(table.createCalculation('total').sum())
   //TODO: SOMA
 
-  // let filteredOrders = (start: number, end: number) => {
-  //   return orders.filter(order => {
-  //     return (
-  //       order.created_at.getTime() >= start && order.created_at.getTime() <= end
-  //     )
-  //   })
-  // }
-
 </script>
 
 <main class=" mt-20 h-full max-h-[calc(100vh-35vh)]">
@@ -60,5 +52,5 @@
 <h1 class="text-xl m-3 font-medium">
   Pedidos de {customer.name}:
 </h1>
-  <PedidoCliente {table} />
+  <PedidoCliente {table} total={sum}/>
 </main>

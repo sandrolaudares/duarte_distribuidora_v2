@@ -15,3 +15,7 @@
 * {
   font-family: 'Poppins', Helvetica, sans-serif;
 }
+
+:root {
+  --radius: 0.5rem;
+  }
