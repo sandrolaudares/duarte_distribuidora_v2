@@ -197,4 +197,7 @@ export const user = (db: TenantDbType) => ({
       .where(eq(userTable.id, userId))
       .run()
   },
+  updateUserCashier:(caixa_id:UserMeta['caixa_id'],userId:SelectUser['id'])=>{
+    return db.update(userTable).set({meta:{caixa_id:caixa_id}}).where(eq(userTable.id,userId))
+  }
 })

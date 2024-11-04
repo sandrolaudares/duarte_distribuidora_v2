@@ -212,6 +212,21 @@ export const auth = router({
       return await userController(tenantDb).updateUserRole(userId, role)
     }),
 
+    updateUserCashier: publicProcedure
+    .use(middleware.admin)
+    .input(
+      z.object({
+        userId: z.string(),
+        meta: z.object(
+          {caixa_id:z.number(),}
+        ),
+      }),
+    )
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
+      const { userId, meta } = input
+      return await userController(tenantDb).updateUserCashier(meta.caixa_id, userId)
+    }),
+
   getMotoboys: publicProcedure.query(({ ctx: { tenantDb } }) => {
     return userController(tenantDb).getMotoboys()
   }),

@@ -60,7 +60,7 @@ export type UserMeta = {
   redirect?: string
   permissions?: Permission[]
 
-  caixa_id?: string
+  caixa_id?: number
 }
 
 export const DEFAULT_PERMISSIONS: UserMeta = {

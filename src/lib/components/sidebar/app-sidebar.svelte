@@ -43,7 +43,7 @@
     ],
     projects: [
 		{
-        name: 'Caixas',
+        name: 'Todos caixas',
         url: '/admin/cashier',
         icon: HandCoins,
       },
@@ -71,6 +71,16 @@
     activeTeam,
     ...restProps
   }: ComponentProps<typeof Sidebar.Root> & {activeTeam:SelectTenant}= $props()
+
+  if($user?.meta.caixa_id) {
+    data.projects.push(
+      {
+        name: 'Ir direto para caixa',
+        url: `/admin/cashier/${$user.meta.caixa_id}`,
+        icon: HandCoins,
+      },
+    )
+  }
     
   if ($user?.role === 'admin') {
     data.navMain.push(
