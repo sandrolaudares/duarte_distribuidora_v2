@@ -21,7 +21,7 @@
   import { trpc } from '$trpc/client'
   import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
-  import EditableCell from './EditableCell.svelte'
+  import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
 
   let { data }: { data: PageData } = $props()
 
