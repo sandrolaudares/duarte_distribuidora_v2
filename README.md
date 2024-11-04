@@ -146,11 +146,12 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - MOSTRAR CRÉDITO DO CLIENTE NA TELA DO CAIXA ✅
 - COPIAR SIDE BAR SHADCN ✅
 - CHECAR O SUM PAGINA CUSTOMER/ID ✅
-
-
+- CHECKBOX TABELA FIADO PRA MOSTRAR TOTAL APENAS DAS SELECIONADAS ✅
 - ADICIONAR NO METADATA DO USUARIO UM CAIXA DESIGNADO A ELE ✅
-  -- Falta adicionar a opcao na tela de permissoes
-  -- Butao do caixa admin na navbar dar redirect direto pro caixa dele
+  -- Falta adicionar a opcao na tela de permissoes ✅
+  -- Butao do caixa admin na navbar dar redirect direto pro caixa dele ✅
+
+
 - PODER EDITAR INFOS DISTRIBUIDORA NO /TENANT - perfil da distribuidora
 - REFATORAR ONDE MOSTRA AS INFOS DO CLINTE NA PAGINA DO CAIXA
 - DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES
@@ -159,7 +160,6 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - TELA FIADO FILTRAR PAGAMENTOS ATRASADOS 
 - EDITAR DATA VENCIMENTO (EXIPIRE_AT)
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE
-- CHECKBOX TABELA FIADO PRA MOSTRAR TOTAL APENAS DAS SELECIONADAS
 - APLICAR EDITABLECELL NAS TABLES EXISTENTES
 
 - TRANSAÇÕES DO CAIXA (TELAS)
