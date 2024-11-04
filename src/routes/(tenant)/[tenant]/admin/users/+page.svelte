@@ -16,6 +16,13 @@
   import type { PageData } from './$types'
   import EditPermissions from './EditPermissions.svelte'
     import EditRole from './EditRole.svelte'
+  import { onMount } from 'svelte'
+  import { trpc } from '$trpc/client'
+
+import { page } from '$app/stores'
+  import type { SelectCashier, SelectUser } from '$lib/server/db/schema'
+  import { toast } from 'svelte-sonner'
+  import EditCaixa from './EditCaixa.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -67,7 +74,11 @@
             <td>{row.id}</td>
             <td><b>{row.username}</b></td>
             <td><b>{row.email}</b></td>
-            <td><b><EditRole userId={row.id} userName={row.username} userRole={row.role}/></b></td>
+            <td><b><EditRole userId={row.id} userName={row.username} userRole={row.role}/> 
+              {#if row.role === 'caixa'}
+                <EditCaixa userId={row.id} userCashier={row}/>
+              {/if} 
+          </b></td>
             <td><b><EditPermissions userId={row.id} userName={row.username} userPermissions={row.meta.permissions ?? []}/></b></td>
             <td><span>{row.emailVerified ? '✅' : '❌'}</span></td>
           </tr>
