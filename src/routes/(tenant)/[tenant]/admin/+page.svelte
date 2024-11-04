@@ -64,7 +64,7 @@
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
       <a
         href="/admin/customer"
-        class=" bg-card text-card-foregrouAnalyticsnd space-y-4 rounded-lg border p-6 shadow-sm hover:bg-base-200"
+        class=" bg-card text-card-foreground space-y-4 rounded-lg border p-6 shadow-sm hover:bg-base-200"
         data-v0-t="card"
       >
         <div class="flex items-center justify-between">

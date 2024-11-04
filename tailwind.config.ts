@@ -49,8 +49,8 @@ export default {
 					foreground: 'oklch(var(--bc) / <alpha-value>)'
 				},
 				card: {
-					DEFAULT: 'oklch(var(--n) / <alpha-value>)',
-					foreground: 'oklch(var(--nc) / <alpha-value>)'
+					DEFAULT: 'oklch(var(--b2)) / <alpha-value>)',
+					foreground: 'oklch(var(--bc)) / <alpha-value>)'
 				},
 				sidebar: {
 					DEFAULT: 'oklch(var(--b2) / <alpha-value>)',
