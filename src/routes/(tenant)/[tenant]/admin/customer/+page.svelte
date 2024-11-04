@@ -22,6 +22,7 @@
   import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
   import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
+  import EditableCurrency from '$lib/components/editableCells/EditableCurrency.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -94,7 +95,7 @@
     })
   }
 
-  async function handleUpdate(value:unknown, key = '', row) {
+  async function handleUpdate(value:unknown, key = '', row:any) {
     const last_val = row[key]
     try {
       await trpc($page).customer.updateCustomer.mutate({
@@ -179,9 +180,19 @@
             <td><b>{row.cpf_cnpj}</b></td> -->
             <td><b>{row.is_retail ? 'Pessoa física': 'Pessoa Juridica'}</b></td>
             <!-- <td><b>{row.rg_ie}</b></td> -->
-            <td><b>{row.phone}</b></td>
+            <td><b><EditableCell
+              value={row.phone}
+              onUpdateValue={async newValue => {
+                handleUpdate(newValue, 'phone', row)
+              }}
+            /></b></td>
             <td><b><UsedCredits id={row.id} /></b></td>
-            <td><b>R${(row.max_credit / 100).toFixed(2)}</b></td>
+            <td><b><EditableCurrency
+              value={row.max_credit}
+              onUpdateValue={async newValue => {
+                handleUpdate(newValue, 'max_credit', row)
+              }}
+            /></b></td>
             <td>
               <a href="/admin/customer/{row.id}" class="badge badge-primary">
                 Detalhes
