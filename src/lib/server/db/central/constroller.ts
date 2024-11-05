@@ -26,12 +26,16 @@ export async function createTenant(newTenantInfo: {
   name: unknown
   email: unknown
   password: unknown
+  phone:unknown
+  address:unknown
+  lat:unknown
+  lon:unknown
 }) {
-  const { tenantName, subdomain, email, password, name } = newTenantInfo
+  const { tenantName, subdomain, email, password, name ,phone,address,lat,lon} = newTenantInfo
   if (typeof tenantName !== 'string' || tenantName.length < 4) {
     return {
       success: false,
-      message: 'Tenant name must be at least 4 characters long',
+      message: 'Nome da filial deve conter ao menos 4 caracteres',
     }
   }
 
@@ -50,21 +54,49 @@ export async function createTenant(newTenantInfo: {
   if (typeof email !== 'string' || !isValidEmail(email)) {
     return {
       success: false,
-      message: 'Invalid email',
+      message: 'Email inválido',
+    }
+  }
+
+  if (typeof phone !== 'string') {
+    return {
+      success: false,
+      message: 'Telefone inválido',
+    }
+  }
+
+  if (typeof address !== 'string') {
+    return {
+      success: false,
+      message: 'Endereço inválido',
     }
   }
 
   if (typeof password !== 'string' || password.length < 8) {
     return {
       success: false,
-      message: 'Password must be at least 8 characters long',
+      message: 'Senhas devem conter no minimo 8 digitos',
     }
   }
 
   if (typeof name !== 'string' || name.length < 4) {
     return {
       success: false,
-      message: 'name must be at least 4 characters long',
+      message: 'Nome deve possuir no minimo 4 caracteres',
+    }
+  }
+  
+  if (typeof lat !== 'number') {
+    return {
+      success: false,
+      message: 'Latitude inválida',
+    }
+  }
+
+  if (typeof lon !== 'number') {
+    return {
+      success: false,
+      message: 'Latitude inválida',
     }
   }
 
@@ -75,7 +107,7 @@ export async function createTenant(newTenantInfo: {
   if (tenant) {
     return {
       success: false,
-      message: 'Subdomain already exists',
+      message: 'Subdominio já existe',
     }
   }
 
@@ -99,6 +131,10 @@ export async function createTenant(newTenantInfo: {
       subdomain,
       name: tenantName,
       databaseName,
+      phone,
+      address,
+      lat,
+      lng:lon
     })
     .returning()
 

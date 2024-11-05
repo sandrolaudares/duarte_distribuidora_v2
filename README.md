@@ -152,6 +152,9 @@ Feel free to submit issues or pull requests. Contributions are welcome!
   -- Butao do caixa admin na navbar dar redirect direto pro caixa dele ✅
 
 
+- Preco km tabela distribuidora + infos tabela distribuidora
+- Colunas na tabela dos logs
+- AJustar form criar tenant erros de endereco
 - PODER EDITAR INFOS DISTRIBUIDORA NO /TENANT - perfil da distribuidora
 - REFATORAR ONDE MOSTRA AS INFOS DO CLINTE NA PAGINA DO CAIXA
 - DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES

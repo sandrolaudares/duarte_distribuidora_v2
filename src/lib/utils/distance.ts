@@ -1,19 +1,21 @@
 export async function geocodeAddress(address: string) {
-  console.log('Geocodificando' + address)
+  console.log('Geocodificando ' + address)
   try {
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURI(address)}&format=json&addressdetails=1`)
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURI(address)}&format=json&addressdetails=1`,
+    )
     const result = await response.json()
 
-    console.log('RESULT: ',result)
-    
-    const location = {
-      lat: result[0].lat,
-      lon: result[0].lon,
+    console.log('RESULT: ', result)
+
+    return {
+      lat: parseFloat(result[0].lat),
+      lon: parseFloat(result[0].lon),
     }
-    return location
   } catch (e) {
     console.error(e)
     console.warn(`Erro ao geocodificar o endereço: ${address}`)
+    return { lat: 0, lon: 0 }
   }
 }
 
