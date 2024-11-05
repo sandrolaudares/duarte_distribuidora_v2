@@ -7,6 +7,8 @@ export const load = (async () => {
       tenantId: true,
       name: true,
       subdomain: true,
+      address:true,
+      phone:true
     },
   })
   return {
