@@ -1,0 +1,1 @@
+ALTER TABLE `tenants` ADD `taxa_por_km` integer;
