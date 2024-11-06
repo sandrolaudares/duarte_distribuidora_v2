@@ -24,11 +24,15 @@ import {
 } from '$lib/server/db/schema'
 
 
+import { distribuidora as distribuidoraController } from '$db/controller'
+
+
 import { middleware } from '$trpc/middleware'
 import { eq } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { geocodeAddress, getDistanceFromLatLonInKm } from '$lib/utils/distance'
 import { env } from '$env/dynamic/private'
+import { getDistribuidoraLatLong } from '../../central/constroller'
 
 export const customer = router({
   insertCustomer: publicProcedure
@@ -684,7 +688,7 @@ export const customer = router({
         country: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input , ctx}) => {
       const location = await geocodeAddress(
         `${input.street}, ${input.number}, ${input.city}, ${input.bairro}, ${input.state}, ${input.cep}, ${input.country}`
       )
@@ -701,14 +705,18 @@ export const customer = router({
         lon: location.lon,
       }
 
-      const distribuidoraLat = parseFloat(env.DISTRIBUIDORA_LAT || '0')
-      const distribuidoraLong = parseFloat(env.DISTRIBUIDORA_LONG || '0')
+      const tenantId = ctx.tenantInfo.tenantId
 
-      const distance = getDistanceFromLatLonInKm(
-        { lat: distribuidoraLat, lon: distribuidoraLong },
-        customerPosition,
-      )
+      const distribuidora = await getDistribuidoraLatLong(tenantId)
 
-      return distance
+        const distribuidoraLat = distribuidora[0].lat;
+        const distribuidoraLong = distribuidora[0].lng;
+      
+        const distance = getDistanceFromLatLonInKm(
+          { lat: distribuidoraLat, lon: distribuidoraLong },
+          customerPosition,
+        )
+        console.log(distance)
+        return distance
     }),
 })

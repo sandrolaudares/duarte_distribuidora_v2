@@ -10,6 +10,7 @@ import {
 
 
 import { middleware } from '$trpc/middleware'
+import { updateDistribuidora } from '../../central/constroller'
 
 export const distribuidora = router({
   insertCashier: publicProcedure
@@ -35,6 +36,19 @@ export const distribuidora = router({
     .mutation(async ({ input, ctx: { tenantDb } }) => {
       const { id, data } = input
       return distribuidoraController(tenantDb).updateCashier(id, data)
+    }),
+
+    updateDistribuidora:publicProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        data: z.object({
+          taxa_por_km:z.number()
+        }),
+      })
+    ).mutation(async({input})=>{
+      const {id,data}= input
+      return updateDistribuidora(id,data)
     }),
 
   abrirCaixa: publicProcedure
