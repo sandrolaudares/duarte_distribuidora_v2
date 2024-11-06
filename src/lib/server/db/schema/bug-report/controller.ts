@@ -78,6 +78,11 @@ export const bugReport = (db: TenantDbType) => ({
         text: logsTable.text,
         metadata: logsTable.metadata,
         error: logsTable.error,
+        type: logsTable.type,
+        pathname: logsTable.pathname,
+        routeName: logsTable.routeName,
+        currency: logsTable.currency,
+
         user_name: userTable.username,
       })
       .from(logsTable)

@@ -55,6 +55,10 @@
           <ThSort {table} field="id">ID</ThSort>
           <Th>Usuário</Th>
           <Th>Logs</Th>
+          <Th>Nome da rota</Th>
+          <Th>Pathname</Th>
+          <Th>Tipo</Th>
+          <Th>Dinheiro</Th>
           <Th>Metadata</Th>
           <Th>Erro</Th>
           <Th>Data</Th>
@@ -64,6 +68,10 @@
           <Th />
           <ThFilter {table} field="user_name"/>
           <ThFilter {table} field="text"/>
+          <Th/>
+          <Th/>
+          <Th/>
+          <Th/>
           <Th/>
           <Th/>
           <Th/>
@@ -77,9 +85,13 @@
             <td>{row.id}</td>
             <td>{row.user_name}</td>
             <td>{row.text}</td>
+            <td>{row.pathname}</td>
+            <td>{row.routeName}</td>
+            <td>{row.type}</td>
+            <td>{row.currency ? 'R$'+(row.currency/100).toFixed(2) : 'Não é transação'}</td>
             <td>{JSON.stringify(row.metadata)}</td>
             <td>{row.error ?? 'Não tem'}</td>
-            <td>{format(row.created_at,'dd/MM/yyyy')}</td>
+            <td>{row.created_at ? format(row.created_at,'dd/MM/yyyy') :''}</td>
             
           </tr>
         {/each}
