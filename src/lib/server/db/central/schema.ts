@@ -13,6 +13,7 @@ export const tenants = sqliteTable('tenants', {
   phone: text('phone'),
   lat: real('lat'),
   lng: real('lng'),
+  taxa_por_km: integer('taxa_por_km')
 })
 
 export type SelectTenant = typeof tenants.$inferSelect
