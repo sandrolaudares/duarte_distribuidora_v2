@@ -14,7 +14,7 @@
   export let data: PageData
 
   let cashiers = data
-  let taxa = data.taxa
+  // let taxa = data.taxa
 
   function handleAddCachier() {
     modal.open(FormModal, {
@@ -79,11 +79,15 @@
     }
   }
 
+  let taxa = 0
+
+  if(data.tenant?.taxa_por_km) taxa = data.tenant?.taxa_por_km
+
   async function updateCashierDeliveryFee() {
     try {
-      await trpc($page).distribuidora.updateAllKm.mutate(taxa[0].taxa_por_km)
-      Math.round(taxa[0].taxa_por_km)
-      console.log(taxa[0].taxa_por_km)
+      await trpc($page).distribuidora.updateDistribuidora.mutate({id:data.tenant?.tenantId ?? 0,data:{taxa_por_km:taxa}})
+      Math.round(taxa)
+      console.log(taxa)
       toast.success('Taxa de entrega atualizada!')
       isTaxaChanged = false
     } catch (error: any) {
@@ -109,7 +113,10 @@
 
       <div>
         <div class="flex gap-2">
-          <CurrencyInput bind:value={taxa[0].taxa_por_km} on:change={()=>{isTaxaChanged = true}}/>
+          {#if data.tenant}
+          
+          <CurrencyInput bind:value={taxa} on:change={()=>{isTaxaChanged = true}}/>
+          {/if}
           {#if isTaxaChanged}
             <button class="btn btn-primary" onclick={updateCashierDeliveryFee}>
               salvar
