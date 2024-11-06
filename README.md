@@ -152,7 +152,7 @@ Feel free to submit issues or pull requests. Contributions are welcome!
   -- Butao do caixa admin na navbar dar redirect direto pro caixa dele ✅
 
 
-- Preco km tabela distribuidora + infos tabela distribuidora
+- Preco km tabela distribuidora ✅ + infos tabela distribuidora - Delete deliveryFee Table
 - Colunas na tabela dos logs
 - AJustar form criar tenant erros de endereco
 - PODER EDITAR INFOS DISTRIBUIDORA NO /TENANT - perfil da distribuidora

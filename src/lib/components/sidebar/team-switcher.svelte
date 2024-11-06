@@ -35,7 +35,7 @@
 						</div>
 						<div class="grid flex-1 text-left text-sm leading-tight">
 							<span class="truncate font-semibold">
-								{activeTeam[0].name}
+								{activeTeam.name}
 							</span>
 							<!-- <span class="truncate text-xs">{activeTeam.name}</span> -->
 						</div>
