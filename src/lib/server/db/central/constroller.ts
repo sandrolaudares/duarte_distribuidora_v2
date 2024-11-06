@@ -1,5 +1,5 @@
-import { centralDb as db } from '$db/central'
-import { tenants } from './schema'
+import {  centralDb as db } from '$db/central'
+import { tenants, type SelectTenant } from './schema'
 import { createClient } from '@tursodatabase/api'
 
 import { user as userC } from '$db/controller'
@@ -157,4 +157,12 @@ export async function createTenant(newTenantInfo: {
       domain: `http://${subdomain}.${PUBLIC_DOMAIN}`,
     },
   }
+}
+
+export async function updateDistribuidora(id:SelectTenant['tenantId'],data:Partial<SelectTenant>){
+  return db.update(tenants).set(data).where(eq(tenants.tenantId,id))
+}
+
+export async function getDistribuidoraLatLong(id:SelectTenant['tenantId']){
+  return db.select({lat:tenants.lat,lng:tenants.lng}).from(tenants).where(eq(tenants.tenantId,id)).limit(1)
 }
