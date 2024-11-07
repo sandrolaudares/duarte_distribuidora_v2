@@ -13,3 +13,19 @@ CREATE TABLE `stock_transference` (
 	FOREIGN KEY (`from_tenant_id`) REFERENCES `tenants`(`tenant_id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`to_tenant_id`) REFERENCES `tenants`(`tenant_id`) ON UPDATE no action ON DELETE no action
 );
+--> statement-breakpoint
+CREATE TABLE `tenants` (
+	`tenant_id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`name` text NOT NULL,
+	`subdomain` text NOT NULL,
+	`database_name` text NOT NULL,
+	`theme` text DEFAULT 'winter' NOT NULL,
+	`address` text,
+	`phone` text,
+	`lat` real,
+	`lng` real,
+	`taxa_por_km` integer
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `tenants_subdomain_unique` ON `tenants` (`subdomain`);--> statement-breakpoint
+CREATE UNIQUE INDEX `tenants_database_name_unique` ON `tenants` (`database_name`);
