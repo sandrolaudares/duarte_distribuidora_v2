@@ -18,7 +18,7 @@ import type {
   SelectCustomer,
   InsertOrderPayment,
 } from './index'
-import { and, count, eq, gt, gte, isNotNull, ne, or, sql } from 'drizzle-orm'
+import { and,  count, eq, gt, gte, isNotNull, lt, ne, or, sql } from 'drizzle-orm'
 
 import { stock, bugReport } from '$db/controller'
 import { cashierTable, cashierTransactionTable } from '../distribuidora'
@@ -86,6 +86,26 @@ export const customer = (db: TenantDbType) => ({
         ),
       )
   },
+
+  countCustomerExpiredFiadoTransactions: async (id: SelectCustomer['id']) => {
+    return db
+      .select({
+        count: count(customerOrderTable.id).mapWith(v => {
+          if (typeof v === 'number') {
+            return v
+          }
+          return 0
+        }),
+      })
+      .from(customerOrderTable)
+      .where(
+        and(
+          eq(customerOrderTable.customer_id, id),
+          gte(customerOrderTable.total, customerOrderTable.amount_paid),
+          lt(customerOrderTable.expire_at, new Date()),
+        ),
+      )
+  },
   getPendingFiadoTransactions: async () => {
     return db.query.customerOrderTable.findMany({
       where: t => and(gt(t.total, t.amount_paid), eq(t.is_fiado, true)),
@@ -118,10 +138,7 @@ export const customer = (db: TenantDbType) => ({
     const [newAddress] = await db.insert(addressTable).values(input).returning()
     return newAddress
   },
-  updateAddress: (
-    id: number,
-    input: Partial<InsertAddress>,
-  ) => {
+  updateAddress: (id: number, input: Partial<InsertAddress>) => {
     return db.update(addressTable).set(input).where(eq(addressTable.id, id))
   },
   getCustomerAddress: async (customerId: SelectCustomer['id']) => {
@@ -233,7 +250,7 @@ export const customer = (db: TenantDbType) => ({
             product: true,
           },
         },
-        motoboy:true,
+        motoboy: true,
       },
     })
   },
