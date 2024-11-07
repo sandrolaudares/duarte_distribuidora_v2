@@ -10,7 +10,7 @@
   <h1 class="mb-8 text-center text-4xl font-bold">Distribuidoras</h1>
   <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
     {#each data.tenats as tenant}
-      <a href="http://{tenant.subdomain}.{PUBLIC_DOMAIN}" class="group block">
+      <a href="https://{tenant.subdomain}.{PUBLIC_DOMAIN}" class="group block">
         <div
           class="transform overflow-hidden rounded-xl bg-base-200 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
         >

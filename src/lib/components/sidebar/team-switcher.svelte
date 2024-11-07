@@ -6,6 +6,7 @@
 	import Plus from "lucide-svelte/icons/plus";
 	import Beer from 'lucide-svelte/icons/beer'
   import type { SelectTenant } from "$lib/server/db/central/schema"
+    import {PUBLIC_DOMAIN} from '$env/static/public'
 
 
 	// This should be `Component` after lucide-svelte updates types
@@ -64,7 +65,7 @@
 				{/each}
 				<DropdownMenu.Separator />
 				<DropdownMenu.Item class="gap-2 p-2">
-					<a class="text-foreground font-medium" href="http://localhost:5173/">Voltar para central</a>
+					<a class="text-foreground font-medium" href="https://{activeTeam.subdomain}.{PUBLIC_DOMAIN}">Voltar para central</a>
 					<!--TODO: Arrumar o link-->
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
