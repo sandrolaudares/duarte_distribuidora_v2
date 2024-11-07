@@ -65,7 +65,7 @@
 				{/each}
 				<DropdownMenu.Separator />
 				<DropdownMenu.Item class="gap-2 p-2">
-					<a class="text-foreground font-medium" href="https://{activeTeam.subdomain}.{PUBLIC_DOMAIN}">Voltar para central</a>
+					<a class="text-foreground font-medium" href="https://{PUBLIC_DOMAIN}">Voltar para central</a>
 					<!--TODO: Arrumar o link-->
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
