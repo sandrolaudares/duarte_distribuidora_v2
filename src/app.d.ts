@@ -1,5 +1,4 @@
-import type { AvailableLanguageTag } from '../../lib/paraglide/runtime'
-import type { ParaglideLocals } from '@inlang/paraglide-sveltekit'
+
 
 import type { SelectUser, SelectSession } from '$lib/server/db/schema'
 import type { SelectTenant } from '$lib/server/db/central/schema'
@@ -10,8 +9,7 @@ declare global {
   namespace App {
     // interface Error {}
     interface Locals {
-      paraglide: ParaglideLocals<AvailableLanguageTag>
-
+      
       tenantDb: import('$lib/server/db/tenant').TenantDbType | null
       tenantInfo: SelectTenant | null
       tenantAuthManager:
