@@ -1,5 +1,6 @@
 import type { Theme } from '$lib'
 import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { timestamps } from '../utils'
 // import { timestamps } from '../utils'
 
 export const tenants = sqliteTable('tenants', {
@@ -13,7 +14,7 @@ export const tenants = sqliteTable('tenants', {
   phone: text('phone'),
   lat: real('lat'),
   lng: real('lng'),
-  taxa_por_km: integer('taxa_por_km')
+  taxa_por_km: integer('taxa_por_km'),
 })
 
 export type SelectTenant = typeof tenants.$inferSelect
@@ -33,3 +34,33 @@ export type InsertTenant = typeof tenants.$inferInsert
 //     .notNull()
 //     .default(sql`current_timestamp`),
 // });
+
+export const stockTransferenceStatus = [
+  'REQUESTED',
+  'ACCEPTED',
+
+  'COMPLETED',
+  'CANCELED',
+] as const
+type StockTransferenceStatus = (typeof stockTransferenceStatus)[number]
+
+export const stockTransference = sqliteTable('stock_transference', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  ...timestamps,
+  status: text('status')
+    .notNull()
+    .default('new')
+    .$type<StockTransferenceStatus>(),
+  fromTenantId: integer('from_tenant_id').references(() => tenants.tenantId),
+  toTenantId: integer('to_tenant_id').notNull().references(() => tenants.tenantId),
+  sku_name: text('sku_name').notNull(),
+  sku: text('sku').notNull(),
+  quantity: integer('quantity').notNull(),
+  meta_data: text('meta_data', {
+    // TODO: metadados tranferencia estoque
+    mode: 'json',
+  }).notNull(),
+})
+
+export type InsertStockTransference = typeof stockTransference.$inferInsert
+export type SelectStockTransference = typeof stockTransference.$inferSelect

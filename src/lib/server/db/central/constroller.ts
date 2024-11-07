@@ -1,8 +1,14 @@
-import {  centralDb as db } from '$db/central'
-import { tenants, type SelectTenant } from './schema'
+import { centralDb as db } from '$db/central'
+import { tenants, stockTransference } from './schema'
+import type {
+  SelectTenant,
+  InsertStockTransference,
+  SelectStockTransference,
+} from './schema'
+
 import { createClient } from '@tursodatabase/api'
 
-import { user as userC } from '$db/controller'
+import { user as userC, type SKU_TRANSFERENCE_POST_TYPE } from '$db/controller'
 import { isValidEmail } from '$db/schema/user/controller'
 import { subdomainRegex } from '$lib/utils'
 import { eq } from 'drizzle-orm'
@@ -26,12 +32,22 @@ export async function createTenant(newTenantInfo: {
   name: unknown
   email: unknown
   password: unknown
-  phone:unknown
-  address:unknown
-  lat:unknown
-  lon:unknown
+  phone: unknown
+  address: unknown
+  lat: unknown
+  lon: unknown
 }) {
-  const { tenantName, subdomain, email, password, name ,phone,address,lat,lon} = newTenantInfo
+  const {
+    tenantName,
+    subdomain,
+    email,
+    password,
+    name,
+    phone,
+    address,
+    lat,
+    lon,
+  } = newTenantInfo
   if (typeof tenantName !== 'string' || tenantName.length < 4) {
     return {
       success: false,
@@ -85,7 +101,7 @@ export async function createTenant(newTenantInfo: {
       message: 'Nome deve possuir no minimo 4 caracteres',
     }
   }
-  
+
   if (typeof lat !== 'number') {
     return {
       success: false,
@@ -134,7 +150,7 @@ export async function createTenant(newTenantInfo: {
       phone,
       address,
       lat,
-      lng:lon
+      lng: lon,
     })
     .returning()
 
@@ -159,10 +175,119 @@ export async function createTenant(newTenantInfo: {
   }
 }
 
-export async function updateDistribuidora(id:SelectTenant['tenantId'],data:Partial<SelectTenant>){
-  return db.update(tenants).set(data).where(eq(tenants.tenantId,id))
+export async function updateDistribuidora(
+  id: SelectTenant['tenantId'],
+  data: Partial<SelectTenant>,
+) {
+  return db.update(tenants).set(data).where(eq(tenants.tenantId, id))
 }
 
-export async function getDistribuidoraLatLong(id:SelectTenant['tenantId']){
-  return db.select({lat:tenants.lat,lng:tenants.lng}).from(tenants).where(eq(tenants.tenantId,id)).limit(1)
+export async function getDistribuidoraLatLong(id: SelectTenant['tenantId']) {
+  return db
+    .select({ lat: tenants.lat, lng: tenants.lng })
+    .from(tenants)
+    .where(eq(tenants.tenantId, id))
+    .limit(1)
+}
+
+export async function solicitarTransference(data: InsertStockTransference[]) {
+  return await db.insert(stockTransference).values(data).returning()
+}
+
+export async function acceptTransference(
+  stockTransferenceId: SelectStockTransference['id'],
+) {
+  const transference = await db.query.stockTransference.findFirst({
+    where: eq(stockTransference.id, stockTransferenceId),
+  })
+
+  if (transference?.status !== 'REQUESTED') {
+    return {
+      success: false,
+      message: 'Status invalido',
+    }
+  }
+
+  if (!transference.fromTenantId) {
+    return {
+      success: false,
+      message: 'Adicione uma filial de origem para aceitar a transferência',
+    }
+  }
+  return await db.update(stockTransference).set({
+    status: 'ACCEPTED',
+  })
+}
+
+export async function completeTransference(
+  stockTransferenceId: SelectStockTransference['id'],
+) {
+  const transference = await db.query.stockTransference.findFirst({
+    where: eq(stockTransference.id, stockTransferenceId),
+  })
+  if (!transference?.fromTenantId) {
+    return {
+      success: false,
+      message: 'Adicione uma filial de origem para aceitar a transferência',
+    }
+  }
+  if (
+    // TODO: better errror message
+
+    transference?.status !== 'ACCEPTED'
+  ) {
+    return {
+      success: false,
+      message: 'Primeiro aceite a transferência',
+    }
+  }
+
+  const fromTenant = await db.query.tenants.findFirst({
+    where: eq(tenants.tenantId, transference.fromTenantId),
+  })
+
+  const toTenant = await db.query.tenants.findFirst({
+    where: eq(tenants.tenantId, transference.toTenantId),
+  })
+
+  if (!fromTenant || !toTenant) {
+    return {
+      success: false,
+      message: 'Tenant not found',
+    }
+  }
+
+  const fromTransfer = await fetch(
+    `https://${fromTenant.subdomain}.${PUBLIC_DOMAIN}/api/stock/${transference.sku}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(<SKU_TRANSFERENCE_POST_TYPE>{
+        quantity: transference.quantity,
+        type: 'OUT_TRANSFERENCE',
+        central_transference_id: transference.id,
+      }),
+    },
+  )
+
+  console.log('fromTransfer:', fromTransfer)
+
+  const toTransfer = await fetch(
+    `https://${toTenant.subdomain}.${PUBLIC_DOMAIN}/api/stock/${transference.sku}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(<SKU_TRANSFERENCE_POST_TYPE>{
+        quantity: transference.quantity,
+        type: 'IN_TRANSFERENCE',
+        central_transference_id: transference.id,
+      }),
+    },
+  )
+
+  console.log('toTransfer:', toTransfer)
 }

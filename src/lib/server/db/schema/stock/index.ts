@@ -53,7 +53,14 @@ export type metaSaida = {
   order_id: number
 }
 
-export type MetaUnion = metaEntrada | metaSaida
+export type metaTransference = {
+  type: 'transference'
+  central_transference_id: number
+
+  transference_type: 'IN_TRANSFERENCE' | 'OUT_TRANSFERENCE'
+}
+
+export type MetaUnion = metaEntrada | metaSaida | metaTransference
 // function isMetaEntrada(meta: MetaUnion): meta is metaEntrada {
 //   return meta.type === 'entrada'
 // }

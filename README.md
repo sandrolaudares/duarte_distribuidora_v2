@@ -151,6 +151,8 @@ Feel free to submit issues or pull requests. Contributions are welcome!
   -- Falta adicionar a opcao na tela de permissoes ✅
   -- Butao do caixa admin na navbar dar redirect direto pro caixa dele ✅
 
+- boolean pra esconder produtos do cardapio
+
 
 - Preco km tabela distribuidora ✅ + infos tabela distribuidora - Delete deliveryFee Table
 - Colunas na tabela dos logs
@@ -159,7 +161,8 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - REFATORAR ONDE MOSTRA AS INFOS DO CLINTE NA PAGINA DO CAIXA
 - DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES
 - PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS
-- CADASTRAR MOTOBOY
+- CADASTRAR MOTOBOY ✅
+- CHECAR O SUM PAGINA CUSTOMER/ID 
 - TELA FIADO FILTRAR PAGAMENTOS ATRASADOS 
 - EDITAR DATA VENCIMENTO (EXIPIRE_AT)
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE

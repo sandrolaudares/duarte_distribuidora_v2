@@ -49,19 +49,19 @@ export const stock = (db: TenantDbType) => ({
     data: Omit<InsertStockTransaction, 'total_log'>,
   ) {
     const { sku } = data
-    return await db.transaction(async trx => {
-      const [resp] = await trx
-        .update(skuTable)
-        .set({
-          quantity: sql`${skuTable.quantity} + ${data.quantity}`,
-        })
-        .where(eq(skuTable.sku, sku))
-        .returning()
-      await trx.insert(stockTransactionTable).values({
-        ...data,
-        total_log: resp.quantity,
+    const [resp] = await db
+      .update(skuTable)
+      .set({
+        quantity: sql`${skuTable.quantity} + ${data.quantity}`,
       })
+      .where(eq(skuTable.sku, sku))
+      .returning()
+    await db.insert(stockTransactionTable).values({
+      ...data,
+      total_log: resp.quantity,
     })
+    return resp
+
   },
   insertSupplier(data: InsertSupplier) {
     return db.insert(supplierTable).values(data)
