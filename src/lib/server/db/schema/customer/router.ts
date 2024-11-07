@@ -23,9 +23,7 @@ import {
   type InsertCashierTransaction,
 } from '$lib/server/db/schema'
 
-
 import { distribuidora as distribuidoraController } from '$db/controller'
-
 
 import { middleware } from '$trpc/middleware'
 import { eq } from 'drizzle-orm'
@@ -102,7 +100,7 @@ export const customer = router({
         console.error('Failed to insert address:', error)
       }
     }),
-    updateAddress: publicProcedure
+  updateAddress: publicProcedure
     .meta({
       routeName: 'Atualizar Endereço',
       permission: 'editar_clientes',
@@ -126,10 +124,10 @@ export const customer = router({
       }),
     )
     .mutation(async ({ input, ctx: { tenantDb } }) => {
-      if(input.id){
+      if (input.id) {
         const { id, address } = input
         try {
-          return await customerController(tenantDb).updateAddress(id,address)
+          return await customerController(tenantDb).updateAddress(id, address)
         } catch (error) {
           console.error('Failed to insert address:', error)
         }
@@ -190,7 +188,7 @@ export const customer = router({
           }),
         }),
       )
-      .mutation(async ({ input, ctx: { tenantDb,locals } }) => {
+      .mutation(async ({ input, ctx: { tenantDb, locals } }) => {
         const userId = locals.user?.id
         const { order_items, order_info } = input
         const customer = await customerController(tenantDb).getCustomerById(
@@ -203,12 +201,22 @@ export const customer = router({
           })
         }
 
+        const [{ count: pendingOrders }] = await customerController(
+          tenantDb,
+        ).countCustomerExpiredFiadoTransactions(customer.id)
+
+        if (pendingOrders > 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Cliente possui pedidos fiados pendentes e expirados',
+          })
+        }
+
         const used_credit = await customerController(
           tenantDb,
         ).getCustomerUsedCredit(order_info.customer_id)
 
         const credit = used_credit?.used_credit ?? 0
-
 
         if (customer?.max_credit < credit + order_info.total) {
           throw new TRPCError({
@@ -688,9 +696,9 @@ export const customer = router({
         country: z.string(),
       }),
     )
-    .mutation(async ({ input , ctx}) => {
+    .mutation(async ({ input, ctx }) => {
       const location = await geocodeAddress(
-        `${input.street}, ${input.number}, ${input.city}, ${input.bairro}, ${input.state}, ${input.cep}, ${input.country}`
+        `${input.street}, ${input.number}, ${input.city}, ${input.bairro}, ${input.state}, ${input.cep}, ${input.country}`,
       )
 
       if (!location) {
@@ -709,14 +717,14 @@ export const customer = router({
 
       const distribuidora = await getDistribuidoraLatLong(tenantId)
 
-        const distribuidoraLat = distribuidora[0].lat;
-        const distribuidoraLong = distribuidora[0].lng;
-      
-        const distance = getDistanceFromLatLonInKm(
-          { lat: distribuidoraLat, lon: distribuidoraLong },
-          customerPosition,
-        )
-        console.log(distance)
-        return distance
+      const distribuidoraLat = distribuidora[0].lat
+      const distribuidoraLong = distribuidora[0].lng
+
+      const distance = getDistanceFromLatLonInKm(
+        { lat: distribuidoraLat!, lon: distribuidoraLong! },
+        customerPosition,
+      )
+      console.log(distance)
+      return distance
     }),
 })
