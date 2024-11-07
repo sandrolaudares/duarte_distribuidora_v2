@@ -155,6 +155,7 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 
 
 - Preco km tabela distribuidora ✅ + infos tabela distribuidora - Delete deliveryFee Table
+- Permissoes no trpc pra cada func
 - Colunas na tabela dos logs
 - AJustar form criar tenant erros de endereco
 - PODER EDITAR INFOS DISTRIBUIDORA NO /TENANT - perfil da distribuidora
