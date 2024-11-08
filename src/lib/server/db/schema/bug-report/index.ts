@@ -9,6 +9,7 @@ import {
 import { eq, relations, sql } from 'drizzle-orm'
 import { userTable } from '../user'
 import { createInsertSchema } from 'drizzle-zod'
+import { customerOrderTable } from '../customer'
 
 export const bugReportTable = sqliteTable('bugReport', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
@@ -47,6 +48,7 @@ export const logsTable = sqliteTable('logs', {
   metadata: text('metadata', { mode: 'json' }),
   error: text('error', { mode: 'json' }),
   currency: integer('currency'),
+  order_id: integer('order_id').references(()=>customerOrderTable.id)
 })
 
 export const logRelations = relations(logsTable, ({ one }) => ({
