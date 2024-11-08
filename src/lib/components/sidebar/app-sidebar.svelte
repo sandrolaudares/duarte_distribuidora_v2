@@ -2,11 +2,13 @@
   import AudioWaveform from 'lucide-svelte/icons/audio-waveform'
   import beer from 'lucide-svelte/icons/beer'
   import ListOrdered from 'lucide-svelte/icons/list-ordered'
+    import CircleDolar from 'lucide-svelte/icons/dollar-sign'
   import scroll from 'lucide-svelte/icons/scroll'
   import Command from 'lucide-svelte/icons/command'
   import Frame from 'lucide-svelte/icons/frame'
   import HandCoins from 'lucide-svelte/icons/hand-coins'
   import ShieldMap from 'lucide-svelte/icons/shield-check'
+  import Transactions from 'lucide-svelte/icons/arrow-left-right'
   import Settings2 from 'lucide-svelte/icons/settings-2'
   import User from 'lucide-svelte/icons/user'
 
@@ -77,7 +79,7 @@
       {
         name: 'Ir direto para caixa',
         url: `/admin/cashier/${$user.meta.caixa_id}`,
-        icon: HandCoins,
+        icon: CircleDolar,
       },
     )
   }
@@ -123,11 +125,20 @@
             title: 'Estoque',
             url: '/admin/stock',
           },
+          {
+            title: 'Transferir estoque',
+            url: '/admin/stock/transferir',
+          },
         ],
       },
     )
     data.projects.push(
 
+      {
+        name: 'Transações dos caixas',
+        url: '/admin/cashier/transactions',
+        icon: Transactions,
+      },
       {
         name: 'Logs',
         url: '/admin/logs',
@@ -162,8 +173,10 @@
   </Sidebar.Header>
   <Sidebar.Content>
     {#if data.navMain && data.projects && $user?.role === 'admin'}
-      <NavMain items={data.navMain} />
-      <NavProjects projects={data.projects} />
+    {#key $user}
+    <NavMain items={data.navMain} />
+    <NavProjects projects={data.projects} />
+    {/key}
     {/if}
 	{#if !$user}
 	
@@ -171,7 +184,7 @@
 			<Sidebar.Menu>
 				<Sidebar.MenuButton>
 					{#snippet child({ props })}
-					<a href="/login" {...props}>
+					<a href="/login/password" {...props}>
 						<User/>
 						<span>Login</span>
 					</a>
