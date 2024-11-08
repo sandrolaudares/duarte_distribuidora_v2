@@ -6,7 +6,6 @@ import {
   // customType,
 } from 'drizzle-orm/sqlite-core'
 import { relations, sql } from 'drizzle-orm'
-import { cashierTransactionTable } from '../distribuidora'
 import { logsTable } from '../bug-report'
 import { customerOrderTable, orderPaymentTable } from '../customer'
 import type { Permission, Role } from '$lib/utils/permissions'
@@ -36,7 +35,6 @@ export const userTable = sqliteTable('user', {
 })
 
 export const userRelations = relations(userTable, ({ many }) => ({
-  cashier_transactions: many(cashierTransactionTable),
   logs: many(logsTable),
   orders_made: many(customerOrderTable, { relationName: 'orders_made' }),
   entregou: many(customerOrderTable, { relationName: 'entregou' }),

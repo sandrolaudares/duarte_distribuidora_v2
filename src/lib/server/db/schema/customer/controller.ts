@@ -21,7 +21,7 @@ import type {
 import { and,  count, eq, gt, gte, isNotNull, lt, ne, or, sql } from 'drizzle-orm'
 
 import { stock, bugReport } from '$db/controller'
-import { cashierTable, cashierTransactionTable } from '../distribuidora'
+import { cashierTable } from '../distribuidora'
 import { TRPCError } from '@trpc/server'
 import { userTable } from '../user'
 import type { TenantDbType } from '../../tenant'

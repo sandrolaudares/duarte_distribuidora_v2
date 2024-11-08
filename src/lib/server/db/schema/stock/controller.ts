@@ -3,7 +3,6 @@ import {
   skuTable,
   stockTransactionTable,
   supplierTable,
-  cashierTransactionTable,
 } from '$db/schema'
 
 import type {
@@ -88,18 +87,5 @@ export const stock = (db: TenantDbType) => ({
       orderBy: [desc(stockTransactionTable.created_at)],
     })
   },
-  getRecentTransactionsCaixa(id: number) {
-    return db
-      .select()
-      .from(cashierTransactionTable)
-      .where(eq(cashierTransactionTable.cachier_id, id))
-      .orderBy(desc(cashierTransactionTable.created_at))
-      .limit(15)
-  },
-  getAllTransactionsCaixa() {
-    return db
-      .select()
-      .from(cashierTransactionTable)
-      .orderBy(desc(cashierTransactionTable.created_at))
-  }
+ 
 })
