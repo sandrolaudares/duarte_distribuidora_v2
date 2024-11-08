@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1729461390340,
-      "tag": "0000_lumpy_blink",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1729788446029,
-      "tag": "0001_lazy_screwball",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1730225382608,
-      "tag": "0002_clear_timeslip",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1731074861901,
-      "tag": "0003_tiresome_maddog",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1731078195022,
-      "tag": "0004_needy_blindfold",
+      "when": 1731082821820,
+      "tag": "0000_known_mathemanic",
       "breakpoints": true
     }
   ]
