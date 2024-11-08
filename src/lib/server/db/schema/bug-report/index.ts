@@ -33,7 +33,7 @@ export type InsertBugReport = typeof bugReportTable.$inferInsert
 
 export const logsTable = sqliteTable('logs', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  created_at: integer('created_at',{ mode: 'timestamp' }).$defaultFn(()=> new Date()).notNull(),
   type: text('type', {
     enum: ['LOG', 'SYSTEM', 'ERROR', 'CAIXA'],
   }).notNull(),
