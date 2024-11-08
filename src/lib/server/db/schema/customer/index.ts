@@ -22,7 +22,7 @@ export const customerTable = sqliteTable('cliente', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   // .$defaultFn(() => generateId(15)),
   is_retail: integer('is_retail', { mode: 'boolean' }).notNull(),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  created_at: integer('created_at',{ mode: 'timestamp' }).$defaultFn(()=> new Date()).notNull(),
   updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
     () => new Date(),
   ),
@@ -61,7 +61,7 @@ export type InsertCustomer = typeof customerTable.$inferInsert
 export const addressTable = sqliteTable('endereco', {
   id: integer('id').notNull().primaryKey({ autoIncrement: true }),
   // .$defaultFn(() => generateId(15)),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  created_at: integer('created_at',{ mode: 'timestamp' }).$defaultFn(()=> new Date()).notNull(),
   updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
     () => new Date(),
   ),
@@ -191,7 +191,7 @@ export type InsertCustomerOrder = typeof customerOrderTable.$inferInsert
 
 export const orderItemTable = sqliteTable('item_pedido', {
   id: integer('id').notNull().primaryKey({ autoIncrement: true }),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  created_at: integer('created_at',{ mode: 'timestamp' }).$defaultFn(()=> new Date()).notNull(),
   updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
     () => new Date(),
   ),
@@ -225,7 +225,7 @@ export type InsertOrderItem = typeof orderItemTable.$inferInsert
 export const orderPaymentTable = sqliteTable('pagamentos', {
   id: integer('id').primaryKey({ autoIncrement: true }).notNull(),
   created_by: text('created_by').references(() => userTable.id),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  created_at: integer('created_at',{ mode: 'timestamp' }).$defaultFn(()=> new Date()).notNull(),
   amount_paid: integer('amount_paid').notNull(),
   troco: integer('troco'),
   payment_method: text('payment_method', { enum: paymentMethodEnum }).notNull(),

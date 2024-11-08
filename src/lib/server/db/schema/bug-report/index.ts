@@ -13,7 +13,7 @@ import { customerOrderTable } from '../customer'
 
 export const bugReportTable = sqliteTable('bugReport', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  created_at: integer('created_at',{ mode: 'timestamp' }).$defaultFn(()=> new Date()).notNull(),
   created_by: text('created_by')
     .references(() => userTable.id, {
       onDelete: 'set null',
