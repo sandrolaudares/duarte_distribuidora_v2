@@ -176,7 +176,7 @@
             <p class="font-bold">
               {clienteSelecionado.name} - {clienteSelecionado.email}
             </p>
-            Créditos usados: <UsedCredits id={clienteSelecionado.id}/>
+            Créditos usados: <UsedCredits id={clienteSelecionado.id}/> - R${(clienteSelecionado.max_credit/100).toFixed(2)}
           </span>
           <button
             class="btn btn-primary"

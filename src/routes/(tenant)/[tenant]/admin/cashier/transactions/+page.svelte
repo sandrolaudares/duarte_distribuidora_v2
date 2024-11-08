@@ -1,36 +1,112 @@
 <script lang="ts">
-    import type { PageData } from './$types';
-    
-    export let data: PageData;
+  import { navigating } from '$app/stores'
+  import { SSRFilters } from '$lib/components/datatable/filter.svelte'
+  import { modal, FormModal } from '$lib/components/modal'
+  import DateFilter from '$lib/components/DateFilter.svelte'
+  import { page } from '$app/stores'
 
-    let transactions = data.rows
+  import {
+    TableHandler,
+    Datatable,
+    ThSort,
+    ThFilter,
+    Pagination,
+    RowsPerPage,
+    Th,
+    Search,
+    type State,
+  } from '@vincjo/datatables/server'
+
+  import type { PageData } from './$types'
+  import { toast } from 'svelte-sonner'
+  import { trpc } from '$trpc/client'
+  import { tr } from 'date-fns/locale'
+  import NoResults from '$lib/components/NoResults.svelte'
+  import { format } from 'date-fns'
+  import { goto } from '$app/navigation';
+
+  let { data }: { data: PageData } = $props()
+  const filters = new SSRFilters()
+
+  const table = new TableHandler(data.rows, {
+    rowsPerPage: data.size,
+    totalRows: data.count,
+  })
+
+  table.setPage(Number(filters.get('page')) || 1)
+  table.load(async s => {
+    console.log(s)
+    filters.fromState(s)
+    await $navigating?.complete
+    return data.rows
+  })
 </script>
-<table class="table table-zebra">
-    <thead>
-      <tr>
-        <th>Text</th>
-        <th>ID</th>
-        <th>Created At</th>
-        <th>Type</th>
-        <th>Created By</th>
-        <th>Currency</th>
-        <th>Pathname</th>
-        <th>Route Name</th>
-      </tr>
-    </thead>
-    <tbody>
-      {#each transactions as transaction}
+
+<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+  <Datatable {table} headless>
+    <!-- {#snippet header()}
+      <Search {table} />
+     
+    {/snippet} -->
+    <!-- svelte-ignore component_name_lowercase -->
+    <table class="table table-zebra border">
+      <thead>
         <tr>
-          <td>{transaction.text}</td>
-          <td>{transaction.id}</td>
-          <td>{transaction.created_at}</td>
-          <td>{transaction.type}</td>
-          <td>{transaction.created_by}</td>
-          <td>{transaction.currency}</td>
-          <td>{transaction.pathname}</td>
-          <td>{transaction.routeName}</td>
+          <Th>ID</Th>
+          <Th>Usuário</Th>
+          <Th>Caixa</Th>
+          <Th>Logs</Th>
+          <Th>Data</Th>
+          <Th>Troco</Th>
+          <Th>Valor Pago</Th>
+          <Th>Total</Th>
+          <Th>Detalhes</Th>
+          
         </tr>
-      {/each}
-    </tbody>
-  </table>
-  
+        <tr>
+          <Th />
+          <ThFilter {table} field="user_name"/>
+          <Th/>
+          <Th/>
+          <Th/>
+          <Th/>
+          <Th/>
+          <Th/>
+          <Th/>
+          <!--FINALIZAR ESSA TABLE, FILTRO DE DATA E ETC-->
+          
+        </tr>
+      </thead>
+      <tbody>
+        {#each data.rows as row}
+          <tr>
+            <td>{row.id}</td>
+            <td>{row.user_name}</td>
+            <td>{row.cashier}</td>
+            <td>{row.text}</td>
+            <!-- <td>{row.routeName}</td> -->
+            <td>{row.created_at ? format(row.created_at,'dd/MM/yyyy') :''}</td>
+            <td class="{row.metadata.troco? 'font-semibold': 'text-error'}">{row.metadata.troco ? 'R$'+(row.metadata.troco/100).toFixed(2) : 'Não tem'}</td>
+            <td class="font-semibold">R${row.currency ? (row.currency/100).toFixed(2) : '0.00'}</td>
+            <td class="font-semibold">{row.total ? 'R$'+(row.total/100).toFixed(2) : ''}</td>
+            <td><a href="/admin/orders/{row.order_id}" class="badge badge-primary">Detalhes</a></td>
+            
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+    {#if data.rows.length === 0}
+      <NoResults />
+    {/if}
+    {#snippet footer()}
+      <RowsPerPage {table} />
+      <div></div>
+      <Pagination {table} />
+    {/snippet}
+  </Datatable>
+</main>
+<style>
+  thead {
+    background-color: oklch(var(--b1)) !important;
+  }
+</style>
