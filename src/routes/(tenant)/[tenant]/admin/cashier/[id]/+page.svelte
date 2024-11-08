@@ -253,6 +253,7 @@
     <CaixaLeftColumn
       {caixa}
       {user}
+      fee={data.tenant?.taxa_por_km ?? 0}
       bind:tipo_preco
       bind:clienteSelecionado
       bind:enderecoCliente

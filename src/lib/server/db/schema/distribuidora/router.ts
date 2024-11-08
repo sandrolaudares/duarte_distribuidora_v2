@@ -145,15 +145,7 @@ export const distribuidora = router({
     .mutation(async ({ input, ctx: { tenantDb } }) => {
       return await distribuidoraController(tenantDb).deleteCashierById(input)
     }),
-  updateAllKm: publicProcedure
-    .input(z.number())
-    .mutation(({ input, ctx: { tenantDb } }) => {
-      return distribuidoraController(tenantDb).updateKmForAllCaixas(input)
-    }),
 
-  getFee: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
-    return await distribuidoraController(tenantDb).getFee()
-  }),
   getDistribuidoras: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
     return await distribuidoraController(tenantDb).getDistribuidoras()
   }),

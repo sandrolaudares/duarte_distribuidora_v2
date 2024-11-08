@@ -342,7 +342,7 @@ export const customer = router({
 
         for (const payment of order_info.payment_info) {
           await bugReport(tenantDb).insertLogs({
-            text: `Pagamento de ${payment.amount_paid} para pedido ${order.id}${payment.troco ? ` com troco de ${payment.troco}` : ''}`,
+            text: `Pagamento de R$${(payment.amount_paid/100).toFixed(2)} para pedido ${order.id}${payment.troco ? ` com troco de R$${(payment.troco/100).toFixed(2)}` : ''}`,
             created_by: userId,
             metadata: {
               order_id: order.id,
@@ -492,7 +492,7 @@ export const customer = router({
           }
 
           await bugReport(tenantDb).insertLogs({
-            text: `Pagamento de ${payment_info.amount_paid} para pedido ${payment_info.order_id}`,
+            text: `Pagamento de R$${(payment_info.amount_paid/100).toFixed(2)} para pedido ${payment_info.order_id}`,
             created_by: userId,
             metadata: {
               order_id: payment_info.order_id,
@@ -546,7 +546,7 @@ export const customer = router({
         },
         order_id,
         type: 'SYSTEM',
-        pathname: '/TODO:ROUTE',
+        pathname: '',
         routeName: 'Atualizar Pedido',
       })
       return await customerController(tenantDb).updateOrderStatus(
@@ -655,7 +655,7 @@ export const customer = router({
     )
     .mutation(async ({ input, ctx }) => {
       const location = await geocodeAddress(
-        `${input.street}, ${input.number}, ${input.city}, ${input.bairro}, ${input.state}, ${input.cep}, ${input.country}`,
+        `${input.number}, ${input.street}, ${input.bairro}, ${input.city}, ${input.state}, ${input.cep}, ${input.country}`,
       )
 
       if (!location) {

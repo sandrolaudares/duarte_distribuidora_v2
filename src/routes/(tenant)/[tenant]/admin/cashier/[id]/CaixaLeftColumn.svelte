@@ -36,13 +36,7 @@
   
   const cart = getCartContext()
 
-  let fee = 0
-
-  onMount(async ()=>{
-    const resp = await trpc($page).distribuidora.getFee.query()
-
-    fee = resp[0].taxa_por_km
-  })
+  export let fee = 0
 
   function handleSelectClient() {
     modal.open(ModalCliente, {
@@ -91,12 +85,12 @@
     try {
       if (enderecoCliente) {
         distance = await trpc($page).customer.calculateDistance.mutate({
-          cep: enderecoCliente.cep,
-          bairro: enderecoCliente?.neighborhood,
-          state: enderecoCliente.state,
-          city: enderecoCliente?.city,
-          street: enderecoCliente.street,
           number: enderecoCliente.number,
+          bairro: enderecoCliente?.neighborhood,
+          street: enderecoCliente.street,
+          city: enderecoCliente?.city,
+          state: enderecoCliente.state,
+          cep: enderecoCliente.cep,
           country: enderecoCliente.country,
         })
         taxaEntrega = (distance / 1000) * (fee / 100);
