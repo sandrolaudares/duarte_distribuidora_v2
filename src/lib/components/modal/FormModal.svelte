@@ -104,8 +104,8 @@
         <div class="label">
           <span class="label-text">{field.label}</span>
           {#if !field.required && field.type !== 'checkbox'}
-            <span class="badge badge-info label-text-alt text-info-content">
-              Optional
+            <span class="badge badge-primary label-text-alt text-primary-content">
+              Opcional
             </span>
           {/if}
 
