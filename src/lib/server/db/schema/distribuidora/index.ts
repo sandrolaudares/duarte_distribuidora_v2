@@ -11,13 +11,12 @@ import { imageTable } from '../image'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { customerOrderTable } from '../customer'
 import { userTable } from '../user'
+import { timestamps } from '../../utils'
 
 export const cashierTable = sqliteTable('caixas', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: integer('created_at',{ mode: 'timestamp' }).$defaultFn(()=> new Date()).notNull(),
-  updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => new Date(),
-  ),
+  ...timestamps,
+
   name: text('name').notNull(),
   status: text('status', { enum: ['Aberto', 'Fechado'] })
     .notNull()

@@ -5,12 +5,12 @@ import {
   blob,
   // customType,
 } from 'drizzle-orm/sqlite-core'
-import { sql } from 'drizzle-orm'
 import { userTable } from '../user'
+import { timestamps } from '../../utils'
 
 const imageTable = sqliteTable('image', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  ...timestamps,
   uploaded_by: text('uploaded_by')
     // .notNull()
     .references(() => userTable.id, { onDelete: 'set null' }),

@@ -19,15 +19,12 @@ import {
   productTable,
   userTable,
 } from '$db/schema'
+import { timestamps } from '../../utils'
 
 export const skuTable = sqliteTable('estoque', {
   sku: text('sku').primaryKey(),
-  created_at: integer('created_at', { mode: 'timestamp' }).$defaultFn(
-    () => new Date(),
-  ),
-  updated_at: integer('updated_at', { mode: 'timestamp' })
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => new Date()),
+  ...timestamps,
+
   image: integer('image_id').references(() => imageTable.id),
   name: text('name').notNull(),
   quantity: integer('quantity').notNull().default(0),
@@ -70,12 +67,8 @@ export type MetaUnion = metaEntrada | metaSaida | metaTransference
 // }
 export const stockTransactionTable = sqliteTable('transacao_estoque', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: integer('created_at', { mode: 'timestamp' }).default(
-    sql`(CURRENT_TIMESTAMP)`,
-  ),
-  updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => new Date(),
-  ),
+  ...timestamps,
+
   sku: text('sku')
     .notNull()
     .references(() => skuTable.sku),
@@ -113,12 +106,8 @@ export type SelectStockTransaction = typeof stockTransactionTable.$inferSelect
 export const supplierTable = sqliteTable('fornecedor', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
-  created_at: integer('created_at', { mode: 'timestamp' }).default(
-    sql`(CURRENT_TIMESTAMP)`,
-  ),
-  updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => new Date(),
-  ),
+  ...timestamps,
+ 
   razao_social: text('razao_social'),
   cnpj_cpf: text('cnpj_cpf'),
   ie_rg: text('ie_rg'),
