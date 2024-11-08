@@ -35,12 +35,11 @@ import { getDistribuidoraLatLong } from '../../central/constroller'
 export const customer = router({
   insertCustomer: publicProcedure
     .meta({
-      routeName: 'Adicionar Cliente',
+      routeName: 'Cadastrar Cliente',
       permission: 'editar_clientes',
     })
     .use(middleware.auth)
     .use(middleware.logged)
-
     .input(insertCustomerSchema)
     .mutation(async ({ input, ctx: { tenantDb } }) => {
       return await customerController(tenantDb)
