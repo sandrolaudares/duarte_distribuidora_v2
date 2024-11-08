@@ -82,7 +82,7 @@ export const timestamps = {
   }).default(sql`(unixepoch())`),
   updated_at: integer('updated_at', {
     mode: 'timestamp',
-  }).$onUpdate(() => sql`(unixepoch())`),
+  }).$onUpdate(() => new Date()),
   deleted_at: integer('deleted_at', {
     mode: 'timestamp',
   }),
