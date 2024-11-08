@@ -57,8 +57,7 @@ export type InsertProduct = typeof productTable.$inferInsert
 
 export const productItemTable = sqliteTable('product_item', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
-
+...timestamps,
   product_id: integer('product_id')
     .notNull()
     .references(() => productTable.id),
