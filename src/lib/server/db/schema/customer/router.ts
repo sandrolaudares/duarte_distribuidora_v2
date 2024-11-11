@@ -241,6 +241,10 @@ export const customer = router({
         //   })
         //   .returning()
 
+        if(!order.motoboy_id) {
+          customerController(tenantDb).updateStockOnOrder(order.id)
+        }
+
         await bugReport(tenantDb).insertLogs({
           text: `Pedido fiado`,
           created_by: userId,
@@ -358,6 +362,10 @@ export const customer = router({
             currency: payment.amount_paid,
           })
 
+        }
+
+        if(!order.motoboy_id) {
+          customerController(tenantDb).updateStockOnOrder(order.id)
         }
         //TODO: se necessario inserir outro log só pro troco
 
