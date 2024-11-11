@@ -8,16 +8,19 @@ import {
   getSQLiteColumn,
   getOrderBy,
 } from '$lib/server/db/utils'
-import { and, eq, getTableColumns, SQL, count, like, desc } from 'drizzle-orm'
+import { and, eq, getTableColumns, SQL, count, like, desc, gte, lte } from 'drizzle-orm'
 
-export const load = (async ({ url,locals:{tenantDb} }) => {
+export const load = (async ({ url, locals: { tenantDb } }) => {
   const size = 13
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
   const pageSize = Number(searchParams.get('pageSize') ?? size)
 
   const username = searchParams.get('user_name')
-  const email = searchParams.get('email')
+  const caixa = searchParams.get('cashier')
+
+  const dateStart = searchParams.get('startDate')
+  const dateEnd = searchParams.get('endDate')
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_order')
@@ -35,15 +38,36 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
       currency: schema.logsTable.currency,
       total: schema.customerOrderTable.total,
       cashier: schema.cashierTable.name,
-      order_id:schema.customerOrderTable.id,
+      order_id: schema.customerOrderTable.id,
 
       user_name: schema.userTable.username,
     })
     .from(schema.logsTable)
-    .where(and(eq(schema.logsTable.type,'CAIXA'), username ? like(schema.userTable.username, `${username}%`) : undefined,))
-    .leftJoin(schema.userTable, eq(schema.logsTable.created_by, schema.userTable.id))
-    .leftJoin(schema.customerOrderTable,eq(schema.logsTable.order_id,schema.customerOrderTable.id))
-    .leftJoin(schema.cashierTable,eq(schema.customerOrderTable.cachier_id,schema.cashierTable.id))
+    .where(
+      and(
+        eq(schema.logsTable.type, 'CAIXA'),
+        username ? like(schema.userTable.username, `${username}%`) : undefined,
+        caixa ? like(schema.cashierTable.name, `${caixa}%`) : undefined,
+        dateStart && dateEnd
+        ? and(
+          gte(schema.logsTable.created_at, new Date(Number(dateStart))),
+          lte(schema.logsTable.created_at, new Date(Number(dateEnd))),
+          )
+        : undefined,
+      ),
+    )
+    .leftJoin(
+      schema.userTable,
+      eq(schema.logsTable.created_by, schema.userTable.id),
+    )
+    .leftJoin(
+      schema.customerOrderTable,
+      eq(schema.logsTable.order_id, schema.customerOrderTable.id),
+    )
+    .leftJoin(
+      schema.cashierTable,
+      eq(schema.customerOrderTable.cachier_id, schema.cashierTable.id),
+    )
     .orderBy(desc(schema.logsTable.created_at))
     .$dynamic()
 
@@ -58,11 +82,21 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
   try {
     const rows = await withPagination(query, page, pageSize)
 
-    const total = await tenantDb!.select({ count: count() }).from(schema.logsTable).where(and(eq(schema.logsTable.type,'CAIXA'), username ? like(schema.userTable.username, `${username}%`) : undefined,))
+    const total = await tenantDb!
+      .select({ count: count() })
+      .from(schema.logsTable)
+      .where(
+        and(
+          eq(schema.logsTable.type, 'CAIXA'),
+          username
+            ? like(schema.userTable.username, `${username}%`)
+            : undefined,
+        ),
+      )
 
-    return { rows: rows ?? [], count: total[0].count ,size}
+    return { rows: rows ?? [], count: total[0].count, size }
   } catch (error) {
     console.error(error)
-    return { rows: [], count: 0,size:0 }
+    return { rows: [], count: 0, size: 0 }
   }
 }) satisfies PageServerLoad

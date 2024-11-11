@@ -58,7 +58,7 @@
           <Th>Logs</Th>
           <Th>Data</Th>
           <Th>Troco</Th>
-          <Th>Valor Pago</Th>
+          <Th>Valor</Th>
           <Th>Total</Th>
           <Th>Detalhes</Th>
           
@@ -66,9 +66,17 @@
         <tr>
           <Th />
           <ThFilter {table} field="user_name"/>
+          <ThFilter {table} field="cashier"/>
           <Th/>
-          <Th/>
-          <Th/>
+          <Th><DateFilter
+            onchange={(start,end)=>{
+              if(start != null && end !=null){
+                let startDate= start.toString()
+                let endDate = end.toString()
+                filters.update({startDate,endDate})
+              }
+              }}
+              /></Th>
           <Th/>
           <Th/>
           <Th/>
@@ -89,7 +97,11 @@
             <td class="{row.metadata.troco? 'font-semibold': 'text-error'}">{row.metadata.troco ? 'R$'+(row.metadata.troco/100).toFixed(2) : 'Não tem'}</td>
             <td class="font-semibold">R${row.currency ? (row.currency/100).toFixed(2) : '0.00'}</td>
             <td class="font-semibold">{row.total ? 'R$'+(row.total/100).toFixed(2) : ''}</td>
-            <td><a href="/admin/orders/{row.order_id}" class="badge badge-primary">Detalhes</a></td>
+            <td>
+              {#if row.order_id}
+              <a href="/admin/orders/{row.order_id}" class="badge badge-primary">Detalhes</a>
+              {/if}
+            </td>
             
           </tr>
         {/each}
