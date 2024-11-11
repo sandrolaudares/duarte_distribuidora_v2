@@ -155,6 +155,7 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 
 
 - Preco km tabela distribuidora ✅ + infos tabela distribuidora - Delete deliveryFee Table
+- Contas a pagar, nova tabela (Preciso que inclua nas guias a esquerda contas a pagar. Essa guia deve ter a categoria da dívida, fornecedor (já cadastrado em fornecedores), descrição, data de vencimento e valor. A conta fica cadastradastra, financeiro realiza o pagamento na data correta, esse histórico precisa ficar registrado, pois em relatórios vamos precisar comparar vendas x despesas pra analisar o lucro mensal.)
 - Permissoes no trpc pra cada func
 - Colunas na tabela dos logs
 - AJustar form criar tenant erros de endereco
