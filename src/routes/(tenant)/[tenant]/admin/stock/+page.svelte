@@ -116,7 +116,7 @@
             <td>{row.sku}</td>
             <td>{row.name}</td>
             <td>{row.quantity}</td>
-            <td>{row.created_at}</td>
+            <td>{format(row.created_at,'dd/MM/yyyy') ?? ''}</td>
             <!--TODO: Change created at in DB to timestamp-->
             <td>
               <a href="/admin/stock/{row.sku}" class="badge badge-primary">

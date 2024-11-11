@@ -29,8 +29,8 @@ export const stock = (db: TenantDbType) => ({
   getSKUWithStock() {
     return db.select().from(skuTable)
   },
-  getSKUByID(sku_id: SelectSku['sku']) {
-    return db.query.skuTable.findFirst({
+  async getSKUByID(sku_id: SelectSku['sku']) {
+    return await db.query.skuTable.findFirst({
       where: eq(skuTable.sku, sku_id),
     })
   },

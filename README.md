@@ -150,6 +150,8 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - ADICIONAR NO METADATA DO USUARIO UM CAIXA DESIGNADO A ELE ✅
   -- Falta adicionar a opcao na tela de permissoes ✅
   -- Butao do caixa admin na navbar dar redirect direto pro caixa dele ✅
+- CADASTRAR MOTOBOY ✅
+- TELA FIADO FILTRAR PAGAMENTOS ATRASADOS ✅
 
 - boolean pra esconder produtos do cardapio
 
@@ -163,9 +165,7 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - REFATORAR ONDE MOSTRA AS INFOS DO CLINTE NA PAGINA DO CAIXA
 - DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES
 - PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS
-- CADASTRAR MOTOBOY ✅
 - CHECAR O SUM PAGINA CUSTOMER/ID 
-- TELA FIADO FILTRAR PAGAMENTOS ATRASADOS 
 - EDITAR DATA VENCIMENTO (EXIPIRE_AT)
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE
 - APLICAR EDITABLECELL NAS TABLES EXISTENTES
