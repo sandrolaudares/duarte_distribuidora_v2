@@ -106,7 +106,7 @@
             <h1 class="mb-3 text-lg font-semibold">Pagamentos:</h1>
             <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
               {#each order_details.payments as payment, i}
-                <CardPayments {payment} {i} />
+                <CardPayments {payment} {i} created_by={payment.created_by?.email} />
               {/each}
             </div>
             {#if order_details.amount_paid - troco < order_details.total}

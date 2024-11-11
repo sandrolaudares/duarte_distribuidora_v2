@@ -116,7 +116,7 @@
           <Th>Data do pedido</Th>
           <ThSort {table} field="expire_at">Data de vencimento</ThSort>
           <Th>Dias para vencimento</Th>
-          <Th>Status do pedido</Th>
+
           <ThSort {table} field="total">Valor do pedido</ThSort>
 
           <Th>Ver detalhes</Th>
@@ -136,8 +136,18 @@
               }}
             />
           </Th>
-          <Th></Th>
-          <Th />
+
+          <Th><DateFilter
+            enableFutureDates={true}
+            enablePastDates={true}
+            onchange={(startExpire, endExpire) => {
+              if (startExpire != null && endExpire != null) {
+                let startExpireDate = startExpire.toString()
+                let endExpireDate = endExpire.toString()
+                filters.update({ startExpireDate, endExpireDate })
+              }
+            }}
+          /></Th>
           <Th />
           <Th />
 
@@ -187,7 +197,6 @@
                 {/if}
               </b>
             </td>
-            <td><b>{row.status}</b></td>
             <td><b class="text-xl text-success">R${row.total / 100}</b></td>
 
             <td>
