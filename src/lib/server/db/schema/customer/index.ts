@@ -32,7 +32,7 @@ export const customerTable = sqliteTable('cliente', {
   phone: text('phone').unique(),
   cpf_cnpj: text('cpf_cnpj'),
   rg_ie: text('rg_ie'),
-  max_credit: integer('max_credit').notNull().default(50000),
+  max_credit: integer('max_credit').notNull().default(0),
 })
 export const customerRelations = relations(customerTable, ({ one, many }) => ({
   adresses: many(addressTable),
