@@ -40,6 +40,8 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
 
   const startExpireDate = searchParams.get('startExpireDate')
   const endExpireDate = searchParams.get('endExpireDate')
+
+  const atrasados = Boolean(searchParams.get('atrasados'))
   
 
   let query = customer(tenantDb!)
@@ -78,6 +80,11 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
               ),
             )
           : undefined,
+
+          atrasados ? lte(
+            schema.customerOrderTable.expire_at,
+            new Date()
+          ) : undefined
       ),
     )
     .$dynamic()
@@ -133,6 +140,10 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
               ),
             )
           : undefined,
+          atrasados ? lte(
+            schema.customerOrderTable.expire_at,
+            new Date()
+          ) : undefined
 
             
         ),
@@ -179,6 +190,10 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
               ),
             )
           : undefined,
+          atrasados ? lte(
+            schema.customerOrderTable.expire_at,
+            new Date()
+          ) : undefined
         ),
       )
 

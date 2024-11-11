@@ -69,25 +69,6 @@
     return 'table-zebra '
   }
 
-  async function handleUpdate(
-    newItem: any,
-    key: string,
-    idx: number,
-    currentItem: any,
-  ) {
-    try {
-      await trpc($page).customer.updateCustomer.mutate({
-        id: newItem.id,
-        customer: { [key]: newItem[key] },
-      })
-      toast.success('Atualizado com sucesso!')
-    } catch (error: any) {
-      toast.error('Erro ao atualizar')
-      console.error(error)
-      table.rows[idx] = currentItem
-    }
-    table.rows = table.rows
-  }
   function calculateSum() {
     return data.rows
       .filter(row => table.selected.includes(row.id))
@@ -100,6 +81,18 @@
   Pedidos com pagamento pendente:
 </h1>
 <main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+  <select value="todos" onchange={(e)=>{
+    const value = e.target?.value
+    if(value === "atrasados"){
+      filters.update({atrasados:"true"})
+    } else {
+      filters.clear('atrasados')
+    }
+    
+  }} class="select select-bordered mb-3">
+    <option value="todos" selected>Todos</option>
+    <option value="atrasados">Pagamentos atrasados</option>
+  </select>
   <Datatable {table} headless>
     <!-- {#snippet header()}
       <Search {table} />
@@ -213,7 +206,7 @@
           <td></td>
           <td></td>
           <td></td>
-          <td></td>
+
           <td class="text-xl font-bold">
             Total: <span class="text-secondary">
               R${sum
