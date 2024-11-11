@@ -159,7 +159,11 @@ export const customer = (db: TenantDbType) => ({
         },
         address: true,
         customer: true,
-        payments: true,
+        payments: {
+          with:{
+            created_by:true,
+          },
+        },
         transactions: true,
       },
     })
