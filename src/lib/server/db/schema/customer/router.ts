@@ -14,13 +14,14 @@ import {
   paymentMethodEnum,
   paymentStatusEnum,
   insertOrderPaymentSchema,
-  cashierTransactionTable,
+
   orderPaymentTable,
   customerOrderTable,
   type InsertOrderPayment,
   orderItemTable,
   orderTypeEnum,
-  type InsertCashierTransaction,
+
+  type InsertLogs,
 } from '$lib/server/db/schema'
 
 import { distribuidora as distribuidoraController } from '$db/controller'
@@ -35,12 +36,11 @@ import { getDistribuidoraLatLong } from '../../central/constroller'
 export const customer = router({
   insertCustomer: publicProcedure
     .meta({
-      routeName: 'Adicionar Cliente',
+      routeName: 'Cadastrar Cliente',
       permission: 'editar_clientes',
     })
     .use(middleware.auth)
     .use(middleware.logged)
-
     .input(insertCustomerSchema)
     .mutation(async ({ input, ctx: { tenantDb } }) => {
       return await customerController(tenantDb)
@@ -133,27 +133,7 @@ export const customer = router({
         }
       }
     }),
-  // getPaginatedCustomers: publicProcedure
-  //   .input(paramsSchema)
-  //   .query(async ({ input }) => {
-  //     return await tableHelper(
-  //       customerController.getCustomers().$dynamic(),
-  //       customerTable,
-  //       'name',
-  //       input,
-  //     )
-  //   }),
 
-  // getPaginatedOrders: publicProcedure
-  //   .input(paramsSchema)
-  //   .query(async ({ input }) => {
-  //     return await tableHelper(
-  //       customerController.getAllOrderInfo().$dynamic(),
-  //       customerOrderTable,
-  //       'name',
-  //       input,
-  //     )
-  //   }),
 
   getCustomers: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
     return await customerController(tenantDb).getCustomersWithAddress()
@@ -261,6 +241,10 @@ export const customer = router({
         //   })
         //   .returning()
 
+        if(!order.motoboy_id) {
+          customerController(tenantDb).updateStockOnOrder(order.id)
+        }
+
         await bugReport(tenantDb).insertLogs({
           text: `Pedido fiado`,
           created_by: userId,
@@ -268,6 +252,7 @@ export const customer = router({
             order_id: order.id,
             customer_id: order_info.customer_id,
           },
+          order_id:order.id,
           type: 'CAIXA',
           pathname: '/TODO:ROUTE',
           routeName: 'Fiado',
@@ -359,35 +344,9 @@ export const customer = router({
           .values(items)
           .returning()
 
-        const trocos: InsertCashierTransaction[] = []
-        const transactions: InsertCashierTransaction[] = []
         for (const payment of order_info.payment_info) {
-          transactions.push({
-            created_by: userId,
-            cachier_id: order_info.cashier_id,
-            type: 'PAGAMENTO',
-            order_id: order.id,
-
-            meta_data: {
-              customer: order_info.customer_id,
-            },
-            amount: payment.amount_paid,
-          })
-          if (payment.troco) {
-            trocos.push({
-              created_by: userId,
-              cachier_id: order_info.cashier_id,
-              type: 'Troco',
-              order_id: order.id,
-              meta_data: {
-                customer: order_info.customer_id,
-              },
-              amount: payment.troco,
-            })
-          }
-
           await bugReport(tenantDb).insertLogs({
-            text: `Pagamento de ${payment.amount_paid} para pedido ${order.id}${payment.troco ? ` com troco de ${payment.troco}` : ''}`,
+            text: `Pagamento de R$${(payment.amount_paid/100).toFixed(2)} para pedido ${order.id}${payment.troco ? ` com troco de R$${(payment.troco/100).toFixed(2)}` : ''}`,
             created_by: userId,
             metadata: {
               order_id: order.id,
@@ -396,16 +355,20 @@ export const customer = router({
               amount_paid: payment.amount_paid,
               troco: payment.troco,
             },
+            order_id: order.id,
             type: 'CAIXA',
-            pathname: '/TODO:ROUTE',
-            routeName: 'Pagamento',
+            pathname: '',
+            routeName: 'Inserir pedido pago',
             currency: payment.amount_paid,
           })
+
         }
-        if (trocos.length > 0) {
-          await distribuidora(tenantDb).insertCashierTransaction(trocos, true)
+
+        if(!order.motoboy_id) {
+          customerController(tenantDb).updateStockOnOrder(order.id)
         }
-        await distribuidora(tenantDb).insertCashierTransaction(transactions)
+        //TODO: se necessario inserir outro log só pro troco
+
         const payments = order_info.payment_info.map(payment => ({
           ...payment,
           cachier_id: order_info.cashier_id,
@@ -537,13 +500,14 @@ export const customer = router({
           }
 
           await bugReport(tenantDb).insertLogs({
-            text: `Pagamento de ${payment_info.amount_paid} para pedido ${payment_info.order_id}`,
+            text: `Pagamento de R$${(payment_info.amount_paid/100).toFixed(2)} para pedido ${payment_info.order_id}`,
             created_by: userId,
             metadata: {
               order_id: payment_info.order_id,
               payment_id: payment_info.id,
               amount: payment_info.amount_paid,
             },
+            order_id: payment_info.order_id,
             type: 'CAIXA',
             pathname: '/TODO:ROUTE',
             routeName: 'Pagamento',
@@ -588,8 +552,9 @@ export const customer = router({
           order_id,
           status,
         },
+        order_id,
         type: 'SYSTEM',
-        pathname: '/TODO:ROUTE',
+        pathname: '',
         routeName: 'Atualizar Pedido',
       })
       return await customerController(tenantDb).updateOrderStatus(
@@ -698,7 +663,7 @@ export const customer = router({
     )
     .mutation(async ({ input, ctx }) => {
       const location = await geocodeAddress(
-        `${input.street}, ${input.number}, ${input.city}, ${input.bairro}, ${input.state}, ${input.cep}, ${input.country}`,
+        `${input.number}, ${input.street}, ${input.bairro}, ${input.city}, ${input.state}, ${input.cep}, ${input.country}`,
       )
 
       if (!location) {

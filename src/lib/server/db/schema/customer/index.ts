@@ -17,15 +17,14 @@ import {
 import { createInsertSchema } from 'drizzle-zod'
 
 import { product } from '$db/controller'
+import { timestamps } from '../../utils'
 
 export const customerTable = sqliteTable('cliente', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   // .$defaultFn(() => generateId(15)),
   is_retail: integer('is_retail', { mode: 'boolean' }).notNull(),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
-  updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => new Date(),
-  ),
+  ...timestamps,
+
   name: text('name').notNull(),
   email: text('email').unique(),
   birth_date: text('birth_date'),
@@ -33,7 +32,7 @@ export const customerTable = sqliteTable('cliente', {
   phone: text('phone').unique(),
   cpf_cnpj: text('cpf_cnpj'),
   rg_ie: text('rg_ie'),
-  max_credit: integer('max_credit').notNull().default(50000),
+  max_credit: integer('max_credit').notNull().default(0),
 })
 export const customerRelations = relations(customerTable, ({ one, many }) => ({
   adresses: many(addressTable),
@@ -61,10 +60,8 @@ export type InsertCustomer = typeof customerTable.$inferInsert
 export const addressTable = sqliteTable('endereco', {
   id: integer('id').notNull().primaryKey({ autoIncrement: true }),
   // .$defaultFn(() => generateId(15)),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
-  updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => new Date(),
-  ),
+  ...timestamps,
+
   customer_id: integer('customer_id')
     .notNull()
     .references(() => customerTable.id),
@@ -125,10 +122,7 @@ export const customerOrderTable = sqliteTable(
   {
     id: integer('id').notNull().primaryKey({ autoIncrement: true }),
     // .$defaultFn(() => generateId(15)),
-    created_at: integer('created_at',{ mode: 'timestamp' }).$defaultFn(()=> new Date()).notNull(),
-    updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-      () => new Date(),
-    ),
+    ...timestamps,
     expire_at:integer('expire_at',{mode:'timestamp'}).$defaultFn(() => {
       const createdAt = new Date();
       createdAt.setDate(createdAt.getDate() + 7);
@@ -191,10 +185,8 @@ export type InsertCustomerOrder = typeof customerOrderTable.$inferInsert
 
 export const orderItemTable = sqliteTable('item_pedido', {
   id: integer('id').notNull().primaryKey({ autoIncrement: true }),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
-  updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => new Date(),
-  ),
+  ...timestamps,
+
   order_id: integer('order_id')
     .notNull()
     .references(() => customerOrderTable.id),
@@ -225,7 +217,7 @@ export type InsertOrderItem = typeof orderItemTable.$inferInsert
 export const orderPaymentTable = sqliteTable('pagamentos', {
   id: integer('id').primaryKey({ autoIncrement: true }).notNull(),
   created_by: text('created_by').references(() => userTable.id),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  ...timestamps,
   amount_paid: integer('amount_paid').notNull(),
   troco: integer('troco'),
   payment_method: text('payment_method', { enum: paymentMethodEnum }).notNull(),

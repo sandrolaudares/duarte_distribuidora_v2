@@ -21,7 +21,7 @@ import type {
 import { and,  count, eq, gt, gte, isNotNull, lt, ne, or, sql } from 'drizzle-orm'
 
 import { stock, bugReport } from '$db/controller'
-import { cashierTable, cashierTransactionTable } from '../distribuidora'
+import { cashierTable } from '../distribuidora'
 import { TRPCError } from '@trpc/server'
 import { userTable } from '../user'
 import type { TenantDbType } from '../../tenant'
@@ -159,7 +159,11 @@ export const customer = (db: TenantDbType) => ({
         },
         address: true,
         customer: true,
-        payments: true,
+        payments: {
+          with:{
+            created_by:true,
+          },
+        },
         transactions: true,
       },
     })
@@ -378,6 +382,48 @@ export const customer = (db: TenantDbType) => ({
         cashierTable,
         eq(cashierTable.id, customerOrderTable.cachier_id),
       )
+  },
+  updateStockOnOrder: async (
+    order_id: SelectCustomerOrder['id'],
+  ) => {
+    console.log('Updating order status:', order_id)
+
+      const order = await customer(db).getOrderByID(order_id)
+      console.log('Order:', order)
+      
+      if (!order) {
+        return {
+          error: 'Order not found',
+        }
+      }
+
+      for (const item of order.items) {
+        console.log('sku', item.product.sku)
+        if (item.product.sku) {
+          try {
+            console.log('Processing stock transaction:', {
+              sku_id: item.product.sku,
+              quantity: -item.quantity * item.product.quantity,
+              meta_data: {
+                order_id,
+                type: 'saida',
+              },
+            })
+            await stock(db).insertStockTransaction({
+              sku: item.product.sku,
+              type: 'Saida',
+              quantity: -item.quantity * item.product.quantity,
+              meta_data: {
+                order_id,
+                type: 'saida',
+              },
+            })
+          } catch (error) {
+            console.error('Failed to process stock transaction:', error)
+          }
+        }
+      }
+    
   },
 })
 export type CurrentOrders = ReturnType<typeof customer>['getCurrentOrders']

@@ -11,33 +11,20 @@ import { imageTable } from '../image'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { customerOrderTable } from '../customer'
 import { userTable } from '../user'
+import { timestamps } from '../../utils'
 
 export const cashierTable = sqliteTable('caixas', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
-  updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => new Date(),
-  ),
+  ...timestamps,
+
   name: text('name').notNull(),
   status: text('status', { enum: ['Aberto', 'Fechado'] })
     .notNull()
     .default('Fechado'),
   currency: integer('currency').notNull().default(0),
-  taxa_por_km: integer('taxa_por_km')
 })
 
-export const deliveryFeeTable = sqliteTable('delivery_fee', {
-  id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  taxa_por_km: integer('taxa_por_km').notNull().default(1),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
-  updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => new Date(),
-  ),
-});
 
-export const cachierRelations = relations(cashierTable, ({ one, many }) => ({
-  transactions: many(cashierTransactionTable),
-}))
 export const insertCashierSchema = createInsertSchema(cashierTable)
 export type InsertCashier = typeof cashierTable.$inferInsert
 export type SelectCashier = typeof cashierTable.$inferSelect
@@ -52,38 +39,5 @@ export const cashierTransactionEnum = [
   "DEPOSITO",
   "SAQUE",
 ] as const
-export const cashierTransactionTable = sqliteTable('transacao_caixa_dinheiro', {
-  id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
-  updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => new Date(),
-  ),
-  created_by: text('created_by').references(() => userTable.id),
-  cachier_id: integer('cashier_id')
-    .notNull()
-    .references(() => cashierTable.id),
-  amount: integer('amount').notNull(),
-  observation: text('observation'),
-  type: text('type', { enum: cashierTransactionEnum }).notNull(),
-  order_id: integer('order_id').references(() => customerOrderTable.id),
-  meta_data: text('meta_data', { mode: 'json' }).notNull(),
-})
 
-export const cashierTransactionRelations = relations(
-  cashierTransactionTable,
-  ({ one, many }) => ({
-    cashier: one(cashierTable, {
-      fields: [cashierTransactionTable.cachier_id],
-      references: [cashierTable.id],
-    }),
-    created_by: one(userTable, {
-      fields: [cashierTransactionTable.created_by],
-      references: [userTable.id],
-    }),
-  }),
-)
 
-export type InsertCashierTransaction =
-  typeof cashierTransactionTable.$inferInsert
-export type SelectCashierTransaction =
-  typeof cashierTransactionTable.$inferSelect

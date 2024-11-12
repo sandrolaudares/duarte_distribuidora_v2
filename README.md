@@ -150,11 +150,14 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - ADICIONAR NO METADATA DO USUARIO UM CAIXA DESIGNADO A ELE ✅
   -- Falta adicionar a opcao na tela de permissoes ✅
   -- Butao do caixa admin na navbar dar redirect direto pro caixa dele ✅
+- CADASTRAR MOTOBOY ✅
+- TELA FIADO FILTRAR PAGAMENTOS ATRASADOS ✅
 
 - boolean pra esconder produtos do cardapio
 
 
 - Preco km tabela distribuidora ✅ + infos tabela distribuidora - Delete deliveryFee Table
+- Contas a pagar, nova tabela (Preciso que inclua nas guias a esquerda contas a pagar. Essa guia deve ter a categoria da dívida, fornecedor (já cadastrado em fornecedores), descrição, data de vencimento e valor. A conta fica cadastradastra, financeiro realiza o pagamento na data correta, esse histórico precisa ficar registrado, pois em relatórios vamos precisar comparar vendas x despesas pra analisar o lucro mensal.)
 - Permissoes no trpc pra cada func
 - Colunas na tabela dos logs
 - AJustar form criar tenant erros de endereco
@@ -162,9 +165,7 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - REFATORAR ONDE MOSTRA AS INFOS DO CLINTE NA PAGINA DO CAIXA
 - DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES
 - PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS
-- CADASTRAR MOTOBOY ✅
 - CHECAR O SUM PAGINA CUSTOMER/ID 
-- TELA FIADO FILTRAR PAGAMENTOS ATRASADOS 
 - EDITAR DATA VENCIMENTO (EXIPIRE_AT)
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE
 - APLICAR EDITABLECELL NAS TABLES EXISTENTES

@@ -37,6 +37,11 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
 
   const dateStart = searchParams.get('startDate')
   const dateEnd = searchParams.get('endDate')
+
+  const startExpireDate = searchParams.get('startExpireDate')
+  const endExpireDate = searchParams.get('endExpireDate')
+
+  const atrasados = Boolean(searchParams.get('atrasados'))
   
 
   let query = customer(tenantDb!)
@@ -62,6 +67,24 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
               ),
             )
           : undefined,
+
+          startExpireDate && endExpireDate
+          ? and(
+              gte(
+                schema.customerOrderTable.expire_at,
+                new Date(Number(startExpireDate)),
+              ),
+              lte(
+                schema.customerOrderTable.expire_at,
+                new Date(Number(endExpireDate)),
+              ),
+            )
+          : undefined,
+
+          atrasados ? lte(
+            schema.customerOrderTable.expire_at,
+            new Date()
+          ) : undefined
       ),
     )
     .$dynamic()
@@ -84,6 +107,47 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     const total = await tenantDb!
       .select({ count: count() })
       .from(schema.customerOrderTable)
+      .where(
+        and(
+          gt(
+            schema.customerOrderTable.total,
+            schema.customerOrderTable.amount_paid,
+          ),
+          eq(schema.customerOrderTable.is_fiado, true),
+          name ? like(schema.customerTable.name, `${name}%`) : undefined,
+  
+          dateStart && dateEnd
+            ? and(
+                gte(
+                  schema.customerOrderTable.created_at,
+                  new Date(Number(dateStart)),
+                ),
+                lte(
+                  schema.customerOrderTable.created_at,
+                  new Date(Number(dateEnd)),
+                ),
+              )
+            : undefined,
+            startExpireDate && endExpireDate
+          ? and(
+              gte(
+                schema.customerOrderTable.expire_at,
+                new Date(Number(startExpireDate)),
+              ),
+              lte(
+                schema.customerOrderTable.expire_at,
+                new Date(Number(endExpireDate)),
+              ),
+            )
+          : undefined,
+          atrasados ? lte(
+            schema.customerOrderTable.expire_at,
+            new Date()
+          ) : undefined
+
+            
+        ),
+      )
 
     const totalSumResult = await tenantDb!
       .select({
@@ -114,6 +178,22 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
                 ),
               )
             : undefined,
+            startExpireDate && endExpireDate
+          ? and(
+              gte(
+                schema.customerOrderTable.expire_at,
+                new Date(Number(startExpireDate)),
+              ),
+              lte(
+                schema.customerOrderTable.expire_at,
+                new Date(Number(endExpireDate)),
+              ),
+            )
+          : undefined,
+          atrasados ? lte(
+            schema.customerOrderTable.expire_at,
+            new Date()
+          ) : undefined
         ),
       )
 

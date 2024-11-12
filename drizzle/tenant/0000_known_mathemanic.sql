@@ -22,7 +22,9 @@ CREATE TABLE `session` (
 --> statement-breakpoint
 CREATE TABLE `user` (
 	`id` text PRIMARY KEY NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (unixepoch()),
+	`updated_at` integer,
+	`deleted_at` integer,
 	`is_active` integer DEFAULT true NOT NULL,
 	`username` text NOT NULL,
 	`email` text NOT NULL,
@@ -45,7 +47,9 @@ CREATE TABLE `user_verification_code` (
 --> statement-breakpoint
 CREATE TABLE `image` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (unixepoch()),
+	`updated_at` integer,
+	`deleted_at` integer,
 	`uploaded_by` text,
 	`name` text NOT NULL,
 	`data` blob NOT NULL,
@@ -54,14 +58,17 @@ CREATE TABLE `image` (
 --> statement-breakpoint
 CREATE TABLE `product_category` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (unixepoch()),
+	`updated_at` integer,
+	`deleted_at` integer,
 	`name` text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `product_item` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (unixepoch()),
 	`updated_at` integer,
+	`deleted_at` integer,
 	`product_id` integer NOT NULL,
 	`name` text NOT NULL,
 	`sku` text,
@@ -76,8 +83,9 @@ CREATE TABLE `product_item` (
 --> statement-breakpoint
 CREATE TABLE `product` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (unixepoch()),
 	`updated_at` integer,
+	`deleted_at` integer,
 	`category_id` integer,
 	`name` text NOT NULL,
 	`description` text NOT NULL,
@@ -88,7 +96,9 @@ CREATE TABLE `product` (
 --> statement-breakpoint
 CREATE TABLE `bugReport` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (unixepoch()),
+	`updated_at` integer,
+	`deleted_at` integer,
 	`created_by` text DEFAULT '',
 	`status` text NOT NULL,
 	`name` text NOT NULL,
@@ -98,7 +108,9 @@ CREATE TABLE `bugReport` (
 --> statement-breakpoint
 CREATE TABLE `logs` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (unixepoch()),
+	`updated_at` integer,
+	`deleted_at` integer,
 	`type` text NOT NULL,
 	`pathname` text,
 	`created_by` text DEFAULT '',
@@ -107,13 +119,16 @@ CREATE TABLE `logs` (
 	`metadata` text,
 	`error` text,
 	`currency` integer,
-	FOREIGN KEY (`created_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null
+	`order_id` integer,
+	FOREIGN KEY (`created_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE set null,
+	FOREIGN KEY (`order_id`) REFERENCES `pedidos`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `estoque` (
 	`sku` text PRIMARY KEY NOT NULL,
-	`created_at` integer,
-	`updated_at` integer DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (unixepoch()),
+	`updated_at` integer,
+	`deleted_at` integer,
 	`image_id` integer,
 	`name` text NOT NULL,
 	`quantity` integer DEFAULT 0 NOT NULL,
@@ -122,8 +137,9 @@ CREATE TABLE `estoque` (
 --> statement-breakpoint
 CREATE TABLE `transacao_estoque` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` integer DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (unixepoch()),
 	`updated_at` integer,
+	`deleted_at` integer,
 	`sku` text NOT NULL,
 	`quantity` integer NOT NULL,
 	`type` text NOT NULL,
@@ -140,8 +156,9 @@ CREATE TABLE `transacao_estoque` (
 CREATE TABLE `fornecedor` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL,
-	`created_at` integer DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (unixepoch()),
 	`updated_at` integer,
+	`deleted_at` integer,
 	`razao_social` text,
 	`cnpj_cpf` text,
 	`ie_rg` text,
@@ -152,8 +169,9 @@ CREATE TABLE `fornecedor` (
 --> statement-breakpoint
 CREATE TABLE `endereco` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (unixepoch()),
 	`updated_at` integer,
+	`deleted_at` integer,
 	`customer_id` integer NOT NULL,
 	`cep` text NOT NULL,
 	`street` text NOT NULL,
@@ -163,13 +181,16 @@ CREATE TABLE `endereco` (
 	`city` text NOT NULL,
 	`state` text NOT NULL,
 	`country` text NOT NULL,
+	`distance` integer,
 	FOREIGN KEY (`customer_id`) REFERENCES `cliente`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `pedidos` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` integer NOT NULL,
+	`created_at` integer DEFAULT (unixepoch()),
 	`updated_at` integer,
+	`deleted_at` integer,
+	`expire_at` integer,
 	`is_fiado` integer NOT NULL,
 	`customer_id` integer,
 	`address_id` integer,
@@ -193,8 +214,9 @@ CREATE INDEX `paid_index` ON `pedidos` (`amount_paid`) WHERE "pedidos"."amount_p
 CREATE TABLE `cliente` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`is_retail` integer NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (unixepoch()),
 	`updated_at` integer,
+	`deleted_at` integer,
 	`name` text NOT NULL,
 	`email` text,
 	`birth_date` text,
@@ -210,8 +232,9 @@ CREATE UNIQUE INDEX `cliente_cellphone_unique` ON `cliente` (`cellphone`);--> st
 CREATE UNIQUE INDEX `cliente_phone_unique` ON `cliente` (`phone`);--> statement-breakpoint
 CREATE TABLE `item_pedido` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (unixepoch()),
 	`updated_at` integer,
+	`deleted_at` integer,
 	`order_id` integer NOT NULL,
 	`product_id` integer NOT NULL,
 	`quantity` integer NOT NULL,
@@ -223,7 +246,9 @@ CREATE TABLE `item_pedido` (
 CREATE TABLE `pagamentos` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`created_by` text,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (unixepoch()),
+	`updated_at` integer,
+	`deleted_at` integer,
 	`amount_paid` integer NOT NULL,
 	`troco` integer,
 	`payment_method` text NOT NULL,
@@ -238,33 +263,10 @@ CREATE TABLE `pagamentos` (
 --> statement-breakpoint
 CREATE TABLE `caixas` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
+	`created_at` integer DEFAULT (unixepoch()),
 	`updated_at` integer,
+	`deleted_at` integer,
 	`name` text NOT NULL,
 	`status` text DEFAULT 'Fechado' NOT NULL,
-	`currency` integer DEFAULT 0 NOT NULL,
-	`taxa_por_km` integer
-);
---> statement-breakpoint
-CREATE TABLE `transacao_caixa_dinheiro` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
-	`updated_at` integer,
-	`created_by` text,
-	`cashier_id` integer NOT NULL,
-	`amount` integer NOT NULL,
-	`observation` text,
-	`type` text NOT NULL,
-	`order_id` integer,
-	`meta_data` text NOT NULL,
-	FOREIGN KEY (`created_by`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`cashier_id`) REFERENCES `caixas`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`order_id`) REFERENCES `pedidos`(`id`) ON UPDATE no action ON DELETE no action
-);
---> statement-breakpoint
-CREATE TABLE `delivery_fee` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`taxa_por_km` integer DEFAULT 1 NOT NULL,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
-	`updated_at` integer
+	`currency` integer DEFAULT 0 NOT NULL
 );

@@ -3,7 +3,6 @@ import {
   skuTable,
   stockTransactionTable,
   supplierTable,
-  cashierTransactionTable,
 } from '$db/schema'
 
 import type {
@@ -30,8 +29,8 @@ export const stock = (db: TenantDbType) => ({
   getSKUWithStock() {
     return db.select().from(skuTable)
   },
-  getSKUByID(sku_id: SelectSku['sku']) {
-    return db.query.skuTable.findFirst({
+  async getSKUByID(sku_id: SelectSku['sku']) {
+    return await db.query.skuTable.findFirst({
       where: eq(skuTable.sku, sku_id),
     })
   },
@@ -88,18 +87,5 @@ export const stock = (db: TenantDbType) => ({
       orderBy: [desc(stockTransactionTable.created_at)],
     })
   },
-  getRecentTransactionsCaixa(id: number) {
-    return db
-      .select()
-      .from(cashierTransactionTable)
-      .where(eq(cashierTransactionTable.cachier_id, id))
-      .orderBy(desc(cashierTransactionTable.created_at))
-      .limit(15)
-  },
-  getAllTransactionsCaixa() {
-    return db
-      .select()
-      .from(cashierTransactionTable)
-      .orderBy(desc(cashierTransactionTable.created_at))
-  }
+ 
 })

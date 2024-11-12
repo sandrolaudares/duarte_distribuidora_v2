@@ -16,7 +16,7 @@
 
 <main class="flex min-h-[90vh] items-center justify-center bg-base-200">
   <div class="w-full max-w-sm rounded-lg p-8 shadow-lg bg-base-100">
-    <h1 class="text-center text-2xl font-semibold">Cadastrar</h1>
+    <h1 class="text-center text-2xl font-semibold">Login com senha</h1>
     <form method="post" use:enhance class="mt-6 flex flex-col gap-4">
       <div>
         <label for="email" class="block text-sm font-medium">Email</label>

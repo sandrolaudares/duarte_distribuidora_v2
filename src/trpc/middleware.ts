@@ -9,7 +9,7 @@ const admin = t.middleware(async ({ next, ctx }) => {
   if (user?.role !== 'admin')
     throw new TRPCError({
       code: 'UNAUTHORIZED',
-      message: 'You must be an admin to access this route',
+      message: 'Você não tem permissão para acessar esta rota',
     })
   return next()
 })
@@ -19,7 +19,7 @@ const auth = t.middleware(async ({ next, ctx }) => {
   if (!user) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
-      message: 'You must be logged in to access this route',
+      message: 'Você precisa estar logado para acessar esta rota',
     })
   }
 
@@ -27,7 +27,7 @@ const auth = t.middleware(async ({ next, ctx }) => {
 })
 
 const logged = t.middleware(async ({ next, path, type, ctx, input, meta }) => {
-  const { user } = ctx.locals
+  const { user, tenantDb } = ctx.locals
   const start = Date.now()
 
   const result = await next()
@@ -38,7 +38,7 @@ const logged = t.middleware(async ({ next, path, type, ctx, input, meta }) => {
   try {
     if (result.ok) {
       console.log('OK request timing:', metaData)
-      await bugReport.insertLogs({
+      await bugReport(tenantDb!).insertLogs({
         text: `${user?.username ?? 'Anonymous'} acabou de ${meta?.routeName ?? path} time: ${durationMs}`,
         created_by: user?.id ?? undefined,
         metadata: { metaData, input, type, ctx, path },
@@ -48,7 +48,7 @@ const logged = t.middleware(async ({ next, path, type, ctx, input, meta }) => {
       })
     } else {
       console.error('Non-OK request timing', meta)
-      await bugReport.insertLogs({
+      await bugReport(tenantDb!).insertLogs({
         text: `${user?.username ?? 'Anonymous'} acabou de ${meta?.routeName ?? path} time: ${durationMs}`,
         created_by: user?.id ?? undefined,
         metadata: { metaData, input, type, ctx, path },
@@ -98,7 +98,8 @@ const checkPermission = t.middleware(async ({ next, ctx, meta }) => {
   if (!meta?.permission) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
-      message: 'Entre em contato com o a equipe de desenvolvimento, erro de permissão',
+      message:
+        'Entre em contato com o a equipe de desenvolvimento, erro de permissão',
     })
   }
   if (user.role !== 'admin') {

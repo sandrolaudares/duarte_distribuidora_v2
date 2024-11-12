@@ -1,31 +1,9 @@
-<!-- <script lang="ts">
-  import type { PageData } from './$types'
-
-  export let data: PageData
-
-  const { estoque } = data
-
-  import { trpc } from '$trpc/client'
+<script lang="ts">
+  import { navigating } from '$app/stores'
+  import { SSRFilters } from '$lib/components/datatable/filter.svelte'
+  import { modal, FormModal } from '$lib/components/modal'
+  import DateFilter from '$lib/components/DateFilter.svelte'
   import { page } from '$app/stores'
-
-  import {
-    renderComponent,
-    type ColumnDef,
-    type TableOptions,
-  } from '@tanstack/svelte-table'
-  import Datatable from '$components/table/Datatable.svelte'
-  // import {
-  //   type TableState,
-  //   getParams,
-  //   EditRowButton,
-  //   EditRowInput,
-  //   RowActions,
-  //   EditRowCurrency,
-  // } from '$lib/components/table'
-  import type { RouterOutputs, RouterInputs } from '$trpc/router'
-
-  import type { metaEntrada, metaSaida, MetaUnion } from '$db/schema'
-  import { icons } from '$lib/utils'
   import { scaleBand, scaleTime } from 'd3-scale'
   import {
     Chart,
@@ -34,77 +12,54 @@
     Bars,
     Area,
     Tooltip,
-    TooltipItem,
+    // TooltipItem,
   } from 'layerchart'
+
+  import {
+    TableHandler,
+    Datatable,
+    ThSort,
+    ThFilter,
+    Pagination,
+    RowsPerPage,
+    Th,
+    Search,
+    type State,
+  } from '@vincjo/datatables/server'
+
+  import type { PageData } from './$types'
   import { toast } from 'svelte-sonner'
+  import { trpc } from '$trpc/client'
+  import { tr } from 'date-fns/locale'
+  import NoResults from '$lib/components/NoResults.svelte'
+  import { format } from 'date-fns'
+  import { goto } from '$app/navigation';
+  import { icons } from '$lib/utils'
 
-  function isMetaEntrada(meta: MetaUnion): meta is metaEntrada {
-    return meta.type === 'entrada'
-  }
+  let { data }: { data: PageData } = $props()
+  const filters = new SSRFilters()
 
-  function isMetaSaida(meta: MetaUnion): meta is metaSaida {
-    return meta.type === 'saida'
-  }
+  let estoque = data.sku
 
-  type Transaction = RouterOutputs['stock']['paginatedTransactions']['rows'][0]
+  const table = new TableHandler(data.rows, {
+    rowsPerPage: 13,
+    totalRows: data.count,
+  })
 
-  let transactions: Transaction[] = []
+  table.setPage(Number(filters.get('page')) || 1)
+  table.load(async s => {
+    console.log(s)
+    filters.fromState(s)
+    await $navigating?.complete
+    return data.rows
+  })
 
-  $: chartData = transactions.map(t => ({
+  let chartData = $derived.by(()=>{
+    data.rows.map(t => ({
     ...t,
-    created_at: new Date(t.updated_at ?? ''),
+    created_at: new Date(t.created_at ?? ''),
   }))
-
-  $: console.log(chartData)
-
-  const defaultColumns: ColumnDef<Transaction>[] = [
-    {
-      header: 'Date',
-      accessorFn: v => v.updated_at ?? '',
-    },
-    {
-      header: 'SKU',
-      accessorKey: 'sku',
-    },
-    {
-      header: 'Quantidade',
-      accessorKey: 'quantity',
-    },
-    // {
-    //   header: 'ID Pedido',
-
-    //   accessorFn: r => JSON.stringify(r.meta_data),
-    // },
-    {
-      header: 'Tipo',
-      accessorKey: 'type',
-    },
-    // {
-    //   header: 'Custo',
-    //   accessorKey: 'cost_price',
-    //   cell: info =>
-    //     renderComponent(EditRowCurrency<Transaction>, {
-    //       id: info.row.original.id,
-    //       colID: 'cost_price',
-    //       editT: 'number',
-    //       value: info.getValue(),
-    //     }),
-    // },
-  ]
-
-  async function load(s: TableState) {
-    const resp = await trpc($page).stock.paginatedTransactions.query({
-      sku: estoque.sku,
-      table_state: s,
-    })
-
-    transactions = resp.rows
-
-    return {
-      data: resp.rows ?? [],
-      count: resp.total ?? 0,
-    }
-  }
+  })
 
   async function handleDeleteStockItem(sku:string){
     try {
@@ -115,8 +70,8 @@
       toast.error('Ocorreu um erro ao deletar!')
     }
   }
-    //TODO: NEW TABLE
 </script>
+
 
 <div class="">
   <div class="container mx-auto flex flex-col gap-5">
@@ -149,7 +104,7 @@
           <div class="stat-value flex justify-center">{estoque.quantity}</div>
         </div>
       </div>
-      <button class="btn btn-circle btn-error w-20 h-20"  on:click={()=>{
+      <button class="btn btn-circle btn-error w-20 h-20"  onclick={()=>{
         if(confirm("Tem certeza que deseja deletar?") === true){
           handleDeleteStockItem(estoque.sku)
         } else {
@@ -163,7 +118,41 @@
       <div
         class=" h-[70vh] w-full max-w-[50%] overflow-x-auto rounded-box border border-base-300"
       >
-        <Datatable columns={defaultColumns} {load} />
+      <Datatable {table} headless>
+        <!-- {#snippet header()}
+          <Search {table} />
+         
+        {/snippet} -->
+        <!-- svelte-ignore component_name_lowercase -->
+        <table class="table table-zebra border">
+          <thead>
+            <tr>
+              <Th>Data</Th>
+              <Th>Tipo</Th>
+              <Th>Quantidade</Th>
+              <Th>Preço de custo</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each data.rows as row}
+              <tr>
+                <td>{format(new Date(row.created_at || ''),'dd/MM/yyyy')}</td>
+                <td>{row.type}</td>
+                <td>{row.quantity}</td>
+                <td>R${row.cost_price ? (row.cost_price/100).toFixed(2): 0.00}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+        {#if data.rows.length === 0}
+          <NoResults />
+        {/if}
+        {#snippet footer()}
+          <RowsPerPage {table} />
+          <div></div>
+          <Pagination {table} />
+        {/snippet}
+      </Datatable>
       </div>
 
       <div class="w-full max-w-[50%] rounded-box border p-4">
@@ -199,13 +188,21 @@
               />
             </Svg>
 
-            <Tooltip header={data => data.created_at} let:data>
+            <!-- <Tooltip header={data => data.created_at} let:data>
               <TooltipItem label="Quantidade Transacao" value={data.quantity} />
               <TooltipItem label="Total em estoque no momento" value={data.total_log} />
-            </Tooltip>
+            </Tooltip> -->
           </Chart>
         </div>
       </div>
     </div>
   </div>
-</div> -->
+</div>
+<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+  
+</main>
+<style>
+  thead {
+    background-color: oklch(var(--b1)) !important;
+  }
+</style>

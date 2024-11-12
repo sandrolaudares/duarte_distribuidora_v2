@@ -9,10 +9,12 @@ import {
 import { eq, relations, sql } from 'drizzle-orm'
 import { userTable } from '../user'
 import { createInsertSchema } from 'drizzle-zod'
+import { customerOrderTable } from '../customer'
+import { timestamps } from '../../utils'
 
 export const bugReportTable = sqliteTable('bugReport', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  ...timestamps,
   created_by: text('created_by')
     .references(() => userTable.id, {
       onDelete: 'set null',
@@ -32,7 +34,7 @@ export type InsertBugReport = typeof bugReportTable.$inferInsert
 
 export const logsTable = sqliteTable('logs', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  ...timestamps,
   type: text('type', {
     enum: ['LOG', 'SYSTEM', 'ERROR', 'CAIXA'],
   }).notNull(),
@@ -47,6 +49,7 @@ export const logsTable = sqliteTable('logs', {
   metadata: text('metadata', { mode: 'json' }),
   error: text('error', { mode: 'json' }),
   currency: integer('currency'),
+  order_id: integer('order_id').references(()=>customerOrderTable.id)
 })
 
 export const logRelations = relations(logsTable, ({ one }) => ({

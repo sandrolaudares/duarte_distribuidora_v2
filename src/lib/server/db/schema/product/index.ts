@@ -11,10 +11,11 @@ import { imageTable } from '../image'
 import { skuTable } from '../stock'
 
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import { timestamps } from '../../utils'
 
 export const productCategoryTable = sqliteTable('product_category', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  ...timestamps,
   // parent_id: integer('parent_id').references(
   //   (): SQLiteColumn => productCategoryTable.id,
   // ),
@@ -35,10 +36,7 @@ export const insertProductCategorySchema =
 
 export const productTable = sqliteTable('product', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
-  updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => new Date(),
-  ),
+  ...timestamps,
   category_id: integer('category_id').references(() => productCategoryTable.id),
   name: text('name').notNull(),
   description: text('description').notNull(),
@@ -59,10 +57,7 @@ export type InsertProduct = typeof productTable.$inferInsert
 
 export const productItemTable = sqliteTable('product_item', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
-  updated_at: integer('updated_at', { mode: 'timestamp' }).$onUpdate(
-    () => new Date(),
-  ),
+...timestamps,
   product_id: integer('product_id')
     .notNull()
     .references(() => productTable.id),

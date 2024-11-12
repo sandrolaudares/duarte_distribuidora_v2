@@ -22,7 +22,7 @@
   export let data: LayoutData
 
   const user = createUserContext(data.user)
-  // $: user.set(data.user)
+  $: user.set(data.user)
   const cart = createCartContext()
 
 
@@ -34,7 +34,7 @@
   <Toaster richColors closeButton />
   <!-- <DrawerContainer> -->
   <!-- <NavBar> -->
-   <SideBar activeTeam={data.tenant}>
+   <SideBar activeTeam={data.tenant!}>
      <ModalContainer />
      <Transition key={data.transition_key}>
        <slot />

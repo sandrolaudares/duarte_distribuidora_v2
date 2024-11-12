@@ -5,17 +5,17 @@ import {
 
   // customType,
 } from 'drizzle-orm/sqlite-core'
-import { relations, sql } from 'drizzle-orm'
-import { cashierTransactionTable } from '../distribuidora'
+import { relations } from 'drizzle-orm'
 import { logsTable } from '../bug-report'
 import { customerOrderTable, orderPaymentTable } from '../customer'
 import type { Permission, Role } from '$lib/utils/permissions'
+import { timestamps } from '../../utils'
 
 export const userTable = sqliteTable('user', {
   id: text('id').notNull().primaryKey(),
   // .$defaultFn(() => generateId(15)),
 
-  created_at: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  ...timestamps,
   is_active: integer('is_active', { mode: 'boolean' }).notNull().default(true),
   username: text('username').notNull().unique(),
   email: text('email').notNull().unique(),
@@ -36,7 +36,6 @@ export const userTable = sqliteTable('user', {
 })
 
 export const userRelations = relations(userTable, ({ many }) => ({
-  cashier_transactions: many(cashierTransactionTable),
   logs: many(logsTable),
   orders_made: many(customerOrderTable, { relationName: 'orders_made' }),
   entregou: many(customerOrderTable, { relationName: 'entregou' }),

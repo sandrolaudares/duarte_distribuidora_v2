@@ -2,7 +2,7 @@
 import { publicProcedure, router } from '$trpc/t'
 
 import { z } from 'zod'
-import { distribuidora as distribuidoraController, stock } from '$db/controller'
+import { bugReport, distribuidora as distribuidoraController, stock } from '$db/controller'
 import {
   insertCashierSchema,
   cashierTransactionEnum,
@@ -63,14 +63,19 @@ export const distribuidora = router({
     .mutation(async ({ input, ctx }) => {
       const { id, data } = input
       const { tenantDb, user } = ctx
-      await distribuidoraController(tenantDb).insertCashierTransaction({
-        cachier_id: id,
-        meta_data: {
-          user,
+
+      await bugReport(tenantDb).insertLogs({
+        text: `Abertura de caixa com ${data.amount}`,
+        created_by: user?.id,
+        metadata:{
+          cashier_id:id
         },
-        type: 'Entrada',
-        amount: data.amount,
+        type: 'CAIXA',
+        pathname: '',
+        routeName: 'Abrir caixa',
+        currency: data.amount,
       })
+
       return await distribuidoraController(tenantDb).updateCashier(id, {
         status: 'Aberto',
       })
@@ -87,14 +92,18 @@ export const distribuidora = router({
 
       const [info] = await distribuidoraController(tenantDb).getCashierById(id)
 
-      await distribuidoraController(tenantDb).justInsertCashierTransaction({
-        cachier_id: id,
-        meta_data: {
-          user,
+      await bugReport(tenantDb).insertLogs({
+        text: `Fechamento de caixa com ${info.currency}`,
+        created_by: user?.id,
+        metadata:{
+          cashier_id:id
         },
-        type: 'Saida',
-        amount: info.currency,
+        type: 'CAIXA',
+        pathname: '',
+        routeName: 'Fechar caixa',
+        currency: info.currency,
       })
+
       return await distribuidoraController(tenantDb).updateCashier(id, {
         status: 'Fechado',
         currency: 0,
@@ -114,14 +123,14 @@ export const distribuidora = router({
     .mutation(async ({ input, ctx }) => {
       const { id, data } = input
       const { user, tenantDb } = ctx
-      await distribuidoraController(tenantDb).insertCashierTransaction({
-        cachier_id: id,
-        meta_data: {
-          user,
-        },
-        type: data.type,
-        amount: data.amount,
-      })
+      // await distribuidoraController(tenantDb).insertCashierTransaction({
+      //   cachier_id: id,
+      //   meta_data: {
+      //     user,
+      //   },
+      //   type: data.type,
+      //   amount: data.amount,
+      // })
     }),
 
   getCashierById: publicProcedure
@@ -136,15 +145,7 @@ export const distribuidora = router({
     .mutation(async ({ input, ctx: { tenantDb } }) => {
       return await distribuidoraController(tenantDb).deleteCashierById(input)
     }),
-  updateAllKm: publicProcedure
-    .input(z.number())
-    .mutation(({ input, ctx: { tenantDb } }) => {
-      return distribuidoraController(tenantDb).updateKmForAllCaixas(input)
-    }),
 
-  getFee: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
-    return await distribuidoraController(tenantDb).getFee()
-  }),
   getDistribuidoras: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
     return await distribuidoraController(tenantDb).getDistribuidoras()
   }),

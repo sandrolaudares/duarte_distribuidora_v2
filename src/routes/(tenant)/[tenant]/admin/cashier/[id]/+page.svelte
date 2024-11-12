@@ -226,9 +226,9 @@
 </script>
 
 <div class="m-4 flex justify-center gap-3">
-  <button class="btn btn-primary" on:click={seeTransactionsCaixa}>
+  <!-- <button class="btn btn-primary" on:click={seeTransactionsCaixa}>
     Ver transacoes do caixa
-  </button>
+  </button> -->
 </div>
 <h1 class="mb-1 text-center text-3xl font-semibold">Caixa:</h1>
 {#if caixa.status === 'Fechado'}
@@ -253,6 +253,7 @@
     <CaixaLeftColumn
       {caixa}
       {user}
+      fee={data.tenant?.taxa_por_km ?? 0}
       bind:tipo_preco
       bind:clienteSelecionado
       bind:enderecoCliente
