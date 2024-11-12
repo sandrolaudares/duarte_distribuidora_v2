@@ -52,7 +52,7 @@
 			>
 				<DropdownMenu.Label class=" text-xs">Distribuidoras</DropdownMenu.Label>
 				{#each teams as team, index}
-				<a href="http://{team.subdomain}.localhost:5173">
+				<a href="http://{team.subdomain}.{PUBLIC_DOMAIN}">
 					<DropdownMenu.Item class="gap-2 p-2">
 						<div class="flex size-6 items-center justify-center rounded-sm border">
 							<!-- <team.logo class="size-4 shrink-0" /> -->
