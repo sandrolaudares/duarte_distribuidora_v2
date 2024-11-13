@@ -93,7 +93,7 @@ export const distribuidora = router({
       const [info] = await distribuidoraController(tenantDb).getCashierById(id)
 
       await bugReport(tenantDb).insertLogs({
-        text: `Fechamento de caixa com ${info.currency}`,
+        text: `Fechamento de caixa com R$${(info.currency/100).toFixed(2)}`,
         created_by: user?.id,
         metadata:{
           cashier_id:id
