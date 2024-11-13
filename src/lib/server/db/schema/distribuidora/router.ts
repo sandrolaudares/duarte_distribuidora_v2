@@ -65,7 +65,7 @@ export const distribuidora = router({
       const { tenantDb, user } = ctx
 
       await bugReport(tenantDb).insertLogs({
-        text: `Abertura de caixa com ${data.amount}`,
+        text: `Abertura de caixa com R$${(data.amount/100).toFixed(2)}`,
         created_by: user?.id,
         metadata:{
           cashier_id:id
