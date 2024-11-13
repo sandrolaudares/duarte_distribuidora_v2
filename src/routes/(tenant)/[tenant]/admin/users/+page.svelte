@@ -56,6 +56,12 @@
   async function handleInsertMotoboy() {
     if (newMotoboy.username.length < 3) {
       errors.nameError = 'Nome do cliente deve conter mais de 3 caracteres'
+      toast.error(errors.nameError)
+      return
+    }
+    if(!newMotoboy.email) {
+      errors.emailError = 'Email é obrigatório'
+      toast.error(errors.emailError)
       return
     }
     try {
@@ -65,6 +71,11 @@
       newMotoboy.username = ''
       newMotoboy.email = ''
       toast.success('Motoboy inserido com sucesso!')
+      setTimeout(()=>{
+            isOpenModal?.close()
+            window.location.reload()
+            isLoading=false
+      },1300)
 
     } catch (error: any) {
       toast.error(error.message)
@@ -171,16 +182,18 @@
           bind:value={newMotoboy.email}
         />
       </label>
+      {#if errors}
+      <p class="text-error">
+        {errors.emailError}
+        {errors.nameError}
+      </p>
+      {/if}
       <button
         class="btn btn-primary"
         disabled={isLoading}
         onclick={() => {
           handleInsertMotoboy()
-          setTimeout(()=>{
-            isOpenModal?.close()
-            window.location.reload()
-            isLoading=false
-          },1300)
+          
         }}
       >
         Adicionar

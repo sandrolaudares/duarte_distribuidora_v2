@@ -1,26 +1,29 @@
 <script lang="ts">
-    import type { LayoutData } from './$types';
-    
-    export let data: LayoutData;
+	import AppSidebar from "$lib/components/simplebar/app-sidebar.svelte";
+	import { Separator } from "$lib/components/ui/separator/index";
+	import * as Sidebar from "$lib/components/ui/sidebar/index";
 </script>
 
-<nav class="bg-base-200">
-    <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-     
-      <div class=" w-full  md:w-auto" id="navbar-default">
-        <ul class="font-medium flex flex-col p-4 md:p-0 mt-4 border rounded-lg md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0">
-          <li>
-            <a href="/" class="block py-2 px-3  rounded  p-0">home</a>
-          </li>
-          <li>
-            <a href="/create" class="block py-2 px-3  rounded  p-0" aria-current="page">criar distribuidoras</a>
-          </li>
-          <!-- <li>
-            <a href="/transferir" class="block py-2 px-3  rounded  p-0">transferir estoque</a>
-          </li> -->
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <slot></slot>
+<Sidebar.Provider>
+	<AppSidebar />
+	<Sidebar.Inset>
+		<header class="flex h-16 shrink-0 items-center gap-2 border-b">
+			<div class="flex items-center gap-2 px-3">
+				<Sidebar.Trigger />
+				<Separator orientation="vertical" class="mr-2 h-4" />
+				<!-- <Breadcrumb.Root>
+					<Breadcrumb.List>
+						<Breadcrumb.Item class="hidden md:block">
+							<Breadcrumb.Link href="#">Building Your Application</Breadcrumb.Link>
+						</Breadcrumb.Item>
+						<Breadcrumb.Separator class="hidden md:block" />
+						<Breadcrumb.Item>
+							<Breadcrumb.Page>Data Fetching</Breadcrumb.Page>
+						</Breadcrumb.Item>
+					</Breadcrumb.List>
+				</Breadcrumb.Root> -->
+			</div>
+		</header>
+    <slot></slot>
+	</Sidebar.Inset>
+</Sidebar.Provider>

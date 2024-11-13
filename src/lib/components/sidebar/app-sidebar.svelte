@@ -1,5 +1,5 @@
-<script lang="ts" module>
-  import AudioWaveform from 'lucide-svelte/icons/audio-waveform'
+<script lang="ts">
+   import AudioWaveform from 'lucide-svelte/icons/audio-waveform'
   import beer from 'lucide-svelte/icons/beer'
   import ListOrdered from 'lucide-svelte/icons/list-ordered'
     import CircleDolar from 'lucide-svelte/icons/dollar-sign'
@@ -11,16 +11,27 @@
   import Transactions from 'lucide-svelte/icons/arrow-left-right'
   import Settings2 from 'lucide-svelte/icons/settings-2'
   import User from 'lucide-svelte/icons/user'
+  import NavMain from '$lib/components/sidebar/nav-main.svelte'
+  import NavProjects from '$lib/components/sidebar/nav-projects.svelte'
+  import NavUser from '$lib/components/sidebar/nav-user.svelte'
+  import TeamSwitcher from '$lib/components/sidebar/team-switcher.svelte'
+  import * as Sidebar from '$lib/components/ui/sidebar/index.js'
+  import { onMount, type ComponentProps } from 'svelte'
+  import { getUserContext } from '$lib/stores/user'
+    import { trpc } from '$trpc/client'
+  import { page } from '$app/stores'
+  import type { SelectTenant } from '$lib/server/db/central/schema'
+  
+  const user = getUserContext()
+  
+  let {
+    ref = $bindable(null),
+    collapsible = 'icon',
+    activeTeam,
+    ...restProps
+  }: ComponentProps<typeof Sidebar.Root> & {activeTeam:SelectTenant}= $props()
 
-  export let showDefaultItems = true
-
-  const data = {
-    // teams: [
-    //   {
-    //     name: tenats.nome,
-    //     logo: beer,
-    //   },
-    // ],
+    const data = {
     navMain: [
 		{
         title: 'Pessoas',
@@ -51,28 +62,6 @@
       },
     ],
   }
-</script>
-
-<script lang="ts">
-  import NavMain from '$lib/components/sidebar/nav-main.svelte'
-  import NavProjects from '$lib/components/sidebar/nav-projects.svelte'
-  import NavUser from '$lib/components/sidebar/nav-user.svelte'
-  import TeamSwitcher from '$lib/components/sidebar/team-switcher.svelte'
-  import * as Sidebar from '$lib/components/ui/sidebar/index.js'
-  import { onMount, type ComponentProps } from 'svelte'
-  import { getUserContext } from '$lib/stores/user'
-    import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
-  import type { SelectTenant } from '$lib/server/db/central/schema'
-  
-  const user = getUserContext()
-  
-  let {
-    ref = $bindable(null),
-    collapsible = 'icon',
-    activeTeam,
-    ...restProps
-  }: ComponentProps<typeof Sidebar.Root> & {activeTeam:SelectTenant}= $props()
 
   if($user?.meta.caixa_id) {
     data.projects.push(
