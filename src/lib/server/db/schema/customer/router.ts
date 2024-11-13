@@ -251,6 +251,7 @@ export const customer = router({
           metadata: {
             order_id: order.id,
             customer_id: order_info.customer_id,
+            cashier_id: order_info.cachier_id,
           },
           order_id:order.id,
           type: 'CAIXA',
@@ -354,6 +355,7 @@ export const customer = router({
               customer_id: order_info.customer_id,
               amount_paid: payment.amount_paid,
               troco: payment.troco,
+              cashier_id: order_info.cashier_id,
             },
             order_id: order.id,
             type: 'CAIXA',
@@ -411,7 +413,8 @@ export const customer = router({
           }),
         }),
       )
-      .mutation(async ({ input, ctx: { tenantDb } }) => {
+      .mutation(async ({ input, ctx: { tenantDb,locals } }) => {
+        const userId = locals.user?.id
         const { order_items, order_info } = input
         const customer = await customerController(tenantDb).getCustomerById(
           order_info.customer_id,
@@ -450,6 +453,20 @@ export const customer = router({
           ...item,
           order_id: order.id,
         }))
+
+        await bugReport(tenantDb).insertLogs({
+          text: `Pedido delivery, EM ESPERA`,
+          created_by: userId,
+          metadata: {
+            order_id: order.id,
+            customer_id: order_info.customer_id,
+            cashier_id: order_info.cachier_id,
+          },
+          order_id:order.id,
+          type: 'CAIXA',
+          pathname: '/TODO:ROUTE',
+          routeName: 'Fiado',
+        })
 
         const order_items_db = await tenantDb
           .insert(orderItemTable)
