@@ -58,6 +58,10 @@
       errors.nameError = 'Nome do cliente deve conter mais de 3 caracteres'
       return
     }
+    if(!newMotoboy.email) {
+      errors.emailError = 'Email é obrigatório'
+      return
+    }
     try {
       isLoading=true
       newMotoboy.role = 'motoboy'
