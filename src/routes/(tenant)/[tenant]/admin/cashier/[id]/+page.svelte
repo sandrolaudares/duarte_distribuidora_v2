@@ -214,6 +214,7 @@
       enderecoSelecionado: enderecoCliente,
       isDelivery: isDelivery,
       taxaEntrega:taxaEntrega,
+      cashier_id :caixa.id,
       save: payments => {
         createOrder(payments)
       },

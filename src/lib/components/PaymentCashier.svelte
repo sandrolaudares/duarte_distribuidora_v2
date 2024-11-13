@@ -35,6 +35,7 @@
   export let taxaEntrega = 0
 
   export let isDelivery = false
+  export let cashier_id = 0
 
   const cart = getCartContext()
 
@@ -128,6 +129,7 @@
             motoboy_id: motoboySelecionado?.id,
             type: 'ATACADO',
             taxa_entrega: isDelivery ? taxaEntrega : 0,
+            cachier_id: cashier_id
             //TODO: Type
             //TODO: Observation
           },
