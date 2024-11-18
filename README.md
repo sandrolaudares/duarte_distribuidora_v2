@@ -153,11 +153,12 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - CADASTRAR MOTOBOY ✅
 - TELA FIADO FILTRAR PAGAMENTOS ATRASADOS ✅
 - Preco km tabela distribuidora ✅ + infos tabela distribuidora ✅- Delete deliveryFee Table✅
+- Verificar sidebar não mostra todos itens ao logar ✅
 
 - boolean pra esconder produtos do cardapio
-
-
-- Verificar sidebar não mostra todos itens ao logar
+- Verificar name filter fiado
+- Editar motoboy pedidos aceitos
+- Poder cancelar pedidos aceitos, pedir senha master
 - Alterar join do caixa na tela da transacao do caixa
 - Contas a pagar, nova tabela (Preciso que inclua nas guias a esquerda contas a pagar. Essa guia deve ter a categoria da dívida, fornecedor (já cadastrado em fornecedores), descrição, data de vencimento e valor. A conta fica cadastradastra, financeiro realiza o pagamento na data correta, esse histórico precisa ficar registrado, pois em relatórios vamos precisar comparar vendas x despesas pra analisar o lucro mensal.)
 - Permissoes no trpc pra cada func
