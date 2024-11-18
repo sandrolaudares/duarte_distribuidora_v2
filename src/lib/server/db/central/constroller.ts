@@ -194,6 +194,10 @@ export async function solicitarTransference(data: InsertStockTransference[]) {
   return await db.insert(stockTransference).values(data).returning()
 }
 
+export async function getCurrentTransfers() {
+  return await db.select().from(stockTransference).where(eq(stockTransference.status,'REQUESTED'))
+}
+
 export async function acceptTransference(
   stockTransferenceId: SelectStockTransference['id'],
 ) {
