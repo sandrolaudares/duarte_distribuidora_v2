@@ -20,6 +20,7 @@ import {
   lte,
   sum,
   sql,
+  type AnyColumn,
 } from 'drizzle-orm'
 import { customer } from '$lib/server/db/controller'
 import { gte } from 'drizzle-orm'
@@ -45,43 +46,71 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   console.log(name)
 
   const condicoes = [
-    name ? like(schema.customerTable.name, `${name}%`) : undefined,
-  //TODO: NAME NÃO FILTRA
-          dateStart && dateEnd
-            ? and(
-                gte(
-                  schema.customerOrderTable.created_at,
-                  new Date(Number(dateStart)),
-                ),
-                lte(
-                  schema.customerOrderTable.created_at,
-                  new Date(Number(dateEnd)),
-                ),
-              )
-            : undefined,
-  
-            startExpireDate && endExpireDate
-            ? and(
-                gte(
-                  schema.customerOrderTable.expire_at,
-                  new Date(Number(startExpireDate)),
-                ),
-                lte(
-                  schema.customerOrderTable.expire_at,
-                  new Date(Number(endExpireDate)),
-                ),
-              )
-            : undefined,
-  
-            atrasados ? lte(
-              schema.customerOrderTable.expire_at,
-              new Date()
-            ) : undefined
+    //TODO: NAME NÃO FILTRA
+    dateStart && dateEnd
+      ? and(
+          gte(
+            schema.customerOrderTable.created_at,
+            new Date(Number(dateStart)),
+          ),
+          lte(schema.customerOrderTable.created_at, new Date(Number(dateEnd))),
+        )
+      : undefined,
+
+    startExpireDate && endExpireDate
+      ? and(
+          gte(
+            schema.customerOrderTable.expire_at,
+            new Date(Number(startExpireDate)),
+          ),
+          lte(
+            schema.customerOrderTable.expire_at,
+            new Date(Number(endExpireDate)),
+          ),
+        )
+      : undefined,
+
+    atrasados
+      ? lte(schema.customerOrderTable.expire_at, new Date())
+      : undefined,
   ]
 
   try {
-    let query = customer(tenantDb!)
-      .getAllOrderInfo().$dynamic()
+    let query = tenantDb!
+      .select({
+        //Order:
+        id: schema.customerOrderTable.id,
+        created_at: schema.customerOrderTable.created_at,
+        updated_at: schema.customerOrderTable.updated_at,
+        is_fiado: schema.customerOrderTable.is_fiado,
+        observation: schema.customerOrderTable.observation,
+        amount_paid: schema.customerOrderTable.amount_paid,
+        total: schema.customerOrderTable.total,
+        status: schema.customerOrderTable.status,
+        type: schema.customerOrderTable.type,
+        expire_at: schema.customerOrderTable.expire_at,
+
+        //customer:
+        name: schema.customerTable.name,
+        email: schema.customerTable.email,
+        cellphone: schema.customerTable.cellphone,
+
+        //cashier
+        cashier: schema.cashierTable.name,
+      })
+      .from(schema.customerOrderTable)
+      .innerJoin(
+        schema.customerTable,
+        and(
+          name ? like(schema.customerTable.name, `${name}%`) : undefined,
+          eq(schema.customerTable.id, schema.customerOrderTable.customer_id),
+        )
+      )
+      .leftJoin(
+        schema.cashierTable,
+        eq(schema.cashierTable.id, schema.customerOrderTable.cachier_id),
+      )
+      .$dynamic()
       .where(
         and(
           gt(
@@ -89,16 +118,14 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
             schema.customerOrderTable.amount_paid,
           ),
           eq(schema.customerOrderTable.is_fiado, true),
-          ...condicoes
+          ...condicoes,
         ),
       )
-      .$dynamic()
-  
+
     console.log('Date Start:', dateStart, 'Date End:', dateEnd)
     console.log(sortId, sortOrder)
-  
+
     if (sortId && sortOrder) {
-  
       query = withOrderBy(
         query,
         getSQLiteColumn(schema.customerOrderTable, sortId),
@@ -117,8 +144,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
             schema.customerOrderTable.amount_paid,
           ),
           eq(schema.customerOrderTable.is_fiado, true),
-          ...condicoes
-            
+          ...condicoes,
         ),
       )
 
@@ -138,7 +164,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
             schema.customerOrderTable.amount_paid,
           ),
           eq(schema.customerOrderTable.is_fiado, true),
-          ...condicoes
+          ...condicoes,
         ),
       )
 
