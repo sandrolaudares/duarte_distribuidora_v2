@@ -62,7 +62,7 @@
 
 <div class="container mx-auto max-w-7xl p-4">
   <h1 class="mb-6 text-center text-3xl font-bold">
-    Solicitar transferência de estoque
+    Solicitar estoque para central
   </h1>
 
   <div class="flex flex-col gap-6 lg:flex-row">
