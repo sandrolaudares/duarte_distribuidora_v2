@@ -42,21 +42,24 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const dateEnd = searchParams.get('endDate')
   
   let query = customer(tenantDb!)
-    .getAllOrderInfo()
-    .where(
-      and(
-        name ? like(schema.customerTable.name, `${name}%`) : undefined,
-        
-        dateStart && dateEnd
+  .getAllOrderInfo()
+  .where(
+    and(
+      name ? like(schema.customerTable.name, `${name}%`) : undefined,
+      dateStart && dateEnd
         ? and(
-          gte(schema.customerOrderTable.created_at, new Date(Number(dateStart))),
-          lte(schema.customerOrderTable.created_at, new Date(Number(dateEnd))),
+            gte(schema.customerOrderTable.created_at, new Date(Number(dateStart))),
+            lte(schema.customerOrderTable.created_at, new Date(Number(dateEnd))),
           )
         : undefined,
-        cashier ? like(schema.cashierTable.name, `${cashier}%`) : undefined,
-      ),
-    ).orderBy(desc(schema.customerOrderTable.created_at))
-    .$dynamic();
+      cashier ? like(schema.cashierTable.name, `${cashier}%`) : undefined,
+      //TODO: Filtrar nome caixa tambem nao funciona, do mesmo jeito que no fiado filtrar nome
+    ),
+  )
+  .orderBy(desc(schema.customerOrderTable.created_at))
+  .$dynamic();
+
+  console.log(query.toSQL());
 
   if (sortId && sortOrder) {
     query = withOrderBy(
