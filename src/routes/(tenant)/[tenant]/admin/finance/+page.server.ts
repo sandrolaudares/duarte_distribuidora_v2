@@ -30,7 +30,6 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const pageSize = Number(searchParams.get('pageSize') ?? 10)
 
   const name = searchParams.get('name')
-  const expire_at = searchParams.get('expire_at')
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_direction')
@@ -42,80 +41,12 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const endExpireDate = searchParams.get('endExpireDate')
 
   const atrasados = Boolean(searchParams.get('atrasados'))
-  
 
-  let query = customer(tenantDb!)
-    .getAllOrderInfo()
-    .where(
-      and(
-        gt(
-          schema.customerOrderTable.total,
-          schema.customerOrderTable.amount_paid,
-        ),
-        eq(schema.customerOrderTable.is_fiado, true),
-        name ? like(schema.customerTable.name, `${name}%`) : undefined,
+  console.log(name)
 
-        dateStart && dateEnd
-          ? and(
-              gte(
-                schema.customerOrderTable.created_at,
-                new Date(Number(dateStart)),
-              ),
-              lte(
-                schema.customerOrderTable.created_at,
-                new Date(Number(dateEnd)),
-              ),
-            )
-          : undefined,
-
-          startExpireDate && endExpireDate
-          ? and(
-              gte(
-                schema.customerOrderTable.expire_at,
-                new Date(Number(startExpireDate)),
-              ),
-              lte(
-                schema.customerOrderTable.expire_at,
-                new Date(Number(endExpireDate)),
-              ),
-            )
-          : undefined,
-
-          atrasados ? lte(
-            schema.customerOrderTable.expire_at,
-            new Date()
-          ) : undefined
-      ),
-    )
-    .$dynamic()
-
-  console.log('Date Start:', dateStart, 'Date End:', dateEnd)
-  console.log(sortId, sortOrder)
-
-  if (sortId && sortOrder) {
-
-    query = withOrderBy(
-      query,
-      getSQLiteColumn(schema.customerOrderTable, sortId),
-      sortOrder,
-    )
-  }
-
-  try {
-    const rows = await withPagination(query, page, pageSize)
-
-    const total = await tenantDb!
-      .select({ count: count() })
-      .from(schema.customerOrderTable)
-      .where(
-        and(
-          gt(
-            schema.customerOrderTable.total,
-            schema.customerOrderTable.amount_paid,
-          ),
-          eq(schema.customerOrderTable.is_fiado, true),
-          name ? like(schema.customerTable.name, `${name}%`) : undefined,
-  
+  const condicoes = [
+    name ? like(schema.customerTable.name, `${name}%`) : undefined,
+  //TODO: NAME NÃO FILTRA
           dateStart && dateEnd
             ? and(
                 gte(
@@ -128,23 +59,65 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
                 ),
               )
             : undefined,
+  
             startExpireDate && endExpireDate
-          ? and(
-              gte(
-                schema.customerOrderTable.expire_at,
-                new Date(Number(startExpireDate)),
-              ),
-              lte(
-                schema.customerOrderTable.expire_at,
-                new Date(Number(endExpireDate)),
-              ),
-            )
-          : undefined,
-          atrasados ? lte(
-            schema.customerOrderTable.expire_at,
-            new Date()
-          ) : undefined
+            ? and(
+                gte(
+                  schema.customerOrderTable.expire_at,
+                  new Date(Number(startExpireDate)),
+                ),
+                lte(
+                  schema.customerOrderTable.expire_at,
+                  new Date(Number(endExpireDate)),
+                ),
+              )
+            : undefined,
+  
+            atrasados ? lte(
+              schema.customerOrderTable.expire_at,
+              new Date()
+            ) : undefined
+  ]
 
+  try {
+    let query = customer(tenantDb!)
+      .getAllOrderInfo().$dynamic()
+      .where(
+        and(
+          gt(
+            schema.customerOrderTable.total,
+            schema.customerOrderTable.amount_paid,
+          ),
+          eq(schema.customerOrderTable.is_fiado, true),
+          ...condicoes
+        ),
+      )
+      .$dynamic()
+  
+    console.log('Date Start:', dateStart, 'Date End:', dateEnd)
+    console.log(sortId, sortOrder)
+  
+    if (sortId && sortOrder) {
+  
+      query = withOrderBy(
+        query,
+        getSQLiteColumn(schema.customerOrderTable, sortId),
+        sortOrder,
+      )
+    }
+    const rows = await withPagination(query, page, pageSize)
+
+    const total = await tenantDb!
+      .select({ count: count() })
+      .from(schema.customerOrderTable)
+      .where(
+        and(
+          gt(
+            schema.customerOrderTable.total,
+            schema.customerOrderTable.amount_paid,
+          ),
+          eq(schema.customerOrderTable.is_fiado, true),
+          ...condicoes
             
         ),
       )
@@ -165,35 +138,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
             schema.customerOrderTable.amount_paid,
           ),
           eq(schema.customerOrderTable.is_fiado, true),
-          name ? like(schema.customerTable.name, `${name}%`) : undefined,
-          dateStart && dateEnd
-            ? and(
-                gte(
-                  schema.customerOrderTable.created_at,
-                  new Date(Number(dateStart)),
-                ),
-                lte(
-                  schema.customerOrderTable.created_at,
-                  new Date(Number(dateEnd)),
-                ),
-              )
-            : undefined,
-            startExpireDate && endExpireDate
-          ? and(
-              gte(
-                schema.customerOrderTable.expire_at,
-                new Date(Number(startExpireDate)),
-              ),
-              lte(
-                schema.customerOrderTable.expire_at,
-                new Date(Number(endExpireDate)),
-              ),
-            )
-          : undefined,
-          atrasados ? lte(
-            schema.customerOrderTable.expire_at,
-            new Date()
-          ) : undefined
+          ...condicoes
         ),
       )
 
