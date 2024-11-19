@@ -295,3 +295,7 @@ export async function completeTransference(
 
   console.log('toTransfer:', toTransfer)
 }
+
+export async function getDistribuidoras(){
+  return db.select().from(tenants)
+}
