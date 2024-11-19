@@ -13,6 +13,7 @@
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
   import Loading from '$lib/components/Loading.svelte'
   import UsedCredits from '$lib/components/UsedCredits.svelte'
+  import AvailableCredits from '$lib/components/AvailableCredits.svelte'
 
   export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
   export let caixa
@@ -170,7 +171,7 @@
             <p class="font-bold">
               {clienteSelecionado.name} - {clienteSelecionado.email}
             </p>
-            Créditos usados: <UsedCredits id={clienteSelecionado.id}/> - R${(clienteSelecionado.max_credit/100).toFixed(2)}
+            Créditos disponíveis: <AvailableCredits id={clienteSelecionado.id} max_credit={clienteSelecionado.max_credit}/>
           </span>
           <button
             class="btn btn-primary"
