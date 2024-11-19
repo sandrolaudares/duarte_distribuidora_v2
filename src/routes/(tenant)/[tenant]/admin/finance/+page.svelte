@@ -22,7 +22,8 @@
   import NoResults from '$lib/components/NoResults.svelte'
   import DateFilter from '$lib/components/DateFilter.svelte'
   import { format } from 'date-fns'
-  // import ChangeExpireDate from './ChangeExpireDate.svelte'
+  import ChangeExpireDate from './ChangeExpireDate.svelte'
+  import { TreeDeciduous } from 'lucide-svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -75,21 +76,46 @@
       .reduce((sum, row) => sum + row.total, 0)
   }
   let sum = $derived(calculateSum())
+
+  let isLoading = $state(false)
+
+  async function handleUpdate(value: Date, key = '', row: any) {
+    const last_val = row[key]
+    try {
+      isLoading = true
+      await trpc($page).customer.updateOrderExpireDate.mutate({
+        order_id: row.id,
+        expire_at: value,
+      })
+      row[key] = value
+      toast.success('Atualizado com sucesso!')
+      setTimeout(() => {
+        window.location.reload()
+      }, 500)
+    } catch (error) {
+      row[key] = last_val
+      toast.error('Erro ao atualizar')
+      isLoading = false
+    }
+  }
 </script>
 
 <h1 class="my-5 text-center text-2xl font-medium">
   Pedidos com pagamento pendente:
 </h1>
 <main class="container mx-auto h-full max-h-[calc(100vh-24vh)]">
-  <select value="todos" onchange={(e)=>{
-    const value = e.target?.value
-    if(value === "atrasados"){
-      filters.update({atrasados:"true"})
-    } else {
-      filters.clear('atrasados')
-    }
-    
-  }} class="select select-bordered mb-3">
+  <select
+    value="todos"
+    onchange={e => {
+      const value = (e.target as HTMLInputElement).value
+      if (value === 'atrasados') {
+        filters.update({ atrasados: 'true' })
+      } else {
+        filters.clear('atrasados')
+      }
+    }}
+    class="select select-bordered mb-3"
+  >
     <option value="todos" selected>Todos</option>
     <option value="atrasados">Pagamentos atrasados</option>
   </select>
@@ -130,17 +156,19 @@
             />
           </Th>
 
-          <Th><DateFilter
-            enableFutureDates={true}
-            enablePastDates={true}
-            onchange={(startExpire, endExpire) => {
-              if (startExpire != null && endExpire != null) {
-                let startExpireDate = startExpire.toString()
-                let endExpireDate = endExpire.toString()
-                filters.update({ startExpireDate, endExpireDate })
-              }
-            }}
-          /></Th>
+          <Th>
+            <DateFilter
+              enableFutureDates={true}
+              enablePastDates={true}
+              onchange={(startExpire, endExpire) => {
+                if (startExpire != null && endExpire != null) {
+                  let startExpireDate = startExpire.toString()
+                  let endExpireDate = endExpire.toString()
+                  filters.update({ startExpireDate, endExpireDate })
+                }
+              }}
+            />
+          </Th>
           <Th />
           <Th />
 
@@ -150,9 +178,11 @@
       <tbody>
         {#each data.rows as row}
           <tr
-          class={table.selected.includes(row.id)
-            ? 'selected'
-            : row.expire_at ? getBgColor(row.expire_at) : ''}
+            class={table.selected.includes(row.id)
+              ? 'selected'
+              : row.expire_at
+                ? getBgColor(row.expire_at)
+                : ''}
           >
             <td>
               <input
@@ -162,19 +192,25 @@
                   table.select(row.id)
                 }}
               />
-              <!--TODO: Show the sum of the selected rows-->
             </td>
             <td>{row.id}</td>
             <td><b>{row.name}</b></td>
-            <td><b>{format(row.created_at, 'dd/MM/yyyy')}</b></td>
+            <td><b>{format(row.created_at!, 'dd/MM/yyyy')}</b></td>
             <td>
               <b>
-                {row.expire_at
+                <!-- {row.expire_at
                   ? format(new Date(row.expire_at), 'dd/MM/yyyy')
-                  : 'Não registrado'}
-                <!-- <ChangeExpireDate value={format(new Date(row.expire_at),'dd/MM/yyyy')} onUpdateValue={async()=>{
-                
-                  }}/> -->
+                  : 'Não registrado'} -->
+                {#if isLoading}
+                Atualizando...
+                {:else}
+                  <ChangeExpireDate
+                    value={row.expire_at!}
+                    onUpdateValue={async (value: Date) => {
+                      handleUpdate(value, 'expire_at', row)
+                    }}
+                  />
+                {/if}
               </b>
             </td>
             <td>

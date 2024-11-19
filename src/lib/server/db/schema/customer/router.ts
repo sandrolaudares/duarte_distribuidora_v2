@@ -32,6 +32,7 @@ import { TRPCError } from '@trpc/server'
 import { geocodeAddress, getDistanceFromLatLonInKm } from '$lib/utils/distance'
 import { env } from '$env/dynamic/private'
 import { getDistribuidoraLatLong } from '../../central/constroller'
+import { format } from 'date-fns'
 
 export const customer = router({
   insertCustomer: publicProcedure
@@ -219,6 +220,7 @@ export const customer = router({
             cachier_id: order_info.cachier_id,
             observation: order_info.observation,
             taxa_entrega: order_info.taxa_entrega,
+            created_by: userId,
           })
           .returning()
 
@@ -446,6 +448,7 @@ export const customer = router({
             cachier_id: order_info.cachier_id,
             observation: order_info.observation,
             taxa_entrega: order_info.taxa_entrega,
+            created_by: userId,
           })
           .returning()
 
@@ -535,6 +538,41 @@ export const customer = router({
           )
         }),
     }),
+  }),
+
+  updateOrderExpireDate: publicProcedure
+  .meta({
+    routeName: 'Atualizar Status do Pedido',
+    permission: 'atualizar_pedidos',
+  })
+  .use(middleware.logged)
+  .use(middleware.auth)
+  .input(
+    z.object({
+      order_id: z.number(),
+      expire_at: z.date(),
+    }),
+  )
+  .mutation(async ({ input, ctx }) => {
+    const { order_id, expire_at } = input
+    const { tenantDb } = ctx
+    const user = ctx.locals.user
+    await bugReport(tenantDb).insertLogs({
+      text: `${user?.username} atualizou a data de vencimento do pedido ${order_id} para ${format(expire_at,'dd/MM/yyyy')}`,
+      created_by: user?.id,
+      metadata: {
+        order_id,
+        expire_at,
+      },
+      order_id,
+      type: 'SYSTEM',
+      pathname: '',
+      routeName: 'Atualizar Pedido',
+    })
+    return await customerController(tenantDb).updateOrderExpireDate(
+      order_id,
+      expire_at,
+    )
   }),
 
   updateOrderStatus: publicProcedure
