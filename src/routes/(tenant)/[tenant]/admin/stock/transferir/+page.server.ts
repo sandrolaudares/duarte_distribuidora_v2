@@ -35,7 +35,7 @@ export const actions: Actions = {
       }
     } catch (error) {
       console.error('Erro ao solicitar', error)
-      return fail(500, { message: 'Erro interno no servidor' })
+      return fail(500, { message: 'Erro interno no servidor',error })
     }
   },
 }

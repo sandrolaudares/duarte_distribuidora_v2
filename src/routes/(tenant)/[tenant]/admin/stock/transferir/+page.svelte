@@ -6,8 +6,10 @@
   import { getImagePath } from '$lib/utils/image'
   import type { SelectProductItem } from '$lib/server/db/schema'
   import { enhance } from '$app/forms'
+  import Success from '$lib/components/transfer/success.svelte'
 
   export let data: PageData
+  export let form
 
   type Cart = Record<
     SelectProductItem['id'],
@@ -60,9 +62,16 @@
         return cart
     }
 
+let isLoading = false
 </script>
 
 <div class="container mx-auto max-w-7xl p-4">
+
+  {#if form?.success}
+  <div class="flex justify-center mt-20">
+    <Success transferDetails={form.result[0]} tenant={data.tenant!}/>
+  </div>
+  {:else}
   <h1 class="mb-6 text-center text-3xl font-bold">
     Solicitar estoque para central
   </h1>
@@ -171,6 +180,7 @@
         {/if}
       </div>
       <form method="post" use:enhance={({formData})=>{
+        isLoading = true
          formData.set('data', JSON.stringify(Object.values(cart).map(product => ({
             sku: product.item.sku,
             sku_name: product.item.name,
@@ -182,17 +192,27 @@
               todo:'TODO'
             }
       }))))
+        return async ({ update }) => {
+            await update()
+            isLoading = false
+            cart = {}
+        }
       }}>
         <button
           type="submit"
           class="btn btn-primary w-full transition duration-150 ease-in-out focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={isLoading || Object.values(cart).length ===0}
         >
-          Solicitar transferencia
+        {isLoading?'Solicitando...':'Solicitar transferência'}
         </button>
       </form>
+      {#if form?.error}
+        <p class="text-error text-center">{form.message}</p>
+      {/if}
 
     </div>
   </div>
+  {/if}
 </div>
 
 <style>
