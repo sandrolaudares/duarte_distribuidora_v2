@@ -29,7 +29,7 @@
   const filters = new SSRFilters()
 
   const table = new TableHandler(data.rows, {
-    rowsPerPage: 10,
+    rowsPerPage: 50,
     totalRows: data.count,
     selectBy: 'id',
   })
@@ -80,7 +80,7 @@
 <h1 class="my-5 text-center text-2xl font-medium">
   Pedidos com pagamento pendente:
 </h1>
-<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+<main class="container mx-auto h-full max-h-[calc(100vh-24vh)]">
   <select value="todos" onchange={(e)=>{
     const value = e.target?.value
     if(value === "atrasados"){

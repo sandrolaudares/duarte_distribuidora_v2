@@ -28,7 +28,7 @@ import { gte } from 'drizzle-orm'
 export const load = (async ({ url, locals: { tenantDb } }) => {
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
-  const pageSize = Number(searchParams.get('pageSize') ?? 10)
+  const pageSize = Number(searchParams.get('pageSize') ?? 50)
 
   const name = searchParams.get('name')
 
