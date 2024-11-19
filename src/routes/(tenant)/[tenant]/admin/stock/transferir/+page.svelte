@@ -5,6 +5,7 @@
 
   import { getImagePath } from '$lib/utils/image'
   import type { SelectProductItem } from '$lib/server/db/schema'
+  import { enhance } from '$app/forms'
 
   export let data: PageData
 
@@ -58,6 +59,7 @@
         cart = {...cart}
         return cart
     }
+
 </script>
 
 <div class="container mx-auto max-w-7xl p-4">
@@ -168,13 +170,27 @@
           <p class="text-gray-500">Nenhum produto</p>
         {/if}
       </div>
+      <form method="post" use:enhance={({formData})=>{
+         formData.set('data', JSON.stringify(Object.values(cart).map(product => ({
+            sku: product.item.sku,
+            sku_name: product.item.name,
+            status: 'REQUESTED',
+            fromTenantId: null,
+            toTenantId: data.tenant?.tenantId,
+            quantity: product.quantity,
+            meta_data:{
+              todo:'TODO'
+            }
+      }))))
+      }}>
+        <button
+          type="submit"
+          class="btn btn-primary w-full transition duration-150 ease-in-out focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Solicitar transferencia
+        </button>
+      </form>
 
-      <button
-        type="submit"
-        class="btn btn-primary w-full transition duration-150 ease-in-out focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        Solicitar transferencia
-      </button>
     </div>
   </div>
 </div>
