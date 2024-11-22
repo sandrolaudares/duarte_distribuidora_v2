@@ -69,7 +69,7 @@
         <tr>
           <Th />
           <ThFilter {table} field="name" />
-          <ThFilter {table} field="cashier" />
+          <ThFilter {table} field="created_by" />
           <Th />
           <Th>
           <DateFilter onchange={(start,end)=>{
@@ -90,7 +90,7 @@
           <tr>
             <td>{row.id}</td>
             <td><b>{row.name}</b></td>
-            <td><b>{row.cashier}</b></td>
+            <td><b>{row.created_by}</b></td>
             <td><b>{row.observation}</b></td>
             <td><b>{row.created_at ? format(row.created_at,'dd/MM/yyyy') : ''}</b></td>
             <td><b class="text-xl text-success">R${(row.total/100)}</b></td>

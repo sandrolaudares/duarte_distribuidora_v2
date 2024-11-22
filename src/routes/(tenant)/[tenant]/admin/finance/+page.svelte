@@ -30,7 +30,7 @@
   const filters = new SSRFilters()
 
   const table = new TableHandler(data.rows, {
-    rowsPerPage: 50,
+    rowsPerPage: 100,
     totalRows: data.count,
     selectBy: 'id',
   })
@@ -179,7 +179,7 @@
         {#each data.rows as row}
           <tr
             class={table.selected.includes(row.id)
-              ? 'selected'
+              ? 'bg-base-300'
               : row.expire_at
                 ? getBgColor(row.expire_at)
                 : ''}
