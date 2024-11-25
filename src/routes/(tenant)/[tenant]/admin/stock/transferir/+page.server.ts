@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { PageServerLoad } from './$types'
 import { product } from '$db/controller'
 import { error, fail } from '@sveltejs/kit'
@@ -17,25 +18,3 @@ export const load = (async ({ locals: { tenantDb } }) => {
     return error(500, JSON.stringify(e))
   }
 }) satisfies PageServerLoad
-
-export const actions: Actions = {
-  default: async ({ request }) => {
-    try {
-      const formData = await request.formData()
-      const data: InsertStockTransference[] = JSON.parse(formData.get('data') as string) 
-      console.log(data)
-      
-      const result = await solicitarTransference(data)
-
-      console.log(result)
-
-      return {
-        success: true,
-        result,
-      }
-    } catch (error) {
-      console.error('Erro ao solicitar', error)
-      return fail(500, { message: 'Erro interno no servidor',error })
-    }
-  },
-}

@@ -7,6 +7,11 @@
   import type { SelectProductItem } from '$lib/server/db/schema'
   import { enhance } from '$app/forms'
   import Success from '$lib/components/transfer/success.svelte'
+  import { trpc } from '$trpc/client'
+  import { page } from '$app/stores'
+  import type { InsertStockTransference } from '$lib/server/db/central/schema'
+  import { toast } from 'svelte-sonner'
+  import { createInsertSchema } from 'drizzle-zod'
 
   export let data: PageData
   export let form
@@ -25,11 +30,13 @@
 
   let searchTerm = ''
 
-  $: {products = data.products.filter(product =>
-  product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )}
+  $: {
+    products = data.products.filter(product =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+  }
 
-  $:console.log(products)
+  $: console.log(products)
 
   function addItem(input: { item: SelectProductItem; quantity: number }) {
     const existing = cart[input.item.id]
@@ -43,35 +50,54 @@
       }
     }
 
-    cart = {...cart}
+    cart = { ...cart }
     return cart
   }
 
   function removeItem(item_id: number) {
     delete cart[item_id]
-    cart = {...cart}
+    cart = { ...cart }
     return cart
   }
 
   function setItem(input: { item: SelectProductItem; quantity: number }) {
-        cart[input.item.id] = {
-          item: input.item,
-          quantity: input.quantity,
-        }
-        cart = {...cart}
-        return cart
+    cart[input.item.id] = {
+      item: input.item,
+      quantity: input.quantity,
     }
+    cart = { ...cart }
+    return cart
+  }
 
-let isLoading = false
+  let isLoading = false
+
+  async function handleSolicitarTransferir(data: InsertStockTransference[]) {
+    if (!Object.values(cart).length) {
+      toast.error('Carrinho está vazio')
+      return
+    }
+    isLoading = true
+    try {
+      for (let dat of data) {
+        await trpc($page).distribuidora.solicitarTransference.mutate(dat)
+      }
+      toast.success('Solicitado com sucesso!')
+      cart = {}
+    } catch (error) {
+      console.error(error)
+      toast.error('Erro ao solicitar')
+    } finally {
+      isLoading = false
+    }
+  }
 </script>
 
 <div class="container mx-auto max-w-7xl p-4">
-
-  {#if form?.success}
+  <!-- {#if form?.success}
   <div class="flex justify-center mt-20">
     <Success transferDetails={form.result[0]} tenant={data.tenant!}/>
   </div>
-  {:else}
+  {:else} -->
   <h1 class="mb-6 text-center text-3xl font-bold">
     Solicitar estoque para central
   </h1>
@@ -81,84 +107,90 @@ let isLoading = false
       <div
         class="max-h-[80vh] overflow-auto rounded-lg bg-base-200 p-6 shadow-md"
       >
-      <div class="flex justify-between">
-        <h2 class="mb-4 text-xl font-semibold">
-          Escolha produtos para solicitar transferencia
-        </h2>
-        <input type="text" placeholder="Procurar..." class="input input-bordered max-w-xs" bind:value={searchTerm}/>
-      </div>
+        <div class="flex justify-between">
+          <h2 class="mb-4 text-xl font-semibold">
+            Escolha produtos para solicitar transferencia
+          </h2>
+          <input
+            type="text"
+            placeholder="Procurar..."
+            class="input input-bordered max-w-xs"
+            bind:value={searchTerm}
+          />
+        </div>
 
         <div class="max-h-[calc(100vh-300px)] space-y-2 overflow-y-auto pr-2">
           <!-- <Cardapio data={products}>
             {#snippet card(p)} -->
-              <div class="card w-full p-1">
-                <div class="grid grid-cols-1 gap-3">
-                  {#each products as item}
-                    {@const cartItem = cart[item.id]}
-                    <hr />
-                    <div class="flex w-full">
-                      <div class=" hidden flex-none md:block md:w-auto">
-                        <img
-                          alt="imagem"
-                          src={getImagePath(item.image)}
-                          class="h-10 w-10 rounded-lg object-cover md:h-16 md:w-16"
-                        />
-                      </div>
-                      <div class="ml-4 w-full">
-                        <h2 class="font-bold md:text-xl">{item.name}</h2>
-                        <h3 class="md:text-md">
-                          Em estoque: <strong>{item.sku?.quantity}</strong>
-                        </h3>
-                      </div>
-                      <div class="w-full text-right">
-                        <div
-                          class="flex items-center justify-end gap-3 text-center"
-                        >
-                          <button
-                            class="btn btn-primary hidden md:block"
-                            on:click={() => {
-                              if (cartItem.quantity <= 1) {
-                                removeItem(item.id)
-                              } else {
-                                addItem({
-                                  item: item,
-                                  quantity: -1,
-                                })
-                              }
-                            }}
-                          >
-                            {@html icons.minus()}
-                          </button>
+          <div class="card w-full p-1">
+            <div class="grid grid-cols-1 gap-3">
+              {#each products as item}
+                {@const cartItem = cart[item.id]}
+                <hr />
+                <div class="flex w-full">
+                  <div class=" hidden flex-none md:block md:w-auto">
+                    <img
+                      alt="imagem"
+                      src={getImagePath(item.image)}
+                      class="h-10 w-10 rounded-lg object-cover md:h-16 md:w-16"
+                    />
+                  </div>
+                  <div class="ml-4 w-full">
+                    <h2 class="font-bold md:text-xl">{item.name}</h2>
+                    <h3 class="md:text-md">
+                      Em estoque: <strong>{item.sku?.quantity}</strong>
+                    </h3>
+                  </div>
+                  <div class="w-full text-right">
+                    <div
+                      class="flex items-center justify-end gap-3 text-center"
+                    >
+                      <button
+                        class="btn btn-primary hidden md:block"
+                        on:click={() => {
+                          if (cartItem.quantity <= 1) {
+                            removeItem(item.id)
+                          } else {
+                            addItem({
+                              item: item,
+                              quantity: -1,
+                            })
+                          }
+                        }}
+                      >
+                        {@html icons.minus()}
+                      </button>
 
-                          <input
-                            min="1"
-                            class="max-w-16 bg-base-200 text-right text-xl font-bold focus:border-yellow-500 md:min-w-10 md:max-w-28"
-                            value={cartItem?.quantity ?? 0}
-                            on:input={e => {
-                              const quant_temp = (e.target as HTMLInputElement)?.value
-                              setItem({
-                                item: item,
-                                quantity: Number(quant_temp),
-                              })
-                            }}
-                          />
-                          <button
-                            on:click={() =>
-                              addItem({
-                                item: item,
-                                quantity: 1,
-                              })}
-                            class="btn btn-primary"
-                          >
-                            {@html icons.plus()}
-                          </button>
-                        </div>
-                      </div>
+                      <input
+                        min="1"
+                        class="max-w-16 bg-base-200 text-right text-xl font-bold focus:border-yellow-500 md:min-w-10 md:max-w-28"
+                        value={cartItem?.quantity ?? 0}
+                        on:input={e => {
+                          const quant_temp = (e.target as HTMLInputElement)
+                            ?.value
+                          setItem({
+                            item: item,
+                            quantity: Number(quant_temp),
+                          })
+                        }}
+                      />
+                      <button
+                        on:click={() =>
+                          addItem({
+                            item: item,
+                            quantity: 1,
+                          })}
+                        class="btn btn-primary"
+                      >
+                        {@html icons.plus()}
+                      </button>
                     </div>
-                  {/each}
+                  </div>
                 </div>
-              </div>
-            <!-- {/snippet}
+              {/each}
+            </div>
+          </div>
+          <!-- {/snippet}
           </Cardapio> -->
         </div>
       </div>
@@ -169,7 +201,7 @@ let isLoading = false
         {#if Object.values(cart).length > 0}
           <ul class="space-y-2">
             {#each Object.values(cart) as product}
-              <li class="flex justify-between items-center">
+              <li class="flex items-center justify-between">
                 <span>{product.item.name}</span>
                 <span class="font-semibold">Qnt: {product.quantity}</span>
               </li>
@@ -179,40 +211,34 @@ let isLoading = false
           <p class="text-gray-500">Nenhum produto</p>
         {/if}
       </div>
-      <form method="post" use:enhance={({formData})=>{
-        isLoading = true
-         formData.set('data', JSON.stringify(Object.values(cart).map(product => ({
-            sku: product.item.sku,
-            sku_name: product.item.name,
-            status: 'REQUESTED',
-            fromTenantId: null,
-            toTenantId: data.tenant?.tenantId,
-            quantity: product.quantity,
-            meta_data:{
-              todo:'TODO'
-            }
-      }))))
-        return async ({ update }) => {
-            await update()
-            isLoading = false
-            cart = {}
-        }
-      }}>
+      <div>
         <button
-          type="submit"
+          on:click={() => {
+            const dataInsert: InsertStockTransference[] = Object.values(
+              cart,
+            ).map(product => ({
+              sku: product.item.sku.sku,
+              sku_name: product.item.name,
+              status: 'REQUESTED',
+              fromTenantId: null,
+              toTenantId: data.tenant?.tenantId || 0,
+              quantity: product.quantity,
+              meta_data: {},
+            }))
+            handleSolicitarTransferir(dataInsert)
+          }}
           class="btn btn-primary w-full transition duration-150 ease-in-out focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={isLoading || Object.values(cart).length ===0}
+          disabled={isLoading || Object.values(cart).length === 0}
         >
-        {isLoading?'Solicitando...':'Solicitar transferência'}
+          {isLoading ? 'Solicitando...' : 'Solicitar transferência'}
         </button>
-      </form>
-      {#if form?.error}
+      </div>
+      <!-- {#if form?.error}
         <p class="text-error text-center">{form.message}</p>
-      {/if}
-
+      {/if} -->
     </div>
   </div>
-  {/if}
+  <!-- {/if} -->
 </div>
 
 <style>

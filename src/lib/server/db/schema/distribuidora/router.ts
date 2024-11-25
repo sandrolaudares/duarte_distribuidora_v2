@@ -10,7 +10,9 @@ import {
 
 
 import { middleware } from '$trpc/middleware'
-import { updateDistribuidora } from '../../central/constroller'
+import { solicitarTransference, updateDistribuidora } from '../../central/constroller'
+import { stockTransference, stockTransferenceStatus, type InsertStockTransference } from '../../central/schema'
+import { createInsertSchema } from 'drizzle-zod'
 
 export const distribuidora = router({
   insertCashier: publicProcedure
@@ -152,5 +154,15 @@ export const distribuidora = router({
 
   getCaixas: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
     return await distribuidoraController(tenantDb).getCashier()
+  }),
+
+  solicitarTransference: publicProcedure
+  .input(createInsertSchema(stockTransference,{
+    status: z.enum(stockTransferenceStatus)
+  }))
+  .mutation(async ({ input, ctx }) => {
+    const data = input
+    console.log(data)
+    await solicitarTransference(data)
   }),
 })

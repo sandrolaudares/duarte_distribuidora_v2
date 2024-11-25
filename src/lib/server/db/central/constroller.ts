@@ -11,7 +11,7 @@ import { createClient } from '@tursodatabase/api'
 import { user as userC, type SKU_TRANSFERENCE_POST_TYPE } from '$db/controller'
 import { isValidEmail } from '$db/schema/user/controller'
 import { subdomainRegex } from '$lib/utils'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 
 import {
   TURSO_GROUP_NAME,
@@ -190,9 +190,29 @@ export async function getDistribuidoraLatLong(id: SelectTenant['tenantId']) {
     .limit(1)
 }
 
-export async function solicitarTransference(data: InsertStockTransference[]) {
-  return await db.insert(stockTransference).values(data).returning()
+export async function solicitarTransference(data: InsertStockTransference) {
+  const existing = await db
+    .select()
+    .from(stockTransference)
+    .where(and(eq(stockTransference.status,'REQUESTED'),eq(stockTransference.sku,data.sku)))
+
+    console.log(existing)
+
+  if (existing.length > 0) {
+    console.log('já existe')
+    const ext = existing[0]
+    return await db
+      .update(stockTransference)
+      .set({
+        quantity: ext.quantity + data.quantity,
+      })
+      .where(eq(stockTransference.id,ext.id))
+      .returning();
+  } else {
+    return await db.insert(stockTransference).values(data).returning();
+  }
 }
+
 
 export async function getCurrentTransfers() {
   return await db.select().from(stockTransference).where(eq(stockTransference.status,'REQUESTED'))
