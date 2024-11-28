@@ -14,7 +14,6 @@
   import { createInsertSchema } from 'drizzle-zod'
 
   export let data: PageData
-  export let form
 
   type Cart = Record<
     SelectProductItem['id'],
@@ -24,6 +23,7 @@
       is_retail?: boolean
     }
   >
+
 
   let products = data.products
   let cart: Cart = {}
@@ -79,7 +79,15 @@
     isLoading = true
     try {
       for (let dat of data) {
-        await trpc($page).distribuidora.solicitarTransference.mutate(dat)
+        await trpc($page).distribuidora.solicitarTransference.mutate({
+          meta_data:dat.meta_data,
+          sku:dat.sku,
+          sku_name:dat.sku_name,
+          toTenantId:dat.toTenantId,
+          fromTenantId:dat.fromTenantId,
+          status:dat.status,
+          quantity:dat.quantity
+        })
       }
       toast.success('Solicitado com sucesso!')
       cart = {}
@@ -222,7 +230,7 @@
               status: 'REQUESTED',
               fromTenantId: null,
               toTenantId: data.tenant?.tenantId || 0,
-              quantity: product.quantity,
+              quantity: product.quantity * product.item.quantity,
               meta_data: {},
             }))
             handleSolicitarTransferir(dataInsert)
@@ -241,23 +249,4 @@
   <!-- {/if} -->
 </div>
 
-<style>
-  /* Custom scrollbar styles for Webkit browsers */
-  .overflow-y-auto::-webkit-scrollbar {
-    width: 8px;
-  }
 
-  .overflow-y-auto::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-  }
-
-  .overflow-y-auto::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
-  }
-
-  .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
-</style>
