@@ -10,6 +10,8 @@ export * from './icons'
 export * from './device'
 export * from './entities'
 
+export * from './monad'
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function debounce<T extends (...args: any[]) => void>(
   func: T,
@@ -24,8 +26,6 @@ export function debounce<T extends (...args: any[]) => void>(
     timeoutId = window.setTimeout(() => func(...args), delay)
   }
 }
-
-
 
 import { PUBLIC_DOMAIN } from '$env/static/public'
 

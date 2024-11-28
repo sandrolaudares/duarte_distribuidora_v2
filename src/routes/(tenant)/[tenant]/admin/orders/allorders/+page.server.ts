@@ -26,6 +26,7 @@ import {
 } from 'drizzle-orm'
 import { customer } from '$lib/server/db/controller'
 import { gte } from 'drizzle-orm'
+import { Monad } from '$lib/utils'
 
 export const load = (async ({ url, locals: { tenantDb } }) => {
   const { searchParams } = url
@@ -41,45 +42,85 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const dateStart = searchParams.get('startDate')
   const dateEnd = searchParams.get('endDate')
 
-  let query = innerJoinOnMany(
-    innerJoinOnMany(
-      tenantDb!
-        .select({
-          //Order:
-          id: schema.customerOrderTable.id,
-          created_at: schema.customerOrderTable.created_at,
-          updated_at: schema.customerOrderTable.updated_at,
-          is_fiado: schema.customerOrderTable.is_fiado,
-          observation: schema.customerOrderTable.observation,
-          amount_paid: schema.customerOrderTable.amount_paid,
-          total: schema.customerOrderTable.total,
-          status: schema.customerOrderTable.status,
-          type: schema.customerOrderTable.type,
-          expire_at: schema.customerOrderTable.expire_at,
+  let query = Monad.of(
+    tenantDb!
+      .select({
+        //Order:
+        id: schema.customerOrderTable.id,
+        created_at: schema.customerOrderTable.created_at,
+        updated_at: schema.customerOrderTable.updated_at,
+        is_fiado: schema.customerOrderTable.is_fiado,
+        observation: schema.customerOrderTable.observation,
+        amount_paid: schema.customerOrderTable.amount_paid,
+        total: schema.customerOrderTable.total,
+        status: schema.customerOrderTable.status,
+        type: schema.customerOrderTable.type,
+        expire_at: schema.customerOrderTable.expire_at,
 
-          //customer:
-          name: schema.customerTable.name,
-          email: schema.customerTable.email,
-          cellphone: schema.customerTable.cellphone,
+        //customer:
+        name: schema.customerTable.name,
+        email: schema.customerTable.email,
+        cellphone: schema.customerTable.cellphone,
 
-          //cashier
-          // cashier: schema.cashierTable.name,
-          created_by:schema.userTable.username
-        })
-        .from(schema.customerOrderTable)
-        .$dynamic(),
-      schema.customerTable,
-      [
+        //cashier
+        // cashier: schema.cashierTable.name,
+        created_by: schema.userTable.username,
+      })
+      .from(schema.customerOrderTable)
+      .$dynamic(),
+  )
+    .map(q =>
+      innerJoinOnMany(q, schema.customerTable, [
         eq(schema.customerTable.id, schema.customerOrderTable.customer_id),
         name ? like(schema.customerTable.name, `${name}%`) : undefined,
-      ],
-    ),
-    schema.userTable,
-    [
-      eq(schema.userTable.id, schema.customerOrderTable.created_by),
-      cashier ? like(schema.userTable.username, `${cashier}%`) : undefined,
-    ],
-  )
+      ]),
+    )
+    .map(q =>
+      innerJoinOnMany(q, schema.userTable, [
+        eq(schema.userTable.id, schema.customerOrderTable.created_by),
+        cashier ? like(schema.userTable.username, `${cashier}%`) : undefined,
+      ]),
+    )
+    .get()
+  // let query = innerJoinOnMany(
+  //   innerJoinOnMany(
+  //     tenantDb!
+  //       .select({
+  //         //Order:
+  //         id: schema.customerOrderTable.id,
+  //         created_at: schema.customerOrderTable.created_at,
+  //         updated_at: schema.customerOrderTable.updated_at,
+  //         is_fiado: schema.customerOrderTable.is_fiado,
+  //         observation: schema.customerOrderTable.observation,
+  //         amount_paid: schema.customerOrderTable.amount_paid,
+  //         total: schema.customerOrderTable.total,
+  //         status: schema.customerOrderTable.status,
+  //         type: schema.customerOrderTable.type,
+  //         expire_at: schema.customerOrderTable.expire_at,
+
+  //         //customer:
+  //         name: schema.customerTable.name,
+  //         email: schema.customerTable.email,
+  //         cellphone: schema.customerTable.cellphone,
+
+  //         //cashier
+  //         // cashier: schema.cashierTable.name,
+  //         created_by: schema.userTable.username,
+  //       })
+  //       .from(schema.customerOrderTable)
+  //       .$dynamic(),
+  //     schema.customerTable,
+  //     [
+  //       eq(schema.customerTable.id, schema.customerOrderTable.customer_id),
+  //       name ? like(schema.customerTable.name, `${name}%`) : undefined,
+  //     ],
+  //   ),
+  //   schema.userTable,
+  //   [
+  //     eq(schema.userTable.id, schema.customerOrderTable.created_by),
+  //     cashier ? like(schema.userTable.username, `${cashier}%`) : undefined,
+  //   ],
+  // )
 
   // .innerJoin(
   //   schema.customerTable,
