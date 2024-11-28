@@ -118,6 +118,10 @@
               title: 'Transferir estoque',
               url: '/admin/stock/transferir',
             },
+            {
+              title: 'Transferencias',
+              url: '/admin/stock/solicitacoes',
+            },
           ],
         },
       )

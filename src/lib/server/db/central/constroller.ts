@@ -213,17 +213,38 @@ export async function solicitarTransference(data: InsertStockTransference) {
   }
 }
 
+export async function refuseTransference(id:SelectStockTransference['id']) {
+  return await db.update(stockTransference).set({
+    status: 'CANCELED',
+  })
+  .where(eq(stockTransference.id,id)).returning()
+}
 
 export async function getCurrentTransfers() {
   return await db.select().from(stockTransference).where(eq(stockTransference.status,'REQUESTED'))
 }
 
+export async function getReceivedTransfers(fromTenantId:SelectStockTransference['fromTenantId']) {
+  if (fromTenantId === null) {
+    throw new Error('Id não pode ser nulo');
+  }
+  return await db.select().from(stockTransference)
+  .where(
+    and(
+      eq(stockTransference.status,'ACCEPTED'),
+      eq(stockTransference.fromTenantId,fromTenantId)
+    )
+  )
+}
+
 export async function acceptTransference(
   stockTransferenceId: SelectStockTransference['id'],
+  fromTenantId:SelectStockTransference['fromTenantId']
 ) {
   const transference = await db.query.stockTransference.findFirst({
     where: eq(stockTransference.id, stockTransferenceId),
   })
+  //TODO: validate quantidade do from
 
   if (transference?.status !== 'REQUESTED') {
     return {
@@ -240,7 +261,7 @@ export async function acceptTransference(
   }
   return await db.update(stockTransference).set({
     status: 'ACCEPTED',
-  })
+  }).where(eq(stockTransference.id,stockTransferenceId))
 }
 
 export async function completeTransference(
