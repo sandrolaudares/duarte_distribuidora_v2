@@ -239,8 +239,8 @@ export async function getReceivedTransfers(fromTenantId:SelectStockTransference[
 
 export async function acceptTransference(
   stockTransferenceId: SelectStockTransference['id'],
-  fromTenantId:SelectStockTransference['fromTenantId']
 ) {
+
   const transference = await db.query.stockTransference.findFirst({
     where: eq(stockTransference.id, stockTransferenceId),
   })
@@ -259,9 +259,20 @@ export async function acceptTransference(
       message: 'Adicione uma filial de origem para aceitar a transferência',
     }
   }
-  return await db.update(stockTransference).set({
-    status: 'ACCEPTED',
-  }).where(eq(stockTransference.id,stockTransferenceId))
+  try {
+     await db.update(stockTransference).set({
+      status: 'ACCEPTED',
+    }).where(eq(stockTransference.id,stockTransferenceId))
+    return {
+      success:true,
+      message:'Bem sucedido'
+    }
+  } catch (error:any) {
+    return {
+      success:false,
+      message: error.message
+    }
+  }
 }
 
 export async function completeTransference(
@@ -303,7 +314,7 @@ export async function completeTransference(
   }
 
   const fromTransfer = await fetch(
-    `https://${fromTenant.subdomain}.${PUBLIC_DOMAIN}/api/stock/${transference.sku}`,
+    `http://${fromTenant.subdomain}.${PUBLIC_DOMAIN}/api/stock/${transference.sku}`,
     {
       method: 'POST',
       headers: {
@@ -320,7 +331,7 @@ export async function completeTransference(
   console.log('fromTransfer:', fromTransfer)
 
   const toTransfer = await fetch(
-    `https://${toTenant.subdomain}.${PUBLIC_DOMAIN}/api/stock/${transference.sku}`,
+    `http://${toTenant.subdomain}.${PUBLIC_DOMAIN}/api/stock/${transference.sku}`,
     {
       method: 'POST',
       headers: {

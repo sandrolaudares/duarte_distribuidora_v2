@@ -4,7 +4,7 @@
   import { icons } from '$lib/utils'
 
   import { getImagePath } from '$lib/utils/image'
-  import type { SelectProductItem } from '$lib/server/db/schema'
+  import type { SelectProductItem, SelectSku } from '$lib/server/db/schema'
   import { enhance } from '$app/forms'
   import Success from '$lib/components/transfer/success.svelte'
   import { trpc } from '$trpc/client'
@@ -14,13 +14,15 @@
   import { createInsertSchema } from 'drizzle-zod'
 
   export let data: PageData
+  
 
   type Cart = Record<
-    SelectProductItem['id'],
+    SelectSku['sku'],
     {
-      item: SelectProductItem
-      quantity: number
-      is_retail?: boolean
+      sku:SelectSku
+      totalQuantity: number
+      // productQuantity:number
+      item:SelectProductItem
     }
   >
 
@@ -36,17 +38,19 @@
     )
   }
 
-  $: console.log(products)
+  $: console.log(cart)
 
-  function addItem(input: { item: SelectProductItem; quantity: number }) {
-    const existing = cart[input.item.id]
-
+  function addItem(input: { quantity: number,sku:SelectSku,item:SelectProductItem }) {
+    const existing = cart[input.sku.sku]
+    console.log(input.quantity)
+    
     if (existing) {
-      existing.quantity += input.quantity
+      existing.totalQuantity += input.quantity
     } else {
-      cart[input.item.id] = {
-        item: input.item,
-        quantity: input.quantity,
+      cart[input.sku.sku] = {
+        totalQuantity: input.quantity,
+        sku:input.sku,
+        item:input.item,
       }
     }
 
@@ -54,16 +58,17 @@
     return cart
   }
 
-  function removeItem(item_id: number) {
-    delete cart[item_id]
+  function removeItem(sku_id: SelectSku['sku']) {
+    delete cart[sku_id]
     cart = { ...cart }
     return cart
   }
 
-  function setItem(input: { item: SelectProductItem; quantity: number }) {
-    cart[input.item.id] = {
-      item: input.item,
-      quantity: input.quantity,
+  function setItem(input: { quantity: number,sku:SelectSku,item:SelectProductItem }) {
+    cart[input.sku.sku] = {
+      totalQuantity: input.quantity,
+      sku:input.sku,
+      item:input.item,
     }
     cart = { ...cart }
     return cart
@@ -133,7 +138,7 @@
           <div class="card w-full p-1">
             <div class="grid grid-cols-1 gap-3">
               {#each products as item}
-                {@const cartItem = cart[item.id]}
+                {@const cartItem = cart[item.sku!.sku]}
                 <hr />
                 <div class="flex w-full">
                   <div class=" hidden flex-none md:block md:w-auto">
@@ -156,12 +161,18 @@
                       <button
                         class="btn btn-primary hidden md:block"
                         on:click={() => {
-                          if (cartItem.quantity <= 1) {
-                            removeItem(item.id)
+                          if (!item.sku) {
+                            console.error('SKU is null');
+                            return;
+                          }
+                          if (cartItem.totalQuantity <= 1) {
+                            removeItem(item.sku)
                           } else {
                             addItem({
                               item: item,
-                              quantity: -1,
+                              quantity: -1 * item.quantity,
+                              sku:item.sku,
+                              // productQuantity:-1
                             })
                           }
                         }}
@@ -172,22 +183,34 @@
                       <input
                         min="1"
                         class="max-w-16 bg-base-200 text-right text-xl font-bold focus:border-yellow-500 md:min-w-10 md:max-w-28"
-                        value={cartItem?.quantity ?? 0}
+                        value={cartItem?.totalQuantity ?? 0}
                         on:input={e => {
+                          if (!item.sku) {
+                            console.error('SKU is null')
+                            return
+                          }
                           const quant_temp = (e.target as HTMLInputElement)
                             ?.value
                           setItem({
                             item: item,
                             quantity: Number(quant_temp),
+                            sku:item.sku,
+                            // productQuantity:Number(quant_temp)
                           })
                         }}
                       />
                       <button
-                        on:click={() =>
+                        on:click={() =>{
+                        if (!item.sku) {
+                            console.error('SKU is null');
+                            return;
+                          }
                           addItem({
                             item: item,
-                            quantity: 1,
-                          })}
+                            quantity: 1 * item.quantity,
+                            sku:item.sku,
+                            // productQuantity: 1
+                          })}}
                         class="btn btn-primary"
                       >
                         {@html icons.plus()}
@@ -210,8 +233,8 @@
           <ul class="space-y-2">
             {#each Object.values(cart) as product}
               <li class="flex items-center justify-between">
-                <span>{product.item.name}</span>
-                <span class="font-semibold">Qnt: {product.quantity}</span>
+                <span>{product.sku.name}</span>
+                <span class="font-semibold">Qnt: {product.totalQuantity}</span>
               </li>
             {/each}
           </ul>
@@ -225,12 +248,12 @@
             const dataInsert: InsertStockTransference[] = Object.values(
               cart,
             ).map(product => ({
-              sku: product.item.sku.sku,
-              sku_name: product.item.name,
+              sku: product.sku.sku,
+              sku_name: product.sku.name,
               status: 'REQUESTED',
               fromTenantId: null,
               toTenantId: data.tenant?.tenantId || 0,
-              quantity: product.quantity * product.item.quantity,
+              quantity: product.totalQuantity * product.item.quantity,
               meta_data: {},
             }))
             handleSolicitarTransferir(dataInsert)

@@ -18,23 +18,20 @@
   import { enhance } from '$app/forms'
   import { toast } from 'svelte-sonner'
   import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
-  import type { ActionResult } from '@sveltejs/kit';
-  import { invalidateAll, goto } from '$app/navigation';
-	import { applyAction, deserialize } from '$app/forms'
+  import type { ActionResult } from '@sveltejs/kit'
+  import { invalidateAll, goto } from '$app/navigation'
+  import { applyAction, deserialize } from '$app/forms'
 
   let { data, form }: { data: PageData; form: ActionData } = $props()
 
-  let solicitacoes = data.solicitacoes
-  let distribuidoras = data.distribuidoras
-
-  const table = new TableHandler(solicitacoes, {
-    rowsPerPage: solicitacoes.length,
+  const table = new TableHandler(data.solicitacoes, {
+    rowsPerPage: data.solicitacoes.length,
     selectBy: 'id',
   })
 
   let isLoading = $state(false)
 
-  let activeDist = $state(distribuidoras[0].subdomain)
+  let activeDist = $state(data.distribuidoras[0].subdomain)
 
   let isOpenModal: HTMLDialogElement | null = null
 
@@ -44,64 +41,63 @@
     return table.rows.filter(row => table.selected.includes(row.id))
   }
 
-  async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement}) {
-  //   if (!selectedRows || selectedRows.length === 0) {
-  //   toast.error("Nenhuma selecionada");
-  //   return
-  // }
+  let fromTenant = $state(0)
 
-  try {
-    for (const row of selectedRows) {
-      const data = new FormData(event.currentTarget)
-      const formData = new FormData();
-      formData.set("id", String(row.id));
+  type update = (options?: {
+    reset?: boolean
+    invalidateAll?: boolean
+  }) => Promise<void>
 
-      const response = await fetch(event.currentTarget.action, {
-        method: "POST",
-        body: formData,
-        headers: {
-          "x-sveltekit-action": "true",
-        },
-      });
-
-      const result: ActionResult = deserialize(await response.text())
-      console.log(result)
-
-      if (!response.ok || result.type !== "success") {
-        toast.error(`Failed to send row ID: ${row.id}`);
-        console.error(`Failed to send row ID: ${row.id}`)
-      } else {
-        toast.success(`Row ID ${row.id} sent successfully!`);
-        console.log(`Row ID ${row.id} sent successfully!`)
-      }
+  async function handleRefuse(
+    update: update,
+    result: ActionResult,
+    row: SelectStockTransference,
+  ) {
+    await update()
+    isLoading = false
+    console.log(result)
+    if (result.type === 'success') {
+      toast.success(`Sucesso ao remover ${row.sku_name}`)
+      await invalidateAll()
+    } else {
+      toast.error(`Erro ao remover ${row.sku_name}`)
     }
-    await invalidateAll(); // Refresh data on success
-  } catch (error) {
-    console.error(error);
-    toast.error("An error occurred while sending data.");
-  // }
+  }
 
-	// 	const data = new FormData(event.currentTarget);
-    
+  async function handleSubmit() {
+    try {
+      for (const row of selectedRows) {
+        const formData = new FormData()
+        formData.set('id', String(row.id))
+        formData.set('fromId', String(fromTenant))
 
-	// 	const response = await fetch(event.currentTarget.action, {
-	// 		method: 'POST',
-	// 		body: data,
-  //     headers: {
-  //       'x-sveltekit-action': 'true'
-  //     }
-	// 	});
+        const response = await fetch('/transferir?/send', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'x-sveltekit-action': 'true',
+          },
+        })
 
-	// 	const result: ActionResult = deserialize(await response.text());
+        const result: ActionResult = deserialize(await response.text())
 
-	// 	if (result.type === 'success') {
-	// 		// rerun all `load` functions, following the successful update
-	// 		await invalidateAll()
-	// 	}
+        if (!response.ok || result.type !== 'success') {
+          toast.error(`Falha ao transferir ${row.sku_name}`)
+        } else {
+          toast.success(`Sucesso ao transferir ${row.sku_name}`)
+          isOpenModal?.close()
+        }
+      }
+      await invalidateAll()
+    } catch (error) {
+      console.error(error)
+      toast.error('Erro')
+    }
+  }
 
-	// 	applyAction(result);
-	}
-}
+  $effect(() => {
+    table.setRows(data.solicitacoes)
+  })
 </script>
 
 <main class="container mx-auto mt-10">
@@ -114,7 +110,7 @@
   >
     <div class="flex items-center justify-center">
       <Tabs.List>
-        {#each distribuidoras as distribuidora}
+        {#each data.distribuidoras as distribuidora}
           <Tabs.Trigger
             value={distribuidora.subdomain}
             class="relative"
@@ -125,7 +121,7 @@
         {/each}
       </Tabs.List>
     </div>
-    {#each distribuidoras as distribuidora}
+    {#each data.distribuidoras as distribuidora}
       <Tabs.Content
         value={distribuidora.subdomain}
         class="border-none p-0 outline-none"
@@ -134,19 +130,22 @@
           <h2 class="text-xl">
             Solicitações de <strong>{distribuidora.name}</strong>
           </h2>
-          <button onclick={() => isOpenModal?.showModal()} class="btn">
+          <button
+            onclick={() => isOpenModal?.showModal()}
+            class="btn"
+            disabled={selectedRows.length === 0}
+          >
             Transferir
           </button>
         </div>
         <Datatable {table} headless>
-          <table class="table table-zebra">
+          <table class="table table-zebra rounded border">
             <thead>
               <tr>
                 <Th></Th>
                 <ThSort {table} field="sku">SKU</ThSort>
                 <Th>Produto</Th>
                 <ThSort {table} field="quantity">Quantidade</ThSort>
-                <Th>Saindo de</Th>
                 <Th>Deletar</Th>
               </tr>
               <tr>
@@ -161,13 +160,6 @@
                 </Th>
                 <ThFilter {table} field="sku_name" />
                 <Th />
-                <Th>
-                  <!-- <select name="" id="" class="select select-bordered">
-                        {#each distribuidoras.filter(s=>s.tenantId != distribuidora.tenantId) as dis}
-                        <option value="">{dis.name}</option>
-                        {/each}
-                      </select> -->
-                </Th>
                 <Th></Th>
                 <Th></Th>
               </tr>
@@ -191,7 +183,6 @@
                       onUpdateValue={async newValue => {}}
                     />
                   </td>
-                  <td>A definir</td>
                   <td>
                     <form
                       action="?/refuse"
@@ -199,16 +190,8 @@
                       use:enhance={({ formData }) => {
                         isLoading = true
                         formData.set('id', String(row.id))
-                        return async ({ update, result }) => {
-                          await update()
-                          isLoading = false
-                          console.log(result)
-                          if (result.type === 'success') {
-                            toast.success(`Sucesso ao remover ${row.sku_name}`)
-                            await invalidateAll()
-                          } else {
-                            toast.error(`Erro ao remover ${row.sku_name}`)
-                          }
+                        return async ({ update, result,  }) => {
+                          handleRefuse(update, result, row)
                         }
                       }}
                     >
@@ -225,7 +208,7 @@
             </tbody>
           </table>
         </Datatable>
-        {#if solicitacoes.filter(s => s.toTenantId === distribuidora.tenantId).length === 0}
+        {#if data.solicitacoes.filter(s => s.toTenantId === distribuidora.tenantId).length === 0}
           <NoResults />
         {/if}
       </Tabs.Content>
@@ -235,13 +218,23 @@
 
 <dialog class="modal" bind:this={isOpenModal}>
   <div class="modal-box max-w-4xl">
-    <h3 class="text-lg font-bold">Produtos selecionados</h3>
-    <select name="" id="" class="select select-bordered">
-      {#each distribuidoras.filter(s => s.subdomain != activeDist) as dis}
-        <option value="">{dis.name}</option>
-      {/each}
-    </select>
-    <table class="table table-zebra">
+    <div class="mb-2 flex items-center justify-between">
+      <h3 class="text-lg font-bold">Produtos selecionados:</h3>
+      <div class="flex items-center gap-2">
+        <h1>Selecione distribuidora de onde produtos vão sair:</h1>
+        <select
+          name=""
+          id=""
+          class="select select-bordered"
+          bind:value={fromTenant}
+        >
+          {#each data.distribuidoras.filter(s => s.subdomain != activeDist) as dis}
+            <option value={dis.tenantId}>{dis.name}</option>
+          {/each}
+        </select>
+      </div>
+    </div>
+    <table class="table table-zebra mb-3 border">
       <thead>
         <tr>
           <th>SKU</th>
@@ -255,15 +248,33 @@
             <td>{row.sku}</td>
             <td>{row.sku_name}</td>
             <td>{row.quantity}</td>
-            <td>remover</td>
+            <td>
+              <button
+                class="btn btn-primary btn-sm"
+                onclick={() => {
+                  if (selectedRows.length <= 1) {
+                    isOpenModal?.close()
+                  }
+                  table.select(row.id)
+                  console.log(selectedRows)
+                }}
+              >
+                Remover
+              </button>
+            </td>
           </tr>
         {/each}
       </tbody>
     </table>
-    <form method="POST" onsubmit={handleSubmit} action="?/send" use:enhance={({formData})=>{
-    }} >
-      <button class="btn" type="submit">ENVIAR</button>
-    </form>
+    <div>
+      <button
+        class="btn btn-primary w-full"
+        type="submit"
+        onclick={handleSubmit}
+      >
+        ENVIAR
+      </button>
+    </div>
   </div>
   <form method="dialog" class="modal-backdrop">
     <button>close</button>

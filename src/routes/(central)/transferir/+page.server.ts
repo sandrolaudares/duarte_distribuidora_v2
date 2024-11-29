@@ -6,6 +6,9 @@ import {
 } from '$lib/server/db/central/constroller'
 import { fail } from '@sveltejs/kit'
 import type { PageServerLoad, Actions } from './$types'
+import { stockTransference } from '$lib/server/db/central/schema'
+import { centralDb } from '$lib/server/db/central'
+import { eq } from 'drizzle-orm'
 
 export const load = (async () => {
   try {
@@ -30,7 +33,7 @@ export const actions: Actions = {
 
     try {
       await refuseTransference(id)
-      return { success: true }
+      return { success: true,message:'Recusado com sucesso'}
     } catch (err) {
       console.error(err)
       return fail(400, { success: false, message: 'Erro ao deletar item' })
@@ -40,16 +43,19 @@ export const actions: Actions = {
     const formData = await request.formData()
     console.log(formData)
     const id = Number(formData.get('id'))
-    console.log(id)
+    const fromId = Number(formData.get('fromId'))
 
-
-    // if (!fromId) {
-    //   return fail(400, { success: false, message: 'Selecione distribuidora' })
-    // }
-
+    console.log(formData)
+    
     try {
 
-      return {success:true}
+      await centralDb.update(stockTransference).set({fromTenantId:fromId}).where(eq(stockTransference.id,id))
+
+      const resp = await acceptTransference(id)
+
+      console.log(resp)
+      
+      return resp
     } catch (error) {
       console.error(error)
       return fail(400, { success: false, message: 'Erro ao enviar' })
