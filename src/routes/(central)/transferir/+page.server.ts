@@ -33,7 +33,7 @@ export const actions: Actions = {
 
     try {
       await refuseTransference(id)
-      return { success: true,message:'Recusado com sucesso'}
+      return { success: true, message: 'Recusado com sucesso' }
     } catch (err) {
       console.error(err)
       return fail(400, { success: false, message: 'Erro ao deletar item' })
@@ -46,19 +46,43 @@ export const actions: Actions = {
     const fromId = Number(formData.get('fromId'))
 
     console.log(formData)
-    
-    try {
 
-      await centralDb.update(stockTransference).set({fromTenantId:fromId}).where(eq(stockTransference.id,id))
+    try {
+      await centralDb
+        .update(stockTransference)
+        .set({ fromTenantId: fromId })
+        .where(eq(stockTransference.id, id))
 
       const resp = await acceptTransference(id)
 
       console.log(resp)
-      
+
       return resp
     } catch (error) {
       console.error(error)
       return fail(400, { success: false, message: 'Erro ao enviar' })
+    }
+  },
+  update: async ({ request }) => {
+    const formData = await request.formData()
+    const quantity = await Number(formData.get('quantity'))
+    const id = Number(formData.get('id'))
+
+    if (isNaN(quantity)) {
+      return fail(400, {
+        success: false,
+        message: 'Quantidade não é um número',
+      })
+    }
+
+    try {
+      await centralDb
+        .update(stockTransference)
+        .set({ quantity: quantity })
+        .where(eq(stockTransference.id, id))
+      return { success: true, message: 'Sucesso ao editar quantidade' }
+    } catch (error: any) {
+      return { success: false, message: error.message }
     }
   },
 }

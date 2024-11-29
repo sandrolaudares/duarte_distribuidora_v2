@@ -64,6 +64,40 @@
     }
   }
 
+  async function handleUpdateQuantity(newValue:number,id:number) {
+    try {
+      const formData = new FormData()
+      formData.set('quantity', String(newValue))
+      formData.set('id',String(id))
+
+      // if(typeof newValue != 'number'){
+      //   toast.error('Quantidade deve ser um numero!')
+      //   return
+      // }
+
+      const response = await fetch('/transferir?/update', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'x-sveltekit-action': 'true',
+        },
+      })
+
+      const result: ActionResult = deserialize(await response.text())
+
+      if (!response.ok || result.type !== 'success') {
+        toast.error(`Erro ao editar quantidade`)
+      } else {
+        toast.success(`Sucesso ao editar quantidade`)
+        isOpenModal?.close()
+      }
+      await invalidateAll()
+    } catch (error) {
+      console.error(error)
+      toast.error('Erro')
+    }
+  }
+
   async function handleSubmit() {
     try {
       for (const row of selectedRows) {
@@ -158,8 +192,8 @@
                     />
                   {/if}
                 </Th>
-                <ThFilter {table} field="sku_name" />
                 <Th />
+                <ThFilter {table} field="sku_name" />
                 <Th></Th>
                 <Th></Th>
               </tr>
@@ -180,7 +214,9 @@
                   <td>
                     <EditableCell
                       value={row.quantity}
-                      onUpdateValue={async newValue => {}}
+                      onUpdateValue={async newValue => {
+                        handleUpdateQuantity(newValue,row.id)
+                      }}
                     />
                   </td>
                   <td>
@@ -190,7 +226,7 @@
                       use:enhance={({ formData }) => {
                         isLoading = true
                         formData.set('id', String(row.id))
-                        return async ({ update, result,  }) => {
+                        return async ({ update, result }) => {
                           handleRefuse(update, result, row)
                         }
                       }}
@@ -218,7 +254,7 @@
 
 <dialog class="modal" bind:this={isOpenModal}>
   <div class="modal-box max-w-4xl">
-    <div class="mb-2 flex items-center justify-between">
+    <div class="mb-4 flex items-center justify-between">
       <h3 class="text-lg font-bold">Produtos selecionados:</h3>
       <div class="flex items-center gap-2">
         <h1>Selecione distribuidora de onde produtos vão sair:</h1>
@@ -234,7 +270,7 @@
         </select>
       </div>
     </div>
-    <table class="table table-zebra mb-3 border">
+    <table class="table table-zebra mb-3 max-h-[50vh] overflow-auto border">
       <thead>
         <tr>
           <th>SKU</th>
@@ -271,6 +307,7 @@
         class="btn btn-primary w-full"
         type="submit"
         onclick={handleSubmit}
+        disabled={!fromTenant && selectRows.length === 0}
       >
         ENVIAR
       </button>
