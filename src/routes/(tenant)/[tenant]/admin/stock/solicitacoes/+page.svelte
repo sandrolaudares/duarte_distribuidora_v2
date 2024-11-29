@@ -27,11 +27,14 @@
 
   let { data }: { data: PageData } = $props()
 
+  let isOpenModal: HTMLDialogElement | null = null
+
   const filters = new SSRFilters()
 
   const table = new TableHandler(data.rows, {
-    rowsPerPage: 10,
+    rowsPerPage: data.size,
     totalRows: data.count,
+    selectBy: 'id',
   })
 
   table.setPage(Number(filters.get('page')) || 1)
@@ -41,44 +44,71 @@
     await $navigating?.complete
     return data.rows
   })
+
+  let selectedRows = $derived(selectRows())
+
+  function selectRows() {
+    return table.rows.filter(row => table.selected.includes(row.id))
+  }
 </script>
 
-<h1 class="my-5 text-center text-2xl font-medium">
-  Solicitações de transferencia:
-</h1>
 <main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+  <div class="flex justify-between items-center">
+    <h1 class="my-5 text-center text-2xl font-medium">
+      Solicitações de transferencia:
+    </h1>
+    <button
+      onclick={() => isOpenModal?.showModal()}
+      class="btn btn-primary"
+      disabled={selectedRows.length === 0}
+    >
+      Aceitar transferencia
+    </button>
+  </div>
   <Datatable {table} headless>
-    <!-- {#snippet header()}
-        <Search {table} />
-       
-      {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table table-zebra border">
+    <table class="table table-zebra rounded-none border">
       <thead>
         <tr>
+          <Th></Th>
           <ThSort {table} field="id">ID</ThSort>
           <Th>Produto</Th>
+          <Th>Indo para</Th>
           <Th>Quantidade</Th>
           <Th>Data</Th>
         </tr>
         <tr>
+          <Th>
+            <input
+              type="checkbox"
+              checked={table.isAllSelected}
+              onclick={() => table.selectAll()}
+            />
+          </Th>
           <Th />
           <ThFilter {table} field="sku_name" />
+          <Th />
           <Th />
           <Th />
         </tr>
       </thead>
       <tbody>
         {#each data.rows as row}
-          <tr>
+          <tr class:active={table.selected.includes(row.id)}>
+            <td>
+              <input
+                type="checkbox"
+                checked={table.selected.includes(row.id)}
+                onclick={() => table.select(row.id)}
+              />
+            </td>
             <td>{row.id}</td>
-            <!-- <td class="py-2 px-4 border-b">
-                <span class="px-2 py-1 rounded-full text-xs font-semibold
-                  {row.status === 'ACCEPTED' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}">
-                  {row.status}
-                </span>
-              </td> -->
             <td>{row.sku_name}</td>
+            <td>
+              {data.distribuidoras.find(
+                distribuidora => distribuidora.tenantId === row.toTenantId,
+              )?.name}
+            </td>
             <td>{row.quantity}</td>
             <td>{format(row.created_at!, 'dd/MM/yyyy')}</td>
           </tr>
@@ -95,6 +125,64 @@
     {/snippet}
   </Datatable>
 </main>
+
+<dialog class="modal" bind:this={isOpenModal}>
+  <div class="modal-box max-w-4xl">
+    <div class="mb-4 flex items-center justify-between">
+      <h3 class="text-lg font-bold">Produtos selecionados:</h3>
+    </div>
+    <table class="table table-zebra mb-3 max-h-[50vh] overflow-auto border">
+      <thead>
+        <tr>
+          <th>SKU</th>
+          <th>Produto</th>
+          <th>Quantidade</th>
+          <th>Indo para</th>
+        </tr>
+      </thead>
+      <tbody>
+        {#each selectedRows as row}
+          <tr>
+            <td>{row.sku}</td>
+            <td>{row.sku_name}</td>
+            <td>{row.quantity}</td>
+            <td>
+              {data.distribuidoras.find(
+                distribuidora => distribuidora.tenantId === row.toTenantId,
+              )?.name}
+            </td>
+            <td>
+              <button
+                class="btn btn-primary btn-sm"
+                onclick={() => {
+                  if (selectedRows.length <= 1) {
+                    isOpenModal?.close()
+                  }
+                  table.select(row.id)
+                  console.log(selectedRows)
+                }}
+              >
+                Remover
+              </button>
+            </td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+    <div>
+      <button
+        class="btn btn-primary w-full"
+        type="submit"
+        disabled={selectRows.length === 0}
+      >
+        CONFIRMAR TRANSFERENCIA
+      </button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
 
 <style>
   thead {

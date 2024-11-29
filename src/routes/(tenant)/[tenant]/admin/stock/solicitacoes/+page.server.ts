@@ -8,7 +8,8 @@ import {
 } from '$lib/server/db/utils'
 import { and, eq, SQL, count, like } from 'drizzle-orm'
 import { centralDb } from '$lib/server/db/central'
-import { stockTransference } from '$lib/server/db/central/schema'
+import { stockTransference, tenants } from '$lib/server/db/central/schema'
+import { getDistribuidoras } from '$lib/server/db/central/constroller'
 
 export const load = (async ({ url, locals: { tenantDb, tenantInfo } }) => {
   const id = tenantInfo?.tenantId
@@ -18,7 +19,8 @@ export const load = (async ({ url, locals: { tenantDb, tenantInfo } }) => {
   }
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
-  const pageSize = Number(searchParams.get('pageSize') ?? 10)
+  const size = 15
+  const pageSize = Number(searchParams.get('pageSize') ?? size)
 
   const name = searchParams.get('sku_name')
 
@@ -37,12 +39,15 @@ export const load = (async ({ url, locals: { tenantDb, tenantInfo } }) => {
     ...condicoes
   )
 
+  const distribuidoras = await getDistribuidoras()
+
   let query = centralDb!
     .select()
     .from(stockTransference)
     .where(
       baseConditions
-    ).$dynamic()
+    )
+    .$dynamic()
 
   if (sortId && sortOrder) {
     query = withOrderBy(
@@ -63,9 +68,9 @@ export const load = (async ({ url, locals: { tenantDb, tenantInfo } }) => {
       baseConditions
     ).$dynamic()
 
-    return { rows: rows ?? [], count: total[0].count }
+    return { rows: rows ?? [], count: total[0].count ,size,distribuidoras}
   } catch (error) {
     console.error(error)
-    return { rows: [], count: 0 }
+    return { rows: [], count: 0,size ,distribuidoras:[]}
   }
 }) satisfies PageServerLoad
