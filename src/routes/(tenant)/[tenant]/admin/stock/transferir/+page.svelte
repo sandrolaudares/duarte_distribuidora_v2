@@ -12,20 +12,21 @@
   import type { InsertStockTransference } from '$lib/server/db/central/schema'
   import { toast } from 'svelte-sonner'
   import { createInsertSchema } from 'drizzle-zod'
+  import { Item } from '$lib/components/ui/dropdown-menu'
+  import ListaProdutos from './ListaProdutos.svelte'
+  import { se } from 'date-fns/locale'
 
   export let data: PageData
-  
 
   type Cart = Record<
     SelectSku['sku'],
     {
-      sku:SelectSku
+      sku: SelectSku
       totalQuantity: number
       // productQuantity:number
-      item:SelectProductItem
+      item: SelectProductItem
     }
   >
-
 
   let products = data.products
   let cart: Cart = {}
@@ -36,42 +37,6 @@
     products = data.products.filter(product =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()),
     )
-  }
-
-  $: console.log(cart)
-
-  function addItem(input: { quantity: number,sku:SelectSku,item:SelectProductItem }) {
-    const existing = cart[input.sku.sku]
-    console.log(input.quantity)
-    
-    if (existing) {
-      existing.totalQuantity += input.quantity
-    } else {
-      cart[input.sku.sku] = {
-        totalQuantity: input.quantity,
-        sku:input.sku,
-        item:input.item,
-      }
-    }
-
-    cart = { ...cart }
-    return cart
-  }
-
-  function removeItem(sku_id: SelectSku['sku']) {
-    delete cart[sku_id]
-    cart = { ...cart }
-    return cart
-  }
-
-  function setItem(input: { quantity: number,sku:SelectSku,item:SelectProductItem }) {
-    cart[input.sku.sku] = {
-      totalQuantity: input.quantity,
-      sku:input.sku,
-      item:input.item,
-    }
-    cart = { ...cart }
-    return cart
   }
 
   let isLoading = false
@@ -85,13 +50,13 @@
     try {
       for (let dat of data) {
         await trpc($page).distribuidora.solicitarTransference.mutate({
-          meta_data:dat.meta_data,
-          sku:dat.sku,
-          sku_name:dat.sku_name,
-          toTenantId:dat.toTenantId,
-          fromTenantId:dat.fromTenantId,
-          status:dat.status,
-          quantity:dat.quantity
+          meta_data: dat.meta_data,
+          sku: dat.sku,
+          sku_name: dat.sku_name,
+          toTenantId: dat.toTenantId,
+          fromTenantId: dat.fromTenantId,
+          status: dat.status,
+          quantity: dat.quantity,
         })
       }
       toast.success('Solicitado com sucesso!')
@@ -106,126 +71,12 @@
 </script>
 
 <div class="container mx-auto max-w-7xl p-4">
-  <!-- {#if form?.success}
-  <div class="flex justify-center mt-20">
-    <Success transferDetails={form.result[0]} tenant={data.tenant!}/>
-  </div>
-  {:else} -->
   <h1 class="mb-6 text-center text-3xl font-bold">
     Solicitar estoque para central
   </h1>
 
   <div class="flex flex-col gap-6 lg:flex-row">
-    <div class="lg:w-2/3">
-      <div
-        class="max-h-[80vh] overflow-auto rounded-lg bg-base-200 p-6 shadow-md"
-      >
-        <div class="flex justify-between">
-          <h2 class="mb-4 text-xl font-semibold">
-            Escolha produtos para solicitar transferencia
-          </h2>
-          <input
-            type="text"
-            placeholder="Procurar..."
-            class="input input-bordered max-w-xs"
-            bind:value={searchTerm}
-          />
-        </div>
-
-        <div class="max-h-[calc(100vh-300px)] space-y-2 overflow-y-auto pr-2">
-          <!-- <Cardapio data={products}>
-            {#snippet card(p)} -->
-          <div class="card w-full p-1">
-            <div class="grid grid-cols-1 gap-3">
-              {#each products as item}
-                {@const cartItem = cart[item.sku!.sku]}
-                <hr />
-                <div class="flex w-full">
-                  <div class=" hidden flex-none md:block md:w-auto">
-                    <img
-                      alt="imagem"
-                      src={getImagePath(item.image)}
-                      class="h-10 w-10 rounded-lg object-cover md:h-16 md:w-16"
-                    />
-                  </div>
-                  <div class="ml-4 w-full">
-                    <h2 class="font-bold md:text-xl">{item.name}</h2>
-                    <h3 class="md:text-md">
-                      Em estoque: <strong>{item.sku?.quantity}</strong>
-                    </h3>
-                  </div>
-                  <div class="w-full text-right">
-                    <div
-                      class="flex items-center justify-end gap-3 text-center"
-                    >
-                      <button
-                        class="btn btn-primary hidden md:block"
-                        on:click={() => {
-                          if (!item.sku) {
-                            console.error('SKU is null');
-                            return;
-                          }
-                          if (cartItem.totalQuantity <= 1) {
-                            removeItem(item.sku)
-                          } else {
-                            addItem({
-                              item: item,
-                              quantity: -1 * item.quantity,
-                              sku:item.sku,
-                              // productQuantity:-1
-                            })
-                          }
-                        }}
-                      >
-                        {@html icons.minus()}
-                      </button>
-
-                      <input
-                        min="1"
-                        class="max-w-16 bg-base-200 text-right text-xl font-bold focus:border-yellow-500 md:min-w-10 md:max-w-28"
-                        value={cartItem?.totalQuantity ?? 0}
-                        on:input={e => {
-                          if (!item.sku) {
-                            console.error('SKU is null')
-                            return
-                          }
-                          const quant_temp = (e.target as HTMLInputElement)
-                            ?.value
-                          setItem({
-                            item: item,
-                            quantity: Number(quant_temp),
-                            sku:item.sku,
-                            // productQuantity:Number(quant_temp)
-                          })
-                        }}
-                      />
-                      <button
-                        on:click={() =>{
-                        if (!item.sku) {
-                            console.error('SKU is null');
-                            return;
-                          }
-                          addItem({
-                            item: item,
-                            quantity: 1 * item.quantity,
-                            sku:item.sku,
-                            // productQuantity: 1
-                          })}}
-                        class="btn btn-primary"
-                      >
-                        {@html icons.plus()}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              {/each}
-            </div>
-          </div>
-          <!-- {/snippet}
-          </Cardapio> -->
-        </div>
-      </div>
-    </div>
+    <ListaProdutos bind:cart {products} bind:searchTerm />
     <div class="space-y-6 lg:w-1/3">
       <div class="rounded-lg bg-base-200 p-6 shadow-md">
         <h2 class="mb-4 text-xl font-semibold">Produtos à solicitar</h2>
@@ -264,12 +115,6 @@
           {isLoading ? 'Solicitando...' : 'Solicitar transferência'}
         </button>
       </div>
-      <!-- {#if form?.error}
-        <p class="text-error text-center">{form.message}</p>
-      {/if} -->
     </div>
   </div>
-  <!-- {/if} -->
 </div>
-
-
