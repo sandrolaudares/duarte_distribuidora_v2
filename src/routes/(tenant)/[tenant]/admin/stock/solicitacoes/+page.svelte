@@ -19,11 +19,10 @@
   import { format } from 'date-fns'
 
   import { toast } from 'svelte-sonner'
-  import { goto } from '$app/navigation'
 
   import { trpc } from '$trpc/client'
-
   import { page } from '$app/stores'
+  import { goto } from '$app/navigation'
 
   let { data }: { data: PageData } = $props()
 
@@ -49,6 +48,20 @@
 
   function selectRows() {
     return table.rows.filter(row => table.selected.includes(row.id))
+  }
+  let isLoading = $state(false)
+  async function handleComplete(){
+    isLoading = true
+    try {
+      for(const row of selectedRows){
+        await trpc($page).distribuidora.completeTransference.mutate(row.id)
+      }
+      toast.success('Aceito com sucesso!')
+    } catch (error:any) {
+      toast.error(error.message)
+    } finally {
+      isLoading = false
+    }
   }
 </script>
 
@@ -173,9 +186,10 @@
       <button
         class="btn btn-primary w-full"
         type="submit"
-        disabled={selectRows.length === 0}
+        disabled={selectRows.length === 0 && isLoading}
+        onclick={handleComplete}
       >
-        CONFIRMAR TRANSFERENCIA
+        {isLoading ? 'Aceitando transferencia...':'Confirmar transferencia'}
       </button>
     </div>
   </div>

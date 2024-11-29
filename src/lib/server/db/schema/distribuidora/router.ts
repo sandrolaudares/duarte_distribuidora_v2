@@ -10,7 +10,7 @@ import {
 
 
 import { middleware } from '$trpc/middleware'
-import { refuseTransference, solicitarTransference, updateDistribuidora } from '../../central/constroller'
+import { completeTransference, refuseTransference, solicitarTransference, updateDistribuidora } from '../../central/constroller'
 import { stockTransference, stockTransferenceStatus, type InsertStockTransference } from '../../central/schema'
 import { createInsertSchema } from 'drizzle-zod'
 
@@ -171,5 +171,12 @@ export const distribuidora = router({
   .mutation(async ({input}) =>{
     const id = input
     await refuseTransference(id)
+  }),
+
+  completeTransference:publicProcedure
+  .input(z.number())
+  .mutation(async({input})=>{
+    const id = input
+    await completeTransference(id)
   })
 })
