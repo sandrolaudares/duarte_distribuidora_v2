@@ -14,7 +14,7 @@ export const contasPagarTable = sqliteTable('contas', {
   ...timestamps,
   fornecedor_id: integer('fornecedor_id').references(() => supplierTable.id),
   descricao: text('descricao'),
-  expire_at: integer('updated_at', {
+  expire_at: integer('expire_at', {
     mode: 'timestamp',
   }),
   valor_conta: integer('valor_conta').notNull(),
