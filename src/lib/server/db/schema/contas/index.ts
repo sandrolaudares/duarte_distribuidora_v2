@@ -17,6 +17,7 @@ export const contasPagarTable = sqliteTable('contas', {
   expire_at: integer('expire_at', {
     mode: 'timestamp',
   }),
+  status:text('status').default('PENDENTE'),
   valor_conta: integer('valor_conta').notNull(),
 })
 
