@@ -56,7 +56,7 @@
     try {
       for(const row of selectedRows){
         const resp = await trpc($page).distribuidora.completeTransference.mutate(row.id)
-        toast.success(resp.message)
+        toast.success(resp)
       }
       invalidate('tenant:solicitacoes')
     } catch (error:any) {
