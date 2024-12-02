@@ -134,10 +134,10 @@ npm run db:check
 
 Feel free to submit issues or pull requests. Contributions are welcome!
 
-
 ## AGORA
+
 - TABLE FIADO PODER SELECIONAR E MOSTRAR TOTAL DOS SELECIONADOS ✅
-- SALVAR LAT E LONG DA DISTRIBUIDORA NO DB  ✅
+- SALVAR LAT E LONG DA DISTRIBUIDORA NO DB ✅
 - TELA CLIENTE TROCAR CARD POR TABLE DE PEDIDOS - ✅
 - ARREDONDAR VALOR DA TAXA DE ENTREGA ✅
 - NOME MOTOBOY NO CARD TELA PEDIDOS ✅
@@ -147,20 +147,26 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - COPIAR SIDE BAR SHADCN ✅
 - CHECAR O SUM PAGINA CUSTOMER/ID ✅
 - CHECKBOX TABELA FIADO PRA MOSTRAR TOTAL APENAS DAS SELECIONADAS ✅
-- ADICIONAR NO METADATA DO USUARIO UM CAIXA DESIGNADO A ELE ✅
-  -- Falta adicionar a opcao na tela de permissoes ✅
-  -- Butao do caixa admin na navbar dar redirect direto pro caixa dele ✅
+- ADICIONAR NO METADATA DO USUARIO UM CAIXA DESIGNADO A ELE ✅ -- Falta
+  adicionar a opcao na tela de permissoes ✅ -- Butao do caixa admin na navbar
+  dar redirect direto pro caixa dele ✅
 - CADASTRAR MOTOBOY ✅
 - TELA FIADO FILTRAR PAGAMENTOS ATRASADOS ✅
-- Preco km tabela distribuidora ✅ + infos tabela distribuidora ✅- Delete deliveryFee Table✅
+- Preco km tabela distribuidora ✅ + infos tabela distribuidora ✅- Delete
+  deliveryFee Table✅
 - Verificar sidebar não mostra todos itens ao logar ✅
 
-- boolean pra esconder produtos do cardapio
+- boolean pra esconder produtos do cardapio ✅
 - Verificar name filter fiado
 - Editar motoboy pedidos aceitos
 - Poder cancelar pedidos aceitos, pedir senha master
 - Alterar join do caixa na tela da transacao do caixa
-- Contas a pagar, nova tabela (Preciso que inclua nas guias a esquerda contas a pagar. Essa guia deve ter a categoria da dívida, fornecedor (já cadastrado em fornecedores), descrição, data de vencimento e valor. A conta fica cadastradastra, financeiro realiza o pagamento na data correta, esse histórico precisa ficar registrado, pois em relatórios vamos precisar comparar vendas x despesas pra analisar o lucro mensal.)
+- Contas a pagar, nova tabela (Preciso que inclua nas guias a esquerda contas a
+  pagar. Essa guia deve ter a categoria da dívida, fornecedor (já cadastrado em
+  fornecedores), descrição, data de vencimento e valor. A conta fica
+  cadastradastra, financeiro realiza o pagamento na data correta, esse histórico
+  precisa ficar registrado, pois em relatórios vamos precisar comparar vendas x
+  despesas pra analisar o lucro mensal.)
 - Permissoes no trpc pra cada func
 - Colunas na tabela dos logs
 - AJustar form criar tenant erros de endereco
@@ -168,36 +174,42 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - REFATORAR ONDE MOSTRA AS INFOS DO CLINTE NA PAGINA DO CAIXA
 - DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES
 - PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS
-- CHECAR O SUM PAGINA CUSTOMER/ID 
+- CHECAR O SUM PAGINA CUSTOMER/ID
 - EDITAR DATA VENCIMENTO (EXIPIRE_AT)
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE
 - APLICAR EDITABLECELL NAS TABLES EXISTENTES
 
 - TRANSAÇÕES DO CAIXA (TELAS)
 
-- Alerta de compra em excesso ex, bloqueio automático caso tenha notas em atraso. (Desbloqueio somente com senha de gerente). 
+- Alerta de compra em excesso ex, bloqueio automático caso tenha notas em
+  atraso. (Desbloqueio somente com senha de gerente).
 - REPASSE ESTOQUE ENTRE DISTRIBUIDORAS
-- Adicionar campo de distancia na tabela endereço (calcular ao adicionar endereço talvez) acho legal adicionar um butao de recalcular
-
-
+- Adicionar campo de distancia na tabela endereço (calcular ao adicionar
+  endereço talvez) acho legal adicionar um butao de recalcular
 
 - Parte do cliente fazer pedido
 - TELA RESUMO DE CADA MOTOBOY ENTREGAS
 
 ## DEPOIS
-- SCORE DO CLIENTE/PONTUACAO. - Cliente pagou fiado em dia ganha 5 pontos, pagou atrasado perde 5 pontos. Esse score atualiza automaticamente toda vez que ele efetuar um pagamento. Pra auxiliar na tomada de decisões junto aos clientes pj que compram fiado.
 
+- SCORE DO CLIENTE/PONTUACAO. - Cliente pagou fiado em dia ganha 5 pontos, pagou
+  atrasado perde 5 pontos. Esse score atualiza automaticamente toda vez que ele
+  efetuar um pagamento. Pra auxiliar na tomada de decisões junto aos clientes pj
+  que compram fiado.
 
 # RELATORIOS:
+
 - Vendas por período.
 - Recebimentos por períodos, dia e semana, mês.
 - Cliente inadimplentes.
-- Vendas comparando dia atual com mesmo dia do mês passado, mês atual com mesmo mês do ano passado.
+- Vendas comparando dia atual com mesmo dia do mês passado, mês atual com mesmo
+  mês do ano passado.
 - Relatório de estoque crítico, baseado na venda.
 - Relatório venda x recebimento por período.
 - Relatório de delivery por motoboy por período.
 - Relatório estoque preço de custo, e preço de venda
 
 # SANDRO
-- Opção de emissão de Nota Fiscal eletrônica e Cupom Fiscal (Opcionais). Emissão de .xml para enviar para contabilidade.
 
+- Opção de emissão de Nota Fiscal eletrônica e Cupom Fiscal (Opcionais). Emissão
+  de .xml para enviar para contabilidade.

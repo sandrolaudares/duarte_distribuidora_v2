@@ -57,7 +57,7 @@ export type InsertProduct = typeof productTable.$inferInsert
 
 export const productItemTable = sqliteTable('product_item', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
-...timestamps,
+  ...timestamps,
   product_id: integer('product_id')
     .notNull()
     .references(() => productTable.id),
@@ -67,6 +67,7 @@ export const productItemTable = sqliteTable('product_item', {
   image: integer('image_id').references(() => imageTable.id),
   retail_price: integer('retail_price').notNull(),
   wholesale_price: integer('wholesale_price').notNull(),
+  visible: integer('visible', { mode: 'boolean' }).notNull().default(true),
 })
 
 export const productItemRelations = relations(
