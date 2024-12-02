@@ -2,17 +2,30 @@
 import { publicProcedure, router } from '$trpc/t'
 
 import { z } from 'zod'
-import { bugReport, distribuidora as distribuidoraController, stock } from '$db/controller'
+import {
+  bugReport,
+  distribuidora as distribuidoraController,
+  stock,
+} from '$db/controller'
 import {
   insertCashierSchema,
   cashierTransactionEnum,
 } from '$lib/server/db/schema'
 
-
 import { middleware } from '$trpc/middleware'
-import { completeTransference, refuseTransference, solicitarTransference, updateDistribuidora } from '../../central/constroller'
-import { stockTransference, stockTransferenceStatus, type InsertStockTransference } from '../../central/schema'
+import {
+  completeTransference,
+  refuseTransference,
+  solicitarTransference,
+  updateDistribuidora,
+} from '../../central/constroller'
+import {
+  stockTransference,
+  stockTransferenceStatus,
+  type InsertStockTransference,
+} from '../../central/schema'
 import { createInsertSchema } from 'drizzle-zod'
+import { TRPCError } from '@trpc/server'
 
 export const distribuidora = router({
   insertCashier: publicProcedure
@@ -40,17 +53,18 @@ export const distribuidora = router({
       return distribuidoraController(tenantDb).updateCashier(id, data)
     }),
 
-    updateDistribuidora:publicProcedure
+  updateDistribuidora: publicProcedure
     .input(
       z.object({
         id: z.number(),
         data: z.object({
-          taxa_por_km:z.number()
+          taxa_por_km: z.number(),
         }),
-      })
-    ).mutation(async({input})=>{
-      const {id,data}= input
-      return updateDistribuidora(id,data)
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const { id, data } = input
+      return updateDistribuidora(id, data)
     }),
 
   abrirCaixa: publicProcedure
@@ -67,10 +81,10 @@ export const distribuidora = router({
       const { tenantDb, user } = ctx
 
       await bugReport(tenantDb).insertLogs({
-        text: `Abertura de caixa com R$${(data.amount/100).toFixed(2)}`,
+        text: `Abertura de caixa com R$${(data.amount / 100).toFixed(2)}`,
         created_by: user?.id,
-        metadata:{
-          cashier_id:id
+        metadata: {
+          cashier_id: id,
         },
         type: 'CAIXA',
         pathname: '',
@@ -95,10 +109,10 @@ export const distribuidora = router({
       const [info] = await distribuidoraController(tenantDb).getCashierById(id)
 
       await bugReport(tenantDb).insertLogs({
-        text: `Fechamento de caixa com R$${(info.currency/100).toFixed(2)}`,
+        text: `Fechamento de caixa com R$${(info.currency / 100).toFixed(2)}`,
         created_by: user?.id,
-        metadata:{
-          cashier_id:id
+        metadata: {
+          cashier_id: id,
         },
         type: 'CAIXA',
         pathname: '',
@@ -157,26 +171,33 @@ export const distribuidora = router({
   }),
 
   solicitarTransference: publicProcedure
-  .input(createInsertSchema(stockTransference,{
-    status: z.enum(stockTransferenceStatus)
-  }))
-  .mutation(async ({ input, ctx }) => {
-    const data = input
-    console.log(data)
-    await solicitarTransference(data)
-  }),
+    .input(
+      createInsertSchema(stockTransference, {
+        status: z.enum(stockTransferenceStatus),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const data = input
+      console.log(data)
+      await solicitarTransference(data)
+    }),
 
   refuseTransference: publicProcedure
-  .input(z.number())
-  .mutation(async ({input}) =>{
-    const id = input
-    await refuseTransference(id)
-  }),
+    .input(z.number())
+    .mutation(async ({ input }) => {
+      const id = input
+      await refuseTransference(id)
+    }),
 
-  completeTransference:publicProcedure
-  .input(z.number())
-  .mutation(async({input})=>{
-    const id = input
-    await completeTransference(id)
-  })
+  completeTransference: publicProcedure
+    .input(z.number())
+    .mutation(async ({ input }) => {
+      const id = input
+      const response = await completeTransference(id)
+
+      if (response.success === false) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: response.message })
+      }
+      return response
+    }),
 })
