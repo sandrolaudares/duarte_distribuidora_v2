@@ -155,11 +155,11 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - Preco km tabela distribuidora ✅ + infos tabela distribuidora ✅- Delete
   deliveryFee Table✅
 - Verificar sidebar não mostra todos itens ao logar ✅
+- Poder cancelar pedidos aceitos, pedir senha master✅
 
 - boolean pra esconder produtos do cardapio ✅
 - Verificar name filter fiado ✅
 - Editar motoboy pedidos aceitos
-- Poder cancelar pedidos aceitos, pedir senha master
 
 - Alterar join do caixa na tela da transacao do caixa
 - Contas a pagar, nova tabela (Preciso que inclua nas guias a esquerda contas a

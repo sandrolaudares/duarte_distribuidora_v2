@@ -9,6 +9,8 @@
   import HandCoins from 'lucide-svelte/icons/hand-coins'
   import ShieldMap from 'lucide-svelte/icons/shield-check'
   import Transactions from 'lucide-svelte/icons/arrow-left-right'
+
+  import ChartArea from 'lucide-svelte/icons/chart-area'
   import Settings2 from 'lucide-svelte/icons/settings-2'
   import User from 'lucide-svelte/icons/user'
   import NavMain from '$lib/components/sidebar/nav-main.svelte'
@@ -140,6 +142,11 @@
           name: 'Admin',
           url: '/admin',
           icon: ShieldMap,
+        },
+        {
+          name: 'Dashboards',
+          url: '/dashboard',
+          icon: ChartArea,
         },
       )
     }
