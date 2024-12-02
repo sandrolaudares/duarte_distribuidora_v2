@@ -157,9 +157,10 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - Verificar sidebar não mostra todos itens ao logar ✅
 
 - boolean pra esconder produtos do cardapio ✅
-- Verificar name filter fiado
+- Verificar name filter fiado ✅
 - Editar motoboy pedidos aceitos
 - Poder cancelar pedidos aceitos, pedir senha master
+
 - Alterar join do caixa na tela da transacao do caixa
 - Contas a pagar, nova tabela (Preciso que inclua nas guias a esquerda contas a
   pagar. Essa guia deve ter a categoria da dívida, fornecedor (já cadastrado em

@@ -6,6 +6,7 @@ import {
   bugReport,
   distribuidora as distribuidoraController,
   stock,
+  user,
 } from '$db/controller'
 import {
   insertCashierSchema,
@@ -26,6 +27,7 @@ import {
 } from '../../central/schema'
 import { createInsertSchema } from 'drizzle-zod'
 import { TRPCError } from '@trpc/server'
+import { verify } from '../user/password'
 
 export const distribuidora = router({
   insertCashier: publicProcedure
@@ -193,11 +195,65 @@ export const distribuidora = router({
     .input(z.number())
     .mutation(async ({ input }) => {
       const id = input
-      const response = await completeTransference(id)
+      await completeTransference(id)
+    }),
 
-      if (response.success === false) {
-        throw new TRPCError({ code: 'BAD_REQUEST', message: response.message })
+  getAdmins: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
+    return await distribuidoraController(tenantDb).getAdmins()
+  }),
+
+  validateAdminPassword: publicProcedure
+    .input(
+      z.object({
+        admin_id: z.string(),
+        password: z.string(),
+        reason: z.string(),
+      }),
+    )
+    .use(middleware.logged)
+    .query(async ({ input, ctx: { tenantDb } }) => {
+      const [adminUser] = await user(tenantDb).getUserById(input.admin_id)
+
+      if (!input.reason) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Motivo é obrigatório',
+        })
       }
-      return response
+
+      if (!adminUser) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Usuário não encontrado',
+        })
+      }
+
+      if (adminUser.role !== 'admin') {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Usuário não é um admin',
+        })
+      }
+
+      const isValid = await verify(
+        adminUser.password_hash ?? '',
+        input.password,
+      )
+      if (isValid) {
+        await bugReport(tenantDb).insertLogs({
+          text: `${adminUser.username} validou ${input.reason}`,
+          created_by: adminUser.id,
+          metadata: {
+            reason: input.reason,
+          },
+          type: 'LOG',
+          pathname: '',
+          routeName: 'Validação de admin',
+        })
+        return {
+          success: true,
+          message: `${adminUser.username} validou ${input.reason}`,
+        }
+      }
     }),
 })
