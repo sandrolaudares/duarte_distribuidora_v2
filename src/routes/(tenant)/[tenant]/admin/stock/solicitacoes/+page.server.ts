@@ -11,7 +11,8 @@ import { centralDb } from '$lib/server/db/central'
 import { stockTransference, tenants } from '$lib/server/db/central/schema'
 import { getDistribuidoras } from '$lib/server/db/central/constroller'
 
-export const load = (async ({ url, locals: { tenantDb, tenantInfo } }) => {
+export const load = (async ({ url, locals: { tenantDb, tenantInfo },depends}) => {
+  depends('tenant:solicitacoes')
   const id = tenantInfo?.tenantId
 
   if (!id) {

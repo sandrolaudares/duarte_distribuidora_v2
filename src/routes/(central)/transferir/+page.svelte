@@ -19,7 +19,7 @@
   import { toast } from 'svelte-sonner'
   import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
   import type { ActionResult } from '@sveltejs/kit'
-  import { invalidateAll, goto } from '$app/navigation'
+  import { invalidateAll, goto, invalidate } from '$app/navigation'
   import { applyAction, deserialize } from '$app/forms'
 
   let { data, form }: { data: PageData; form: ActionData } = $props()
@@ -91,7 +91,7 @@
         toast.success(`Sucesso ao editar quantidade`)
         isOpenModal?.close()
       }
-      await invalidateAll()
+      await invalidate('central:transferir')
     } catch (error) {
       console.error(error)
       toast.error('Erro')

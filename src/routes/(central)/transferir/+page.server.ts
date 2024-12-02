@@ -10,7 +10,8 @@ import { stockTransference } from '$lib/server/db/central/schema'
 import { centralDb } from '$lib/server/db/central'
 import { eq } from 'drizzle-orm'
 
-export const load = (async () => {
+export const load = (async ({depends}) => {
+  depends('central:transferir')
   try {
     const solicitacoes = await getCurrentTransfers()
     const distribuidoras = await getDistribuidoras()

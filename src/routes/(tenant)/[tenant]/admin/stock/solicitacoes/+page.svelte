@@ -22,7 +22,8 @@
 
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
-  import { goto } from '$app/navigation'
+  import { goto, invalidate, invalidateAll } from '$app/navigation'
+  import Loading from '$lib/components/Loading.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -54,9 +55,10 @@
     isLoading = true
     try {
       for(const row of selectedRows){
-        await trpc($page).distribuidora.completeTransference.mutate(row.id)
+        const resp = await trpc($page).distribuidora.completeTransference.mutate(row.id)
+        toast.success(resp.message)
       }
-      toast.success('Aceito com sucesso!')
+      invalidate('tenant:solicitacoes')
     } catch (error:any) {
       toast.error(error.message)
     } finally {
@@ -64,6 +66,12 @@
     }
   }
 </script>
+
+{#if isLoading}
+<div class="absolute left-1/2 top-1/2 z-50">
+  <Loading/>
+</div>
+{/if}
 
 <main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
   <div class="flex justify-between items-center">
