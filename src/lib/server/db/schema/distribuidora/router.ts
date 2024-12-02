@@ -195,7 +195,16 @@ export const distribuidora = router({
     .input(z.number())
     .mutation(async ({ input }) => {
       const id = input
-      await completeTransference(id)
+      const resp = await completeTransference(id)
+
+      if (!resp.success) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: resp.message,
+        })
+      }
+
+      return resp.message
     }),
 
   getAdmins: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
