@@ -367,7 +367,16 @@ export async function completeTransference(
     ).then(res => res.json())
 
     if (!fromTransfer.success) {
-      return fromTransfer
+      if (fromTransfer.message && fromTransfer.success !== undefined) {
+        return fromTransfer as {
+          success: boolean
+          message: string
+        }
+      }
+      return {
+        success: false,
+        message: 'Erro desconhecido, entre em contato com o desenvolvedor',
+      }
     }
   } catch (error: any) {
     console.error(error)
