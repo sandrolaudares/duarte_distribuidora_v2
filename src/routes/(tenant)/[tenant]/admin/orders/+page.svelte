@@ -227,6 +227,13 @@
                         status: 'ON THE WAY',
                       })
                     }}
+                    cancel_order={async ()=>{
+                      pedido.status = 'CANCELED'
+                      await changeStatusPedido({
+                        order_id: pedido.id,
+                        status:'CANCELED'
+                      })
+                    }}
                   />
                 {/if}
               {/each}

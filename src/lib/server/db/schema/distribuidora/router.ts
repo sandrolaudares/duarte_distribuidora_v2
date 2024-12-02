@@ -263,6 +263,8 @@ export const distribuidora = router({
           success: true,
           message: `${adminUser.username} validou ${input.reason}`,
         }
+      } else {
+        throw new TRPCError({code:'UNAUTHORIZED',message:`Senha inválida para ${adminUser.username}`})
       }
     }),
 })
