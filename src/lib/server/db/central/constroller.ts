@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { centralDb as db } from '$db/central'
 import { tenants, stockTransference } from './schema'
 import type {
@@ -25,6 +26,7 @@ import { PUBLIC_DOMAIN } from '$env/static/public'
 import { hash } from '../schema/user/password'
 import { getTenantDbClient } from '$lib/server/utils/init-db'
 import { generateId } from '$lib/server/auth/utils'
+import type { SelectSku } from '../schema'
 
 export async function createTenant(newTenantInfo: {
   tenantName: unknown
@@ -194,9 +196,14 @@ export async function solicitarTransference(data: InsertStockTransference) {
   const existing = await db
     .select()
     .from(stockTransference)
-    .where(and(eq(stockTransference.status,'REQUESTED'),eq(stockTransference.sku,data.sku)))
+    .where(
+      and(
+        eq(stockTransference.status, 'REQUESTED'),
+        eq(stockTransference.sku, data.sku),
+      ),
+    )
 
-    console.log(existing)
+  console.log(existing)
 
   if (existing.length > 0) {
     console.log('já existe')
@@ -206,45 +213,72 @@ export async function solicitarTransference(data: InsertStockTransference) {
       .set({
         quantity: ext.quantity + data.quantity,
       })
-      .where(eq(stockTransference.id,ext.id))
-      .returning();
+      .where(eq(stockTransference.id, ext.id))
+      .returning()
   } else {
-    return await db.insert(stockTransference).values(data).returning();
+    return await db.insert(stockTransference).values(data).returning()
   }
 }
 
-export async function refuseTransference(id:SelectStockTransference['id']) {
-  return await db.update(stockTransference).set({
-    status: 'CANCELED',
-  })
-  .where(eq(stockTransference.id,id)).returning()
+export async function refuseTransference(id: SelectStockTransference['id']) {
+  return await db
+    .update(stockTransference)
+    .set({
+      status: 'CANCELED',
+    })
+    .where(eq(stockTransference.id, id))
+    .returning()
 }
 
 export async function getCurrentTransfers() {
-  return await db.select().from(stockTransference).where(eq(stockTransference.status,'REQUESTED'))
+  return await db
+    .select()
+    .from(stockTransference)
+    .where(eq(stockTransference.status, 'REQUESTED'))
 }
 
-export async function getReceivedTransfers(fromTenantId:SelectStockTransference['fromTenantId']) {
+export async function getReceivedTransfers(
+  fromTenantId: SelectStockTransference['fromTenantId'],
+) {
   if (fromTenantId === null) {
-    throw new Error('Id não pode ser nulo');
+    throw new Error('Id não pode ser nulo')
   }
-  return await db.select().from(stockTransference)
-  .where(
-    and(
-      eq(stockTransference.status,'ACCEPTED'),
-      eq(stockTransference.fromTenantId,fromTenantId)
+  return await db
+    .select()
+    .from(stockTransference)
+    .where(
+      and(
+        eq(stockTransference.status, 'ACCEPTED'),
+        eq(stockTransference.fromTenantId, fromTenantId),
+      ),
     )
-  )
 }
 
 export async function acceptTransference(
   stockTransferenceId: SelectStockTransference['id'],
 ) {
-
   const transference = await db.query.stockTransference.findFirst({
     where: eq(stockTransference.id, stockTransferenceId),
   })
   //TODO: validate quantidade do from
+  try {
+    const skyFrom: SelectSku = await fetch(
+      `https://${transference?.fromTenantId}.${PUBLIC_DOMAIN}/api/stock/${transference?.sku}`,
+    ).then(res => res.json())
+
+    if (transference?.quantity && skyFrom.quantity < transference?.quantity) {
+      return {
+        success: false,
+        message: 'Quantidade insuficiente na filial de origem',
+      }
+    }
+  } catch (error: any) {
+    console.error(error)
+    return {
+      success: false,
+      message: 'Erro ao buscar SKU de origem',
+    }
+  }
 
   if (transference?.status !== 'REQUESTED') {
     return {
@@ -260,17 +294,20 @@ export async function acceptTransference(
     }
   }
   try {
-     await db.update(stockTransference).set({
-      status: 'ACCEPTED',
-    }).where(eq(stockTransference.id,stockTransferenceId))
+    await db
+      .update(stockTransference)
+      .set({
+        status: 'ACCEPTED',
+      })
+      .where(eq(stockTransference.id, stockTransferenceId))
     return {
-      success:true,
-      message:'Bem sucedido'
+      success: true,
+      message: 'Bem sucedido',
     }
-  } catch (error:any) {
+  } catch (error: any) {
     return {
-      success:false,
-      message: error.message
+      success: false,
+      message: error.message,
     }
   }
 }
@@ -313,41 +350,76 @@ export async function completeTransference(
     }
   }
 
-  const fromTransfer = await fetch(
-    `http://${fromTenant.subdomain}.${PUBLIC_DOMAIN}/api/stock/${transference.sku}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+  try {
+    const fromTransfer = await fetch(
+      `http://${fromTenant.subdomain}.${PUBLIC_DOMAIN}/api/stock/${transference.sku}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(<SKU_TRANSFERENCE_POST_TYPE>{
+          quantity: transference.quantity,
+          type: 'OUT_TRANSFERENCE',
+          central_transference_id: transference.id,
+        }),
       },
-      body: JSON.stringify(<SKU_TRANSFERENCE_POST_TYPE>{
-        quantity: transference.quantity,
-        type: 'OUT_TRANSFERENCE',
-        central_transference_id: transference.id,
-      }),
-    },
-  )
+    ).then(res => res.json())
 
-  console.log('fromTransfer:', fromTransfer)
+    if (!fromTransfer.success) {
+      return fromTransfer
+    }
+  } catch (error: any) {
+    console.error(error)
+    return {
+      success: false,
+      message:
+        error.message ??
+        'Erro desconhecido, entre em contato com o desenvolvedor',
+    }
+  }
 
-  const toTransfer = await fetch(
-    `http://${toTenant.subdomain}.${PUBLIC_DOMAIN}/api/stock/${transference.sku}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+  try {
+    const toTransfer = await fetch(
+      `http://${toTenant.subdomain}.${PUBLIC_DOMAIN}/api/stock/${transference.sku}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(<SKU_TRANSFERENCE_POST_TYPE>{
+          quantity: transference.quantity,
+          type: 'IN_TRANSFERENCE',
+          central_transference_id: transference.id,
+        }),
       },
-      body: JSON.stringify(<SKU_TRANSFERENCE_POST_TYPE>{
-        quantity: transference.quantity,
-        type: 'IN_TRANSFERENCE',
-        central_transference_id: transference.id,
-      }),
-    },
-  )
+    )
 
-  console.log('toTransfer:', toTransfer)
+    console.log('toTransfer:', toTransfer)
+  } catch (error: any) {
+    console.error(error)
+
+    return {
+      success: false,
+      message:
+        error.message ??
+        'Erro desconhecido, entre em contato com o desenvolvedor, esse erro pode causar inconsistências no estoque',
+    }
+  }
+
+  await db
+    .update(stockTransference)
+    .set({
+      status: 'COMPLETED',
+    })
+    .where(eq(stockTransference.id, stockTransferenceId))
+
+  return {
+    success: true,
+    message: `Transferência de ${transference.quantity} unidades do SKU ${transference.sku} - ${transference.sku_name} completada`,
+  }
 }
 
-export async function getDistribuidoras(){
+export async function getDistribuidoras() {
   return db.select().from(tenants)
 }
