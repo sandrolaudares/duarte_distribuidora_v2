@@ -14,6 +14,8 @@ export { stock } from './schema/stock/controller'
 
 export { distribuidora } from './schema/distribuidora/controller'
 
+export { contas } from './schema/contas/controller'
+
 export const SKU_TRANSFERENCE_PARAMS = z.object({
   type: z.enum(['IN_TRANSFERENCE', 'OUT_TRANSFERENCE']),
   central_transference_id: z.number(),

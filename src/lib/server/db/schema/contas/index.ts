@@ -7,7 +7,9 @@ import {
 
 import { timestamps } from '../../utils'
 import { supplierTable } from '../stock'
-export const contasPagarTable = sqliteTable('cliente', {
+import { relations } from 'drizzle-orm'
+
+export const contasPagarTable = sqliteTable('contas', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   ...timestamps,
   fornecedor_id: integer('fornecedor_id').references(() => supplierTable.id),
@@ -15,5 +17,12 @@ export const contasPagarTable = sqliteTable('cliente', {
   expire_at: integer('updated_at', {
     mode: 'timestamp',
   }),
-  valor_conta:integer('valor_conta').notNull()
+  valor_conta: integer('valor_conta').notNull(),
 })
+
+export const contasPagarRelations = relations(contasPagarTable, ({ one }) => ({
+  fornecedor: one(supplierTable, {
+    fields: [contasPagarTable.fornecedor_id],
+    references: [supplierTable.id],
+  }),
+}))

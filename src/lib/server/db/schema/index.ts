@@ -16,3 +16,5 @@ export * from './stock'
 export * from './customer'
 
 export * from './distribuidora'
+
+export * from './contas'
