@@ -43,6 +43,13 @@
       "when": 1733232014656,
       "tag": "0005_violet_magma",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1733257103046,
+      "tag": "0006_solid_red_hulk",
+      "breakpoints": true
     }
   ]
 }
