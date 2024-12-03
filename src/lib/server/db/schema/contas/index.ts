@@ -8,6 +8,7 @@ import {
 import { timestamps } from '../../utils'
 import { supplierTable } from '../stock'
 import { relations } from 'drizzle-orm'
+import { createInsertSchema } from 'drizzle-zod'
 
 export const contasPagarTable = sqliteTable('contas', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -19,6 +20,7 @@ export const contasPagarTable = sqliteTable('contas', {
   }),
   titulo:text('titulo'),
   status:text('status').default('PENDENTE'),
+  isPaid:integer('isPaid',{mode:'boolean'}),
   valor_conta: integer('valor_conta').notNull(),
 })
 
@@ -28,3 +30,10 @@ export const contasPagarRelations = relations(contasPagarTable, ({ one }) => ({
     references: [supplierTable.id],
   }),
 }))
+
+
+export type SelectConta = typeof contasPagarTable.$inferSelect
+export type InsertConta = typeof contasPagarTable.$inferInsert
+
+
+export const insertContaSchema = createInsertSchema(contasPagarTable, {})
