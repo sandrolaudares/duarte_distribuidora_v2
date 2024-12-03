@@ -14,6 +14,7 @@ export const contasPagarTable = sqliteTable('contas', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   ...timestamps,
   fornecedor_id: integer('fornecedor_id').references(() => supplierTable.id),
+  categoria_id:integer('categoria_id').references(()=>categoriaConta.id),
   descricao: text('descricao'),
   expire_at: integer('expire_at', {
     mode: 'timestamp',
@@ -30,6 +31,11 @@ export const contasPagarRelations = relations(contasPagarTable, ({ one }) => ({
     references: [supplierTable.id],
   }),
 }))
+
+export const categoriaConta = sqliteTable('categoria',{
+  id:integer('id').primaryKey({autoIncrement:true}),
+  nome:text('nome').notNull()
+})
 
 
 export type SelectConta = typeof contasPagarTable.$inferSelect
