@@ -30,6 +30,10 @@ export const contasPagarRelations = relations(contasPagarTable, ({ one }) => ({
     fields: [contasPagarTable.fornecedor_id],
     references: [supplierTable.id],
   }),
+  categoria:one(categoriaConta,{
+    fields:[contasPagarTable.categoria_id],
+    references:[categoriaConta.id]
+  })
 }))
 
 export const categoriaConta = sqliteTable('categoria',{
