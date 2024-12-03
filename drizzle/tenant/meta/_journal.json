@@ -36,6 +36,13 @@
       "when": 1733230006237,
       "tag": "0004_sturdy_bucky",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1733232014656,
+      "tag": "0005_violet_magma",
+      "breakpoints": true
     }
   ]
 }
