@@ -56,6 +56,7 @@
     descricao: '',
     titulo: '',
     isPaid: false,
+    categoria_id: 0,
   }
   let isLoading = $state(false)
   async function createConta() {
@@ -68,6 +69,7 @@
         titulo: newConta.titulo,
         isPaid: newConta.isPaid,
         fornecedor_id: newConta.fornecedor_id,
+        categoria_id: newConta.categoria_id,
       })
       await invalidateAll()
       toast.success('Sucesso ao criar conta')
@@ -80,7 +82,6 @@
       //TODO: FIX PRA FUNCIONAR SEM RELOAD NA PAGINA
     }
   }
-
 </script>
 
 <div class="container mx-auto p-4">
@@ -98,7 +99,10 @@
       <table class="w-full">
         <thead>
           <tr class="bgg bg-base-200 text-left">
-            <Th>Id</Th>
+            <Th>Titulo</Th>
+            <Th>Observações</Th>
+            <Th>Fornecedor</Th>
+            <Th>Categoria</Th>
             <Th>Data vencimento</Th>
             <ThSort {table} field="valor_conta">Valor</ThSort>
             <Th></Th>
@@ -107,6 +111,9 @@
           <tr>
             <ThFilter {table} field="titulo" />
             <Th />
+            <ThFilter {table} field="supName" />
+            <ThFilter {table} field="catName" />
+            <Th />
             <Th />
             <Th />
             <Th />
@@ -114,36 +121,39 @@
         </thead>
 
         <tbody>
-          {#each table.rows as bill}
+          {#each table.rows as conta}
             <tr
               transition:fade|local
               class="border-t border-gray-200 transition-colors hover:bg-gray-50"
-              class:opacity-50={bill.isPaid}
+              class:opacity-50={conta.isPaid}
             >
-              <td class="p-3">{bill.titulo}</td>
-              <td class="p-3">{format(bill.expire_at!, 'dd/MM/yyyy')}</td>
-              <td class="p-3">R${(bill.valor_conta / 100).toFixed(2)}</td>
+              <td class="p-3">{conta.titulo}</td>
+              <td class="p-3">{conta.descricao}</td>
+              <td class="p-3">{conta.supName}</td>
+              <td class="p-3">{conta.catName ?? 'Não cadastrado'}</td>
+              <td class="p-3">{format(conta.expire_at!, 'dd/MM/yyyy')}</td>
+              <td class="p-3">R${(conta.valor_conta / 100).toFixed(2)}</td>
               <td class="p-3">
                 <span
                   class="rounded px-2 py-1 text-sm font-semibold"
-                  class:bg-green-200={bill.isPaid}
-                  class:text-green-800={bill.isPaid}
-                  class:bg-red-200={!bill.isPaid}
-                  class:text-red-800={!bill.isPaid}
+                  class:bg-green-200={conta.isPaid}
+                  class:text-green-800={conta.isPaid}
+                  class:bg-red-200={!conta.isPaid}
+                  class:text-red-800={!conta.isPaid}
                 >
-                  {bill.isPaid ? 'Pago' : 'Não pago'}
+                  {conta.isPaid ? 'Pago' : 'Não pago'}
                 </span>
               </td>
               <td class="p-3">
                 <button
                   class="mr-2 rounded px-3 py-1 text-sm font-semibold transition-colors"
-                  class:bg-green-500={!bill.isPaid}
-                  class:hover:bg-green-600={!bill.isPaid}
-                  class:text-white={!bill.isPaid}
-                  class:bg-gray-300={bill.isPaid}
-                  class:hover:bg-gray-400={bill.isPaid}
+                  class:bg-green-500={!conta.isPaid}
+                  class:hover:bg-green-600={!conta.isPaid}
+                  class:text-white={!conta.isPaid}
+                  class:bg-gray-300={conta.isPaid}
+                  class:hover:bg-gray-400={conta.isPaid}
                 >
-                  {bill.isPaid ? 'Unpay' : 'Pagar'}
+                  {conta.isPaid ? 'Unpay' : 'Pagar'}
                 </button>
                 <button
                   class="rounded bg-red-500 px-3 py-1 text-sm font-semibold text-white transition-colors hover:bg-red-600"
@@ -256,17 +266,22 @@
         bind:value={newConta.descricao}
       ></textarea>
     </div>
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 items-center">
+    <div class="grid grid-cols-1 items-center gap-4 md:grid-cols-2">
       <div class="form-control">
         <label for="categoria" class="label">
           <span class="label-text">Categoria</span>
         </label>
-        <input
+        <select
           id="categoria"
-          type="text"
-          placeholder="Categoria"
-          class="input input-bordered w-full"
-        />
+          bind:value={newConta.categoria_id}
+          class="select select-bordered w-full"
+          required
+        >
+          <option disabled value={0}>Selecione uma categoria</option>
+          {#each data.categorias as categoria}
+            <option value={categoria.id}>{categoria.nome}</option>
+          {/each}
+        </select>
       </div>
       <div class="form-control flex items-center">
         <label class="label cursor-pointer">
