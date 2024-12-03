@@ -156,18 +156,19 @@ Feel free to submit issues or pull requests. Contributions are welcome!
   deliveryFee Table✅
 - Verificar sidebar não mostra todos itens ao logar ✅
 - Poder cancelar pedidos aceitos, pedir senha master✅
+- CHECAR O SUM PAGINA CUSTOMER/ID✅
 
 - boolean pra esconder produtos do cardapio ✅
 - Verificar name filter fiado ✅
 - Editar motoboy pedidos aceitos
-
-- Alterar join do caixa na tela da transacao do caixa
 - Contas a pagar, nova tabela (Preciso que inclua nas guias a esquerda contas a
   pagar. Essa guia deve ter a categoria da dívida, fornecedor (já cadastrado em
   fornecedores), descrição, data de vencimento e valor. A conta fica
   cadastradastra, financeiro realiza o pagamento na data correta, esse histórico
   precisa ficar registrado, pois em relatórios vamos precisar comparar vendas x
-  despesas pra analisar o lucro mensal.)
+  despesas pra analisar o lucro mensal.) ✅
+
+- Alterar join do caixa na tela da transacao do caixa
 - Permissoes no trpc pra cada func
 - Colunas na tabela dos logs
 - AJustar form criar tenant erros de endereco
@@ -175,7 +176,6 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - REFATORAR ONDE MOSTRA AS INFOS DO CLINTE NA PAGINA DO CAIXA
 - DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES
 - PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS
-- CHECAR O SUM PAGINA CUSTOMER/ID
 - EDITAR DATA VENCIMENTO (EXIPIRE_AT)
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE
 - APLICAR EDITABLECELL NAS TABLES EXISTENTES
