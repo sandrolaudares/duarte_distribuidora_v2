@@ -91,7 +91,7 @@
         toast.success(`Sucesso ao editar quantidade`)
         isOpenModal?.close()
       }
-      await invalidate('central:transferir')
+      await invalidateAll()
     } catch (error) {
       console.error(error)
       toast.error('Erro')

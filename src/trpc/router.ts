@@ -11,6 +11,7 @@ import { customer } from '$db/schema/customer/router'
 import { stock } from '$db/schema/stock/router'
 import { distribuidora } from '$db/schema/distribuidora/router'
 import { bugReporter } from '$db/schema/bug-report/router'
+import { contas } from '$lib/server/db/schema/contas/router'
 
 export const router = t.router({
   auth,
@@ -19,6 +20,7 @@ export const router = t.router({
   customer,
   distribuidora,
   bugReport: bugReporter,
+  contas,
 })
 
 export type Router = typeof router

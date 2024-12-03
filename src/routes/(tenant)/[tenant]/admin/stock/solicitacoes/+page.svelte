@@ -58,7 +58,7 @@
         const resp = await trpc($page).distribuidora.completeTransference.mutate(row.id)
         toast.success(resp)
       }
-      invalidate('tenant:solicitacoes')
+      invalidateAll()
     } catch (error:any) {
       toast.error(error.message)
     } finally {
