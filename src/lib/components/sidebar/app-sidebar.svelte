@@ -92,10 +92,10 @@
               title: 'Pedidos em aberto',
               url: '/admin/orders',
             },
-            {
-              title: 'Pedidos fiado',
-              url: '/admin/finance',
-            },
+              // {
+              //   title: 'Pedidos fiado',
+              //   url: '/admin/finance',
+              // },
             // {
             // 	title: "Pedidos delivery",
             // 	url: "/admin/orders/delivery",
@@ -147,6 +147,24 @@
           name: 'Dashboards',
           url: '/dashboard',
           icon: ChartArea,
+        },
+      )
+      nav.navMain.push(
+        {
+          title: 'Financeiro',
+          url: '/admin',
+          icon: ListOrdered,
+          isActive: true,
+          items: [
+            {
+              title: 'Pedidos fiado',
+              url: '/admin/finance',
+            },
+            {
+              title: 'Contas',
+              url: '/admin/finance/contas',
+            },
+          ],
         },
       )
     }

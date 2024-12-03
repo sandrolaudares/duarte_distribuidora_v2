@@ -88,8 +88,9 @@
 
   <div class="mb-6 rounded-lg bg-base-200 p-4 shadow">
     <button class="btn btn-primary" onclick={() => isOpenModal?.showModal()}>
-      nova conta
+      Criar nova conta
     </button>
+    <button class="btn btn-secondary">Criar nova categoria</button>
   </div>
 
   <div class="bg-base overflow-x-auto rounded-lg shadow">
@@ -120,8 +121,7 @@
               class:opacity-50={bill.isPaid}
             >
               <td class="p-3">{bill.titulo}</td>
-              <!-- <td class="p-3">{format(bill.expire_at!, 'dd/MM/yyyy')}</td> -->
-              <td>{bill.created_at}</td>
+              <td class="p-3">{format(bill.expire_at!, 'dd/MM/yyyy')}</td>
               <td class="p-3">R${(bill.valor_conta / 100).toFixed(2)}</td>
               <td class="p-3">
                 <span
