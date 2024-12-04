@@ -116,7 +116,7 @@
     }}
     class="select select-bordered mb-3"
   >
-    <option value="todos" selected>Todos</option>
+    <option value="todos" selected={true}>Todos</option>
     <option value="atrasados">Pagamentos atrasados</option>
   </select>
   <Datatable {table} headless>

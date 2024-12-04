@@ -82,16 +82,63 @@
       //TODO: FIX PRA FUNCIONAR SEM RELOAD NA PAGINA
     }
   }
+
+  let nameCat = $state('')
+  async function createCategoria() {
+    isLoading = true
+    try {
+      await trpc($page).contas.insertCategoria.mutate({
+        nome: nameCat,
+      })
+      await invalidateAll()
+      toast.success('Sucesso ao criar categoria')
+    } catch (error: any) {
+      toast.error(error.message)
+    } finally {
+      isLoading = false
+      window.location.reload()
+    }
+  }
+
+  const paidFilter = table.createFilter('isPaid')
 </script>
 
 <div class="container mx-auto p-4">
   <h1 class="mb-6 text-3xl font-bold">Contas à pagar</h1>
 
-  <div class="mb-6 rounded-lg bg-base-200 p-4 shadow">
-    <button class="btn btn-primary" onclick={() => isOpenModal?.showModal()}>
-      Criar nova conta
-    </button>
-    <button class="btn btn-secondary">Criar nova categoria</button>
+  <div class="mb-6 flex justify-between rounded-lg bg-base-200 p-4 shadow">
+    <div class="flex gap-2 divide-x">
+      <button class="btn btn-primary" onclick={() => isOpenModal?.showModal()}>
+        Criar nova conta
+      </button>
+      <div class="inline-block w-0.5 self-stretch bg-base-100"></div>
+      <input
+        type="text"
+        bind:value={nameCat}
+        class="input input-bordered"
+        placeholder="Nova categoria"
+      />
+      <button
+        class="btn btn-secondary"
+        onclick={createCategoria}
+        disabled={isLoading || nameCat === ''}
+      >
+        Confirmar nova categoria
+      </button>
+    </div>
+    <div class="flex gap-2 divide-x">
+      <select
+        bind:value={paidFilter.value}
+        onchange={e => {
+          paidFilter.set()
+        }}
+        class="select select-bordered"
+      >
+        <option value="todos" selected={true}>Todos</option>
+        <option value="paid">Pagos</option>
+        <option value="unpaid">Não pagos</option>
+      </select>
+    </div>
   </div>
 
   <div class="bg-base overflow-x-auto rounded-lg shadow">
@@ -151,14 +198,8 @@
                   class:hover:bg-green-600={!conta.isPaid}
                   class:text-white={!conta.isPaid}
                   class:bg-gray-300={conta.isPaid}
-                  class:hover:bg-gray-400={conta.isPaid}
                 >
-                  {conta.isPaid ? 'Unpay' : 'Pagar'}
-                </button>
-                <button
-                  class="rounded bg-red-500 px-3 py-1 text-sm font-semibold text-white transition-colors hover:bg-red-600"
-                >
-                  Delete
+                  {conta.isPaid ? 'PAGO' : 'Pagar'}
                 </button>
               </td>
             </tr>
@@ -180,6 +221,42 @@
     </span>
   </div>
 </div>
+<!-- 
+<dialog
+  class="modal"
+  bind:this={isOpenModalCat}
+  in:fly={{ y: 50, duration: 300 }}
+  out:fade={{ duration: 200 }}
+>
+  <div class="modal-box max-w-2xl">
+    <h2 class="mb-6 text-2xl font-semibold">Nova categoria</h2>
+    <input
+      type="text"
+      bind:value={nameCat}
+      class="input input-bordered w-full"
+      placeholder="Nova categoria"
+    />
+    <button
+      class="btn btn-primary mt-2 w-full"
+      onclick={createCategoria}
+      disabled={isLoading}
+    >
+      Criar
+    </button>
+    {#each data.categorias as cat}
+      <div class="flex">
+        <p>
+          {cat.nome}
+        </p>
+        <button class="btn btn-error">Excluir</button>
+      </div>
+    {/each}
+  </div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog> -->
 
 <dialog
   class="modal"
@@ -230,10 +307,8 @@
           min={format(new Date(), 'yyyy-MM-dd')}
           onchange={e => {
             const v = (e.target as HTMLInputElement).value
-            console.log(v)
             const dateV = new Date(v + 'T00:00:00')
             newConta.expire_at = dateV
-            console.log(newConta.expire_at)
           }}
           required
         />
@@ -286,7 +361,11 @@
       <div class="form-control flex items-center">
         <label class="label cursor-pointer">
           <span class="label-text mr-4">Marcar como pago</span>
-          <input type="checkbox" class="toggle toggle-primary" />
+          <input
+            type="checkbox"
+            class="toggle toggle-primary"
+            bind:checked={newConta.isPaid}
+          />
         </label>
       </div>
     </div>
