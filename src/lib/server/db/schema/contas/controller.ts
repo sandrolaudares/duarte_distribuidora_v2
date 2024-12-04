@@ -1,12 +1,20 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { contasPagarTable, type InsertConta } from '.'
+import {
+  categoriaConta,
+  contasPagarTable,
+  type InsertCategoria,
+  type InsertConta,
+} from '.'
 import type { TenantDbType } from '../../tenant'
 
 export const contasController = (db: TenantDbType) => ({
   tables: {
-    contasPagarTable
+    contasPagarTable,
+    categoriaConta,
   },
   insertConta: (input: InsertConta) => {
     return db.insert(contasPagarTable).values(input)
+  },
+  insertCategoria: (input: InsertCategoria) => {
+    return db.insert(categoriaConta).values(input)
   },
 })
