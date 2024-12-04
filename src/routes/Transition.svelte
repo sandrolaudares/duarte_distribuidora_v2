@@ -1,19 +1,17 @@
 <script>
-  import { fade, fly } from 'svelte/transition'
+  import {  fly } from 'svelte/transition'
   import { cubicIn, cubicOut } from 'svelte/easing'
 
-  import { page, navigating } from '$app/stores'
+  import {  navigating } from '$app/stores'
   import { onNavigate } from '$app/navigation'
   import PreLoadingIndicator from './PreLoadingIndicator.svelte'
 
   export let key
 
   onNavigate(navigation => {
-    // @ts-expect-error
     if (!document.startViewTransition) return
 
     return new Promise(resolve => {
-      // @ts-expect-error
       document.startViewTransition?.(async () => {
         resolve()
         await navigation.complete
