@@ -64,11 +64,11 @@
     }
   }
 
-  async function handleUpdateQuantity(newValue:number,id:number) {
+  async function handleUpdateQuantity(newValue: number, id: number) {
     try {
       const formData = new FormData()
       formData.set('quantity', String(newValue))
-      formData.set('id',String(id))
+      formData.set('id', String(id))
 
       // if(typeof newValue != 'number'){
       //   toast.error('Quantidade deve ser um numero!')
@@ -115,17 +115,26 @@
 
         const result: ActionResult = deserialize(await response.text())
 
-        if (!response.ok || result.type !== 'success') {
-          toast.error(`Falha ao transferir ${row.sku_name}`)
-        } else {
-          toast.success(`Sucesso ao transferir ${row.sku_name}`)
-          isOpenModal?.close()
+        console.log(result)
+
+        if (result.type === 'success' || result.type === 'failure') {
+          if (!result.data || result.data.success === false) {
+            toast.error(result.data?.message || 'Ocorreu um erro ao processar.')
+          } else {
+            toast.success(`Sucesso ao transferir ${row.sku_name}`)
+            isOpenModal?.close()
+          }
+        } else if (result.type === 'redirect') {
+          window.location.href = result.location
+        } else if (result.type === 'error') {
+          toast.error('Erro no servidor')
+          console.error(result.error)
         }
       }
       await invalidateAll()
     } catch (error) {
       console.error(error)
-      toast.error('Erro')
+      toast.error(error.message)
     }
   }
 
@@ -215,7 +224,7 @@
                     <EditableCell
                       value={row.quantity}
                       onUpdateValue={async newValue => {
-                        handleUpdateQuantity(newValue,row.id)
+                        handleUpdateQuantity(newValue, row.id)
                       }}
                     />
                   </td>
