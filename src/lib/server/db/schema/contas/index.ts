@@ -19,6 +19,9 @@ export const contasPagarTable = sqliteTable('contas', {
   expire_at: integer('expire_at', {
     mode: 'timestamp',
   }),
+  paid_at: integer('paid_at', {
+    mode: 'timestamp',
+  }),
   titulo: text('titulo'),
   status: text('status').default('PENDENTE'),
   isPaid: integer('isPaid', { mode: 'boolean' }),
