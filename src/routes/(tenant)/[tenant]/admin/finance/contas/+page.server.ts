@@ -83,8 +83,10 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
           eq(schema.categoriaConta.id, contasPagarTable.categoria_id),
         ),
       )
-      .$dynamic()
-      .orderBy(asc(schema.contasPagarTable.expire_at))
+      .$dynamic().orderBy(
+        sql`CASE WHEN ${schema.contasPagarTable.isPaid} = false THEN 0 ELSE 1 END`,
+        asc(schema.contasPagarTable.expire_at)
+      );
 
     if (sortId && sortOrder) {
       query = withOrderBy(
