@@ -171,11 +171,11 @@ Feel free to submit issues or pull requests. Contributions are welcome!
   precisa ficar registrado, pois em relatórios vamos precisar comparar vendas x
   despesas pra analisar o lucro mensal.) ✅
 - AJustar form criar tenant erros de endereco  ✅
+- DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES  ✅
 
 - Alterar join do caixa na tela da transacao do caixa
 - Permissoes no trpc pra cada func
 - Colunas na tabela dos logs
-- DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES
 - PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE
 - APLICAR EDITABLECELL NAS TABLES EXISTENTES

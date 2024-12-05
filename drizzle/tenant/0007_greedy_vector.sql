@@ -1,0 +1,1 @@
+ALTER TABLE `logs` ADD `cashier_id` integer REFERENCES caixas(id);
