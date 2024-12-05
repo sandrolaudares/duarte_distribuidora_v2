@@ -30,15 +30,15 @@
         <!-- <span>{credits}</span> -->
         <slot></slot>
       </div>
+      {#if address}
       <div class="flex items-start space-x-4 text-sm">
         <MapPin class="mt-0.5 h-4 w-4" />
-        {#if address}
           <div class="">
             <span class="font-medium">Endereço:</span>
             <p class="">{address}</p>
           </div>
+        </div>
         {/if}
-      </div>
       {#if distance}
         <div class="flex items-center space-x-4 text-sm">
           <Truck class="h-4 w-4" />

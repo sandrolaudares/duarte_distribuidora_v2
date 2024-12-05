@@ -112,16 +112,19 @@
   $: if (enderecoCliente) {
     isDelivery = true
   }
-  const formattedAddress = [
-    enderecoCliente?.cep ? `${enderecoCliente.cep}` : '',
-    enderecoCliente?.city,
-    enderecoCliente?.neighborhood,
-    enderecoCliente?.street,
-    enderecoCliente?.number,
-    enderecoCliente?.state,
-  ]
-    .filter(Boolean)
-    .join(', ')
+  const formattedAddress = enderecoCliente
+  ? [
+      enderecoCliente.cep ? `${enderecoCliente.cep}` : '',
+      enderecoCliente.city,
+      enderecoCliente.neighborhood,
+      enderecoCliente.street,
+      enderecoCliente.number,
+      enderecoCliente.state,
+    ]
+      .filter(Boolean)
+      .join(', ')
+  : null;
+
 </script>
 
 <div class="flex h-auto flex-col-reverse justify-between md:flex-col">
