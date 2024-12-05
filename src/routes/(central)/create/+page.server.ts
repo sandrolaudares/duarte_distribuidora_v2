@@ -26,27 +26,27 @@ export const actions: Actions = {
     const city = formData.get('city')
     const state = formData.get('state')
     const address = `${street}, ${number}, ${city}, ${neighborhood},  ${state}, ${cep}, BR`
+    
     console.log(formData)
-    if (!phone || !cep || !street || !neighborhood || !number || !city || !state) {
-      console.error('Campos obrigatórios')
-      return fail(400, {
-        success: false,
-        message: 'Campo obrigatório',
-        form: {
-          tenantName,
-          subdomain,
-          name,
-          email,
-          phone,
-          cep,
-          street,
-          neighborhood,
-          number,
-          city,
-          state,
-        },
-      });
-    }
+      if (!phone) {
+        return fail(400, { success: false, message: 'Telefone é obrigatório'})
+      }
+      if (!cep) {
+        return fail(400, { success: false, message: 'CEP é obrigatório' })
+      }
+      if (!street) {
+        return fail(400, { success: false, message: 'Rua é obrigatório' })
+      }
+      if (!neighborhood) {
+        return fail(400, { success: false, message: 'Bairro é obrigatório'})
+      }
+      if (!number) {
+        return fail(400, { success: false, message: 'Numero é obrigatório'})
+      }
+      if (!city) {
+        return fail(400, { success: false, message: 'Cidade é obrigatório'})
+      }
+
     if (password !== confirmPassword) {
       console.error('Senhas estão diferentes')
       return fail(400, {
@@ -80,7 +80,6 @@ export const actions: Actions = {
       lat: location.lat,
       lon: location.lon,
     })
-    console.log('test5')
     if (!result.success || !result.data) {
       console.error(result.message)
       return fail(400, {

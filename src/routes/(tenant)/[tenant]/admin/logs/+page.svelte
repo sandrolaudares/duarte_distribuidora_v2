@@ -49,7 +49,7 @@
      
     {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table table-zebra border">
+    <table class="table table-zebra border rounded-none">
       <thead>
         <tr>
           <ThSort {table} field="id">ID</ThSort>

@@ -130,8 +130,8 @@ importers:
         specifier: ^10.4.20
         version: 10.4.20(postcss@8.4.47)
       bits-ui:
-        specifier: 1.0.0-next.35
-        version: 1.0.0-next.35(svelte@5.1.12)
+        specifier: 1.0.0-next.60
+        version: 1.0.0-next.60(svelte@5.1.12)
       daisyui:
         specifier: ^4.12.14
         version: 4.12.14(postcss@8.4.47)
@@ -1553,8 +1553,8 @@ packages:
   bindings@1.5.0:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
 
-  bits-ui@1.0.0-next.35:
-    resolution: {integrity: sha512-Bm9hPlswA1hbYwn3xmSUsimEp7UlpNcoT7YddshtG7zd/lcZe5I5vr27flRTjYlBOKkjX6V32b+xwHNBOKSvvA==}
+  bits-ui@1.0.0-next.60:
+    resolution: {integrity: sha512-00S8OuhtVnZxbeIMZAf5Az1wmfWTsktkLw4HImLaL7gWaagPEfG9fc3tGp28jN45vGmKhYRvRTsBNdQ31ugSfw==}
     engines: {node: '>=18', pnpm: '>=8.7.0'}
     peerDependencies:
       svelte: ^5.0.0-next.1
@@ -4491,7 +4491,7 @@ snapshots:
     dependencies:
       file-uri-to-path: 1.0.0
 
-  bits-ui@1.0.0-next.35(svelte@5.1.12):
+  bits-ui@1.0.0-next.60(svelte@5.1.12):
     dependencies:
       '@floating-ui/core': 1.6.7
       '@floating-ui/dom': 1.6.11

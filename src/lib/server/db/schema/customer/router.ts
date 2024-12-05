@@ -32,6 +32,7 @@ import { TRPCError } from '@trpc/server'
 import { geocodeAddress, getDistanceFromLatLonInKm } from '$lib/utils/distance'
 import { env } from '$env/dynamic/private'
 import { getDistribuidoraLatLong } from '../../central/constroller'
+import { format } from 'date-fns'
 
 export const customer = router({
   insertCustomer: publicProcedure
@@ -219,6 +220,7 @@ export const customer = router({
             cachier_id: order_info.cachier_id,
             observation: order_info.observation,
             taxa_entrega: order_info.taxa_entrega,
+            created_by: userId,
           })
           .returning()
 
@@ -251,7 +253,9 @@ export const customer = router({
           metadata: {
             order_id: order.id,
             customer_id: order_info.customer_id,
+            cashier_id: order_info.cachier_id,
           },
+          cashier_id: order_info.cachier_id,
           order_id:order.id,
           type: 'CAIXA',
           pathname: '/TODO:ROUTE',
@@ -354,7 +358,9 @@ export const customer = router({
               customer_id: order_info.customer_id,
               amount_paid: payment.amount_paid,
               troco: payment.troco,
+              cashier_id: order_info.cashier_id,
             },
+            cashier_id: order_info.cashier_id,
             order_id: order.id,
             type: 'CAIXA',
             pathname: '',
@@ -411,7 +417,8 @@ export const customer = router({
           }),
         }),
       )
-      .mutation(async ({ input, ctx: { tenantDb } }) => {
+      .mutation(async ({ input, ctx: { tenantDb,locals } }) => {
+        const userId = locals.user?.id
         const { order_items, order_info } = input
         const customer = await customerController(tenantDb).getCustomerById(
           order_info.customer_id,
@@ -443,6 +450,7 @@ export const customer = router({
             cachier_id: order_info.cachier_id,
             observation: order_info.observation,
             taxa_entrega: order_info.taxa_entrega,
+            created_by: userId,
           })
           .returning()
 
@@ -450,6 +458,21 @@ export const customer = router({
           ...item,
           order_id: order.id,
         }))
+
+        await bugReport(tenantDb).insertLogs({
+          text: `Pedido delivery, EM ESPERA`,
+          created_by: userId,
+          metadata: {
+            order_id: order.id,
+            customer_id: order_info.customer_id,
+            cashier_id: order_info.cachier_id,
+          },
+          cashier_id: order_info.cachier_id,
+          order_id:order.id,
+          type: 'CAIXA',
+          pathname: '/TODO:ROUTE',
+          routeName: 'Fiado',
+        })
 
         const order_items_db = await tenantDb
           .insert(orderItemTable)
@@ -507,6 +530,7 @@ export const customer = router({
               payment_id: payment_info.id,
               amount: payment_info.amount_paid,
             },
+            cashier_id: ctx.locals.user?.meta.caixa_id,
             order_id: payment_info.order_id,
             type: 'CAIXA',
             pathname: '/TODO:ROUTE',
@@ -518,6 +542,41 @@ export const customer = router({
           )
         }),
     }),
+  }),
+
+  updateOrderExpireDate: publicProcedure
+  .meta({
+    routeName: 'Atualizar Status do Pedido',
+    permission: 'atualizar_pedidos',
+  })
+  .use(middleware.logged)
+  .use(middleware.auth)
+  .input(
+    z.object({
+      order_id: z.number(),
+      expire_at: z.date(),
+    }),
+  )
+  .mutation(async ({ input, ctx }) => {
+    const { order_id, expire_at } = input
+    const { tenantDb } = ctx
+    const user = ctx.locals.user
+    await bugReport(tenantDb).insertLogs({
+      text: `${user?.username} atualizou a data de vencimento do pedido ${order_id} para ${format(expire_at,'dd/MM/yyyy')}`,
+      created_by: user?.id,
+      metadata: {
+        order_id,
+        expire_at,
+      },
+      order_id,
+      type: 'SYSTEM',
+      pathname: '',
+      routeName: 'Atualizar Pedido',
+    })
+    return await customerController(tenantDb).updateOrderExpireDate(
+      order_id,
+      expire_at,
+    )
   }),
 
   updateOrderStatus: publicProcedure

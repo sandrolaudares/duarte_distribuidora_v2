@@ -15,6 +15,55 @@
       "when": 1731348108095,
       "tag": "0001_optimal_lily_hollister",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1733177794415,
+      "tag": "0002_sour_speedball",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1733178963709,
+      "tag": "0003_brief_praxagora",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1733230006237,
+      "tag": "0004_sturdy_bucky",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1733232014656,
+      "tag": "0005_violet_magma",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1733257103046,
+      "tag": "0006_solid_red_hulk",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1733424164342,
+      "tag": "0007_greedy_vector",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1733432069519,
+      "tag": "0008_huge_aqueduct",
+      "breakpoints": true
     }
   ]
 }

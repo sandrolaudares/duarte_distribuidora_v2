@@ -20,6 +20,7 @@ import {
   lte,
   sum,
   sql,
+  type AnyColumn,
 } from 'drizzle-orm'
 import { customer } from '$lib/server/db/controller'
 import { gte } from 'drizzle-orm'
@@ -27,10 +28,9 @@ import { gte } from 'drizzle-orm'
 export const load = (async ({ url, locals: { tenantDb } }) => {
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
-  const pageSize = Number(searchParams.get('pageSize') ?? 10)
+  const pageSize = Number(searchParams.get('pageSize') ?? 100)
 
   const name = searchParams.get('name')
-  const expire_at = searchParams.get('expire_at')
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_direction')
@@ -42,66 +42,96 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const endExpireDate = searchParams.get('endExpireDate')
 
   const atrasados = Boolean(searchParams.get('atrasados'))
-  
 
-  let query = customer(tenantDb!)
-    .getAllOrderInfo()
-    .where(
-      and(
-        gt(
-          schema.customerOrderTable.total,
-          schema.customerOrderTable.amount_paid,
-        ),
-        eq(schema.customerOrderTable.is_fiado, true),
-        name ? like(schema.customerTable.name, `${name}%`) : undefined,
+  console.log(name)
 
-        dateStart && dateEnd
-          ? and(
-              gte(
-                schema.customerOrderTable.created_at,
-                new Date(Number(dateStart)),
-              ),
-              lte(
-                schema.customerOrderTable.created_at,
-                new Date(Number(dateEnd)),
-              ),
-            )
-          : undefined,
+  const condicoes = [
+    //TODO: NAME NÃO FILTRA
+    dateStart && dateEnd
+      ? and(
+          gte(
+            schema.customerOrderTable.created_at,
+            new Date(Number(dateStart)),
+          ),
+          lte(schema.customerOrderTable.created_at, new Date(Number(dateEnd))),
+        )
+      : undefined,
 
-          startExpireDate && endExpireDate
-          ? and(
-              gte(
-                schema.customerOrderTable.expire_at,
-                new Date(Number(startExpireDate)),
-              ),
-              lte(
-                schema.customerOrderTable.expire_at,
-                new Date(Number(endExpireDate)),
-              ),
-            )
-          : undefined,
-
-          atrasados ? lte(
+    startExpireDate && endExpireDate
+      ? and(
+          gte(
             schema.customerOrderTable.expire_at,
-            new Date()
-          ) : undefined
-      ),
-    )
-    .$dynamic()
+            new Date(Number(startExpireDate)),
+          ),
+          lte(
+            schema.customerOrderTable.expire_at,
+            new Date(Number(endExpireDate)),
+          ),
+        )
+      : undefined,
 
-  console.log('Date Start:', dateStart, 'Date End:', dateEnd)
-  console.log(sortId, sortOrder)
-
-  if (sortId && sortOrder) {
-
-    query = withOrderBy(
-      query,
-      getSQLiteColumn(schema.customerOrderTable, sortId),
-      sortOrder,
-    )
-  }
+    atrasados
+      ? lte(schema.customerOrderTable.expire_at, new Date())
+      : undefined,
+  ]
 
   try {
+    let query = tenantDb!
+      .select({
+        //Order:
+        id: schema.customerOrderTable.id,
+        created_at: schema.customerOrderTable.created_at,
+        updated_at: schema.customerOrderTable.updated_at,
+        is_fiado: schema.customerOrderTable.is_fiado,
+        observation: schema.customerOrderTable.observation,
+        amount_paid: schema.customerOrderTable.amount_paid,
+        total: schema.customerOrderTable.total,
+        status: schema.customerOrderTable.status,
+        type: schema.customerOrderTable.type,
+        expire_at: schema.customerOrderTable.expire_at,
+
+        //customer:
+        name: schema.customerTable.name,
+        email: schema.customerTable.email,
+        cellphone: schema.customerTable.cellphone,
+
+        //cashier
+        cashier: schema.cashierTable.name,
+      })
+      .from(schema.customerOrderTable)
+      .innerJoin(
+        schema.customerTable,
+        and(
+          name ? like(schema.customerTable.name, `${name}%`) : undefined,
+          eq(schema.customerTable.id, schema.customerOrderTable.customer_id),
+        )
+      )
+      .leftJoin(
+        schema.cashierTable,
+        eq(schema.cashierTable.id, schema.customerOrderTable.cachier_id),
+      )
+      .$dynamic()
+      .where(
+        and(
+          gt(
+            schema.customerOrderTable.total,
+            schema.customerOrderTable.amount_paid,
+          ),
+          eq(schema.customerOrderTable.is_fiado, true),
+          ...condicoes,
+        ),
+      )
+
+    console.log('Date Start:', dateStart, 'Date End:', dateEnd)
+    console.log(sortId, sortOrder)
+
+    if (sortId && sortOrder) {
+      query = withOrderBy(
+        query,
+        getSQLiteColumn(schema.customerOrderTable, sortId),
+        sortOrder,
+      )
+    }
     const rows = await withPagination(query, page, pageSize)
 
     const total = await tenantDb!
@@ -114,38 +144,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
             schema.customerOrderTable.amount_paid,
           ),
           eq(schema.customerOrderTable.is_fiado, true),
-          name ? like(schema.customerTable.name, `${name}%`) : undefined,
-  
-          dateStart && dateEnd
-            ? and(
-                gte(
-                  schema.customerOrderTable.created_at,
-                  new Date(Number(dateStart)),
-                ),
-                lte(
-                  schema.customerOrderTable.created_at,
-                  new Date(Number(dateEnd)),
-                ),
-              )
-            : undefined,
-            startExpireDate && endExpireDate
-          ? and(
-              gte(
-                schema.customerOrderTable.expire_at,
-                new Date(Number(startExpireDate)),
-              ),
-              lte(
-                schema.customerOrderTable.expire_at,
-                new Date(Number(endExpireDate)),
-              ),
-            )
-          : undefined,
-          atrasados ? lte(
-            schema.customerOrderTable.expire_at,
-            new Date()
-          ) : undefined
-
-            
+          ...condicoes,
         ),
       )
 
@@ -165,35 +164,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
             schema.customerOrderTable.amount_paid,
           ),
           eq(schema.customerOrderTable.is_fiado, true),
-          name ? like(schema.customerTable.name, `${name}%`) : undefined,
-          dateStart && dateEnd
-            ? and(
-                gte(
-                  schema.customerOrderTable.created_at,
-                  new Date(Number(dateStart)),
-                ),
-                lte(
-                  schema.customerOrderTable.created_at,
-                  new Date(Number(dateEnd)),
-                ),
-              )
-            : undefined,
-            startExpireDate && endExpireDate
-          ? and(
-              gte(
-                schema.customerOrderTable.expire_at,
-                new Date(Number(startExpireDate)),
-              ),
-              lte(
-                schema.customerOrderTable.expire_at,
-                new Date(Number(endExpireDate)),
-              ),
-            )
-          : undefined,
-          atrasados ? lte(
-            schema.customerOrderTable.expire_at,
-            new Date()
-          ) : undefined
+          ...condicoes,
         ),
       )
 

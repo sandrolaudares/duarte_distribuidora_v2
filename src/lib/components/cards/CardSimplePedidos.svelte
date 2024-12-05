@@ -1,30 +1,39 @@
 <script lang="ts">
-  import type { CurrentOrders } from '$db/schema/customer/controller.ts'
+  import type { CurrentOrders } from '$lib/server/db/schema/customer/controller'
   import { getImagePath } from '$lib/utils'
+  import type { RouterInputs, RouterOutputs } from '$trpc/router'
   import PaymentFiado from '../PaymentFiado.svelte'
   import { format } from 'date-fns';
+  import SenhaAdmin from '../SenhaAdmin.svelte'
+
+  import { trpc } from '$trpc/client'
+  import { page } from '$app/stores'
+  import { toast } from 'svelte-sonner'
 
   export let click_confirm = () => {}
   export let click_refuse = () => {}
+  export let cancel_order = ()=>{}
 
   export let button_text = ''
   export let button_recusar = ''
-  export let order: CurrentOrders[0]
+  export let order: RouterOutputs['customer']['getCurrentOrders'][0]
   export let motoboy = ''
   // export let columns = 1
 
   export let troco = 0
   
   let isOpenModal: HTMLDialogElement | null = null
+  let isOpenModalCancel: HTMLDialogElement | null = null
 
   let amount_paid_order = (order?.amount_paid ?? 0) - troco
+
 </script>
 
 <div class="rounded-lg bg-base-200 bg-opacity-80 p-2 shadow-md">
   <div class="flex justify-between">
     <div class="flex items-center gap-3">
       <span class="font-semibold">
-        {format(order.created_at,'dd/MM/yyyy')}
+        {format(order.created_at!,'dd/MM/yyyy')}
       </span>
         {#if order.is_fiado}
           <p class="text-sm font-semibold text-error">É um pedido fiado!</p>
@@ -71,14 +80,15 @@
             <span class="text-sm text-error">Pagamento ainda pendente</span>
           {/if}
     </div>
-    <span class="font-semibold">
-      Motoboy:
-    </span>
-     {motoboy ? motoboy:''}
+      {#if motoboy}
+      <span class="font-semibold">
+        Motoboy: {motoboy}
+      </span>
+      {/if}
     <div class="">
       <!-- <p class="text-opacity-60"><span class="font-semibold">Criado em:</span> {order.created_at}</p> -->
       <div class="flex flex-col items-start justify-between">
-        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2">
           {#if order.taxa_entrega}
             <span>Taxa entrega: <span class="font-bold text-neutral ">R${(order?.taxa_entrega / 100).toFixed(2)}</span> </span>
           {/if}
@@ -98,6 +108,11 @@
         <button on:click={click_refuse} class="badge py-3 badge-error w-full">
           {button_recusar}
         </button>
+      {/if}
+      {#if order.status === 'CONFIRMED'}
+      <button class=" badge py-3 badge-error" on:click={()=>isOpenModalCancel?.showModal()}>
+        Cancelar
+      </button>
       {/if}
       {#if button_text && (order.status !== 'ON THE WAY' || order.payments.length !== 0 || order.is_fiado)}
         <button on:click={click_confirm} class="badge py-3 badge-info w-full">
@@ -125,3 +140,17 @@
       <button>close</button>
     </form>
   </dialog>
+
+  <dialog class="modal" bind:this={isOpenModalCancel}>
+    <div class="modal-box max-w-2xl">
+     <SenhaAdmin reason='Cancelar pedido' onSuccess={()=>{
+      cancel_order()
+      isOpenModalCancel?.close()
+     }}/>
+    </div>
+
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+

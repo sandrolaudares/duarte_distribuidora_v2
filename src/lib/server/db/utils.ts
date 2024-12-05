@@ -1,5 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { asc, count, desc, like, sql, type AnyColumn } from 'drizzle-orm'
+import {
+  and,
+  asc,
+  count,
+  desc,
+  like,
+  SQL,
+  sql,
+  type AnyColumn,
+} from 'drizzle-orm'
 import {
   SQLiteTable,
   getTableConfig,
@@ -51,7 +60,6 @@ export function getOrderBy(column: AnyColumn, order?: string) {
   return order === 'asc' ? asc(column) : desc(column)
 }
 
-
 export function withOrderBy<T extends SQLiteSelect>(
   qb: T,
   column?: AnyColumn,
@@ -86,4 +94,25 @@ export const timestamps = {
   deleted_at: integer('deleted_at', {
     mode: 'timestamp',
   }),
+}
+
+export function innerJoinOnMany<T extends SQLiteSelect>(
+  qb: T,
+  table: SQLiteTable,
+  filters: (SQL | undefined)[],
+) {
+  const fFilters = filters.filter(f => f !== undefined)
+
+  if (fFilters.length === 0) {
+    console.log('No join');
+    
+    return qb
+  }
+  if (fFilters.length > 1) {
+    console.log('Maior que um join',fFilters);
+    
+    return qb.innerJoin(table, and(...filters))
+  }
+  console.log('Um join só',filters)
+  return qb.leftJoin(table, filters[0])
 }

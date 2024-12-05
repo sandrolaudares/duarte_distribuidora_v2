@@ -168,6 +168,9 @@ export const customer = (db: TenantDbType) => ({
       },
     })
   },
+  updateOrderExpireDate:async(order_id:SelectCustomerOrder['id'],date:SelectCustomerOrder['expire_at']) =>{
+    return await db.update(customerOrderTable).set({expire_at:date}).where(eq(customerOrderTable.id, order_id))
+  },
 
   updateOrderStatus: async (
     order_id: SelectCustomerOrder['id'],

@@ -11,6 +11,7 @@ import { userTable } from '../user'
 import { createInsertSchema } from 'drizzle-zod'
 import { customerOrderTable } from '../customer'
 import { timestamps } from '../../utils'
+import { cashierTable } from '../distribuidora'
 
 export const bugReportTable = sqliteTable('bugReport', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
@@ -49,7 +50,8 @@ export const logsTable = sqliteTable('logs', {
   metadata: text('metadata', { mode: 'json' }),
   error: text('error', { mode: 'json' }),
   currency: integer('currency'),
-  order_id: integer('order_id').references(()=>customerOrderTable.id)
+  order_id: integer('order_id').references(()=>customerOrderTable.id),
+  cashier_id: integer('cashier_id').references(()=>cashierTable.id)
 })
 
 export const logRelations = relations(logsTable, ({ one }) => ({

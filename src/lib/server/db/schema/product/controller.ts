@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { eq } from 'drizzle-orm'
-
+import { eq, isNotNull } from 'drizzle-orm'
 
 import {
   productTable,
@@ -15,10 +14,10 @@ import type {
   InsertProductCategory,
   SelectProductItem,
 } from '$db/schema'
-import { getRowCount } from '$db/utils'
+// import { getRowCount } from '$db/utils'
 import type { TenantDbType } from '../../tenant'
 
-export const product = (db:TenantDbType) =>  ({
+export const product = (db: TenantDbType) => ({
   // Product
   insertProduct: (data: InsertProduct) => {
     return db.insert(productTable).values(data)
@@ -139,5 +138,12 @@ export const product = (db:TenantDbType) =>  ({
       },
     })
   },
-}
-)
+  queryProductItemsWhere: () => {
+    return db.query.productItemTable.findMany({
+      where: items => isNotNull(items.sku),
+      with: {
+        sku: true,
+      },
+    })
+  },
+})

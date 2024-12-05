@@ -13,6 +13,8 @@
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
   import Loading from '$lib/components/Loading.svelte'
   import UsedCredits from '$lib/components/UsedCredits.svelte'
+  import AvailableCredits from '$lib/components/AvailableCredits.svelte'
+  import CustomerInfo from '$lib/components/cards/CustomerInfo.svelte'
 
   export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
   export let caixa
@@ -33,7 +35,7 @@
   export let isDelivery = false
 
   export let taxaEntrega = 0
-  
+
   const cart = getCartContext()
 
   export let fee = 0
@@ -79,9 +81,9 @@
   let distance = 0
 
   let isLoading = false
-  
+
   async function getDistance() {
-    isLoading= true
+    isLoading = true
     try {
       if (enderecoCliente) {
         distance = await trpc($page).customer.calculateDistance.mutate({
@@ -93,13 +95,13 @@
           cep: enderecoCliente.cep,
           country: enderecoCliente.country,
         })
-        taxaEntrega = (distance / 1000) * (fee / 100);
-        taxaEntrega *= 100;
-        taxaEntrega = Math.round(taxaEntrega / 100) * 100;
+        taxaEntrega = (distance / 1000) * (fee / 100)
+        taxaEntrega *= 100
+        taxaEntrega = Math.round(taxaEntrega / 100) * 100
         console.log(taxaEntrega)
         console.log(distance)
         toast.success('Distancia: ' + (distance / 1000).toFixed(2) + 'km')
-        isLoading=false
+        isLoading = false
       }
     } catch (error: any) {
       toast.error(error.message)
@@ -107,9 +109,22 @@
     }
   }
 
-  $: if(enderecoCliente) {
+  $: if (enderecoCliente) {
     isDelivery = true
   }
+  const formattedAddress = enderecoCliente
+  ? [
+      enderecoCliente.cep ? `${enderecoCliente.cep}` : '',
+      enderecoCliente.city,
+      enderecoCliente.neighborhood,
+      enderecoCliente.street,
+      enderecoCliente.number,
+      enderecoCliente.state,
+    ]
+      .filter(Boolean)
+      .join(', ')
+  : null;
+
 </script>
 
 <div class="flex h-auto flex-col-reverse justify-between md:flex-col">
@@ -163,27 +178,26 @@
     {caixa.status === 'Aberto' ? 'Em aberto' : 'Fechado'}
   </div> -->
   <div class="mt-2 flex flex-col-reverse gap-2 md:flex-col">
-    <div class=" rounded-box bg-base-200 p-4">
+    <div class="">
       {#if clienteSelecionado}
-        <div class="flex items-center justify-between gap-2">
-          <span>
-            <p class="font-bold">
-              {clienteSelecionado.name} - {clienteSelecionado.email}
-            </p>
-            Créditos usados: <UsedCredits id={clienteSelecionado.id}/> - R${(clienteSelecionado.max_credit/100).toFixed(2)}
-          </span>
-          <button
-            class="btn btn-primary"
-            on:click={() => {
-              clienteSelecionado = null
-              enderecoCliente = null
-              distance = 0
-              taxaEntrega = 0
-            }}
-          >
-            Desvincular
-          </button>
-        </div>
+        <CustomerInfo
+          customer={clienteSelecionado}
+          address={formattedAddress}
+          distance={distance}
+          bind:deliveryFee={taxaEntrega}
+          isLoading={isLoading}
+          desvincular={() => {
+            clienteSelecionado = null
+            enderecoCliente = null
+            distance = 0
+            taxaEntrega = 0
+          }}
+        >
+        <AvailableCredits
+              id={clienteSelecionado.id}
+              max_credit={clienteSelecionado.max_credit}
+            />
+      </CustomerInfo>
       {:else}
         <button
           class="btn btn-outline w-full disabled:bg-opacity-50"
@@ -191,25 +205,6 @@
         >
           <span class="mr-1">Vincular compra a um cliente</span>
         </button>
-      {/if}
-      {#if enderecoCliente}
-        <div class="mt-2 max-w-[50vh] flex-wrap items-center justify-between">
-          <strong>Endereço:</strong>
-          {enderecoCliente?.cep} -
-          {enderecoCliente?.city}, {enderecoCliente?.neighborhood}, {enderecoCliente?.street},
-          {enderecoCliente?.number}, {enderecoCliente.state}
-        </div>
-        {#if distance}
-          <h1>Distancia até endereço: {(distance / 1000).toFixed(2)}km</h1>
-        {/if}
-        {#if isLoading === true}
-          Taxa de entrega carregando...
-        {:else if taxaEntrega !== null}
-        <div class="flex flex-col">
-          <span>Taxa de entrega: R${(taxaEntrega / 100).toFixed(2)}</span>
-          <span class="mt-2">Definir manualmente valor da entrega: <CurrencyInput bind:value={taxaEntrega}/></span>
-        </div>
-        {/if}
       {/if}
     </div>
     <div class="my-1 flex flex-col items-center justify-center gap-1">
@@ -233,7 +228,7 @@
               </span>
             </p>
             <button
-              class="btn btn-accent"
+              class="btn btn-accent btn-sm"
               on:click={() => {
                 motoboySelecionado = null
                 isDelivery = false

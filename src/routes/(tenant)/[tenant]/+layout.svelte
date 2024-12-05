@@ -28,10 +28,7 @@
 
 </script>
 
-  {#if $navigating}
-    <PreLoadingIndicator />
-  {/if}
-  <Toaster richColors closeButton />
+
   <!-- <DrawerContainer> -->
   <!-- <NavBar> -->
    <SideBar activeTeam={data.tenant!}>

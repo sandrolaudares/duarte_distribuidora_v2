@@ -1,0 +1,1 @@
+ALTER TABLE `product_item` ADD `visible` integer DEFAULT true NOT NULL;

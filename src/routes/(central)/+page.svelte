@@ -8,8 +8,8 @@
 
 <div class="container mx-auto px-4 py-8">
   <h1 class="mb-8 text-center text-4xl font-bold">Distribuidoras</h1>
+  {#if data.tenats.length > 0}
   <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-    {#if data.tenats.length > 0}
     {#each data.tenats as tenant}
       <a href="https://{tenant.subdomain}.{PUBLIC_DOMAIN}" class="group block">
         <div
@@ -37,8 +37,8 @@
         </div>
       </a>
     {/each}
+  </div>
     {:else}
     <h1 class="text-center my-10 text-xl">Nenhuma distribuidora criada, <a href="/create" class="underline text-info">clique aqui</a> para criar</h1>
     {/if}
-  </div>
 </div>

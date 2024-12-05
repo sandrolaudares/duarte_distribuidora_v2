@@ -385,7 +385,7 @@
             {/if}
           </button>
           {/if}
-          {#if form?.message}
+          {#if form?.success === false}
             <div class="mt-4 rounded-md bg-error bg-opacity-20 p-4">
               <div class="flex">
                 <div class="flex-shrink-0">
@@ -414,22 +414,5 @@
           {/if}
       </form>
       {/if}
-    <!-- <hr class="my-1" />
-  <div class="flex justify-between">
-    <button
-      class="btn btn-secondary"
-      onclick={() => handleProgress(-1)}
-      disabled={currentActive === 1}
-    >
-      Passo anterior
-    </button>
-    <button
-      class="btn btn-primary"
-      onclick={() => handleProgress(+1)}
-      disabled={currentActive === steps.length}
-    >
-      Próximo passo
-    </button>
-  </div> -->
   </div>
 </div>

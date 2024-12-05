@@ -1,0 +1,1 @@
+ALTER TABLE `contas` ADD `paid_at` integer;

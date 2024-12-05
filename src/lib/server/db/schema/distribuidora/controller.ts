@@ -7,12 +7,7 @@ import {
   logsTable,
 } from '$db/schema'
 
-import type {
-  SelectCashier,
-  InsertCashier,
-
-  InsertLogs,
-} from '$db/schema'
+import type { SelectCashier, InsertCashier, InsertLogs } from '$db/schema'
 
 import { eq, sql } from 'drizzle-orm'
 import type { TenantDbType } from '../../tenant'
@@ -33,7 +28,7 @@ export const distribuidora = (db: TenantDbType) => ({
       .where(eq(cashierTable.id, id))
       .limit(1)
   },
-  
+
   updateCashier: function updateCashier(
     id: SelectCashier['id'],
     data: Partial<SelectCashier>,
@@ -47,7 +42,17 @@ export const distribuidora = (db: TenantDbType) => ({
     return db.select().from(userTable).where(eq(userTable.role, 'motoboy'))
   },
 
-  getDistribuidoras: ()=>{
+  getDistribuidoras: () => {
     return centralDb.select().from(tenants)
-  }
+  },
+  getAdmins: () => {
+    return db
+      .select({
+        id: userTable.id,
+        name: userTable.username,
+        email: userTable.email,
+      })
+      .from(userTable)
+      .where(eq(userTable.role, 'admin'))
+  },
 })

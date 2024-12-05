@@ -17,6 +17,16 @@
 					},
 				],
 			},
+			{
+				title: "Transferências estoque",
+				url: "/",
+				items: [
+					{
+						title: "Solicitações",
+						url: "/transferir",
+					},
+				],
+			},
 		],
 	};
 </script>
