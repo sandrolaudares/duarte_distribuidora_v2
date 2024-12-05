@@ -24,6 +24,7 @@
   import type { SelectConta } from '$lib/server/db/schema'
   import { toast } from 'svelte-sonner'
   import { invalidate, invalidateAll } from '$app/navigation'
+  import DateFilter from '$lib/components/DateFilter.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -57,6 +58,7 @@
     titulo: '',
     isPaid: false,
     categoria_id: 0,
+    paid_at: new Date()
   }
   let isLoading = $state(false)
   async function createConta() {
@@ -101,6 +103,20 @@
   }
 
   const paidFilter = table.createFilter('isPaid')
+
+  async function pagar(id:number){
+    isLoading = true
+    try {
+      await trpc($page).contas.pagarConta.mutate(id)
+      await invalidateAll()
+      toast.success('Sucesso ao pagar conta')
+    } catch (error: any) {
+      toast.error(error.message)
+    } finally {
+      isLoading = false
+      window.location.reload()
+    }
+  }
 </script>
 
 <div class="container mx-auto p-4">
@@ -151,6 +167,7 @@
             <Th>Fornecedor</Th>
             <Th>Categoria</Th>
             <Th>Data vencimento</Th>
+            <Th>Pago em</Th>
             <ThSort {table} field="valor_conta">Valor</ThSort>
             <Th></Th>
             <Th></Th>
@@ -159,8 +176,20 @@
             <ThFilter {table} field="titulo" />
             <Th />
             <ThFilter {table} field="supName" />
-            <ThFilter {table} field="catName" />
-            <Th />
+            <!-- <ThFilter {table} field="catName" /> -->
+             <Th/>
+             <Th/>
+            <Th>
+              <!-- <DateFilter
+              onchange={(start, end) => {
+                if (start != null && end != null) {
+                  let startDate = start.toString()
+                  let endDate = end.toString()
+                  filters.update({ startDate, endDate })
+                }
+              }}
+            /> -->
+            </Th>
             <Th />
             <Th />
             <Th />
@@ -179,6 +208,8 @@
               <td class="p-3">{conta.supName}</td>
               <td class="p-3">{conta.catName ?? 'Não cadastrado'}</td>
               <td class="p-3">{format(conta.expire_at!, 'dd/MM/yyyy')}</td>
+
+              <td class="p-3">{conta.paid_at?format(conta.paid_at, 'dd/MM/yyyy'):'Ainda não foi paga'}</td>
               <td class="p-3">R${(conta.valor_conta / 100).toFixed(2)}</td>
               <td class="p-3">
                 <span
@@ -193,11 +224,11 @@
               </td>
               <td class="p-3">
                 <button
-                  class="mr-2 rounded px-3 py-1 text-sm font-semibold transition-colors"
-                  class:bg-green-500={!conta.isPaid}
-                  class:hover:bg-green-600={!conta.isPaid}
-                  class:text-white={!conta.isPaid}
-                  class:bg-gray-300={conta.isPaid}
+                onclick={()=>pagar(conta.id)}
+                  class="btn btn-sm"
+                  class:btn-success={!conta.isPaid}
+                  class:text-success-content={!conta.isPaid}
+                  disabled={isLoading || conta.isPaid}
                 >
                   {conta.isPaid ? 'PAGO' : 'Pagar'}
                 </button>
@@ -209,6 +240,11 @@
       {#if data.rows.length === 0}
         <NoResults />
       {/if}
+      {#snippet footer()}
+      <RowsPerPage {table} />
+      <div></div>
+      <Pagination {table} />
+    {/snippet}
     </Datatable>
   </div>
 

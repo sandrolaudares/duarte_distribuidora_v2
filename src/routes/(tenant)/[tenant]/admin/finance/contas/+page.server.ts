@@ -6,7 +6,7 @@ import {
 } from '$lib/server/db/utils'
 import type { PageServerLoad } from './$types'
 import * as schema from '$lib/server/db/schema'
-import { and, asc, count, eq, like, sql } from 'drizzle-orm'
+import { and, asc, count, eq, gte, like, lte, sql } from 'drizzle-orm'
 import { stock } from '$lib/server/db/controller'
 
 export const load = (async ({ url, locals: { tenantDb } }) => {
@@ -21,6 +21,9 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const fornecedor = searchParams.get('supName')
   const categoria = searchParams.get('catName')
 
+  const dateStart = searchParams.get('startDate')
+  const dateEnd = searchParams.get('endDate')
+
   const pagosParams = searchParams.get('isPaid')
   console.log(pagosParams)
   const pagos = pagosParams === 'paid' ? true : pagosParams === 'unpaid' ? false : pagosParams ==='todos'? undefined :undefined
@@ -30,6 +33,15 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const condicoes = [
     titulo ? like(schema.contasPagarTable.titulo, `${titulo}%`) : undefined,
     pagos !== undefined ? eq(schema.contasPagarTable.isPaid, pagos) : undefined,
+    dateStart && dateEnd
+      ? and(
+          gte(
+            schema.contasPagarTable.paid_at,
+            new Date(Number(dateStart)),
+          ),
+          lte(schema.contasPagarTable.paid_at, new Date(Number(dateEnd))),
+        )
+      : undefined,
   ]
 
   const fornecedores = await stock(tenantDb!).getSupplier()
@@ -45,12 +57,14 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         isPaid: schema.contasPagarTable.isPaid,
         expire_at: schema.contasPagarTable.expire_at,
         valor_conta: schema.contasPagarTable.valor_conta,
+        paid_at:schema.contasPagarTable.paid_at,
 
         catName: schema.categoriaConta.nome,
 
         supName: schema.supplierTable.name,
       })
       .from(contasPagarTable)
+      .where(and(...condicoes))
       .innerJoin(
         schema.supplierTable,
         and(
@@ -70,7 +84,6 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         ),
       )
       .$dynamic()
-      .where(and(...condicoes))
       .orderBy(asc(schema.contasPagarTable.expire_at))
 
     if (sortId && sortOrder) {

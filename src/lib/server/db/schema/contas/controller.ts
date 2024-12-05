@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm'
 import {
   categoriaConta,
   contasPagarTable,
@@ -16,5 +17,11 @@ export const contasController = (db: TenantDbType) => ({
   },
   insertCategoria: (input: InsertCategoria) => {
     return db.insert(categoriaConta).values(input)
+  },
+  pagarConta: (id: number) => {
+    return db
+      .update(contasPagarTable)
+      .set({ isPaid: true, paid_at: new Date() })
+      .where(eq(contasPagarTable.id, id))
   },
 })
