@@ -50,7 +50,7 @@
     try {
       for (let dat of data) {
         await trpc($page).distribuidora.solicitarTransference.mutate({
-          meta_data: dat.meta_data,
+          meta_data: JSON.stringify(dat.meta_data),
           sku: dat.sku,
           sku_name: dat.sku_name,
           toTenantId: dat.toTenantId,
