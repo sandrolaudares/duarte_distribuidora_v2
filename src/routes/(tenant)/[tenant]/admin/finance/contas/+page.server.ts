@@ -34,6 +34,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
 
   const fornecedores = await stock(tenantDb!).getSupplier()
   const categorias = await tenantDb!.select().from(schema.categoriaConta)
+  
 
   try {
     let query = tenantDb!
@@ -84,14 +85,50 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     const total = await tenantDb!
       .select({ count: count() })
       .from(contasPagarTable)
-      .where(and(...condicoes))
+      .innerJoin(
+        schema.supplierTable,
+        and(
+          fornecedor
+            ? like(schema.supplierTable.name, `${fornecedor}%`)
+            : undefined,
+          eq(schema.supplierTable.id, contasPagarTable.fornecedor_id),
+        ),
+      )
+      .leftJoin(
+        schema.categoriaConta,
+        and(
+          categoria
+            ? like(schema.categoriaConta.nome, `${categoria}%`)
+            : undefined,
+          eq(schema.categoriaConta.id, contasPagarTable.categoria_id),
+        ),
+      )
       .$dynamic()
+      .where(and(...condicoes))
 
     const totalSumResult = await tenantDb!
       .select({
         totalSum: sql<number>`SUM(${schema.contasPagarTable.valor_conta})`,
       })
       .from(contasPagarTable)
+      .innerJoin(
+        schema.supplierTable,
+        and(
+          fornecedor
+            ? like(schema.supplierTable.name, `${fornecedor}%`)
+            : undefined,
+          eq(schema.supplierTable.id, contasPagarTable.fornecedor_id),
+        ),
+      )
+      .leftJoin(
+        schema.categoriaConta,
+        and(
+          categoria
+            ? like(schema.categoriaConta.nome, `${categoria}%`)
+            : undefined,
+          eq(schema.categoriaConta.id, contasPagarTable.categoria_id),
+        ),
+      )
       .where(and(...condicoes))
       .$dynamic()
 
