@@ -61,6 +61,11 @@ export const distribuidora = router({
         id: z.number(),
         data: z.object({
           taxa_por_km: z.number(),
+          name: z.string().optional(),
+          address: z.string().optional(),
+          lat: z.number().optional(),
+          lng: z.number().optional(),
+          subdomain: z.string().optional(),
         }),
       }),
     )
@@ -88,6 +93,7 @@ export const distribuidora = router({
         metadata: {
           cashier_id: id,
         },
+        cashier_id:id,
         type: 'CAIXA',
         pathname: '',
         routeName: 'Abrir caixa',
@@ -116,6 +122,7 @@ export const distribuidora = router({
         metadata: {
           cashier_id: id,
         },
+        cashier_id:id,
         type: 'CAIXA',
         pathname: '',
         routeName: 'Fechar caixa',

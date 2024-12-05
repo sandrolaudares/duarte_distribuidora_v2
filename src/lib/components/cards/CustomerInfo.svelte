@@ -6,7 +6,7 @@
   export let desvincular: () => void
 
   export let customer: SelectCustomer
-  export let address: string
+  export let address: string | null
   export let distance: number
   export let deliveryFee: number
   export let isLoading: boolean
@@ -27,10 +27,9 @@
       <div class="flex items-center space-x-4 text-sm">
         <CreditCard class="h-4 w-4" />
         <span class="font-medium">Créditos disponiveis:</span>
-        <!-- <span>{credits}</span> -->
         <slot></slot>
       </div>
-      {#if address}
+      {#if address !==null}
       <div class="flex items-start space-x-4 text-sm">
         <MapPin class="mt-0.5 h-4 w-4" />
           <div class="">

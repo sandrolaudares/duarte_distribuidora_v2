@@ -14,12 +14,12 @@
         })}
       </div>
       <h1 class="mb-4 text-6xl font-bold text-error">{$page.status}</h1>
-      <h2 class="mb-6 text-2xl font-semibold">Something went wrong</h2>
+      <h2 class="mb-6 text-2xl font-semibold">Algo deu errado</h2>
       <p class="mb-4">
         {$page.error?.message ||
-          'An unexpected error has occurred. Please try again later.'}
+          'Um erro inesperado aconteceu, atualize a página.'}
       </p>
-      <a href="/" class="btn btn-primary">Go Back Home</a>
+      <a href="/" class="btn btn-primary">Voltar à página inicial</a>
     </div>
   </div>
 </main>

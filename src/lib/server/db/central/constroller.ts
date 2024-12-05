@@ -172,7 +172,7 @@ export async function createTenant(newTenantInfo: {
   return {
     success: true,
     data: {
-      domain: `http://${subdomain}.${PUBLIC_DOMAIN}`,
+      domain: `https://${subdomain}.${PUBLIC_DOMAIN}`,
     },
   }
 }
@@ -181,7 +181,7 @@ export async function updateDistribuidora(
   id: SelectTenant['tenantId'],
   data: Partial<SelectTenant>,
 ) {
-  return db.update(tenants).set(data).where(eq(tenants.tenantId, id))
+  return db.update(tenants).set(data).where(eq(tenants.tenantId, id)).returning()
 }
 
 export async function getDistribuidoraLatLong(id: SelectTenant['tenantId']) {
@@ -263,8 +263,10 @@ export async function acceptTransference(
   //TODO: validate quantidade do from
   try {
     const skyFrom: SelectSku = await fetch(
-      `https://${transference?.fromTenantId}.${PUBLIC_DOMAIN}/api/stock/${transference?.sku}`,
+      `http://${transference?.fromTenantId}.${PUBLIC_DOMAIN}/api/stock/${transference?.sku}`,
     ).then(res => res.json())
+
+    console.log(skyFrom)
 
     if (transference?.quantity && skyFrom.quantity < transference?.quantity) {
       return {
