@@ -231,7 +231,6 @@
     Ver transacoes do caixa
   </button> -->
 </div>
-<h1 class="mb-1 text-center text-3xl font-semibold">Caixa:</h1>
 {#if caixa.status === 'Fechado'}
   <div class="flex justify-center">
     <label class="form-control w-full max-w-xs gap-2">
