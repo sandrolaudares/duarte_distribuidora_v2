@@ -2,7 +2,7 @@
   import type { SelectProductItem, SelectSku } from '$lib/server/db/schema'
   import { getImagePath, icons } from '$lib/utils'
 
-  export let products
+  export let products:SelectSku[]
   export let cart: Cart
   export let searchTerm = ''
 
@@ -11,14 +11,12 @@
     {
       sku: SelectSku
       totalQuantity: number
-      item: SelectProductItem
     }
   >
 
   function addItem(input: {
     quantity: number
     sku: SelectSku
-    item: SelectProductItem
   }) {
     const existing = cart[input.sku.sku]
 
@@ -28,7 +26,6 @@
       cart[input.sku.sku] = {
         totalQuantity: input.quantity,
         sku: input.sku,
-        item: input.item,
       }
     }
 
@@ -45,12 +42,10 @@
   function setItem(input: {
     quantity: number
     sku: SelectSku
-    item: SelectProductItem
   }) {
     cart[input.sku.sku] = {
       totalQuantity: input.quantity,
       sku: input.sku,
-      item: input.item,
     }
     cart = { ...cart }
     return cart
@@ -74,73 +69,60 @@
     <div class="max-h-[calc(100vh-320px)] space-y-2 overflow-y-auto pr-2">
       <div class="card w-full p-1">
         <div class="grid grid-cols-1 gap-3">
-          {#each products as item}
-            {@const cartItem = cart[item.sku!.sku]}
+          {#each products as skus}
+            {@const cartItem = cart[skus.sku]}
             <hr />
             <div class="flex w-full">
               <div class=" hidden flex-none md:block md:w-auto">
                 <img
                   alt="imagem"
-                  src={getImagePath(item.image)}
+                  src={getImagePath(skus.image)}
                   class="h-10 w-10 rounded-lg object-cover md:h-16 md:w-16"
                 />
               </div>
               <div class="ml-4 w-full">
-                <h2 class="font-bold md:text-xl">{item.name}</h2>
+                <h2 class="font-bold md:text-xl">{skus.name}</h2>
                 <h3 class="md:text-md">
-                  Em estoque: <strong>{item.sku?.quantity}</strong>
+                  Em estoque: <strong>{skus.quantity}</strong>
                 </h3>
               </div>
               <div class="w-full text-right">
                 <div class="flex items-center justify-end gap-3 text-center">
+                  {#if cartItem?.totalQuantity >= 1}
                   <button
                     class="btn btn-primary hidden md:block"
                     on:click={() => {
-                      if (!item.sku) {
-                        console.error('SKU is null')
-                        return
-                      }
                       if (cartItem.totalQuantity <= 1) {
-                        removeItem(item.sku)
+                        removeItem(skus.sku)
                       } else {
                         addItem({
-                          item: item,
-                          quantity: -1 * item.quantity,
-                          sku: item.sku,
+                          sku: skus,
+                          quantity: -1,
+                          
                         })
                       }
                     }}
                   >
                     {@html icons.minus()}
                   </button>
-
+                  {/if}
                   <input
                     min="1"
                     class="max-w-16 bg-base-200 text-right text-xl font-bold focus:border-yellow-500 md:min-w-10 md:max-w-28"
-                    value={0}
+                    value={cart[skus.sku]?.totalQuantity ?? 0}
                     on:input={e => {
-                      if (!item.sku) {
-                        console.error('SKU is null')
-                        return
-                      }
                       const quant_temp = (e.target as HTMLInputElement)?.value
                       setItem({
-                        item: item,
                         quantity: Number(quant_temp),
-                        sku: item.sku,
+                        sku: skus,
                       })
                     }}
                   />
                   <button
                     on:click={() => {
-                      if (!item.sku) {
-                        console.error('SKU is null')
-                        return
-                      }
                       addItem({
-                        item: item,
-                        quantity: 1 * item.quantity,
-                        sku: item.sku,
+                        quantity: 1,
+                        sku: skus,
                       })
                     }}
                     class="btn btn-primary"

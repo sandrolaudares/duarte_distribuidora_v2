@@ -24,7 +24,7 @@
       sku: SelectSku
       totalQuantity: number
       // productQuantity:number
-      item: SelectProductItem
+      // item: SelectProductItem
     }
   >
 
@@ -104,7 +104,7 @@
               status: 'REQUESTED',
               fromTenantId: null,
               toTenantId: data.tenant?.tenantId || 0,
-              quantity: product.totalQuantity * product.item.quantity,
+              quantity: product.totalQuantity ,
               meta_data: {},
             }))
             handleSolicitarTransferir(dataInsert)

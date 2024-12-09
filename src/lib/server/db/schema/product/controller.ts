@@ -138,12 +138,7 @@ export const product = (db: TenantDbType) => ({
       },
     })
   },
-  queryProductItemsWhere: () => {
-    return db.query.productItemTable.findMany({
-      where: items => isNotNull(items.sku),
-      with: {
-        sku: true,
-      },
-    })
+  querySkus: () => {
+    return db.query.skuTable.findMany()
   },
 })
