@@ -8,7 +8,7 @@ import { solicitarTransference } from '$lib/server/db/central/constroller'
 import type { InsertStockTransference } from '$lib/server/db/central/schema'
 export const load = (async ({ locals: { tenantDb } }) => {
   try {
-    const products = await product(tenantDb!).queryProductItemsWhere()
+    const products = await product(tenantDb!).querySkus()
 
     return {
       products,
