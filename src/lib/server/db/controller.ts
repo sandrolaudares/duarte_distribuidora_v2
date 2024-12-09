@@ -19,7 +19,7 @@ export { contasController } from './schema/contas/controller'
 export const SKU_TRANSFERENCE_PARAMS = z.object({
   type: z.enum(['IN_TRANSFERENCE', 'OUT_TRANSFERENCE']),
   central_transference_id: z.number(),
-  quantity: z.number().min(0),
+  quantity: z.number(),
 })
 
 export type SKU_TRANSFERENCE_POST_TYPE = z.infer<typeof SKU_TRANSFERENCE_PARAMS>

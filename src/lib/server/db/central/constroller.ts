@@ -361,7 +361,7 @@ export async function completeTransference(
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(<SKU_TRANSFERENCE_POST_TYPE>{
-          quantity: transference.quantity,
+          quantity: -transference.quantity,
           type: 'OUT_TRANSFERENCE',
           central_transference_id: transference.id,
         }),
