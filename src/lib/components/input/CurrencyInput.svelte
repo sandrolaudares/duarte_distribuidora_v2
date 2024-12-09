@@ -1,29 +1,26 @@
 <script lang="ts">
-  export let value: number = 0
+  let { value = $bindable(),onchange }:{value:number,onchange?:()=>void} = $props()
 
   if (!value) {
     value = 0
   }
 
-  let amountFormatted = '0.00'
+  let amountFormatted = $state('0.00')
 
-  $: amountFormatted = (value / 100).toFixed(2)
+  amountFormatted = (value / 100).toFixed(2)
   let currencyInput: HTMLInputElement
-  // $: console.log('amountFormatted: ' + amountFormatted)
 
   const handleChange = () => {
-    // console.log('currentInput: ' + currencyInput.value)
 
     let cleanedInput = currencyInput.value
-      .replace(/\D*/gm, '') // remove non digits
-      .replace(/^0+/gm, '') // remove leading zeros
-    // console.log('cleanedInput.length: ' + cleanedInput.length)
+      .replace(/\D*/gm, '')
+      .replace(/^0+/gm, '')
 
     if (cleanedInput.length === 0) {
       console.log('setting amountFormatted to 0.00 --- BUT IT does not work ')
-      amountFormatted = '0.00' // ERROR this never works
+      amountFormatted = '0.00'
     } else {
-      value = parseInt(cleanedInput, 10) // Assign the raw value
+      value = parseInt(cleanedInput, 10)
       amountFormatted = (value / 100).toFixed(2);
     }
     value = Number(amountFormatted.replace('.', ''))
@@ -37,7 +34,7 @@
     class=" w-28"
     value={amountFormatted}
     bind:this={currencyInput}
-    on:input={handleChange}
-    on:change
+    oninput={handleChange}
+    onchange={onchange}
   />
 </label>

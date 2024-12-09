@@ -115,7 +115,7 @@
         <div class="flex gap-2">
           {#if data.tenant}
           
-          <CurrencyInput bind:value={taxa} on:change={()=>{isTaxaChanged = true}}/>
+          <CurrencyInput bind:value={taxa} onchange={()=>{isTaxaChanged = true}}/>
           {/if}
           {#if isTaxaChanged}
             <button class="btn btn-primary" onclick={updateCashierDeliveryFee}>
