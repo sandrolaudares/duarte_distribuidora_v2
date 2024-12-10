@@ -5,6 +5,7 @@
 
   import { type Component, type ComponentProps } from 'svelte'
   import CurrencyInput from '../input/CurrencyInput.svelte'
+  import CurrencyInputSecond from '../input/CurrencyInputSecond.svelte'
 
   interface Field<
     T = any,

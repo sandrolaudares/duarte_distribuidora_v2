@@ -164,14 +164,14 @@
 
         <CurrencyInput
           bind:value={item.wholesale_price}
-          on:change={() => (isChanged = true)}
+          onchange={() => (isChanged = true)}
         />
       </div>
       <div class="flex items-center justify-between gap-3">
         Varejo
         <CurrencyInput
           bind:value={item.retail_price}
-          on:change={() => (isChanged = true)}
+          onchange={() => (isChanged = true)}
         />
       </div>
     </div>

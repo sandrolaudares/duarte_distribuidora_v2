@@ -63,6 +63,9 @@ export const POST: RequestHandler = async ({
         if (skuItem.quantity < data.quantity) {
           return error(400, 'Sem estoque suficiente')
         }
+        if(data.quantity >= 0){
+          return error(400, 'Quantidade inválida')
+        }
 
         await stock(tenantDb).insertStockTransaction({
           type: 'Saida',

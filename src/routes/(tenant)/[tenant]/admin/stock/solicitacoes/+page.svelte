@@ -63,6 +63,7 @@
       toast.error(error.message)
     } finally {
       isLoading = false
+      isOpenModal?.close()
     }
   }
 </script>
