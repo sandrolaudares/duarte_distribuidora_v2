@@ -10,7 +10,7 @@
   import ShieldMap from 'lucide-svelte/icons/shield-check'
   import Transactions from 'lucide-svelte/icons/arrow-left-right'
 
-  import ChartArea from 'lucide-svelte/icons/chart-area'
+import {ChartArea,BadgeDollarSign} from 'lucide-svelte/icons'
   import Settings2 from 'lucide-svelte/icons/settings-2'
   import User from 'lucide-svelte/icons/user'
   import NavMain from '$lib/components/sidebar/nav-main.svelte'
@@ -124,6 +124,10 @@
               title: 'Transferencias',
               url: '/admin/stock/solicitacoes',
             },
+            {
+              title: 'Historico transferencias',
+              url: '/admin/stock/solicitacoes/historico',
+            },
           ],
         },
       )
@@ -153,7 +157,7 @@
         {
           title: 'Financeiro',
           url: '/admin',
-          icon: ListOrdered,
+          icon: BadgeDollarSign,
           isActive: true,
           items: [
             {
