@@ -33,7 +33,7 @@
     </button>
   {:else}
     <form on:submit|preventDefault={handleSubmit}>
-      <input bind:this={inputElement} type="text" bind:value />
+      <input bind:this={inputElement} type="text" bind:value class="max-w-28" />
       <button type="submit">✅</button>
       <button on:click={handleCancel}>❌</button>
     </form>
