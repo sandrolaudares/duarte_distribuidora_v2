@@ -159,6 +159,7 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - CHECAR O SUM PAGINA CUSTOMER/ID✅
 - EDITAR DATA VENCIMENTO (EXIPIRE_AT) ✅
 - REFATORAR ONDE MOSTRA AS INFOS DO CLINTE NA PAGINA DO CAIXA✅
+- REPASSE ESTOQUE ENTRE DISTRIBUIDORAS✅
 
 - boolean pra esconder produtos do cardapio ✅
 - Verificar name filter fiado ✅
@@ -184,7 +185,6 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 
 - Alerta de compra em excesso ex, bloqueio automático caso tenha notas em
   atraso. (Desbloqueio somente com senha de gerente).
-- REPASSE ESTOQUE ENTRE DISTRIBUIDORAS
 - Adicionar campo de distancia na tabela endereço (calcular ao adicionar
   endereço talvez) acho legal adicionar um butao de recalcular
 
