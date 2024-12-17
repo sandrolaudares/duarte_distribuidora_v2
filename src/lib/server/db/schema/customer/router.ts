@@ -751,4 +751,11 @@ export const customer = router({
       console.log(distance)
       return distance
     }),
+
+    getOrderById: publicProcedure
+    .use(middleware.logged)
+    .input(z.number())
+    .query(({ input,ctx: { tenantDb } }) => {
+      return customerController(tenantDb).getOrderByID(input)
+    }),
 })
