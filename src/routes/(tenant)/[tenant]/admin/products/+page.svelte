@@ -113,7 +113,7 @@
             return JSON.stringify(error)
           }
         },
-        title: 'Add Category',
+        title: 'Adicionar categoria',
       },
     )
   }
@@ -135,8 +135,8 @@
   }}
 >
   {#snippet collum(cat)}
-    <div class="flex items-center justify-between gap-4">
-      <p>
+    <div class="flex items-center justify-between gap-4  max-w-full">
+      <p class="text-xl overflow-auto">
         {cat.name}
       </p>
       <button
@@ -157,8 +157,8 @@
   {/snippet}
   {#snippet card(p)}
     <div class="flex w-full gap-0 rounded-lg bg-base-300 text-center">
-      <a href="/admin/products/{p.id}" class="w-full px-4 py-3 text-center">
-        <p class="text-xl font-bold">{p.name}</p>
+      <a href="/admin/products/{p.id}" class="w-full px-4 py-1 text-center">
+        <p class="text-lg font-bold">{p.name}</p>
         <p class="font-light">{p.description}</p>
       </a>
 
