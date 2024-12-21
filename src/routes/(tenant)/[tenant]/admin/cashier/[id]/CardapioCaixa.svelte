@@ -3,8 +3,9 @@
   import { getCartContext } from '$lib/stores/cart'
   import { icons } from '$lib/utils/icons'
   import Cardapio from '$lib/components/Cardapio.svelte'
+  import type { RouterOutputs } from '$trpc/router'
 
-  export let products
+  export let products:RouterOutputs['product']['queryCategorysWithProductItems']
   export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
 
   let filteredResults = products;

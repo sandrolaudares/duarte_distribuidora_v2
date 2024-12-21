@@ -58,7 +58,7 @@
     titulo: '',
     isPaid: false,
     categoria_id: 0,
-    paid_at: new Date()
+    paid_at: new Date(),
   }
   let isLoading = $state(false)
   async function createConta() {
@@ -85,6 +85,8 @@
     }
   }
 
+  let messageCat = $state('')
+
   let nameCat = $state('')
   async function createCategoria() {
     isLoading = true
@@ -94,17 +96,18 @@
       })
       await invalidateAll()
       toast.success('Sucesso ao criar categoria')
+      messageCat = 'Successo ao criar categoria!'
     } catch (error: any) {
       toast.error(error.message)
     } finally {
       isLoading = false
-      window.location.reload()
+      // window.location.reload()
     }
   }
 
   const paidFilter = table.createFilter('isPaid')
 
-  async function pagar(id:number){
+  async function pagar(id: number) {
     isLoading = true
     try {
       await trpc($page).contas.pagarConta.mutate(id)
@@ -121,10 +124,19 @@
 
 <div class="container mx-auto p-4">
   <h1 class="mb-6 text-3xl font-bold">Contas à pagar</h1>
+  {#if messageCat}
+    <p class="text-lg font-bold text-success">
+      {messageCat}
+    </p>
+  {/if}
 
   <div class="mb-6 flex justify-between rounded-lg bg-base-200 p-4 shadow">
     <div class="flex gap-2 divide-x">
-      <button class="btn btn-primary" onclick={() => isOpenModal?.showModal()}>
+      <button
+        class="btn btn-primary"
+        onclick={() => isOpenModal?.showModal()}
+        disabled={isLoading}
+      >
         Criar nova conta
       </button>
       <div class="inline-block w-0.5 self-stretch bg-base-100"></div>
@@ -177,8 +189,8 @@
             <Th />
             <ThFilter {table} field="supName" />
             <!-- <ThFilter {table} field="catName" /> -->
-             <Th/>
-             <Th/>
+            <Th />
+            <Th />
             <Th>
               <!-- <DateFilter
               onchange={(start, end) => {
@@ -204,12 +216,16 @@
               class:opacity-50={conta.isPaid}
             >
               <td class="p-3">{conta.titulo}</td>
-              <td class="p-3">{conta.descricao}</td>
+              <td class="p-3 {conta.descricao ? '':'text-error'}">{conta.descricao ? conta.descricao :'Não possui'}</td>
               <td class="p-3">{conta.supName}</td>
               <td class="p-3">{conta.catName ?? 'Não cadastrado'}</td>
               <td class="p-3">{format(conta.expire_at!, 'dd/MM/yyyy')}</td>
 
-              <td class="p-3">{conta.paid_at?format(conta.paid_at, 'dd/MM/yyyy'):'Ainda não foi paga'}</td>
+              <td class="p-3">
+                {conta.paid_at
+                  ? format(conta.paid_at, 'dd/MM/yyyy')
+                  : 'Ainda não foi paga'}
+              </td>
               <td class="p-3">R${(conta.valor_conta / 100).toFixed(2)}</td>
               <td class="p-3">
                 <span
@@ -224,7 +240,7 @@
               </td>
               <td class="p-3">
                 <button
-                onclick={()=>pagar(conta.id)}
+                  onclick={() => pagar(conta.id)}
                   class="btn btn-sm"
                   class:btn-success={!conta.isPaid}
                   class:text-success-content={!conta.isPaid}
@@ -241,10 +257,10 @@
         <NoResults />
       {/if}
       {#snippet footer()}
-      <RowsPerPage {table} />
-      <div></div>
-      <Pagination {table} />
-    {/snippet}
+        <RowsPerPage {table} />
+        <div></div>
+        <Pagination {table} />
+      {/snippet}
     </Datatable>
   </div>
 
@@ -257,42 +273,6 @@
     </span>
   </div>
 </div>
-<!-- 
-<dialog
-  class="modal"
-  bind:this={isOpenModalCat}
-  in:fly={{ y: 50, duration: 300 }}
-  out:fade={{ duration: 200 }}
->
-  <div class="modal-box max-w-2xl">
-    <h2 class="mb-6 text-2xl font-semibold">Nova categoria</h2>
-    <input
-      type="text"
-      bind:value={nameCat}
-      class="input input-bordered w-full"
-      placeholder="Nova categoria"
-    />
-    <button
-      class="btn btn-primary mt-2 w-full"
-      onclick={createCategoria}
-      disabled={isLoading}
-    >
-      Criar
-    </button>
-    {#each data.categorias as cat}
-      <div class="flex">
-        <p>
-          {cat.nome}
-        </p>
-        <button class="btn btn-error">Excluir</button>
-      </div>
-    {/each}
-  </div>
-
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
-</dialog> -->
 
 <dialog
   class="modal"
@@ -321,16 +301,8 @@
         <label for="valor" class="label">
           <span class="label-text">Valor</span>
         </label>
-        <input
-          id="valor"
-          type="number"
-          step="1.00"
-          min="0"
-          class="input input-bordered w-full"
-          placeholder="R$ 0,00"
-          bind:value={newConta.valor_conta}
-          required
-        />
+
+        <CurrencyInput bind:value={newConta.valor_conta} />
       </div>
       <div class="form-control">
         <label for="expire_at" class="label">

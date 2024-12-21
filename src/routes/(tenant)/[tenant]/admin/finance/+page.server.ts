@@ -102,7 +102,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
       .innerJoin(
         schema.customerTable,
         and(
-          name ? like(schema.customerTable.name, `${name}%`) : undefined,
+          name ? like(schema.customerTable.name, `%${name}%`) : undefined,
           eq(schema.customerTable.id, schema.customerOrderTable.customer_id),
         )
       )
@@ -145,6 +145,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
           ),
           eq(schema.customerOrderTable.is_fiado, true),
           ...condicoes,
+          name ? like(schema.customerTable.name, `%${name}%`) : undefined,
         ),
       )
 
@@ -165,6 +166,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
           ),
           eq(schema.customerOrderTable.is_fiado, true),
           ...condicoes,
+          name ? like(schema.customerTable.name, `%${name}%`) : undefined,
         ),
       )
 

@@ -134,7 +134,8 @@ npm run db:check
 
 Feel free to submit issues or pull requests. Contributions are welcome!
 
-## AGORA
+
+## PRONTOS
 
 - TABLE FIADO PODER SELECIONAR E MOSTRAR TOTAL DOS SELECIONADOS ✅
 - SALVAR LAT E LONG DA DISTRIBUIDORA NO DB ✅
@@ -159,6 +160,9 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - CHECAR O SUM PAGINA CUSTOMER/ID✅
 - EDITAR DATA VENCIMENTO (EXIPIRE_AT) ✅
 - REFATORAR ONDE MOSTRA AS INFOS DO CLINTE NA PAGINA DO CAIXA✅
+- REPASSE ESTOQUE ENTRE DISTRIBUIDORAS✅
+
+## PARCIAL PRONTOS OU APENAS REVISAR/AJUSTAR
 
 - boolean pra esconder produtos do cardapio ✅
 - Verificar name filter fiado ✅
@@ -173,23 +177,36 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - AJustar form criar tenant erros de endereco  ✅
 - DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES  ✅
 
-- Alterar join do caixa na tela da transacao do caixa
-- Permissoes no trpc pra cada func
-- Colunas na tabela dos logs
+## IMPORTANTES
+
 - PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS
+
+## FAZER AGORA
+
+- Editar nome SKU
+- Alterar join do caixa na tela da transacao do caixa
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE
 - APLICAR EDITABLECELL NAS TABLES EXISTENTES
-
+- Unique name table de categoria
+- 100 rows como padrao nas table
+- Preco de custo nas transferencias e tela historico transafarencias tipo tela fiado com total e valor do preço de custo
 - TRANSAÇÕES DO CAIXA (TELAS)
+- Parte do cliente fazer pedido
+- TELA RESUMO DE CADA MOTOBOY ENTREGAS
+
+## NAO TAO URGENTE
+
+- Refazer setar cargo ao user, não ta funcionando legal
+- Permissoes no trpc pra cada func
+- Colunas na tabela dos logs/Refatorar tela/melhorar
+- Excluir sku e setar produto como null pro sku
+- Contas cadastrar forma de pagamento
 
 - Alerta de compra em excesso ex, bloqueio automático caso tenha notas em
   atraso. (Desbloqueio somente com senha de gerente).
-- REPASSE ESTOQUE ENTRE DISTRIBUIDORAS
 - Adicionar campo de distancia na tabela endereço (calcular ao adicionar
   endereço talvez) acho legal adicionar um butao de recalcular
 
-- Parte do cliente fazer pedido
-- TELA RESUMO DE CADA MOTOBOY ENTREGAS
 
 ## DEPOIS
 

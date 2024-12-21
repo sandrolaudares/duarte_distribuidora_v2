@@ -142,4 +142,10 @@ export const product = router({
     .mutation(async ({ input, ctx: {tenantDb} }) => {
       return await productController(tenantDb).deleteProductCategory(input)
     }),
+
+    queryCategorysWithProductItems: publicProcedure
+    .use(middleware.logged)
+    .query(({ ctx: { tenantDb } }) => {
+      return productController(tenantDb).queryCategorysWithProductItems()
+    }),
 })

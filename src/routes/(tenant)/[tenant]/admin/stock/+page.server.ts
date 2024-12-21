@@ -24,7 +24,7 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
   let query = tenantDb!
     .select()
     .from(schema.skuTable)
-    .where(name ? like(schema.skuTable.name, `${name}%`) : undefined)
+    .where(name ? like(schema.skuTable.name, `%${name}%`) : undefined)
     .$dynamic()
 
   if (sortId && sortOrder) {
@@ -40,7 +40,7 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
   try {
     const rows = await withPagination(query, page, pageSize)
 
-    const total = await tenantDb!.select({ count: count() }).from(schema.skuTable)
+    const total = await tenantDb!.select({ count: count() }).from(schema.skuTable).where(name ? like(schema.skuTable.name, `${name}%`) : undefined)
 
     return { rows: rows ?? [], count: total[0].count }
   } catch (error) {

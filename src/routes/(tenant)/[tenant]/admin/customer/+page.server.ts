@@ -28,7 +28,7 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
     .from(schema.customerTable)
     .where(
       and(
-        name ? like(schema.customerTable.name, `${name}%`) : undefined,
+        name ? like(schema.customerTable.name, `%${name}%`) : undefined,
         email ? like (schema.customerTable.email, `${email}%`): undefined,
         phone ? like (schema.customerTable.phone, `${phone}%`): undefined,
         cpf_cnpj ? like (schema.customerTable.cpf_cnpj, `${cpf_cnpj}%`): undefined,

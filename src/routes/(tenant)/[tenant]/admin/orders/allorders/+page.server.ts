@@ -72,13 +72,13 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     .map(q =>
       innerJoinOnMany(q, schema.customerTable, [
         eq(schema.customerTable.id, schema.customerOrderTable.customer_id),
-        name ? like(schema.customerTable.name, `${name}%`) : undefined,
+        name ? like(schema.customerTable.name, `%${name}%`) : undefined,
       ]),
     )
     .map(q =>
       innerJoinOnMany(q, schema.userTable, [
         eq(schema.userTable.id, schema.customerOrderTable.created_by),
-        cashier ? like(schema.userTable.username, `${cashier}%`) : undefined,
+        cashier ? like(schema.userTable.username, `%${cashier}%`) : undefined,
       ]),
     )
     .get()
@@ -180,7 +180,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
       )
       .where(
         and(
-          name ? like(schema.customerTable.name, `${name}%`) : undefined,
+          name ? like(schema.customerTable.name, `%${name}%`) : undefined,
           dateStart && dateEnd
             ? and(
                 gte(
@@ -193,7 +193,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
                 ),
               )
             : undefined,
-          cashier ? like(schema.cashierTable.name, `${cashier}%`) : undefined,
+          cashier ? like(schema.cashierTable.name, `%${cashier}%`) : undefined,
         ),
       )
 

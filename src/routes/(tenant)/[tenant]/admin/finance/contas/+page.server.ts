@@ -31,7 +31,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   console.log(pagos)
 
   const condicoes = [
-    titulo ? like(schema.contasPagarTable.titulo, `${titulo}%`) : undefined,
+    titulo ? like(schema.contasPagarTable.titulo, `%${titulo}%`) : undefined,
     pagos !== undefined ? eq(schema.contasPagarTable.isPaid, pagos) : undefined,
     dateStart && dateEnd
       ? and(
@@ -69,7 +69,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         schema.supplierTable,
         and(
           fornecedor
-            ? like(schema.supplierTable.name, `${fornecedor}%`)
+            ? like(schema.supplierTable.name, `%${fornecedor}%`)
             : undefined,
           eq(schema.supplierTable.id, contasPagarTable.fornecedor_id),
         ),
@@ -78,7 +78,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         schema.categoriaConta,
         and(
           categoria
-            ? like(schema.categoriaConta.nome, `${categoria}%`)
+            ? like(schema.categoriaConta.nome, `%${categoria}%`)
             : undefined,
           eq(schema.categoriaConta.id, contasPagarTable.categoria_id),
         ),
@@ -104,7 +104,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         schema.supplierTable,
         and(
           fornecedor
-            ? like(schema.supplierTable.name, `${fornecedor}%`)
+            ? like(schema.supplierTable.name, `%${fornecedor}%`)
             : undefined,
           eq(schema.supplierTable.id, contasPagarTable.fornecedor_id),
         ),
@@ -113,7 +113,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         schema.categoriaConta,
         and(
           categoria
-            ? like(schema.categoriaConta.nome, `${categoria}%`)
+            ? like(schema.categoriaConta.nome, `%${categoria}%`)
             : undefined,
           eq(schema.categoriaConta.id, contasPagarTable.categoria_id),
         ),
@@ -130,7 +130,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         schema.supplierTable,
         and(
           fornecedor
-            ? like(schema.supplierTable.name, `${fornecedor}%`)
+            ? like(schema.supplierTable.name, `%${fornecedor}%`)
             : undefined,
           eq(schema.supplierTable.id, contasPagarTable.fornecedor_id),
         ),
@@ -139,7 +139,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         schema.categoriaConta,
         and(
           categoria
-            ? like(schema.categoriaConta.nome, `${categoria}%`)
+            ? like(schema.categoriaConta.nome, `%${categoria}%`)
             : undefined,
           eq(schema.categoriaConta.id, contasPagarTable.categoria_id),
         ),
