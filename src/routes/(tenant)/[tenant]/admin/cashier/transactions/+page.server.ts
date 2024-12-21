@@ -95,7 +95,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     schema.userTable,
     eq(schema.logsTable.created_by, schema.userTable.id),
   )
-  .where(username ? like(schema.userTable.username, `${username}%`) : undefined,)
+  .where(username ? like(schema.userTable.username, `%${username}%`) : undefined,)
   .leftJoin(
     schema.customerOrderTable,
     eq(schema.logsTable.order_id, schema.customerOrderTable.id),
@@ -104,7 +104,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     schema.cashierTable,
     eq(schema.logsTable.cashier_id, schema.cashierTable.id),
   )
-  .where(caixa ? like(schema.cashierTable.name, `${caixa}%`) : undefined,)
+  .where(caixa ? like(schema.cashierTable.name, `%${caixa}%`) : undefined,)
   .orderBy(desc(schema.logsTable.created_at))
 
   if (sortId && sortOrder) {
@@ -125,7 +125,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         and(
           eq(schema.logsTable.type, 'CAIXA'),
           username
-            ? like(schema.userTable.username, `${username}%`)
+            ? like(schema.userTable.username, `%${username}%`)
             : undefined,
         ),
       )
