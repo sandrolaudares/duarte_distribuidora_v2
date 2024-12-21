@@ -32,7 +32,7 @@
   }
 </script>
 
-<div class="wrapper max-h-[70vh] border">
+<div class="wrapper max-h-[70vh]">
   <div class="column-title divider text-2xl">
     {#if collum}
       {@render collum(category)}
