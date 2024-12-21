@@ -321,16 +321,9 @@
         <label for="valor" class="label">
           <span class="label-text">Valor</span>
         </label>
-        <input
-          id="valor"
-          type="number"
-          step="1.00"
-          min="0"
-          class="input input-bordered w-full"
-          placeholder="R$ 0,00"
-          bind:value={newConta.valor_conta}
-          required
-        />
+
+        <CurrencyInput bind:value={newConta.valor_conta}/>
+        
       </div>
       <div class="form-control">
         <label for="expire_at" class="label">
