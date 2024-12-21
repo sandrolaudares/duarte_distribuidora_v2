@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { invalidateAll } from '$app/navigation'
   import { page } from '$app/stores'
   import Loading from '$lib/components/Loading.svelte'
   import { modal } from '$lib/components/modal'
@@ -10,28 +11,30 @@
 
   export let userId: string
   export let userRole: Role
-  export let userName: string
+  // export let userName: string
 
   let dialog: HTMLDialogElement
   let selectedRole: Role
 
   let isLoading = false
 
-  async function handleUpdateUserPermission() {
+  async function handleUpdateUserRole() {
     isLoading = true
     try {
-      await trpc($page).auth.updateUserRole.mutate({
+      const response = await trpc($page).auth.updateUserRole.mutate({
         userId: userId,
         role: selectedRole,
       })
-      toast.success('Permissões editadas com sucesso!')
-      setTimeout(() => {
-        dialog.close()
-        window.location.reload()
-      }, 1000)
+      toast.success('Cargo editado com sucesso!')
+      await invalidateAll()
+      // setTimeout(() => {
+      //   dialog.close()
+      //   window.location.reload()
+      // }, 1000)
+      userRole = response[0].role
     } catch (error: any) {
       isLoading = false
-      toast.error('Falha ao editar permissões')
+      toast.error('Falha ao editar cargo')
       console.error(error.message)
     }
   }
@@ -53,7 +56,7 @@
   <button
     class="btn btn-primary"
     disabled={(selectedRole === userRole) || isLoading}
-    onclick={handleUpdateUserPermission}
+    onclick={handleUpdateUserRole}
   >
     Salvar
   </button>

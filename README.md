@@ -183,6 +183,7 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 
 ## FAZER AGORA
 
+- Editar nome SKU
 - Alterar join do caixa na tela da transacao do caixa
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE
 - APLICAR EDITABLECELL NAS TABLES EXISTENTES
