@@ -67,6 +67,7 @@
       newCliente.phone = ''
       toast.success('Cliente inserido com sucesso!')
       filteredClientes = await trpc($page).customer.getCustomers.query()
+      clientes = filteredClientes
       isLoading = false
     } catch (error: any) {
       toast.error(error.message)
