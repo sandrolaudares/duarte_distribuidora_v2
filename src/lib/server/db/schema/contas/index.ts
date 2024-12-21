@@ -42,6 +42,7 @@ export const contasPagarRelations = relations(contasPagarTable, ({ one }) => ({
 export const categoriaConta = sqliteTable('categoria', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   nome: text('nome').notNull(),
+  //TODO: AFTER CHANGE NAME TO UNIQUE
 })
 
 export type SelectConta = typeof contasPagarTable.$inferSelect
