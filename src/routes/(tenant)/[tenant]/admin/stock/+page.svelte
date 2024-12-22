@@ -22,6 +22,7 @@
   import NoResults from '$lib/components/NoResults.svelte'
   import DateFilter from '../../../../../lib/components/DateFilter.svelte'
   import { format } from 'date-fns'
+  import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -73,6 +74,20 @@
       },
     })
   }
+
+  async function handleUpdateSku(value: string, key = '', row:any) {
+    const last_val = row[key]
+    try {
+      await trpc($page).stock.updateSku.mutate({
+        sku: row.sku, 
+        data: { name: value }})
+      row[key] = value
+      toast.success('Atualizado com sucesso!')  
+    } catch (error) {
+      toast.error('Erro ao atualizar')
+      row[key] = last_val
+    }
+  }
 </script>
 
 <main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
@@ -114,9 +129,11 @@
           <tr
           >
             <td>{row.sku}</td>
-            <td>{row.name}</td>
+             <td><EditableCell value={row.name} onUpdateValue={async (newValue:string)=>{
+              handleUpdateSku(newValue,'name',row)
+             }}/></td>
             <td>{row.quantity}</td>
-            <td>{format(row.created_at,'dd/MM/yyyy') ?? ''}</td>
+            <td>{format(row.created_at!,'dd/MM/yyyy') ?? ''}</td>
             <!--TODO: Change created at in DB to timestamp-->
             <td>
               <a href="/admin/stock/{row.sku}" class="badge badge-primary">
