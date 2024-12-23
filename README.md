@@ -176,6 +176,8 @@ Feel free to submit issues or pull requests. Contributions are welcome!
   despesas pra analisar o lucro mensal.) ✅
 - AJustar form criar tenant erros de endereco  ✅
 - DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES  ✅
+- Editar nome SKU ✅
+- APLICAR EDITABLECELL NAS TABLES EXISTENTES ✅
 
 ## IMPORTANTES
 
@@ -183,14 +185,12 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 
 ## FAZER AGORA
 
-- Editar nome SKU
 - Alterar join do caixa na tela da transacao do caixa
+- TRANSAÇÕES DO CAIXA (TELAS)
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE
-- APLICAR EDITABLECELL NAS TABLES EXISTENTES
 - Unique name table de categoria
 - 100 rows como padrao nas table
 - Preco de custo nas transferencias e tela historico transafarencias tipo tela fiado com total e valor do preço de custo
-- TRANSAÇÕES DO CAIXA (TELAS)
 - Parte do cliente fazer pedido
 - TELA RESUMO DE CADA MOTOBOY ENTREGAS
 
