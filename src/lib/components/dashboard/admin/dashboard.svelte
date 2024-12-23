@@ -16,8 +16,29 @@
   import * as Card from '$lib/components/ui/card/index'
   import * as Tabs from '$lib/components/ui/tabs/index'
   import type { SelectTenant } from '$lib/server/db/central/schema.js'
+  import DateFilter from '$lib/components/DateFilter.svelte'
 
-  export let distribuidoras: SelectTenant[] = []
+  type Distribuidora = 
+    {
+      name : string,
+      subdomain: string
+    }  
+
+  interface Props {
+    distribuidoras : Distribuidora[]
+  }
+
+  let categorias = [
+    "Vendas",
+    "Recebimentos",
+    "Inadimplência",
+    "Estoque",
+    "Delivery"
+  ]
+  
+  let { distribuidoras } : Props = $props();
+  let comparar = $state(false);
+
 </script>
 
 <div class="hidden flex-col md:flex">
@@ -27,23 +48,26 @@
         Dashboard distribuidoras
       </h2>
       <div class="flex items-center space-x-2">
-        <!-- <DatePickerWithRange /> -->
-        <Button size="sm">
-					<Download class="mr-2 h-4 w-4" />
-					Download
-				</Button>
+        <label for="">Comparar</label>
+        <input type="checkbox" bind:checked={comparar} name="" id="">
+        {#if comparar}
+          <h2>Comparar</h2>
+          <DateFilter />
+          Com
+        {/if}
+        <DateFilter />
       </div>
     </div>
-    <Tabs.Root value={distribuidoras[0].subdomain} class="space-y-4">
+    <Tabs.Root value={categorias[0]} class="space-y-4">
       <Tabs.List>
-        {#each distribuidoras as distribuidora}
-          <Tabs.Trigger value={distribuidora.subdomain}>
-            {distribuidora.name}
+        {#each categorias as cat}
+          <Tabs.Trigger value={cat}>
+            {cat}
           </Tabs.Trigger>
         {/each}
       </Tabs.List>
-      {#each distribuidoras as distribuidora}
-        <Tabs.Content value={distribuidora.subdomain} class="space-y-4">
+      {#each categorias as cat}
+        <Tabs.Content value={cat} class="space-y-4">
           <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card.Root>
               <Card.Header
