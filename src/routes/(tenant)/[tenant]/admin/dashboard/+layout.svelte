@@ -34,6 +34,10 @@
       href : "/admin/dashboard/vendas"
     },
     {
+      label : "Delivery",
+      href : "/admin/dashboard/delivery"
+    },
+    {
       label : "Recebimentos",
       href : "/admin/dashboard/recebimentos"
     },
@@ -45,10 +49,6 @@
       label : "Estoque",
       href : "/admin/dashboard/estoque"
     },
-    {
-      label : "Delivery",
-      href : "/admin/dashboard/delivery"
-    }
   ]
   
   const filters = new SSRFilters();
