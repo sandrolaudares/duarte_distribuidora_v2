@@ -107,6 +107,12 @@ export const load = (async ({ locals: { tenantDb : db }, url }) => {
       average_order_value: sql<number>`avg(${s.customerOrderTable.amount_paid})`,
     })
     .from(s.customerOrderTable)
+  
+  const getQuantOrders = db!
+    .select({
+      total_orders: sql<number>`count(${s.customerOrderTable.id})`,
+    })
+    .from(s.customerOrderTable)
 
   return {
     topOrderedProducts : await getTopOrderedNProducts,
@@ -116,7 +122,9 @@ export const load = (async ({ locals: { tenantDb : db }, url }) => {
     topSellingCategories : await getTopSellingCategories,
     topCustomerOrders : await getCustomerNumberOrders,
     AvgOrderValue : await getAvgOrderValue,
+    quantOrders : await getQuantOrders,
 
+    // TODO: Query to get top 10 customers
     topCustomers : [
       {
         name : "Matheus",

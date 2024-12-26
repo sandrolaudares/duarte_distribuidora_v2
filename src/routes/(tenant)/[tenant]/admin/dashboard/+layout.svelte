@@ -16,7 +16,7 @@
   import { hr } from '@faker-js/faker'
   
   import {page} from '$app/stores';
-
+  
   type Distribuidora = 
   {
     name : string,
@@ -27,7 +27,8 @@
     distribuidoras : Distribuidora[]
   }
   
-  let categorias = [
+  let categorias = 
+  [
     {
       label : "Vendas",
       href : "/admin/dashboard/vendas"
@@ -48,11 +49,6 @@
       label : "Delivery",
       href : "/admin/dashboard/delivery"
     }
-    // "Vendas",
-    // "Recebimentos",
-    // "Fiado",
-    // "Estoque",
-    // "Delivery"
   ]
   
   const filters = new SSRFilters();
@@ -60,7 +56,7 @@
   let { data, children }: { data: LayoutData, children: Snippet } = $props();
 </script>
 
-<div class="hidden flex-col md:flex">
+<div class="flex-col md:flex">
   <div class="flex-1 space-y-4 p-8 pt-6">
     <div class="flex items-center justify-between space-y-2">
       <h2 class="text-3xl font-bold tracking-tight">
@@ -68,28 +64,28 @@
       </h2>
       <DateFilter onchange={(startDate, endDate) => { 
         if (!startDate || !endDate) return 
-          filters.update({startDate : startDate.toString(), endDate : endDate.toString()}) 
-        }}/>
+        filters.update({startDate : startDate.toString(), endDate : endDate.toString()}) 
+      }}/>
       <div class="flex items-center space-x-2">
         <!-- <DateFilter onchange={(startDate, endDate) => { 
-          if (!startDate || !endDate) return 
-            filters.update({startDate : startDate.toString(), endDate : endDate.toString()}) 
-          }}/> -->
+        if (!startDate || !endDate) return 
+        filters.update({startDate : startDate.toString(), endDate : endDate.toString()}) 
+        }}/> -->
       </div>
-      </div>
-      <Tabs.Root value={$page.url.pathname} class="space-y-4">
-        <Tabs.List>
-          {#each categorias as cat}
-          <a href="{cat.href}">
-            <Tabs.Trigger value={cat.href}>
-              {cat.label}
-            </Tabs.Trigger>
-          </a>
-          {/each}
-        </Tabs.List>
-        <Tabs.Root class="space-y-4">
-          {@render children()}
-        </Tabs.Root>
-      </Tabs.Root>
     </div>
+    <Tabs.Root value={$page.url.pathname} class="w-full space-y-4">
+      <Tabs.List>
+        {#each categorias as cat}
+        <a href="{cat.href}">
+          <Tabs.Trigger value={cat.href}>
+            {cat.label}
+          </Tabs.Trigger>
+        </a>
+        {/each}
+      </Tabs.List>
+      <Tabs.Root class="space-y-4">
+        {@render children()}
+      </Tabs.Root>
+    </Tabs.Root>
   </div>
+</div>

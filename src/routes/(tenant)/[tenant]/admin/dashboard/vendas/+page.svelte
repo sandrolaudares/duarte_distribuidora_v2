@@ -9,20 +9,20 @@
   let { data }: { data: PageData } = $props();
 
   let colorPaymentMethods = {
-    pix: 'red',
-    credit_card: 'blue',
-    debit_card: 'green',
-    dinheiro: 'yellow'
+    pix: '#3CB371',
+    credit_card: '#1E90FF',
+    debit_card: '#87CEEB',
+    dinheiro: '#006400'
   }
 
-  const mostPopularPaymentMethodsWithColor = data.mostPopularPaymentMethods.map((method) => ({
+  const mostPopularPaymentMethodsWithColor = $derived.by(() => data.mostPopularPaymentMethods.map((method) => ({
     ...method,
     color: method.payment_method in colorPaymentMethods ? colorPaymentMethods[method.payment_method] : 'gray'
-  }))
+  })))
 
   const { 
     revenueByMonth , topCustomers , topRevenueProducts, topSellingCategories, topCustomerOrders, 
-    topOrderedProducts, AvgOrderValue
+    topOrderedProducts, AvgOrderValue, quantOrders
   } = data
 
   console.log(data);
@@ -52,31 +52,41 @@
     subTitle : ""
   }}
   cardQuatro = {{
-    titleCard : "Pedidos",
-    textCard : topCustomerOrders[0].total_orders.toString(),
-    subTitle : topCustomerOrders[0].customer_name
+    titleCard : "Total pedidos",
+    textCard : quantOrders[0].total_orders.toString(),
+    subTitle : ""
   }}
 />
 
 <h1>Página de vendas</h1>
 
-<div class="flex flex-col md:flex-row gap-3">
-  <Card.Root class="w-9/12 md:w-9/12">
+<div class="flex flex-col lg:flex-row gap-3">
+  <Card.Root class="w-full lg:w-9/12 ">
     <Card.Header>
       <Card.Title>Overview</Card.Title>
     </Card.Header>
     <!-- <Card.Content class="flex flex-col md:flex-row gap-4"> -->
     <Card.Content class="flex flex-wrap">
-      <div class="w-1/2 pr-3">
+      <div class="w-full pr-3">
         <h2>Principais produtos de receita</h2>
         <div class="h-[300px] p-4 border rounded">
           <BarChart data={topRevenueProducts}
           x="product_name"
           y="total_revenue"
-          props={{bars : {class: "fill-yellow-300 stroke-yellow-300"}}} />
+          props={{bars : {class: "fill-primary stroke-primary"}}} />
         </div>
       </div>
-      <div class="w-1/2">
+      <div class="w-full">
+        <h2>Produtos mais vendidos (quantidade)</h2>
+        <div class="h-[300px] p-4 border rounded">
+          <BarChart data={topOrderedProducts} 
+          x="product_name" 
+          y="total_quantity_ordered"
+          props={{bars : {class: "fill-red-400 stroke-red-400"}}}
+          />
+        </div>
+      </div>
+      <div class="w-full lg:w-1/2 lg:pr-3">
         <h2>Metodos de pagamento</h2>
         <div class="h-[300px] p-4 border rounded">
           <PieChart
@@ -91,13 +101,7 @@
           />
         </div>
       </div>
-      <div class="w-1/2 pr-3">
-        <h2>Produtos mais vendidos (quantidade)</h2>
-        <div class="h-[300px] p-4 border rounded">
-          <BarChart data={topOrderedProducts} x="product_name" y="total_quantity_ordered" />
-        </div>
-      </div>
-      <div class="w-1/2">
+      <div class="w-full lg:w-1/2">
         <h2>Maiores que mais pediram</h2>
         <div class="h-[300px] p-4 border rounded">
           <BarChart data={topCustomers} x="name" y="pedidos" />
@@ -105,7 +109,7 @@
       </div>
     </Card.Content>
   </Card.Root>
-  <Card.Root class="w-3/12 md:w-3/12">
+  <Card.Root class="w-full lg:w-3/12">
     <Card.Header>
       <Card.Title>Vendas recentes</Card.Title>
       <Card.Description>Pensar no que colocar aqui</Card.Description>
