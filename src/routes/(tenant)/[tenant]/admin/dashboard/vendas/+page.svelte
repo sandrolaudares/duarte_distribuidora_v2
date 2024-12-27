@@ -35,16 +35,15 @@
 </script>
 
 <NavDashboard 
-  cardUm = 
-  {{
-    titleCard : "Receita", 
+  cardUm = {{
+    titleCard : "Total", 
     textCard : "R$ " + revenueByMonth[0].total_revenue.toLocaleString('pt-BR'),
     subTitle : ""
   }}
   cardDois = {{
-    titleCard : "Categoria mais vendida",
-    textCard : topSellingCategories[0].total_revenue.toString(),
-    subTitle : topSellingCategories[0].category_name
+    titleCard : "Resumo",
+    textCard : "",
+    subTitle : ""
   }}
   cardTres = {{
     titleCard : "Ticket Médio",

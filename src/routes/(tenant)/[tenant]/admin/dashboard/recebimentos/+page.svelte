@@ -6,12 +6,13 @@
   import { RecentSales } from '$lib/components/dashboard/admin'
 
   let { data }: { data: PageData } = $props();
+  console.log(data);
 </script>
 
 <NavDashboard 
   cardUm={{
     titleCard : "Total de entregas", 
-    textCard : "",
+    textCard : "ddd",
     subTitle : ""
   }}
   cardDois={{

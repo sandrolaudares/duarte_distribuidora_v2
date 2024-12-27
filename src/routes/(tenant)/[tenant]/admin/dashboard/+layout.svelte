@@ -13,7 +13,7 @@
   import * as Tabs from '$lib/components/ui/tabs/index'
   import type { SelectTenant } from '$lib/server/db/central/schema.js'
   import DateFilter from '$lib/components/DateFilter.svelte'
-  import { hr } from '@faker-js/faker'
+  import { hr, ur } from '@faker-js/faker'
   
   import {page} from '$app/stores';
   
@@ -52,37 +52,55 @@
   ]
   
   const filters = new SSRFilters();
+
+  let checkbox = $state(false);
   
   let { data, children }: { data: LayoutData, children: Snippet } = $props();
 </script>
 
 <div class="flex-col md:flex">
   <div class="flex-1 space-y-4 p-8 pt-6">
-    <div class="flex items-center justify-between space-y-2">
-      <h2 class="text-3xl font-bold tracking-tight">
-        Dashboard distribuidoras
-      </h2>
-      <DateFilter onchange={(startDate, endDate) => { 
-        if (!startDate || !endDate) return 
-        filters.update({startDate : startDate.toString(), endDate : endDate.toString()}) 
-      }}/>
-      <div class="flex items-center space-x-2">
-        <!-- <DateFilter onchange={(startDate, endDate) => { 
-        if (!startDate || !endDate) return 
-        filters.update({startDate : startDate.toString(), endDate : endDate.toString()}) 
-        }}/> -->
-      </div>
-    </div>
+    <h2 class="text-3xl font-bold tracking-tight">
+      Dashboard distribuidoras
+    </h2>
     <Tabs.Root value={$page.url.pathname} class="w-full space-y-4">
-      <Tabs.List>
-        {#each categorias as cat}
-        <a href="{cat.href}">
-          <Tabs.Trigger value={cat.href}>
-            {cat.label}
-          </Tabs.Trigger>
-        </a>
-        {/each}
-      </Tabs.List>
+      <div class="flex items-center justify-between">
+        <Tabs.List>
+          {#each categorias as cat}
+          <a href="{cat.href}">
+            <Tabs.Trigger value={cat.href}>
+              {cat.label}
+            </Tabs.Trigger>
+          </a>
+          {/each}
+        </Tabs.List>
+        <div class="flex items-center">
+          {#if $page.url.pathname === '/admin/dashboard/vendas'}
+            <div class="flex items-center space-x-2">
+              <span class="label-text">Comparar</span> 
+              <input type="checkbox" class="checkbox" bind:checked={checkbox} />
+            </div>
+            {#if checkbox}
+              <div class="mr-5">
+                <DateFilter onchange={(startDate, endDate) => { 
+                  if (!startDate || !endDate) return 
+                  filters.update({startDate : startDate.toString(), endDate : endDate.toString()}) 
+                }}/>
+              </div>
+            {/if}
+          {/if}
+          <DateFilter onchange={(startDate, endDate) => { 
+            if (!startDate || !endDate) return 
+            filters.update({startDate : startDate.toString(), endDate : endDate.toString()}) 
+          }}/>
+          <div class="flex items-center space-x-2">
+            <!-- <DateFilter onchange={(startDate, endDate) => { 
+            if (!startDate || !endDate) return 
+            filters.update({startDate : startDate.toString(), endDate : endDate.toString()}) 
+            }}/> -->
+          </div>
+        </div>
+      </div>
       <Tabs.Root class="space-y-4">
         {@render children()}
       </Tabs.Root>

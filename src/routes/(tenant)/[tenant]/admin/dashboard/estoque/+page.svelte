@@ -10,12 +10,12 @@
 
 <NavDashboard 
   cardUm={{
-    titleCard : "Total de entregas", 
+    titleCard : "Total", 
     textCard : "",
     subTitle : ""
   }}
   cardDois={{
-    titleCard : "Crescimento", 
+    titleCard : "Entradas - Saídas", 
     textCard : "",
     subTitle : ""
   }}
@@ -41,25 +41,25 @@
     <!-- <Card.Content class="flex flex-col md:flex-row gap-4"> -->
     <Card.Content class="flex flex-wrap">
       <div class="w-full pr-3">
-        <h2>Principais produtos de receita</h2>
+        <h2>Estoque abaixo do mínimo</h2>
         <div class="h-[300px] p-4 border rounded">
           
         </div>
       </div>
       <div class="w-full">
-        <h2>Produtos mais vendidos (quantidade)</h2>
+        <h2>Maior rotatividade por categoria</h2>
         <div class="h-[300px] p-4 border rounded">
           
         </div>
       </div>
       <div class="w-full lg:w-1/2 lg:pr-3">
-        <h2>Metodos de pagamento</h2>
+        <h2>Maior rotatividade</h2>
         <div class="h-[300px] p-4 border rounded">
           
         </div>
       </div>
       <div class="w-full lg:w-1/2">
-        <h2>Maiores que mais pediram</h2>
+        <h2>Distribuição por categoria</h2>
         <div class="h-[300px] p-4 border rounded">
           
         </div>
@@ -68,8 +68,7 @@
   </Card.Root>
   <Card.Root class="w-full lg:w-3/12">
     <Card.Header>
-      <Card.Title>Vendas recentes</Card.Title>
-      <Card.Description>Pensar no que colocar aqui</Card.Description>
+      <Card.Title>Produtos com menor quantidade de estoque</Card.Title>
     </Card.Header>
     <Card.Content>
       <!-- TODO: Mudar o recent sales -->
