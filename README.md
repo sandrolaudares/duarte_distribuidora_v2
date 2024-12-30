@@ -206,7 +206,7 @@ Feel free to submit issues or pull requests. Contributions are welcome!
   atraso. (Desbloqueio somente com senha de gerente).
 - Adicionar campo de distancia na tabela endereço (calcular ao adicionar
   endereço talvez) acho legal adicionar um butao de recalcular
-
+- Responsividade site inteiro
 
 ## DEPOIS
 
