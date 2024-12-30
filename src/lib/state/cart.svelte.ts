@@ -1,14 +1,19 @@
-export class Cart<Item extends { id: string | number }, T> {
+export class Cart<Item extends { id: string | number }, ProductMeta, CartMeta> {
   cart: Record<
     string | number,
     {
       item: Item
       quantity: number
-      meta: T
+      meta: ProductMeta
     }
   > = $state({})
 
-  constructor(items?: { item: Item; quantity: number; meta: T }[]) {
+  meta: CartMeta = $state(<CartMeta>{})
+
+  constructor(
+    items?: { item: Item; quantity: number; meta: ProductMeta }[],
+    meta?: CartMeta,
+  ) {
     items?.forEach(p => {
       this.cart[p.item.id] = {
         item: p.item,
@@ -16,9 +21,10 @@ export class Cart<Item extends { id: string | number }, T> {
         meta: p.meta,
       }
     })
+    this.meta = meta || ({} as CartMeta)
   }
 
-  addItem(p: Item, meta?: T) {
+  addItem(p: Item, meta?: ProductMeta) {
     if (this.cart[p.id]) {
       this.cart[p.id].quantity += 1
     }
@@ -26,15 +32,15 @@ export class Cart<Item extends { id: string | number }, T> {
     this.cart[p.id] = {
       item: p,
       quantity: 1,
-      meta: meta || ({} as T),
+      meta: meta || ({} as ProductMeta),
     }
   }
 
-  setItem(p: Item, quantity: number, meta?: T) {
+  setItem(p: Item, quantity: number, meta?: ProductMeta) {
     this.cart[p.id] = {
       item: p,
       quantity,
-      meta: meta || ({} as T),
+      meta: meta || ({} as ProductMeta),
     }
   }
   removeItem(p: Item) {
