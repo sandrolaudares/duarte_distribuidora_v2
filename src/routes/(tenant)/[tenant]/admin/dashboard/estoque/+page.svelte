@@ -46,24 +46,6 @@
           
         </div>
       </div>
-      <div class="w-full">
-        <h2>Maior rotatividade por categoria</h2>
-        <div class="h-[300px] p-4 border rounded">
-          
-        </div>
-      </div>
-      <div class="w-full lg:w-1/2 lg:pr-3">
-        <h2>Maior rotatividade</h2>
-        <div class="h-[300px] p-4 border rounded">
-          
-        </div>
-      </div>
-      <div class="w-full lg:w-1/2">
-        <h2>Distribuição por categoria</h2>
-        <div class="h-[300px] p-4 border rounded">
-          
-        </div>
-      </div>
     </Card.Content>
   </Card.Root>
   <Card.Root class="w-full lg:w-3/12">

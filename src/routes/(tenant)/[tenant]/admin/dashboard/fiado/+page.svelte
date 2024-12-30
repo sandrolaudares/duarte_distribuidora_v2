@@ -18,13 +18,13 @@
     <!-- <Card.Content class="flex flex-col md:flex-row gap-4"> -->
     <Card.Content class="flex flex-wrap">
       <div class="w-full pr-3">
-        <h2>Cliente</h2>
+        <h2>Relatório recebimento atingido</h2>
         <div class="h-[300px] p-4 border rounded">
           
         </div>
       </div>
       <div class="w-full">
-        <h2>Por categoria</h2>
+        <h2>Maiores dívidas (Vai usar a msm query de clientes PJ com dívida)</h2>
         <div class="h-[300px] p-4 border rounded">
           
         </div>

@@ -78,14 +78,14 @@
             </div>
             {#if checkbox}
               <div class="mr-5">
-                <DateFilter onchange={(startDate, endDate) => { 
+                <DateFilter alignP={"right"} onchange={(startDate, endDate) => { 
                   if (!startDate || !endDate) return 
                   filters.update({startDate : startDate.toString(), endDate : endDate.toString()}) 
                 }}/>
               </div>
             {/if}
           {/if}
-          <DateFilter onchange={(startDate, endDate) => { 
+          <DateFilter alignP={"right"} onchange={(startDate, endDate) => { 
             if (!startDate || !endDate) return 
             filters.update({startDate : startDate.toString(), endDate : endDate.toString()}) 
           }}/>
