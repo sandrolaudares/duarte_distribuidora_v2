@@ -1,7 +1,7 @@
 <script lang="ts">
   import NavDashboard from '$lib/components/dashboard/admin/NavDashboard.svelte'
   import * as Card from '$lib/components/ui/card'
-  import { Axis, BarChart, Bars, Chart, PieChart, Svg } from 'layerchart'
+  import { Axis, BarChart, Bars, Chart, Labels, PieChart, Rule, Svg } from 'layerchart'
   import type { PageData } from './$types';
   import { RecentSales } from '$lib/components/dashboard/admin'
   import { scaleBand } from 'd3-scale'
@@ -10,16 +10,33 @@
   let dataCard = 
   [
     {
-      "date": 'Gustavo',
-      "value": 68,
+      "NomeMotoboy": 'Gustavo',
+      "valueRelatorio": 68,
       "baseline": 90
     },
     {
-      "date": 'Vitor',
-      "value": 38,
+      "NomeMotoboy": 'Vitor',
+      "valueRelatorio": 38,
+      "baseline": 45
+    },
+    {
+      "NomeMotoboy": 'Pedro',
+      "valueRelatorio": 38,
+      "baseline": 45
+    },
+    {
+      "NomeMotoboy": 'Jose',
+      "valueRelatorio": 38,
+      "baseline": 45
+    },
+    {
+      "NomeMotoboy": 'Joadsfdse',
+      "valueRelatorio": 38,
       "baseline": 45
     },
   ]
+
+  let larguraGrafico = "height:" + dataCard.length * 60+"px;";
 </script>
 
 <NavDashboard 
@@ -58,25 +75,31 @@ cardQuatro={{
         <h2>
           Relatório Motoboy (Soma a quantidade de entrega e o valor total das taxas de entrega) - vai ter que ser um gráfico em pé, mostrando todos os motoboys e a altura vai variar conforme a quantidade de motoboys naquela distribuidora
         </h2>
-        <div class="h-[300px] p-4 border rounded">
+        <!-- Axis = Heixo -->
+        <!-- placement = localização -->
+        <!-- Scalable Vector Graphics -->
+        <div class="{larguraGrafico} p-4 border rounded" style="{larguraGrafico}">
           <Chart
             data={dataCard}
-            x="value"
-            xDomain={[0, null]}
+            x="valueRelatorio"
             xNice
-            y="date"
+            xPadding={[20, 20]}
+            y="NomeMotoboy"
             yScale={scaleBand().padding(0.4)}
-            padding={{ left: 20, bottom: 20 }}>
+            padding={{ left: 16, bottom: 24 }}
+          >
             <Svg>
               <Axis placement="bottom" grid rule />
               <Axis
-              placement="left"
-              rule
+                placement="left"
+                rule
               />
-              <Bars strokeWidth={1} class="fill-primary" />
+              <Rule x={0} />
+              <Bars strokeWidth={1} class="fill-primary"/>
+              <Labels format="integer" />
             </Svg>
-        </Chart>
-      </div>
+          </Chart>
+        </div>                
     </div>
     <!-- <div class="w-full pr-3">
       <h2>Motoboys com maior número de entregas</h2>

@@ -37,7 +37,11 @@ export const load = (async ({ locals : { tenantDb : db }, url }) => {
       {
         name :  "Gustavo",
         numberDeliveries : 55
-      }
+      },
+      {
+        name :  "Pedro",
+        numberDeliveries : 55
+      },
     ],
     averageDeliveryTime : [
       {

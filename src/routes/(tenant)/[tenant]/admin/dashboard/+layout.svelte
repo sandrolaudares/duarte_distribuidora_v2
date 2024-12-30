@@ -38,10 +38,6 @@
       href : "/admin/dashboard/delivery"
     },
     {
-      label : "Recebimentos",
-      href : "/admin/dashboard/recebimentos"
-    },
-    {
       label : "Fiado",
       href : "/admin/dashboard/fiado"
     },

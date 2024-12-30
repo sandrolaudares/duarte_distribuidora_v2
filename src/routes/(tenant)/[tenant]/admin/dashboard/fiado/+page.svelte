@@ -8,29 +8,6 @@
   let { data }: { data: PageData } = $props();
 </script>
 
-<NavDashboard 
-  cardUm={{
-    titleCard : "Total", 
-    textCard : "",
-    subTitle : ""
-  }}
-  cardDois={{
-    titleCard : "Total recebido", 
-    textCard : "",
-    subTitle : ""
-  }}
-  cardTres={{
-    titleCard : "Maior produto", 
-    textCard : "",
-    subTitle : ""
-  }}
-  cardQuatro={{
-    titleCard : "Maior categoria", 
-    textCard : "",
-    subTitle : ""
-  }}
-/>
-
 <h1>Fiados</h1>
 
 <div class="flex flex-col lg:flex-row gap-3">
