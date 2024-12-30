@@ -1,7 +1,7 @@
 <script lang="ts">
   type textCard = {
     title: string
-    text: string
+    text?: string
     value: string
   }
 

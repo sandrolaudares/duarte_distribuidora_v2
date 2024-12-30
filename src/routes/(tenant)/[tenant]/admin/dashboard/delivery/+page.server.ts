@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 
 import * as s from '$db/schema'
-import { desc, eq, sql, and } from 'drizzle-orm'
+import { eq, sql, and } from 'drizzle-orm'
 
 const LIMIT = 10 as const;
 
@@ -17,15 +17,18 @@ export const load = (async ({ locals : { tenantDb : db }, url }) => {
     .from(s.customerOrderTable)
     .where(and(eq(s.customerOrderTable.type, "DELIVERY"), eq(s.customerOrderTable.status, "ENDED")))      
     .limit(LIMIT);
-
-  console.log(getTotalDelivered);
   
   return {
+    // TODO: Conferir se está certo
     totalDelivered : await getTotalDelivered,
+    // TODO: Distância total de corridas
     TotalDeliveryFees : 156894.00,
+    // TODO: Pedidos deliveris cancelados
     cancelingOrders : 31,
+    // TODO: Produtos que mais foram entregues
     bestProduct : "Brahma Latão",
     
+    //TODO: Relatório Motoboy (Soma a quantidade de entrega e o valor total das taxas de entrega)
     couriersHighestNumberDeliveries : [
       {
         name :  "Vitor",
@@ -46,23 +49,6 @@ export const load = (async ({ locals : { tenantDb : db }, url }) => {
         time : "11:12"
       },  
     ],
-
-    areaHighestNumberDeliveries : [
-      {
-        endereco : "Caiçara",
-        total : 78
-      },
-      {
-        endereco : "Pedra azul",
-        total : 55
-      },
-      {
-        endereco : "Coracao Eucaristico",
-        total : 43
-      }
-    ],
-
-    
 
     startDate,
     endDate,

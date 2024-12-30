@@ -124,6 +124,8 @@ export const load = (async ({ locals: { tenantDb : db }, url }) => {
     AvgOrderValue : await getAvgOrderValue,
     quantOrders : await getQuantOrders,
 
+    // TODO: Subtrair (vendas a vista + recebimentos de fiado) - Contas pagas
+    financialSummary : 1666.22,
     // TODO: Query to get top 10 customers
     topCustomers : [
       {

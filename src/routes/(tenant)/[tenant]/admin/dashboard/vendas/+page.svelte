@@ -26,19 +26,13 @@
   } = data
 
   console.log(data);
-
-  let card = {
-    titleCard : "Teste leo",
-    textCard : "R$100.00",
-    subTitle : "Aumentou 10%"
-  }
 </script>
 
 <NavDashboard 
   cardUm = {{
     titleCard : "Total", 
     textCard : "R$ " + revenueByMonth[0].total_revenue.toLocaleString('pt-BR'),
-    subTitle : ""
+    subTitle : "",
   }}
   cardDois = {{
     titleCard : "Resumo",
@@ -110,8 +104,8 @@
   </Card.Root>
   <Card.Root class="w-full lg:w-3/12">
     <Card.Header>
-      <Card.Title>Vendas recentes</Card.Title>
-      <Card.Description>Pensar no que colocar aqui</Card.Description>
+      <Card.Title>Clientes ociosos</Card.Title>
+      <Card.Description>Não compra a 2 semanas ou mais</Card.Description>
     </Card.Header>
     <Card.Content>
       <!-- TODO: Mudar o recent sales -->

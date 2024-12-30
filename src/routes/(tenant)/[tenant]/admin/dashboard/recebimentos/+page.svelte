@@ -11,7 +11,7 @@
 
 <NavDashboard 
   cardUm={{
-    titleCard : "Total de entregas", 
+    titleCard : "Relatório de recebimento atingido", 
     textCard : "ddd",
     subTitle : ""
   }}

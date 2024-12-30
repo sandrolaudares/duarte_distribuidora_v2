@@ -22,7 +22,7 @@
   type textCard = {
     titleCard : string,
     textCard : string,
-    subTitle : string
+    subTitle : string,
   }
 
   interface Props {
@@ -36,13 +36,13 @@
 
 </script>
 
-  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
   <Card.Root>
-      <Card.Header
-      class="flex flex-row items-center justify-between space-y-0 pb-2"
-      >
-      <Card.Title class="text-sm font-medium">{cardUm.titleCard}</Card.Title>
-      <DollarSign class="text-muted-foreground h-4 w-4" />
+    <Card.Header
+    class="flex flex-row items-center justify-between space-y-0 pb-2"
+    >
+    <Card.Title class="text-sm font-medium">{cardUm.titleCard}</Card.Title>
+    <!-- <DollarSign class="text-muted-foreground h-4 w-4" /> -->
     </Card.Header>
     <Card.Content>
       <div class="text-2xl font-bold">{cardUm.textCard}</div>
@@ -54,36 +54,36 @@
     class="flex flex-row items-center justify-between space-y-0 pb-2"
     >
     <Card.Title class="text-sm font-medium">{cardDois.titleCard}</Card.Title>
-    <Users class="text-muted-foreground h-4 w-4" />
-  </Card.Header>
-  <Card.Content>
-    <div class="text-2xl font-bold">{cardDois.textCard}</div>
-    <p class="text-muted-foreground text-xs">{cardDois.subTitle}</p>
-  </Card.Content>
-</Card.Root>
-<Card.Root>
-  <Card.Header
-  class="flex flex-row items-center justify-between space-y-0 pb-2"
-  >
-  <Card.Title class="text-sm font-medium">{cardTres.titleCard}</Card.Title>
-  <CreditCard class="text-muted-foreground h-4 w-4" />
-</Card.Header>
-<Card.Content>
-  <div class="text-2xl font-bold">{cardTres.textCard}</div>
-  <p class="text-muted-foreground text-xs">{cardTres.subTitle}</p>
-</Card.Content>
-</Card.Root>
-<Card.Root>
-  <Card.Header
-  class="flex flex-row items-center justify-between space-y-0 pb-2"
-  >
-  <Card.Title class="text-sm font-medium">{cardQuatro.titleCard}</Card.Title>
-  <Activity class="text-muted-foreground h-4 w-4" />
-</Card.Header>
-<Card.Content>
-  <div class="text-2xl font-bold">{cardQuatro.textCard}</div>
-  <p class="text-muted-foreground text-xs">{cardQuatro.subTitle}</p>
-</Card.Content>
-</Card.Root>
+    <!-- <Users class="text-muted-foreground h-4 w-4" /> -->
+    </Card.Header>
+    <Card.Content>
+      <div class="text-2xl font-bold">{cardDois.textCard}</div>
+      <p class="text-muted-foreground text-xs">{cardDois.subTitle}</p>
+    </Card.Content>
+  </Card.Root>
+  <Card.Root>
+    <Card.Header
+    class="flex flex-row items-center justify-between space-y-0 pb-2"
+    >
+      <Card.Title class="text-sm font-medium">{cardTres.titleCard}</Card.Title>
+      <!-- <CreditCard class="text-muted-foreground h-4 w-4" /> -->
+    </Card.Header>
+    <Card.Content>
+      <div class="text-2xl font-bold">{cardTres.textCard}</div>
+      <p class="text-muted-foreground text-xs">{cardTres.subTitle}</p>
+    </Card.Content>
+  </Card.Root>
+  <Card.Root>
+    <Card.Header
+    class="flex flex-row items-center justify-between space-y-0 pb-2"
+    >
+      <Card.Title class="text-sm font-medium">{cardQuatro.titleCard}</Card.Title>
+      <!-- <Activity class="text-muted-foreground h-4 w-4" /> -->
+    </Card.Header>
+    <Card.Content>
+      <div class="text-2xl font-bold">{cardQuatro.textCard}</div>
+      <p class="text-muted-foreground text-xs">{cardQuatro.subTitle}</p>
+    </Card.Content>
+  </Card.Root>
 </div>
 

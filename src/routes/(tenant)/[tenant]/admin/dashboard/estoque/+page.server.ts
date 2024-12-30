@@ -3,18 +3,23 @@ import type { PageServerLoad } from './$types';
 export const load = (async () => {
   
   return {
+    // TODO: Total de itens no estoque
     totalItemsStock : 0,
+    // TODO: Entrada e saida naquele periodo
     stockInStockOut : 231321,
-    highestCategory : {
+    // TODO: Categoria com menor quantidade de produtos
+    lowestCategory : {
       name : 'Bebidas',
       amount : 231321
     },
-    highestProduct : {
+    // TODO: Produto que com menor quantidade
+    lowestProduct : {
       name : 'Cerveja',
       amount : 231321
     },
 
-    // 
+    // TODO: Produtos com estoque abaixo do mínimo, não foi especificado qual é esse minimo
+    // não sei se é fixo ou se varia de cada produto e é definido no momento do cadastro
     stockBelowMinimumLevels : [
       {
         name : 'Brahma latão',
@@ -32,44 +37,8 @@ export const load = (async () => {
         are : 5415
       }
     ],
-    highestTurnoverCategory : [
-      {
-        category : 'Destilados',
-        product : 'Whisky white horse 1 litro',
-        amount : 231321
-      },
-      {
-        category : 'Cevada',
-        product : 'Heiniken long neck',
-        amount : 54564 
-      },
-      {
-        category : 'Agua',
-        product : 'Agua mineral',
-        amount : 45665
-      }
-    ],
-    stockDistributionByCategory : [
-      {
-        category : 'Destilados',
-        amount : '25%'
-      },
-      {
-        category : 'Fermentados',
-        amount : '33%'
-      },
-      {
-        category : 'Churrasco',
-        amount : '33%'
-      },
-      {
-        category : 'Whisky',
-        amount : '9%'
-      }
-    ],
+    
 
-    productsWithLowStock : [
 
-    ]
   };
 }) satisfies PageServerLoad;
