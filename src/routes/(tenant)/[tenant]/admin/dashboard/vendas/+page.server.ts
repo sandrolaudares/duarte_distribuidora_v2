@@ -2,7 +2,7 @@
 import type { PageServerLoad } from './$types';
 
 import * as s from '$db/schema'
-import { desc, eq, sql } from 'drizzle-orm'
+import { desc, eq, sql, gt, gte } from 'drizzle-orm'
 
 const LIMIT = 10 as const;
 
@@ -113,7 +113,30 @@ export const load = (async ({ locals: { tenantDb : db }, url }) => {
       total_orders: sql<number>`count(${s.customerOrderTable.id})`,
     })
     .from(s.customerOrderTable)
-
+  
+  const getTopCustomers = db!
+    .select({
+      customer_name: s.customerTable.name,
+      pedidos: sql<number>`count(${s.customerOrderTable.id})`,
+    })
+    .from(s.customerOrderTable)
+    .innerJoin(
+      s.customerTable,
+      eq(s.customerOrderTable.customer_id, s.customerTable.id),
+    )
+    .groupBy(s.customerOrderTable.customer_id)
+    .orderBy(desc(sql`count(${s.customerOrderTable.id})`))
+    .limit(LIMIT)
+    // total in cents
+    const getTotalPaidOrders = db!
+    .select({
+      total_paid: sql<number>`sum(${s.customerOrderTable.amount_paid})`,
+    })
+    .from(s.customerOrderTable)
+    .where(
+    gt(s.customerOrderTable.amount_paid, 1)
+    )
+    
   return {
     topOrderedProducts : await getTopOrderedNProducts,
     topRevenueProducts : await getTopRRevenueProducts,
@@ -125,22 +148,15 @@ export const load = (async ({ locals: { tenantDb : db }, url }) => {
     quantOrders : await getQuantOrders,
 
     // TODO: Subtrair (vendas a vista + recebimentos de fiado) - Contas pagas
-    financialSummary : 1666.22,
+    financialSummary : (await getTotalPaidOrders)[0].total_paid,
     // TODO: Query to get top 10 customers
-    topCustomers : [
-      {
-        name : "Matheus",
-        pedidos : 122,
-      },
-      {
-        name : "André",
-        pedidos : 56,
-      },
-      {
-        name : "Breno",
-        pedidos : 23  ,
-      }
-    ]
+    topCustomers : await getTopCustomers,
+
+    teste :{
+      startDate,
+      endDate,
+   
+    }
 
   };
 }) satisfies PageServerLoad;
