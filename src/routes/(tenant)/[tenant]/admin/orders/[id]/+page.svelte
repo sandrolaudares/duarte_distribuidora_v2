@@ -8,14 +8,25 @@
   import { page } from '$app/stores'
   import { onMount } from 'svelte'
   import type { SelectOrderPayment } from '$lib/server/db/schema'
+  import { Pencil,Plus,Trash2 } from 'lucide-svelte'
+  import * as Tooltip from '$lib/components/ui/tooltip/index'
+  import EditOrder from './EditOrder.svelte'
+  import CardapioCaixa from '../../cashier/[id]/CardapioCaixa.svelte'
+  import CaixaColumn from '../../cashier/[id]/CaixaColumn.svelte'
+  import EditCart from './EditCart.svelte'
 
-  export let data: PageData
+  let { data }: { data: PageData } = $props()
 
   let order_details = data.order_details
 
-  let isOpenModal: HTMLDialogElement | null = null
+  let isOpenModal: HTMLDialogElement | null = $state(null)
+  let isOpenModalEdit: HTMLDialogElement | null = $state(null)
+  let isOpenModalAdd: HTMLDialogElement | null = $state(null)
 
-  let troco = 0
+
+  let troco = $state(0)
+  let taxaEntrega = 0
+  let isDelivery = false
 
   troco =
     order_details?.payments?.reduce(
@@ -23,7 +34,9 @@
       0,
     ) ?? 0
 
-  let amount_paid_order = (order_details?.amount_paid ?? 0) - troco
+  let amount_paid_order = $derived.by(() => {
+    return (order_details?.amount_paid ?? 0) - troco
+  })
 </script>
 
 {#if order_details}
@@ -33,9 +46,38 @@
     <div
       class=" px-4 {order_details.address ? 'lg:w-2/3' : 'w-full'}  2xl:px-0"
     >
-      <h2 class="text-xl font-semibold text-opacity-90 sm:text-2xl">
-        Detalhes do pedido
-      </h2>
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-opacity-90 sm:text-2xl">
+          Detalhes do pedido
+        </h2>
+        {#if (order_details.status === 'CONFIRMED' || order_details.status === 'PENDING') && order_details.amount_paid < order_details.total}
+        <div class="flex gap-2">
+          <!-- <button class="btn btn-square btn-primary btn-sm" onclick={()=>isOpenModalAdd?.showModal()}>
+            <Plus />
+          </button> -->
+          <button class="btn btn-square btn-primary btn-sm" onclick={()=>isOpenModalEdit?.showModal()}>
+            <Pencil />
+          </button>
+          <button class="btn btn-square btn-error btn-sm">
+            <Trash2 />
+          </button>
+        </div>
+        {:else}
+          <Tooltip.Provider>
+            <Tooltip.Root>
+              <Tooltip.Trigger class="btn btn-square btn-sm">
+                <Pencil class="opacity-50" />
+              </Tooltip.Trigger>
+              <Tooltip.Content>
+                <p>
+                  O pedido já está a caminho, foi entregue ou já foi pago, não é possivel
+                  editar
+                </p>
+              </Tooltip.Content>
+            </Tooltip.Root>
+          </Tooltip.Provider>
+        {/if}
+      </div>
 
       <div class="mt-6 sm:mt-8">
         <div class="relative w-full overflow-x-auto border-b border-base-200">
@@ -78,20 +120,22 @@
         </div>
 
         {#if order_details.taxa_entrega}
-        
-        <dl class="flex items-center justify-between gap-4 pt-2">
-          <dt class="text-md text-opacity-90">Subtotal:</dt>
-          <dd class="text-lg text-opacity-90">
-            R${((order_details.total - order_details.taxa_entrega) / 100).toFixed(2)}
-          </dd>
-        </dl>
-        
-        <dl class="flex items-center justify-between gap-4 pt-2">
-          <dt class="text-sm text-opacity-90">Taxa entrega:</dt>
-          <dd class="text-md text-opacity-90">
-            R${(order_details.taxa_entrega / 100).toFixed(2)}
-          </dd>
-        </dl>
+          <dl class="flex items-center justify-between gap-4 pt-2">
+            <dt class="text-md text-opacity-90">Subtotal:</dt>
+            <dd class="text-lg text-opacity-90">
+              R${(
+                (order_details.total - order_details.taxa_entrega) /
+                100
+              ).toFixed(2)}
+            </dd>
+          </dl>
+
+          <dl class="flex items-center justify-between gap-4 pt-2">
+            <dt class="text-sm text-opacity-90">Taxa entrega:</dt>
+            <dd class="text-md text-opacity-90">
+              R${(order_details.taxa_entrega / 100).toFixed(2)}
+            </dd>
+          </dl>
         {/if}
 
         <div class=" space-y-6">
@@ -106,7 +150,11 @@
             <h1 class="mb-3 text-lg font-semibold">Pagamentos:</h1>
             <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
               {#each order_details.payments as payment, i}
-                <CardPayments {payment} {i} created_by={payment.created_by?.email} />
+                <CardPayments
+                  {payment}
+                  {i}
+                  created_by={payment.created_by?.email}
+                />
               {/each}
             </div>
             {#if order_details.amount_paid - troco < order_details.total}
@@ -123,11 +171,11 @@
                       100
                     ).toFixed(2)}
                   </span>
-                   para pagar
+                  para pagar
                 </h1>
                 <button
                   class="btn btn-primary"
-                  on:click={() => isOpenModal?.showModal()}
+                  onclick={() => isOpenModal?.showModal()}
                 >
                   Realizar pagamento
                 </button>
@@ -195,11 +243,7 @@
   </section>
 {/if}
 
-<!-- <pre>
-    {JSON.stringify(order_details, null, 2)}
-</pre> -->
-
-{#if order_details.amount_paid - troco < order_details.total}
+{#if order_details && order_details.amount_paid - troco < order_details.total}
   <dialog class="modal" bind:this={isOpenModal}>
     <div class="modal-box max-w-2xl">
       <PaymentFiado
@@ -214,4 +258,30 @@
       <button>close</button>
     </form>
   </dialog>
+{/if}
+
+{#if order_details}
+<dialog class="modal" bind:this={isOpenModalEdit}>
+  <div class="modal-box max-w-2xl">
+    <EditOrder order={order_details}/>
+  </div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+{/if}
+
+{#if data.products}
+<dialog class="modal" bind:this={isOpenModalAdd}>
+  <div class="modal-box max-w-7xl">
+    <CardapioCaixa products={data.products}/>
+    <hr>
+    <EditCart bind:taxaEntrega bind:isDelivery />
+  </div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
 {/if}
