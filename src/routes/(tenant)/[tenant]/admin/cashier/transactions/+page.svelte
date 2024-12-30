@@ -58,7 +58,7 @@
           <Th>Logs</Th>
           <Th>Data</Th>
           <Th>Troco</Th>
-          <Th>Valor</Th>
+          <!-- <Th>Valor</Th> -->
           <Th>Total</Th>
           <Th>Detalhes</Th>
           
@@ -79,7 +79,7 @@
               /></Th>
           <Th/>
           <Th/>
-          <Th/>
+          <!-- <Th/> -->
           <Th/>
           <!--FINALIZAR ESSA TABLE, FILTRO DE DATA E ETC-->
           
@@ -95,7 +95,7 @@
             <!-- <td>{row.routeName}</td> -->
             <td>{row.created_at ? format(row.created_at,'dd/MM/yyyy') :''}</td>
             <td class="{row.metadata.troco? 'font-semibold': 'text-error'}">{row.metadata.troco ? 'R$'+(row.metadata.troco/100).toFixed(2) : 'Não tem'}</td>
-            <td class="font-semibold">R${row.currency ? (row.currency/100).toFixed(2) : '0.00'}</td>
+            <!-- <td class="font-semibold">R${row.currency ? (row.currency/100).toFixed(2) : '0.00'}</td> -->
             <td class="font-semibold">{row.total ? 'R$'+(row.total/100).toFixed(2) : ''}</td>
             <td>
               {#if row.order_id}
