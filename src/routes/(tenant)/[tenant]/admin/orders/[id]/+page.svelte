@@ -8,21 +8,29 @@
   import { page } from '$app/stores'
   import { onMount } from 'svelte'
   import type { SelectOrderPayment } from '$lib/server/db/schema'
-  import { Pencil,Plus,Trash2 } from 'lucide-svelte'
+  import { Pencil, Plus, Trash2 } from 'lucide-svelte'
   import * as Tooltip from '$lib/components/ui/tooltip/index'
-  import EditOrder from './EditOrder.svelte'
   import CardapioCaixa from '../../cashier/[id]/CardapioCaixa.svelte'
   import CaixaColumn from '../../cashier/[id]/CaixaColumn.svelte'
-  import EditCart from './EditCart.svelte'
 
+  import { Cart } from '$lib/state/cart.svelte'
   let { data }: { data: PageData } = $props()
+
+  const order = new Cart(
+    data.order_details.items.map(item => ({
+      item: item,
+      quantity: item.quantity,
+      meta: {
+        is_retail: false,
+      },
+    })),
+  )
 
   let order_details = data.order_details
 
   let isOpenModal: HTMLDialogElement | null = $state(null)
   let isOpenModalEdit: HTMLDialogElement | null = $state(null)
   let isOpenModalAdd: HTMLDialogElement | null = $state(null)
-
 
   let troco = $state(0)
   let taxaEntrega = 0
@@ -51,17 +59,20 @@
           Detalhes do pedido
         </h2>
         {#if (order_details.status === 'CONFIRMED' || order_details.status === 'PENDING') && order_details.amount_paid < order_details.total}
-        <div class="flex gap-2">
-          <!-- <button class="btn btn-square btn-primary btn-sm" onclick={()=>isOpenModalAdd?.showModal()}>
+          <div class="flex gap-2">
+            <!-- <button class="btn btn-square btn-primary btn-sm" onclick={()=>isOpenModalAdd?.showModal()}>
             <Plus />
           </button> -->
-          <button class="btn btn-square btn-primary btn-sm" onclick={()=>isOpenModalEdit?.showModal()}>
-            <Pencil />
-          </button>
-          <button class="btn btn-square btn-error btn-sm">
-            <Trash2 />
-          </button>
-        </div>
+            <!-- <button
+              class="btn btn-square btn-primary btn-sm"
+              onclick={() => isOpenModalEdit?.showModal()}
+            >
+              <Pencil />
+            </button> -->
+            <button class="btn btn-square btn-error btn-sm">
+              <Trash2 />
+            </button>
+          </div>
         {:else}
           <Tooltip.Provider>
             <Tooltip.Root>
@@ -70,8 +81,8 @@
               </Tooltip.Trigger>
               <Tooltip.Content>
                 <p>
-                  O pedido já está a caminho, foi entregue ou já foi pago, não é possivel
-                  editar
+                  O pedido já está a caminho, foi entregue ou já foi pago, não é
+                  possivel editar
                 </p>
               </Tooltip.Content>
             </Tooltip.Root>
@@ -85,7 +96,7 @@
             class="w-full text-left font-medium text-opacity-90 md:table-fixed"
           >
             <tbody class="divide-y divide-base-200">
-              {#each order_details.items as item}
+              {#each Object.entries(order.cart) as [key, { item }]}
                 <tr>
                   <td class="whitespace-nowrap py-4 md:w-[384px]">
                     <div class="flex items-center gap-4">
@@ -259,29 +270,33 @@
     </form>
   </dialog>
 {/if}
-
+<!-- 
 {#if order_details}
-<dialog class="modal" bind:this={isOpenModalEdit}>
-  <div class="modal-box max-w-2xl">
-    <EditOrder order={order_details}/>
-  </div>
+  <dialog class="modal" bind:this={isOpenModalEdit}>
+    <div class="modal-box max-w-2xl">
+      <EditOrder order={order_details} />
+    </div>
 
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
-</dialog>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
 {/if}
 
 {#if data.products}
-<dialog class="modal" bind:this={isOpenModalAdd}>
-  <div class="modal-box max-w-7xl">
-    <CardapioCaixa products={data.products}/>
-    <hr>
-    <EditCart bind:taxaEntrega bind:isDelivery />
-  </div>
+  <dialog class="modal" bind:this={isOpenModalAdd}>
+    <div class="modal-box max-w-7xl">
+      <CardapioCaixa products={data.products} />
+      <hr />
+      <EditCart bind:taxaEntrega bind:isDelivery />
+    </div>
 
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
-</dialog>
-{/if}
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+{/if} -->
+
+<pre>
+  {JSON.stringify(order.cart, null, 2)}  
+</pre>
