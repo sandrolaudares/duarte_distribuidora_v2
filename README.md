@@ -193,6 +193,7 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - Preco de custo nas transferencias e tela historico transafarencias tipo tela fiado com total e valor do preço de custo
 - Parte do cliente fazer pedido
 - TELA RESUMO DE CADA MOTOBOY ENTREGAS
+- Toggle tipo preço ao editar pedido
 
 ## NAO TAO URGENTE
 
