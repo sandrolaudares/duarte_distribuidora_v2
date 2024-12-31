@@ -14,17 +14,13 @@
   import CaixaColumn from '../../cashier/[id]/CaixaColumn.svelte'
 
   import { Cart } from '$lib/state/cart.svelte'
+  import CashierMenu from './EditOrderMenu.svelte'
+  import { createCartContext } from './cartContext.svelte'
+  import EditOrderMenu from './EditOrderMenu.svelte'
+  import DisplayCart from './DisplayCart.svelte'
   let { data }: { data: PageData } = $props()
 
-  const order = new Cart(
-    data.order_details.items.map(item => ({
-      item: item,
-      quantity: item.quantity,
-      meta: {
-        is_retail: false,
-      },
-    })),
-  )
+  const order = createCartContext(data.order_details)
 
   let order_details = data.order_details
 
@@ -63,12 +59,12 @@
             <!-- <button class="btn btn-square btn-primary btn-sm" onclick={()=>isOpenModalAdd?.showModal()}>
             <Plus />
           </button> -->
-            <!-- <button
+            <button
               class="btn btn-square btn-primary btn-sm"
               onclick={() => isOpenModalEdit?.showModal()}
             >
               <Pencil />
-            </button> -->
+            </button>
             <button class="btn btn-square btn-error btn-sm">
               <Trash2 />
             </button>
@@ -96,35 +92,13 @@
             class="w-full text-left font-medium text-opacity-90 md:table-fixed"
           >
             <tbody class="divide-y divide-base-200">
-              {#each Object.entries(order.cart) as [key, { item }]}
-                <tr>
-                  <td class="whitespace-nowrap py-4 md:w-[384px]">
-                    <div class="flex items-center gap-4">
-                      <div
-                        class="flex aspect-square h-14 w-14 shrink-0 items-center"
-                      >
-                        <img
-                          class="h-auto max-h-full w-full rounded-md"
-                          src={getImagePath(item.product.image)}
-                          alt="product"
-                        />
-                      </div>
-                      <h1>{item.product.name}</h1>
-                    </div>
-                  </td>
-
-                  <td
-                    class="p-4 text-right text-base font-normal text-opacity-90"
-                  >
-                    {item.quantity}x R${(item.price / 100).toFixed(2)}
-                  </td>
-
-                  <td
-                    class="p-4 text-right text-base font-bold text-opacity-90"
-                  >
-                    R${((item.price * item.quantity) / 100).toFixed(2)}
-                  </td>
-                </tr>
+              {#each data.order_details.items as item}
+                <DisplayCart
+                  image={item.product.image ?? 0}
+                  price={item.price}
+                  quantity={item.quantity}
+                  name={item.product.name}
+                />
               {/each}
             </tbody>
           </table>
@@ -270,11 +244,34 @@
     </form>
   </dialog>
 {/if}
-<!-- 
+
 {#if order_details}
   <dialog class="modal" bind:this={isOpenModalEdit}>
-    <div class="modal-box max-w-2xl">
-      <EditOrder order={order_details} />
+    <div class="modal-box flex max-w-fit flex-col gap-5 xl:flex-row">
+      <div class="max-h-[100vh] max-w-4xl overflow-y-auto pr-5">
+        <EditOrderMenu products={data.products} />
+      </div>
+      <div class="max-h-[100vh] max-w-2xl overflow-y-auto">
+        <h1 class="text-2xl font-semibold">Carrinho:</h1>
+        <table
+          class="w-full text-left font-medium text-opacity-90 md:table-fixed"
+        >
+          <tbody class="divide-y divide-base-200">
+            {#each Object.entries(order.cart) as [key, { item }]}
+              {@const cartItem = order.cart[item.id]}
+              <DisplayCart
+                name={item.name}
+                image={item.image ?? 0}
+                price={cartItem.meta.price}
+                quantity={cartItem.quantity}
+              />
+            {/each}
+          </tbody>
+        </table>
+        <div class="flex justify-end">
+          <button class="btn btn-primary mt-4">Atualizar pedido!</button>
+        </div>
+      </div>
     </div>
 
     <form method="dialog" class="modal-backdrop">
@@ -282,21 +279,3 @@
     </form>
   </dialog>
 {/if}
-
-{#if data.products}
-  <dialog class="modal" bind:this={isOpenModalAdd}>
-    <div class="modal-box max-w-7xl">
-      <CardapioCaixa products={data.products} />
-      <hr />
-      <EditCart bind:taxaEntrega bind:isDelivery />
-    </div>
-
-    <form method="dialog" class="modal-backdrop">
-      <button>close</button>
-    </form>
-  </dialog>
-{/if} -->
-
-<pre>
-  {JSON.stringify(order.cart, null, 2)}  
-</pre>

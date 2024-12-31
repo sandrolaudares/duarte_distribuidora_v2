@@ -27,6 +27,7 @@ export class Cart<Item extends { id: string | number }, ProductMeta, CartMeta> {
   addItem(p: Item, meta?: ProductMeta) {
     if (this.cart[p.id]) {
       this.cart[p.id].quantity += 1
+      return
     }
 
     this.cart[p.id] = {
