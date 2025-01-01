@@ -7,6 +7,7 @@
   import { Overview, RecentSales } from '$lib/components/dashboard/admin'
   import { scaleBand } from 'd3-scale'
   import { format } from 'date-fns'
+  import { icons } from '$lib/utils/icons'
 
   let { data }: { data: PageData } = $props();
 
@@ -27,159 +28,64 @@
     topOrderedProducts, AvgOrderValue, quantOrders, topCustomers, financialSummary
   } = data;
 
-  let testData = [
-  {
-    "date": new Date('2024-12-01T03:00:00.000Z'),
-    "value": 47,
-    "baseline": 64
-  },
-  {
-    "date": new Date('2024-12-02T03:00:00.000Z'),
-    "value": 83,
-    "baseline": 97
-  },
-  {
-    "date": new Date('2024-12-03T03:00:00.000Z'),
-    "value": 39,
-    "baseline": 56
-  },
-  {
-    "date": new Date('2024-12-04T03:00:00.000Z'),
-    "value": 48,
-    "baseline": 95
-  },
-  {
-    "date": new Date('2024-12-05T03:00:00.000Z'),
-    "value": 84,
-    "baseline": 36
-  },
-  {
-    "date": new Date('2024-12-06T03:00:00.000Z'),
-    "value": 30,
-    "baseline": 41
-  },
-  {
-    "date": new Date('2024-12-07T03:00:00.000Z'),
-    "value": 39,
-    "baseline": 49
-  },
-  {
-    "date": new Date('2024-12-08T03:00:00.000Z'),
-    "value": 59,
-    "baseline": 76
-  },
-  {
-    "date": new Date('2024-12-09T03:00:00.000Z'),
-    "value": 72,
-    "baseline": 99
-  },
-  {
-    "date": new Date('2024-12-10T03:00:00.000Z'),
-    "value": 54,
-    "baseline": 78
-  },
-  {
-    "date": new Date('2024-12-11T03:00:00.000Z'),
-    "value": 32,
-    "baseline": 99
-  },
-  {
-    "date": new Date('2024-12-12T03:00:00.000Z'),
-    "value": 52,
-    "baseline": 72
-  },
-  {
-    "date": new Date('2024-12-13T03:00:00.000Z'),
-    "value": 73,
-    "baseline": 61
-  },
-  {
-    "date": new Date('2024-12-14T03:00:00.000Z'),
-    "value": 21,
-    "baseline": 69
-  },
-  {
-    "date": new Date('2024-12-15T03:00:00.000Z'),
-    "value": 91,
-    "baseline": 92
-  },
-  {
-    "date": new Date('2024-12-16T03:00:00.000Z'),
-    "value": 46,
-    "baseline": 49
-  },
-  {
-    "date": new Date('2024-12-17T03:00:00.000Z'),
-    "value": 90,
-    "baseline": 74
-  },
-  {
-    "date": new Date('2024-12-18T03:00:00.000Z'),
-    "value": 75,
-    "baseline": 99
-  },
-  {
-    "date": new Date('2024-12-19T03:00:00.000Z'),
-    "value": 80,
-    "baseline": 23
-  },
-  {
-    "date": new Date('2024-12-20T03:00:00.000Z'),
-    "value": 100,
-    "baseline": 48
-  },
-  {
-    "date": new Date('2024-12-21T03:00:00.000Z'),
-    "value": 87,
-    "baseline": 65
-  },
-  {
-    "date": new Date('2024-12-22T03:00:00.000Z'),
-    "value": 62,
-    "baseline": 96
-  },
-  {
-    "date": new Date('2024-12-23T03:00:00.000Z'),
-    "value": 69,
-    "baseline": 68
-  },
-  {
-    "date": new Date('2024-12-24T03:00:00.000Z'),
-    "value": 32,
-    "baseline": 81
-  },
-  {
-    "date": new Date('2024-12-25T03:00:00.000Z'),
-    "value": 25,
-    "baseline": 52
-  },
-  {
-    "date": new Date('2024-12-26T03:00:00.000Z'),
-    "value": 54,
-    "baseline": 37
-  },
-  {
-    "date": new Date('2024-12-27T03:00:00.000Z'),
-    "value": 100,
-    "baseline": 37
-  },
-  {
-    "date": new Date('2024-12-28T03:00:00.000Z'),
-    "value": 56,
-    "baseline": 75
-  },
-  {
-    "date": new Date('2024-12-29T03:00:00.000Z'),
-    "value": 75,
-    "baseline": 80
-  },
-  {
-    "date": new Date('2024-12-30T03:00:00.000Z'),
-    "value": 32,
-    "baseline": 38
-  }]
-
+  let dadoComparar = [
+    {
+      product_name: "Brahma",
+      total_revenue: 65,
+      total_revenue_compare: 44,
+      total_quantity_ordered: 2,
+      initialDate: "18/02/2024",
+      endDate: "28/02/2024"
+    },
+    {
+      product_name: "Skol",
+      total_revenue: 80,
+      total_revenue_compare: 75,
+      total_quantity_ordered: 5,
+      initialDate: "01/01/2024",
+      endDate: "10/03/2024"
+    },
+    { 
+      product_name: "Heineken",
+      total_revenue: 120,
+      total_revenue_compare: 95,
+      total_quantity_ordered: 8,
+      initialDate: "15/03/2024",
+      endDate: "25/03/2024"
+    },
+    {
+      product_name: "Budweiser",
+      total_revenue: 100,
+      total_revenue_compare: 85,
+      total_quantity_ordered: 6,
+      initialDate: "01/04/2024",
+      endDate: "10/04/2024"
+    },
+    {
+      product_name: "Corona",
+      total_revenue: 70,
+      total_revenue_compare: 100,
+      total_quantity_ordered: 3,
+      initialDate: "15/04/2024",
+      endDate: "25/04/2024"
+    },
+    {
+      product_name: "Stella",
+      total_revenue: 100,
+      total_revenue_compare: 100,
+      total_quantity_ordered: 3,
+      initialDate: "15/04/2024",
+      endDate: "25/04/2024"
+    }
+  ];
   
+  let calculaAumento = (initial : number, end : number) => {
+    let calcula = parseFloat((100 - (end * 100 / initial)).toFixed(2));
+    let htmlText = calcula > 0 ? icons.arrows.down_line() : icons.arrows.up_line()
+    return `${htmlText} <p>${Math.abs(calcula)}%</p>`
+    // icons.arrows()
+  }
+
 </script>
 
 <NavDashboard 
@@ -224,17 +130,17 @@
         </div>
       </div>
       <div class="w-full pr-3">
+        <h2>Comparação de produtos</h2>
         <div class="h-[300px] p-4 border rounded">
           <Chart
-            data={testData}
-            x="date"
-            xScale={scaleBand().padding(0.4)}
-            y={["value", "baseline"]}
+            data={dadoComparar}
+            x="product_name"
+            xScale={scaleBand().padding(0.6)}
+            y={["total_revenue", "total_revenue_compare"]}
             yDomain={[0, null]}
             yNice={4}
             padding={{ left: 16, bottom: 24 }}
-            tooltip={{ mode: "bisect-x" }}
-          >
+            tooltip={{ mode: "bisect-x" }}>
             <Svg>
               <Axis placement="left" grid rule />
               <Axis
@@ -242,9 +148,18 @@
                 format={(d) => d.toString()}
                 rule
               />
-              <Bars y="baseline" strokeWidth={1} class="fill-surface-content/20" />
-              <Bars y="value" strokeWidth={1} inset={8} class="fill-primary" />
+              <Bars y="total_revenue" strokeWidth={1} class="fill-surface-content/20" />
+              <Bars y="total_revenue_compare" strokeWidth={1} inset={0} class="fill-primary" />
             </Svg>
+            <Tooltip.Root let:data={dadoComparar}>
+              <Tooltip.Header> 
+                {@html calculaAumento(dadoComparar.total_revenue, dadoComparar.total_revenue_compare)}
+              </Tooltip.Header>
+              <Tooltip.List>
+                <Tooltip.Item label={dadoComparar.initialDate} value={dadoComparar.total_revenue} />
+                <Tooltip.Item label={dadoComparar.endDate} value={dadoComparar.total_revenue_compare} />
+              </Tooltip.List> 
+            </Tooltip.Root>
           </Chart>
         </div>        
       </div>
@@ -274,7 +189,7 @@
         </div>
       </div>
       <div class="w-full lg:w-1/2">
-        <h2>Maiores que mais pediram</h2>
+        <h2>Clientes que mais pediram</h2>
         <div class="h-[300px] p-4 border rounded">
           <BarChart data={topCustomers} x="customer_name" y="pedidos" />
         </div>
@@ -301,5 +216,7 @@
 
 <pre>
   {JSON.stringify(data.teste, null, 2)}
- 
+  {#each dadoComparar as item}
+    {JSON.stringify(item, null, 2)}
+  {/each}
 </pre>
