@@ -13,21 +13,6 @@
 
   let { data }: { data: PageData } = $props();
 
-  let colorPaymentMethods = {
-    pix: '#3CB371',
-    credit_card: '#1E90FF',
-    debit_card: '#87CEEB',
-    dinheiro: '#006400'
-  }
-
-  const mostPopularPaymentMethodsWithColor = $derived.by(
-    () => data.mostPopularPaymentMethods.map((method) => (
-    {
-      ...method,
-      color: method.payment_method in colorPaymentMethods ? colorPaymentMethods[method.payment_method] : 'gray'
-    }
-  )))
-
   const { 
     revenueByMonth , topRevenueProducts, topSellingCategories, topCustomerOrders, 
     topOrderedProducts, AvgOrderValue, quantOrders, topCustomers, financialSummary
@@ -92,14 +77,14 @@
 
     }
   ]
-  
+
   let calculaAumento = (initial : number, end : number) => {
     let calcula = parseFloat((100 - (end * 100 / initial)).toFixed(2));
     let htmlText = calcula > 0 ? icons.arrows.down_line() : icons.arrows.up_line()
     return `${htmlText} ${Math.abs(calcula)}%`
     // icons.arrows()
   }
-  
+    
   let carregaGrafico = false;
 
 </script>
@@ -227,7 +212,8 @@
           <div class="w-full lg:w-1/2 lg:pr-3">
             <h2>Metodos de pagamento</h2>
             <div class="h-[300px] p-4 border rounded">
-              <Chart data={mostPopularPaymentMethodsWithColor} x="usage_count" c="payment_method" cRange={mostPopularPaymentMethodsWithColor.map((c)=>c.color)}>
+              <Chart 
+              data={mostPopularPaymentMethodsWithColor} x="usage_count" c="payment_method" cRange={mostPopularPaymentMethodsWithColor.map((c)=>c.color)}>
                 <Svg center>
                   <Pie innerRadius={100} data={mostPopularPaymentMethodsWithColor} />
                   <Pie outerRadius={90} data={mostPopularPaymentMethodsWithColor} />
