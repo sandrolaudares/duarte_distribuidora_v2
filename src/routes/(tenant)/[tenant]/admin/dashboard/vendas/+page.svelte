@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Axis, BarChart, Bars, Chart, PieChart, Svg, Tooltip } from 'layerchart'
+  import { Axis, BarChart, Bars, Chart, Pie, PieChart, Svg, Tooltip } from 'layerchart'
   import type { PageData } from './$types';
   import NavDashboard from '$lib/components/dashboard/admin/NavDashboard.svelte'
   import * as Tabs from '$lib/components/ui/tabs/index';
@@ -8,6 +8,8 @@
   import { scaleBand } from 'd3-scale'
   import { format } from 'date-fns'
   import { icons } from '$lib/utils/icons'
+  import { page } from '$app/stores'
+  import { SSRFilters } from '$lib/components/datatable/filter.svelte'; 
 
   let { data }: { data: PageData } = $props();
 
@@ -18,10 +20,13 @@
     dinheiro: '#006400'
   }
 
-  const mostPopularPaymentMethodsWithColor = $derived.by(() => data.mostPopularPaymentMethods.map((method) => ({
-    ...method,
-    color: method.payment_method in colorPaymentMethods ? colorPaymentMethods[method.payment_method] : 'gray'
-  })))
+  const mostPopularPaymentMethodsWithColor = $derived.by(
+    () => data.mostPopularPaymentMethods.map((method) => (
+    {
+      ...method,
+      color: method.payment_method in colorPaymentMethods ? colorPaymentMethods[method.payment_method] : 'gray'
+    }
+  )))
 
   const { 
     revenueByMonth , topRevenueProducts, topSellingCategories, topCustomerOrders, 
@@ -78,13 +83,24 @@
       endDate: "25/04/2024"
     }
   ];
+
+  let dadoCompararProdutoMaisVendido = [
+    {
+
+    },
+    {
+
+    }
+  ]
   
   let calculaAumento = (initial : number, end : number) => {
     let calcula = parseFloat((100 - (end * 100 / initial)).toFixed(2));
     let htmlText = calcula > 0 ? icons.arrows.down_line() : icons.arrows.up_line()
-    return `${htmlText} <p>${Math.abs(calcula)}%</p>`
+    return `${htmlText} ${Math.abs(calcula)}%`
     // icons.arrows()
   }
+  
+  let carregaGrafico = false;
 
 </script>
 
@@ -120,80 +136,112 @@
     </Card.Header>
     <!-- <Card.Content class="flex flex-col md:flex-row gap-4"> -->
     <Card.Content class="flex flex-wrap">
-      <div class="w-full pr-3">
-        <h2>Principais produtos de receita</h2>
-        <div class="h-[300px] p-4 border rounded">
-          <BarChart data={topRevenueProducts}
-          x="product_name"
-          y="total_revenue"
-          props={{bars : {class: "fill-primary stroke-primary"}}} />
-        </div>
-      </div>
-      <div class="w-full pr-3">
-        <h2>Comparação de produtos</h2>
-        <div class="h-[300px] p-4 border rounded">
-          <Chart
-            data={dadoComparar}
-            x="product_name"
-            xScale={scaleBand().padding(0.6)}
-            y={["total_revenue", "total_revenue_compare"]}
-            yDomain={[0, null]}
-            yNice={4}
-            padding={{ left: 16, bottom: 24 }}
-            tooltip={{ mode: "bisect-x" }}>
-            <Svg>
-              <Axis placement="left" grid rule />
-              <Axis
-                placement="bottom"
-                format={(d) => d.toString()}
-                rule
+      {#if carregaGrafico}
+          <div class="w-full pr-3">
+            <h2>Principais produtos de receita</h2>
+            <div class="h-[300px] p-4 border rounded">
+              <BarChart data={topRevenueProducts}
+              x="product_name"
+              y="total_revenue"
+              props={{bars : {class: "fill-primary stroke-primary"}}} />
+            </div>
+          </div>
+          <div class="w-full">
+            <h2>Produtos mais vendidos (quantidade)</h2>
+            <div class="h-[300px] p-4 border rounded">
+              <BarChart data={topOrderedProducts} 
+              x="product_name" 
+              y="total_quantity_ordered"
+              props={{bars : {class: "fill-red-400 stroke-red-400"}}}
               />
-              <Bars y="total_revenue" strokeWidth={1} class="fill-surface-content/20" />
-              <Bars y="total_revenue_compare" strokeWidth={1} inset={0} class="fill-primary" />
-            </Svg>
-            <Tooltip.Root let:data={dadoComparar}>
-              <Tooltip.Header> 
-                {@html calculaAumento(dadoComparar.total_revenue, dadoComparar.total_revenue_compare)}
-              </Tooltip.Header>
-              <Tooltip.List>
-                <Tooltip.Item label={dadoComparar.initialDate} value={dadoComparar.total_revenue} />
-                <Tooltip.Item label={dadoComparar.endDate} value={dadoComparar.total_revenue_compare} />
-              </Tooltip.List> 
-            </Tooltip.Root>
-          </Chart>
-        </div>        
-      </div>
-      <div class="w-full">
-        <h2>Produtos mais vendidos (quantidade)</h2>
-        <div class="h-[300px] p-4 border rounded">
-          <BarChart data={topOrderedProducts} 
-          x="product_name" 
-          y="total_quantity_ordered"
-          props={{bars : {class: "fill-red-400 stroke-red-400"}}}
-          />
-        </div>
-      </div>
-      <div class="w-full lg:w-1/2 lg:pr-3">
-        <h2>Metodos de pagamento</h2>
-        <div class="h-[300px] p-4 border rounded">
-          <PieChart
-          data={mostPopularPaymentMethodsWithColor}
-          key="payment_method"
-          value="usage_count"
-          innerRadius={-20}
-          cornerRadius={5}
-          padAngle={0.02}
-          c="color"
-          cRange={mostPopularPaymentMethodsWithColor.map((d) => d.color)}
-          />
-        </div>
-      </div>
-      <div class="w-full lg:w-1/2">
-        <h2>Clientes que mais pediram</h2>
-        <div class="h-[300px] p-4 border rounded">
-          <BarChart data={topCustomers} x="customer_name" y="pedidos" />
-        </div>
-      </div>
+            </div>
+          </div>
+          <div class="w-full lg:w-1/2 lg:pr-3">
+            <h2>Metodos de pagamento</h2>
+            <div class="h-[300px] p-4 border rounded">
+              <PieChart
+              data={mostPopularPaymentMethodsWithColor}
+              key="payment_method"
+              value="usage_count"
+              innerRadius={-20}
+              cornerRadius={5}
+              padAngle={0.02}
+              c="color"
+              cRange={mostPopularPaymentMethodsWithColor.map((d) => d.color)}
+              />
+            </div>
+          </div>
+          <div class="w-full lg:w-1/2">
+            <h2>Clientes que mais pediram</h2>
+            <div class="h-[300px] p-4 border rounded">
+              <BarChart data={topCustomers} x="customer_name" y="pedidos" />
+            </div>
+          </div>
+        {:else}
+          <div class="w-full pr-3">
+            <h2>Principais produtos de receita</h2>
+            <div class="h-[300px] p-4 border rounded">
+              <Chart
+                data={dadoComparar}
+                x="product_name"
+                xScale={scaleBand().padding(0.6)}
+                y={["total_revenue", "total_revenue_compare"]}
+                yDomain={[0, null]}
+                yNice={4}
+                padding={{ left: 30, bottom: 10 }}
+                tooltip={{ mode: "bisect-x" }}>
+                <Svg>
+                  <Axis placement="left" grid rule />
+                  <Axis
+                    placement="bottom"
+                    format={(d) => d.toString()}
+                    rule
+                  />
+                  <Bars y="total_revenue" class="fill-primary" />
+                  <Bars y="total_revenue_compare"  class="fill-blue-600/80" />
+                  <!-- <Highlight area /> -->
+                </Svg>
+                <!-- TODO: Consertar bug valores legenda -->
+                <Tooltip.Root let:data={dadoComparar}>
+                  <Tooltip.Header> 
+                    {@html calculaAumento(dadoComparar.total_revenue, dadoComparar.total_revenue_compare)}
+                  </Tooltip.Header>
+                  <Tooltip.List>
+                    <Tooltip.Item label={dadoComparar.initialDate} value={dadoComparar.total_revenue} />
+                    <Tooltip.Item label={dadoComparar.endDate} value={dadoComparar.total_revenue_compare} />
+                  </Tooltip.List> 
+                </Tooltip.Root>
+              </Chart>
+            </div>        
+          </div>
+          <div class="w-full pr-3">
+            <h2>Produtos mais vendidos (Quantidade)</h2>
+            <div class="h-[300px] p-4 border rounded">
+              <BarChart data={topOrderedProducts} 
+                x="product_name" 
+                y="total_quantity_ordered"
+                props={{bars : {class: "fill-red-400 stroke-red-400"}}}
+              />
+            </div>
+          </div>
+          <div class="w-full lg:w-1/2 lg:pr-3">
+            <h2>Metodos de pagamento</h2>
+            <div class="h-[300px] p-4 border rounded">
+              <Chart data={mostPopularPaymentMethodsWithColor} x="usage_count" c="payment_method" cRange={mostPopularPaymentMethodsWithColor.map((c)=>c.color)}>
+                <Svg center>
+                  <Pie innerRadius={100} data={mostPopularPaymentMethodsWithColor} />
+                  <Pie outerRadius={90} data={mostPopularPaymentMethodsWithColor} />
+                </Svg>
+              </Chart>
+            </div>        
+          </div>
+          <div class="w-full lg:w-1/2">
+            <h2>Clientes que mais pediram</h2>
+            <div class="h-[300px] p-4 border rounded">
+              <BarChart data={topCustomers} x="customer_name" y="pedidos" />
+            </div>
+          </div>
+      {/if}      
     </Card.Content>
   </Card.Root>
   <Card.Root class="w-full lg:w-3/12">

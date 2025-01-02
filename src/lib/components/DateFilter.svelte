@@ -44,7 +44,6 @@
   }
 
   export let alignP = "left";
-  console.log(alignP)
 </script>
 
 <div class="date-filter">

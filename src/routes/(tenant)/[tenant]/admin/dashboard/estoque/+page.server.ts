@@ -2,6 +2,9 @@ import type { PageServerLoad } from './$types';
 
 export const load = (async () => {
   
+  // const getTotalItemsStock = !db
+  // .select()
+
   return {
     // TODO: Total de itens no estoque
     totalItemsStock : 0,

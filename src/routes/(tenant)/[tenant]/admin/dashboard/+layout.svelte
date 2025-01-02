@@ -14,6 +14,8 @@
   import type { SelectTenant } from '$lib/server/db/central/schema.js'
   import DateFilter from '$lib/components/DateFilter.svelte'
   import { hr, ur } from '@faker-js/faker'
+
+  import { writable } from 'svelte/store';
   
   import {page} from '$app/stores';
   
@@ -50,7 +52,7 @@
   const filters = new SSRFilters();
 
   let checkbox = $state(false);
-  
+
   let { data, children }: { data: LayoutData, children: Snippet } = $props();
 </script>
 
@@ -79,14 +81,17 @@
             {#if checkbox}
               <div class="mr-5">
                 <DateFilter alignP={"right"} onchange={(startDate, endDate) => { 
-                  if (!startDate || !endDate) return 
-                  filters.update({startDate : startDate.toString(), endDate : endDate.toString()}) 
+                  if (!startDate || !endDate) 
+                    return 
+                  // TODO: Bug searchParams subscrevendo
+                  filters.update({compareStartDate : startDate.toString(), compareEndDate : endDate.toString()}) 
                 }}/>
               </div>
             {/if}
           {/if}
           <DateFilter alignP={"right"} onchange={(startDate, endDate) => { 
-            if (!startDate || !endDate) return 
+            if (!startDate || !endDate) 
+              return 
             filters.update({startDate : startDate.toString(), endDate : endDate.toString()}) 
           }}/>
           <div class="flex items-center space-x-2">
