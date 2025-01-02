@@ -45,6 +45,8 @@
   )
   $: valor_a_pagar = total_pedido - total_paid
 
+  $:console.log(valor_a_pagar)
+
   let valor_recebido_dinheiro = 0
   let troco = 0
 
