@@ -18,6 +18,8 @@
   import { createCartContext } from './cartContext.svelte'
   import EditOrderMenu from './EditOrderMenu.svelte'
   import DisplayCart from './DisplayCart.svelte'
+  import CustomerDetails from './CustomerDetails.svelte'
+  import { toast } from 'svelte-sonner'
   let { data }: { data: PageData } = $props()
 
   const order = createCartContext(data.order_details)
@@ -41,6 +43,41 @@
   let amount_paid_order = $derived.by(() => {
     return (order_details?.amount_paid ?? 0) - troco
   })
+
+  let cartTotal = $derived.by(() => {
+    return (
+      Object.values(order.cart).reduce(
+        (acc, { meta, quantity }) => acc + meta.price * quantity,
+        0,
+      )
+    ) + ( order_details.taxa_entrega ?? 0)
+  })
+
+  async function handleUpdateOrder() {
+    const confirmed = confirm('Você tem certeza que deseja atualizar o pedido?')
+    if (confirmed) {
+      try {
+        const toAdd = Object.values(order.cart).map(item => ({
+          item_id: item.item.id,
+          quantity: item.quantity,
+          price: item.meta.price,
+        }))
+
+        console.log(cartTotal)
+
+        await trpc($page).customer.updateOrder.mutate({
+          order_id: order_details.id,
+          data: { total: cartTotal },
+          items: toAdd,
+        })
+        toast.success('Pedido atualizado com sucesso!')
+      } catch (error) {
+        toast.error('Erro ao atualizar pedido!')
+      }
+    } else {
+      toast.error('Pedido não atualizado!')
+    }
+  }
 </script>
 
 {#if order_details}
@@ -93,12 +130,14 @@
           >
             <tbody class="divide-y divide-base-200">
               {#each data.order_details.items as item}
-                <DisplayCart
-                  image={item.product.image ?? 0}
-                  price={item.price}
-                  quantity={item.quantity}
-                  name={item.product.name}
-                />
+                <tr>
+                  <DisplayCart
+                    image={item.product.image ?? 0}
+                    price={item.price}
+                    quantity={item.quantity}
+                    name={item.product.name}
+                  />
+                </tr>
               {/each}
             </tbody>
           </table>
@@ -176,55 +215,7 @@
       </div>
     </div>
 
-    {#if order_details.customer}
-      <div class="px-4 lg:w-1/3 2xl:px-0">
-        <h2 class="text-2xl font-semibold text-opacity-90">
-          Detalhes do Cliente
-        </h2>
-        <div class="mt-6 space-y-6 border-t border-base-200 py-6">
-          <dl class="space-y-4">
-            <div class="flex justify-between">
-              <dt class="text-lg font-semibold text-opacity-90">Nome:</dt>
-              <dd class="text-base font-normal text-opacity-50">
-                {order_details.customer.name}
-              </dd>
-            </div>
-            <div class="flex justify-between">
-              <dt class="text-lg font-semibold text-opacity-90">Email:</dt>
-              <dd class="text-base font-normal text-opacity-50">
-                {order_details.customer.email}
-              </dd>
-            </div>
-            <div class="flex justify-between">
-              <dt class="text-lg font-semibold text-opacity-90">Telefone:</dt>
-              <dd class="text-base font-normal text-opacity-50">
-                {order_details.customer.phone ?? 'Telefone não registrado!'}
-              </dd>
-            </div>
-          </dl>
-
-          {#if order_details.address}
-            <div class="mt-6 space-y-4 border-t border-base-200 py-6">
-              <h4 class="text-lg font-semibold text-opacity-90">
-                Endereço do Cliente
-              </h4>
-              <dl>
-                <dd class="mt-1 text-base font-normal text-opacity-50">
-                  {order_details.address.street}, {order_details.address.number}
-                  {order_details.address.complement}, {order_details.address
-                    .neighborhood}, {order_details.address.city} - {order_details
-                    .address.state}, CEP: {order_details.address.cep}
-                </dd>
-              </dl>
-              <!-- <div class="flex justify-end">
-                <button class="btn btn-link">Mudar endereço</button>
-              </div> -->
-              <!--TODO: mudar endereco e se !endereco colocar pra vincular se pedido ainda nao estiver pronto-->
-            </div>
-          {/if}
-        </div>
-      </div>
-    {/if}
+    <CustomerDetails {order_details} />
   </section>
 {/if}
 
@@ -251,7 +242,7 @@
       <div class="max-h-[100vh] max-w-4xl overflow-y-auto pr-5">
         <EditOrderMenu products={data.products} />
       </div>
-      <div class="max-h-[100vh] max-w-2xl overflow-y-auto">
+      <div class="max-h-[100vh] max-w-2xl overflow-y-auto pr-5">
         <h1 class="text-2xl font-semibold">Carrinho:</h1>
         <table
           class="w-full text-left font-medium text-opacity-90 md:table-fixed"
@@ -259,18 +250,58 @@
           <tbody class="divide-y divide-base-200">
             {#each Object.entries(order.cart) as [key, { item }]}
               {@const cartItem = order.cart[item.id]}
-              <DisplayCart
+              <tr>
+                <DisplayCart
                 name={item.name}
                 image={item.image ?? 0}
                 price={cartItem.meta.price}
                 quantity={cartItem.quantity}
-              />
+                />
+                <td class="w-12">
+                  <button class="btn btn-circle btn-error" onclick={()=>order.removeItem(item)}><Trash2 /></button>
+                </td>
+              </tr>
             {/each}
           </tbody>
         </table>
-        <div class="flex justify-end">
-          <button class="btn btn-primary mt-4">Atualizar pedido!</button>
-        </div>
+
+        {#if Object.values(order.cart).length > 0}
+          <div class="flex flex-col">
+            {#if order_details.taxa_entrega}
+              <dl class="flex items-center justify-between gap-4 pt-2">
+                <dt class="text-md text-opacity-90">Subtotal:</dt>
+                <dd class="text-lg text-opacity-90">
+                  R${((cartTotal - order_details.taxa_entrega) / 100).toFixed(
+                    2,
+                  )}
+                </dd>
+              </dl>
+
+              <dl class="flex items-center justify-between gap-4 pt-2">
+                <dt class="text-sm text-opacity-90">Taxa entrega:</dt>
+                <dd class="text-md text-opacity-90">
+                  R${(order_details.taxa_entrega / 100).toFixed(2)}
+                </dd>
+              </dl>
+            {/if}
+            <dl class="flex items-center justify-between gap-4 pt-2">
+              <dt class="text-lg font-bold text-opacity-90">Total:</dt>
+              <dd class="text-xl font-bold text-success">
+                R${(cartTotal / 100).toFixed(2)}
+              </dd>
+            </dl>
+            <hr />
+          </div>
+          <div class="flex justify-end">
+            <button class="btn btn-primary mt-4" onclick={handleUpdateOrder}>
+              Atualizar pedido!
+            </button>
+          </div>
+        {:else}
+          <h1 class="mt-20 text-center text-lg font-semibold">
+            Carrinho vazio
+          </h1>
+        {/if}
       </div>
     </div>
 

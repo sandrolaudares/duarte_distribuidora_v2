@@ -18,13 +18,27 @@ import type {
   SelectCustomer,
   InsertOrderPayment,
 } from './index'
-import { and,  count, eq, gt, gte, isNotNull, lt, ne, or, sql } from 'drizzle-orm'
+import {
+  and,
+  arrayContained,
+  count,
+  eq,
+  gt,
+  gte,
+  inArray,
+  isNotNull,
+  lt,
+  ne,
+  or,
+  sql,
+} from 'drizzle-orm'
 
 import { stock, bugReport } from '$db/controller'
 import { cashierTable } from '../distribuidora'
 import { TRPCError } from '@trpc/server'
 import { userTable } from '../user'
 import type { TenantDbType } from '../../tenant'
+import { id } from 'date-fns/locale'
 
 export const customer = (db: TenantDbType) => ({
   tables: {
@@ -160,16 +174,22 @@ export const customer = (db: TenantDbType) => ({
         address: true,
         customer: true,
         payments: {
-          with:{
-            created_by:true,
+          with: {
+            created_by: true,
           },
         },
         transactions: true,
       },
     })
   },
-  updateOrderExpireDate:async(order_id:SelectCustomerOrder['id'],date:SelectCustomerOrder['expire_at']) =>{
-    return await db.update(customerOrderTable).set({expire_at:date}).where(eq(customerOrderTable.id, order_id))
+  updateOrderExpireDate: async (
+    order_id: SelectCustomerOrder['id'],
+    date: SelectCustomerOrder['expire_at'],
+  ) => {
+    return await db
+      .update(customerOrderTable)
+      .set({ expire_at: date })
+      .where(eq(customerOrderTable.id, order_id))
   },
 
   updateOrderStatus: async (
@@ -352,6 +372,67 @@ export const customer = (db: TenantDbType) => ({
       .set(data)
       .where(eq(orderPaymentTable.id, id))
   },
+  updateOrder: async (
+    id: number,
+    data: Partial<InsertCustomerOrder>,
+    items: {
+      item_id: number,
+      quantity: number,
+      price: number,
+    }[],
+  ) => {
+    try {
+      return await db.transaction(async trx => {
+
+        const existingItems = await trx
+        .select()
+        .from(orderItemTable)
+        .where(eq(orderItemTable.order_id, id));
+
+        const existingItemsMap = new Map(existingItems.map((item) => [item.id, item]));
+
+        const itemsToDelete = new Set(existingItems.map((item) => item.id))
+
+        for (const cartItem of items) {
+          const existingItem = existingItemsMap.get(cartItem.item_id);
+    
+          if (existingItem) {
+            if (existingItem.quantity !== cartItem.quantity) {
+              await trx
+                .update(orderItemTable)
+                .set({ quantity: cartItem.quantity })
+                .where(eq(orderItemTable.id, existingItem.id));
+            }
+            itemsToDelete.delete(existingItem.id);
+          } else {
+            await trx.insert(orderItemTable).values({
+              order_id: id,
+              product_id: cartItem.item_id,
+              quantity: cartItem.quantity,
+              price: cartItem.price,
+            });
+          }
+        }
+
+        if (itemsToDelete.size > 0) {
+          await trx
+            .delete(orderItemTable)
+            .where(inArray(orderItemTable.id, Array.from(itemsToDelete)));
+        }
+
+        if (Object.keys(data).length > 0) {
+          await trx
+            .update(customerOrderTable)
+            .set(data)
+            .where(eq(customerOrderTable.id, id))
+        }
+
+      })
+    } catch (error) {
+      console.error('Error updating order and items:', error)
+      throw new Error('Failed to update order and items')
+    }
+  },
 
   getAllOrderInfo: () => {
     return db
@@ -386,47 +467,44 @@ export const customer = (db: TenantDbType) => ({
         eq(cashierTable.id, customerOrderTable.cachier_id),
       )
   },
-  updateStockOnOrder: async (
-    order_id: SelectCustomerOrder['id'],
-  ) => {
+  updateStockOnOrder: async (order_id: SelectCustomerOrder['id']) => {
     console.log('Updating order status:', order_id)
 
-      const order = await customer(db).getOrderByID(order_id)
-      console.log('Order:', order)
-      
-      if (!order) {
-        return {
-          error: 'Order not found',
-        }
-      }
+    const order = await customer(db).getOrderByID(order_id)
+    console.log('Order:', order)
 
-      for (const item of order.items) {
-        console.log('sku', item.product.sku)
-        if (item.product.sku) {
-          try {
-            console.log('Processing stock transaction:', {
-              sku_id: item.product.sku,
-              quantity: -item.quantity * item.product.quantity,
-              meta_data: {
-                order_id,
-                type: 'saida',
-              },
-            })
-            await stock(db).insertStockTransaction({
-              sku: item.product.sku,
-              type: 'Saida',
-              quantity: -item.quantity * item.product.quantity,
-              meta_data: {
-                order_id,
-                type: 'saida',
-              },
-            })
-          } catch (error) {
-            console.error('Failed to process stock transaction:', error)
-          }
+    if (!order) {
+      return {
+        error: 'Order not found',
+      }
+    }
+
+    for (const item of order.items) {
+      console.log('sku', item.product.sku)
+      if (item.product.sku) {
+        try {
+          console.log('Processing stock transaction:', {
+            sku_id: item.product.sku,
+            quantity: -item.quantity * item.product.quantity,
+            meta_data: {
+              order_id,
+              type: 'saida',
+            },
+          })
+          await stock(db).insertStockTransaction({
+            sku: item.product.sku,
+            type: 'Saida',
+            quantity: -item.quantity * item.product.quantity,
+            meta_data: {
+              order_id,
+              type: 'saida',
+            },
+          })
+        } catch (error) {
+          console.error('Failed to process stock transaction:', error)
         }
       }
-    
+    }
   },
 })
 export type CurrentOrders = ReturnType<typeof customer>['getCurrentOrders']

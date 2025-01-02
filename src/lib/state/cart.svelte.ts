@@ -38,6 +38,11 @@ export class Cart<Item extends { id: string | number }, ProductMeta, CartMeta> {
   }
 
   setItem(p: Item, quantity: number, meta?: ProductMeta) {
+    if(quantity <= 0) {
+      this.removeItem(p)
+      quantity = 0
+      return
+    }
     this.cart[p.id] = {
       item: p,
       quantity,
