@@ -215,6 +215,7 @@ Feel free to submit issues or pull requests. Contributions are welcome!
   atrasado perde 5 pontos. Esse score atualiza automaticamente toda vez que ele
   efetuar um pagamento. Pra auxiliar na tomada de decisões junto aos clientes pj
   que compram fiado.
+- Uma tela tipo um admin dashboard pro estoque, pra poder acessar transferencia, etc
 
 # RELATORIOS:
 
