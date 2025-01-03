@@ -8,49 +8,7 @@ export const dashboard = (db: TenantDbType) => ({
   weekly: {
     
   },
-
-
-  getTopOrderedNProducts: async (n = 10) => {
-    const resutl = await db
-      .select({
-        product_name: s.productItemTable.name,
-
-        total_quantity_ordered: sql<number>`cast(sum(${s.orderItemTable.quantity}) as int)`,
-      })
-      .from(s.orderItemTable)
-      .innerJoin(
-        s.productItemTable,
-        eq(s.orderItemTable.product_id, s.productItemTable.id),
-      )
-      .groupBy(s.orderItemTable.product_id)
-      .orderBy(desc(sql`sum(${s.orderItemTable.quantity})`))
-      .limit(n)
-
-    return resutl
-  },
-
-  getTopRRevenueProducts: async (n = 10) => {
-    const result = await db
-      .select({
-        product_name: s.productItemTable.name,
-        total_quantity_ordered: sql<number>`cast( sum(${s.orderItemTable.quantity}) as int)`,
-        total_revenue: sql<number>`cast(sum(${s.orderItemTable.quantity} * ${s.orderItemTable.price}) as int)`,
-      })
-      .from(s.orderItemTable)
-      .innerJoin(
-        s.productItemTable,
-        eq(s.orderItemTable.product_id, s.productItemTable.id),
-      )
-      .groupBy(s.orderItemTable.product_id)
-      .orderBy(
-        desc(
-          sql`sum(${s.orderItemTable.quantity} * ${s.orderItemTable.price})`,
-        ),
-      )
-      .limit(n)
-    return result
-  },
-
+  //Total gasto por cliente
   customerTotalSpend: async () => {
     const result = await db
       .select({
@@ -69,46 +27,7 @@ export const dashboard = (db: TenantDbType) => ({
       .limit(10)
     return result
   },
-
-  customerNumberOrders: async () => {
-    const result = await db
-      .select({
-        customer_name: s.customerTable.name,
-        customer_email: s.customerTable.email,
-        total_orders: sql<number>`count(${s.customerOrderTable.id})`,
-      })
-      .from(s.customerOrderTable)
-      .innerJoin(
-        s.customerTable,
-        eq(s.customerOrderTable.customer_id, s.customerTable.id),
-      )
-      .groupBy(s.customerOrderTable.customer_id)
-      .orderBy(desc(sql`count(${s.customerOrderTable.id})`))
-      .limit(10)
-    return result
-  },
-
-  revenueByMonth: async () => {
-    //     SELECT
-    //     strftime('%Y-%m', created_at) AS month,
-    //     SUM(amount_paid) AS total_revenue
-    // FROM
-    //     pedidos
-    // GROUP BY
-    //     month
-    // ORDER BY
-    //     month DESC;
-
-    const result = await db
-      .select({
-        month: sql<string>`strftime('%Y-%m', ${s.customerOrderTable.created_at})`,
-        total_revenue: sql<number>`sum(${s.customerOrderTable.amount_paid})`,
-      })
-      .from(s.customerOrderTable)
-      .groupBy(sql`strftime('%Y-%m', ${s.customerOrderTable.created_at})`)
-      .orderBy(desc(sql`strftime('%Y-%m', ${s.customerOrderTable.created_at})`))
-    return result
-  },
+  //Valor médio do pedido (Ticket Médio)
   avgOrderValue: async () => {
     //     SELECT
     //     AVG(amount_paid) AS average_order_value
@@ -122,52 +41,9 @@ export const dashboard = (db: TenantDbType) => ({
       .from(s.customerOrderTable)
     return result
   },
-
-  topSellingCategories: async (n = 10) => {
-    //     SELECT
-    //     pc.name AS category_name,
-    //     SUM(ip.quantity * ip.price) AS total_revenue
-    // FROM
-    //     item_pedido AS ip
-    // JOIN
-    //     product_item AS pi ON ip.product_id = pi.id
-    // JOIN
-    //     product AS p ON pi.product_id = p.id
-    // JOIN
-    //     product_category AS pc ON p.category_id = pc.id
-    // GROUP BY
-    //     category_name
-    // ORDER BY
-    //     total_revenue DESC;
-
-    const result = await db
-      .select({
-        category_name: s.productCategoryTable.name,
-        total_revenue: sql<number>`sum(${s.orderItemTable.quantity} * ${s.orderItemTable.price})`,
-      })
-      .from(s.orderItemTable)
-      .innerJoin(
-        s.productItemTable,
-        eq(s.orderItemTable.product_id, s.productItemTable.id),
-      )
-      .innerJoin(
-        s.productTable,
-        eq(s.productItemTable.product_id, s.productTable.id),
-      )
-      .innerJoin(
-        s.productCategoryTable,
-        eq(s.productTable.category_id, s.productCategoryTable.id),
-      )
-      .groupBy(s.productCategoryTable.name)
-      .orderBy(
-        desc(
-          sql`sum(${s.orderItemTable.quantity} * ${s.orderItemTable.price})`,
-        ),
-      )
-      .limit(n)
-    return result
-  },
-
+  //Categorias mais vendidas
+  //Tempo médio entre pedidos -> Não vai ser utilizado
+  // avg = averege(média)
   avgTimeBetweenOrders: async () => {
     //     SELECT
     //     c.name AS customer_name,
@@ -210,29 +86,7 @@ export const dashboard = (db: TenantDbType) => ({
     //   )
     // return result
   },
-
-  mostPopularPaymentMethods: async (n = 10) => {
-    //     SELECT
-    //     payment_method,
-    //     COUNT(id) AS usage_count
-    // FROM
-    //     pagamentos
-    // GROUP BY
-    //     payment_method
-    // ORDER BY
-    //     usage_count DESC;
-
-    const result = await db
-      .select({
-        payment_method: s.orderPaymentTable.payment_method,
-        usage_count: sql<number>`count(${s.orderPaymentTable.id})`,
-      })
-      .from(s.orderPaymentTable)
-      .groupBy(s.orderPaymentTable.payment_method)
-      .orderBy(desc(sql`count(${s.orderPaymentTable.id})`))
-      .limit(n)
-    return result
-  },
+  // Fornecedor principal por quantidade -> Não vai ser utilizado
   topSupplierByQuantity: async (n = 10) => {
     //     SELECT
     //     f.name AS supplier_name,
