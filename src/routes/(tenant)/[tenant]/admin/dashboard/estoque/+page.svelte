@@ -4,6 +4,7 @@
   import { BarChart, PieChart } from 'layerchart'
   import type { PageData } from './$types';
   import { RecentSales } from '$lib/components/dashboard/admin'
+  import SvChart from '../SvChart.svelte'
 
   let { data }: { data: PageData } = $props();
 </script>
@@ -41,10 +42,21 @@
     <!-- <Card.Content class="flex flex-col md:flex-row gap-4"> -->
     <Card.Content class="flex flex-wrap">
       <div class="w-full pr-3">
-        <h2>Estoque abaixo do mínimo</h2>
-        <div class="h-[300px] p-4 border rounded">
-          
-        </div>
+        <SvChart 
+        config={{
+          type : "bar",
+          data : {
+            labels: ["Coca-cola 2 litros", "Budweiser"],
+            datasets : [
+              {
+                label: "Total",
+                data: [50, 45]  
+              }
+            ]
+          } 
+        }}
+        title={"Estoque abaixo do mínimo"}
+        />
       </div>
     </Card.Content>
   </Card.Root>
