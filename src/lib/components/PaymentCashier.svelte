@@ -112,7 +112,7 @@
         toast.error('Selecione um motoboy para pedidos delivery')
         return
       }
-      if(!cart.meta.isDelivery) {
+      if (!cart.meta.isDelivery) {
         cart.meta.taxaEntrega = 0
       }
       if (cart.meta.clienteSelecionado) {
@@ -130,7 +130,9 @@
             address_id: cart.meta.enderecoSelecionado
               ? cart.meta.enderecoSelecionado.id
               : undefined,
-            total: cart.meta.isDelivery ? total_pedido - cart.meta.taxaEntrega : total_pedido,
+            total: cart.meta.isDelivery
+              ? total_pedido - cart.meta.taxaEntrega
+              : total_pedido,
             observation: 'TO DO',
             motoboy_id: cart.meta.motoboySelecionado?.id,
             type: 'ATACADO',
@@ -213,10 +215,10 @@
 
           <div>
             <CurrencyInput bind:value={valor_a_pagar} />
-            <!-- <button class="btn mt-2" onclick={() => divideValor(4)}>25%</button>
+            <button class="btn mt-2" onclick={() => divideValor(4)}>25%</button>
             <button class="btn" onclick={() => divideValor(2)}>50%</button>
             <button class="btn" onclick={() => divideValor(1.25)}>75%</button>
-            <button class="btn" onclick={() => divideValor(1)}>100%</button> -->
+            <button class="btn" onclick={() => divideValor(1)}>100%</button>
             <!--TODO: FIx CUrrency input não atualiza valor mesmo se valor_a_pagar muda-->
           </div>
           <p>
