@@ -180,18 +180,18 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 
 ## IMPORTANTES
 
-- PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS
+- PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS ✅
 
 ## FAZER AGORA
 
 - Alterar join do caixa na tela da transacao do caixa
 - TRANSAÇÕES DO CAIXA (TELAS)
-- NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE
+- NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE ✅
 - Unique name table de categoria
 - 100 rows como padrao nas table
 - Preco de custo nas transferencias e tela historico transafarencias tipo tela
   fiado com total e valor do preço de custo
-- Parte do cliente fazer pedido
+- Parte do cliente fazer pedido 
 - TELA RESUMO DE CADA MOTOBOY ENTREGAS
 - Toggle tipo preço ao editar pedido
 - loading login
