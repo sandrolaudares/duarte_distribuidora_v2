@@ -39,9 +39,13 @@
 
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
-    console.log(s)
-    filters.fromState(s)
-    await $navigating?.complete
+    try {
+      console.log(s)
+      filters.fromState(s)
+      await $navigating?.complete
+    } catch (error) {
+      console.error(error)
+    }
     return data.rows
   })
 
@@ -216,7 +220,9 @@
               class:opacity-50={conta.isPaid}
             >
               <td class="p-3">{conta.titulo}</td>
-              <td class="p-3 {conta.descricao ? '':'text-error'}">{conta.descricao ? conta.descricao :'Não possui'}</td>
+              <td class="p-3 {conta.descricao ? '' : 'text-error'}">
+                {conta.descricao ? conta.descricao : 'Não possui'}
+              </td>
               <td class="p-3">{conta.supName}</td>
               <td class="p-3">{conta.catName ?? 'Não cadastrado'}</td>
               <td class="p-3">{format(conta.expire_at!, 'dd/MM/yyyy')}</td>

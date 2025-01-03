@@ -134,7 +134,6 @@ npm run db:check
 
 Feel free to submit issues or pull requests. Contributions are welcome!
 
-
 ## PRONTOS
 
 - TABLE FIADO PODER SELECIONAR E MOSTRAR TOTAL DOS SELECIONADOS ✅
@@ -174,8 +173,8 @@ Feel free to submit issues or pull requests. Contributions are welcome!
   cadastradastra, financeiro realiza o pagamento na data correta, esse histórico
   precisa ficar registrado, pois em relatórios vamos precisar comparar vendas x
   despesas pra analisar o lucro mensal.) ✅
-- AJustar form criar tenant erros de endereco  ✅
-- DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES  ✅
+- AJustar form criar tenant erros de endereco ✅
+- DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES ✅
 - Editar nome SKU ✅
 - APLICAR EDITABLECELL NAS TABLES EXISTENTES ✅
 
@@ -190,10 +189,12 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE
 - Unique name table de categoria
 - 100 rows como padrao nas table
-- Preco de custo nas transferencias e tela historico transafarencias tipo tela fiado com total e valor do preço de custo
+- Preco de custo nas transferencias e tela historico transafarencias tipo tela
+  fiado com total e valor do preço de custo
 - Parte do cliente fazer pedido
 - TELA RESUMO DE CADA MOTOBOY ENTREGAS
 - Toggle tipo preço ao editar pedido
+- loading login
 
 ## NAO TAO URGENTE
 
@@ -216,7 +217,8 @@ Feel free to submit issues or pull requests. Contributions are welcome!
   atrasado perde 5 pontos. Esse score atualiza automaticamente toda vez que ele
   efetuar um pagamento. Pra auxiliar na tomada de decisões junto aos clientes pj
   que compram fiado.
-- Uma tela tipo um admin dashboard pro estoque, pra poder acessar transferencia, etc
+- Uma tela tipo um admin dashboard pro estoque, pra poder acessar transferencia,
+  etc
 
 # RELATORIOS:
 

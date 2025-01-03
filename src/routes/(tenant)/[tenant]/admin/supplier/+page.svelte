@@ -2,7 +2,7 @@
   import { navigating } from '$app/stores'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import { modal, FormModal } from '$lib/components/modal'
-      import ModalSupplierComplete from './ModalSupplierComplete.svelte'
+  import ModalSupplierComplete from './ModalSupplierComplete.svelte'
   import { page } from '$app/stores'
   import {
     TableHandler,
@@ -33,9 +33,13 @@
 
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
-    console.log(s)
-    filters.fromState(s)
-    await $navigating?.complete
+    try {
+      console.log(s)
+      filters.fromState(s)
+      await $navigating?.complete
+    } catch (error) {
+      console.error(error)
+    }
     return data.rows
   })
 
@@ -45,10 +49,12 @@
 </script>
 
 <main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
-  <section class="container mx-auto px-4 mb-4">
-    <div class="mt-2 flex justify-between items-center ">
+  <section class="container mx-auto mb-4 px-4">
+    <div class="mt-2 flex items-center justify-between">
       <h1 class="text-2xl font-semibold">Fornecedores:</h1>
-      <button class="btn btn-primary min-w-96" onclick={add}>Criar fornecedor</button>
+      <button class="btn btn-primary min-w-96" onclick={add}>
+        Criar fornecedor
+      </button>
     </div>
   </section>
   <Datatable {table}>
@@ -71,30 +77,30 @@
           <Th />
           <ThFilter {table} field="name" />
           <ThFilter {table} field="razao_social" />
-          <Th/>
-          <Th/>
-          <ThFilter {table} field="telephone_1"/>
+          <Th />
+          <Th />
+          <ThFilter {table} field="telephone_1" />
           <Th />
           <Th />
         </tr>
       </thead>
       <tbody>
         {#each table.rows as row}
-        <tr>
-          <td>{row.id}</td>
-          <td><b>{row.name}</b></td>
-          <td><b>{row.razao_social}</b></td>
-          <td><b>{row.cnpj_cpf}</b></td>
-          <td><b>{row.ie_rg}</b></td>
-          <td><b>{row.telephone_1}</b></td>
-          <td><b>{row.cep}</b></td>
-        </tr>
+          <tr>
+            <td>{row.id}</td>
+            <td><b>{row.name}</b></td>
+            <td><b>{row.razao_social}</b></td>
+            <td><b>{row.cnpj_cpf}</b></td>
+            <td><b>{row.ie_rg}</b></td>
+            <td><b>{row.telephone_1}</b></td>
+            <td><b>{row.cep}</b></td>
+          </tr>
         {/each}
       </tbody>
     </table>
-      {#if table.rows.length ===0}
-        <NoResults/>
-      {/if}
+    {#if table.rows.length === 0}
+      <NoResults />
+    {/if}
     {#snippet footer()}
       <RowsPerPage {table} />
       <div></div>
