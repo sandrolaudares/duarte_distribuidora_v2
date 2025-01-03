@@ -15,6 +15,12 @@
 
   let { data }: { data: PageData } = $props();
 
+  const { 
+    revenueByMonth , topRevenueProducts, topSellingCategories, topCustomerOrders, 
+    topOrderedProducts, AvgOrderValue, quantOrders, topCustomers, financialSummary,
+    mostPopularPaymentMethods
+  } = data;
+
   let colorPaymentMethods = {
     pix: '#3CB371',
     credit_card: '#1E90FF',
@@ -29,12 +35,6 @@
       color: method.payment_method in colorPaymentMethods ? colorPaymentMethods[method.payment_method] : 'gray'
     }
   )))
-
-  const { 
-    revenueByMonth , topRevenueProducts, topSellingCategories, topCustomerOrders, 
-    topOrderedProducts, AvgOrderValue, quantOrders, topCustomers, financialSummary,
-    mostPopularPaymentMethods
-  } = data;
 
   let dadoComparar = [
     {
@@ -104,8 +104,6 @@
   }
     
   let carregaGrafico = false;
-
-  mostPopularPaymentMethods.forEach((p) => console.log(p.payment_method))
   
 </script>
 
