@@ -20,6 +20,7 @@
   import DisplayCart from './DisplayCart.svelte'
   import CustomerDetails from './CustomerDetails.svelte'
   import { toast } from 'svelte-sonner'
+    import { goto } from '$app/navigation'
   let { data }: { data: PageData } = $props()
 
   const order = createCartContext(data.order_details)
@@ -78,6 +79,22 @@
       toast.error('Pedido não atualizado!')
     }
   }
+
+  async function handleDeleteOrder() {
+    const confirmed = confirm('Você tem certeza que deseja cancelar o pedido?')
+    if (confirmed) { 
+      try {
+        await trpc($page).customer.cancelOrder.mutate(order_details.id)
+        toast.success('Pedido cancelado com sucesso!')
+        goto('/admin/orders')
+      } catch (error) {
+        toast.error('Erro ao cancelar pedido!')
+        console.log(error)
+      }
+    } else {
+      toast.error('Pedido não cancelado!')
+    }
+  }
 </script>
 
 {#if order_details}
@@ -102,7 +119,7 @@
             >
               <Pencil />
             </button>
-            <button class="btn btn-square btn-error btn-sm">
+            <button class="btn btn-square btn-error btn-sm" onclick={handleDeleteOrder}>
               <Trash2 />
             </button>
           </div>
@@ -252,13 +269,18 @@
               {@const cartItem = order.cart[item.id]}
               <tr>
                 <DisplayCart
-                name={item.name}
-                image={item.image ?? 0}
-                price={cartItem.meta.price}
-                quantity={cartItem.quantity}
+                  name={item.name}
+                  image={item.image ?? 0}
+                  price={cartItem.meta.price}
+                  quantity={cartItem.quantity}
                 />
                 <td class="w-12">
-                  <button class="btn btn-circle btn-error" onclick={()=>order.removeItem(item)}><Trash2 /></button>
+                  <button
+                    class="btn btn-circle btn-error"
+                    onclick={() => order.removeItem(item)}
+                  >
+                    <Trash2 />
+                  </button>
                 </td>
               </tr>
             {/each}

@@ -654,6 +654,18 @@ export const customer = router({
       )
     }),
 
+    cancelOrder : publicProcedure
+    .meta({
+      routeName: 'Deletar Pedido',
+      permission: 'atualizar_pedidos',
+    })
+    .use(middleware.logged)
+    .use(middleware.auth)
+    .input(z.number()).mutation(async ({ input, ctx }) => {
+      const { tenantDb } = ctx
+      return await customerController(tenantDb).cancelOrder(input)
+    }),
+
   // updateOrderPaymentStatus: publicProcedure
   //   .use(middleware.logged)
   //   .use(middleware.auth)
@@ -754,7 +766,7 @@ export const customer = router({
     )
     .mutation(async ({ input, ctx }) => {
       const location = await geocodeAddress(
-        `${input.number}, ${input.street}, ${input.bairro}, ${input.city}, ${input.state}, ${input.cep}, ${input.country}`,
+        `${input.street}, ${input.number}, ${input.bairro}, ${input.city}, ${input.state}, ${input.cep}, ${input.country}`,
       )
 
       if (!location) {
@@ -769,6 +781,11 @@ export const customer = router({
         lon: location.lon,
       }
 
+      if(location.lat === 0 && location.lon === 0) {
+        throw new Error(
+          'Erro ao geocodificar endereço!',
+        )
+      }
       const tenantId = ctx.tenantInfo.tenantId
 
       const distribuidora = await getDistribuidoraLatLong(tenantId)

@@ -39,6 +39,7 @@ import { TRPCError } from '@trpc/server'
 import { userTable } from '../user'
 import type { TenantDbType } from '../../tenant'
 import { id } from 'date-fns/locale'
+import { error } from '@sveltejs/kit'
 
 export const customer = (db: TenantDbType) => ({
   tables: {
@@ -115,7 +116,7 @@ export const customer = (db: TenantDbType) => ({
       .where(
         and(
           eq(customerOrderTable.customer_id, id),
-          gte(customerOrderTable.total, customerOrderTable.amount_paid),
+          lt(customerOrderTable.amount_paid, customerOrderTable.total),
           lt(customerOrderTable.expire_at, new Date()),
         ),
       )
@@ -372,52 +373,72 @@ export const customer = (db: TenantDbType) => ({
       .set(data)
       .where(eq(orderPaymentTable.id, id))
   },
+
+  cancelOrder: async (order_id: number) => {
+    const [order] = await db
+      .select()
+      .from(customerOrderTable)
+      .where(eq(customerOrderTable.id, order_id))
+
+    if (order.amount_paid > 0) {
+      error(400, 'Não é possível deletar um pedido que já foi pago')
+    }
+    if (order.status !== 'PENDING' && order.status !== 'CONFIRMED') {
+      error(400, 'Não é possível deletar um pedido que já foi entregue')
+    }
+
+    return await db
+      .update(customerOrderTable)
+      .set({ status: 'CANCELED' })
+      .where(eq(customerOrderTable.id, order_id))
+  },
   updateOrder: async (
     id: number,
     data: Partial<InsertCustomerOrder>,
     items: {
-      item_id: number,
-      quantity: number,
-      price: number,
+      item_id: number
+      quantity: number
+      price: number
     }[],
   ) => {
     try {
       return await db.transaction(async trx => {
-
         const existingItems = await trx
-        .select()
-        .from(orderItemTable)
-        .where(eq(orderItemTable.order_id, id));
+          .select()
+          .from(orderItemTable)
+          .where(eq(orderItemTable.order_id, id))
 
-        const existingItemsMap = new Map(existingItems.map((item) => [item.id, item]));
+        const existingItemsMap = new Map(
+          existingItems.map(item => [item.id, item]),
+        )
 
-        const itemsToDelete = new Set(existingItems.map((item) => item.id))
+        const itemsToDelete = new Set(existingItems.map(item => item.id))
 
         for (const cartItem of items) {
-          const existingItem = existingItemsMap.get(cartItem.item_id);
-    
+          const existingItem = existingItemsMap.get(cartItem.item_id)
+
           if (existingItem) {
             if (existingItem.quantity !== cartItem.quantity) {
               await trx
                 .update(orderItemTable)
                 .set({ quantity: cartItem.quantity })
-                .where(eq(orderItemTable.id, existingItem.id));
+                .where(eq(orderItemTable.id, existingItem.id))
             }
-            itemsToDelete.delete(existingItem.id);
+            itemsToDelete.delete(existingItem.id)
           } else {
             await trx.insert(orderItemTable).values({
               order_id: id,
               product_id: cartItem.item_id,
               quantity: cartItem.quantity,
               price: cartItem.price,
-            });
+            })
           }
         }
 
         if (itemsToDelete.size > 0) {
           await trx
             .delete(orderItemTable)
-            .where(inArray(orderItemTable.id, Array.from(itemsToDelete)));
+            .where(inArray(orderItemTable.id, Array.from(itemsToDelete)))
         }
 
         if (Object.keys(data).length > 0) {
@@ -426,7 +447,6 @@ export const customer = (db: TenantDbType) => ({
             .set(data)
             .where(eq(customerOrderTable.id, id))
         }
-
       })
     } catch (error) {
       console.error('Error updating order and items:', error)
