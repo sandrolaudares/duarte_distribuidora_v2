@@ -6,10 +6,11 @@
     config : ChartConfiguration,
     width? : number,
     height? : number,
-    id? : string
+    id? : string,
+    title : string,
   }
 
-  let {config, width = 400, height = 400, id = ""} : Props = $props();
+  let {config, width = 400, height = 300, id = "", title} : Props = $props();
 
   function chart(node : HTMLCanvasElement){
     // Se não rodar, ver se importando o Chart de alguma dessas formas funciona
@@ -23,4 +24,7 @@
   }
 </script>
 
-<canvas use:chart {id} {width} {height}></canvas>
+<h2 class="text-center text-xl font-semibold">
+  {title}
+</h2>
+<canvas class="pt-10" use:chart {id} {width} {height}></canvas>

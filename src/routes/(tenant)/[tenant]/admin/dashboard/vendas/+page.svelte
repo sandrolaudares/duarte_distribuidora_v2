@@ -10,12 +10,30 @@
   import { icons } from '$lib/utils/icons'
   import { page } from '$app/stores'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'; 
+  import SvChart from '../SvChart.svelte'
+  import {type ChartConfiguration } from 'chart.js'
 
   let { data }: { data: PageData } = $props();
 
+  let colorPaymentMethods = {
+    pix: '#3CB371',
+    credit_card: '#1E90FF',
+    debit_card: '#87CEEB',
+    dinheiro: '#006400'
+  }
+
+  const mostPopularPaymentMethodsWithColor = $derived.by(
+    () => mostPopularPaymentMethods.map((method) => (
+    {
+      ...method,
+      color: method.payment_method in colorPaymentMethods ? colorPaymentMethods[method.payment_method] : 'gray'
+    }
+  )))
+
   const { 
     revenueByMonth , topRevenueProducts, topSellingCategories, topCustomerOrders, 
-    topOrderedProducts, AvgOrderValue, quantOrders, topCustomers, financialSummary
+    topOrderedProducts, AvgOrderValue, quantOrders, topCustomers, financialSummary,
+    mostPopularPaymentMethods
   } = data;
 
   let dadoComparar = [
@@ -87,6 +105,8 @@
     
   let carregaGrafico = false;
 
+  mostPopularPaymentMethods.forEach((p) => console.log(p.payment_method))
+  
 </script>
 
 <NavDashboard 
@@ -119,116 +139,93 @@
     <Card.Header>
       <Card.Title>Overview</Card.Title>
     </Card.Header>
-    <!-- <Card.Content class="flex flex-col md:flex-row gap-4"> -->
-    <Card.Content class="flex flex-wrap">
-      {#if carregaGrafico}
-          <div class="w-full pr-3">
-            <h2>Principais produtos de receita</h2>
-            <div class="h-[300px] p-4 border rounded">
-              <BarChart data={topRevenueProducts}
-              x="product_name"
-              y="total_revenue"
-              props={{bars : {class: "fill-primary stroke-primary"}}} />
-            </div>
-          </div>
-          <div class="w-full">
-            <h2>Produtos mais vendidos (quantidade)</h2>
-            <div class="h-[300px] p-4 border rounded">
-              <BarChart data={topOrderedProducts} 
-              x="product_name" 
-              y="total_quantity_ordered"
-              props={{bars : {class: "fill-red-400 stroke-red-400"}}}
-              />
-            </div>
-          </div>
-          <div class="w-full lg:w-1/2 lg:pr-3">
-            <h2>Metodos de pagamento</h2>
-            <div class="h-[300px] p-4 border rounded">
-              <PieChart
-              data={mostPopularPaymentMethodsWithColor}
-              key="payment_method"
-              value="usage_count"
-              innerRadius={-20}
-              cornerRadius={5}
-              padAngle={0.02}
-              c="color"
-              cRange={mostPopularPaymentMethodsWithColor.map((d) => d.color)}
-              />
-            </div>
-          </div>
-          <div class="w-full lg:w-1/2">
-            <h2>Clientes que mais pediram</h2>
-            <div class="h-[300px] p-4 border rounded">
-              <BarChart data={topCustomers} x="customer_name" y="pedidos" />
-            </div>
-          </div>
-        {:else}
-          <div class="w-full pr-3">
-            <h2>Principais produtos de receita</h2>
-            <div class="h-[300px] p-4 border rounded">
-              <Chart
-                data={dadoComparar}
-                x="product_name"
-                xScale={scaleBand().padding(0.6)}
-                y={["total_revenue", "total_revenue_compare"]}
-                yDomain={[0, null]}
-                yNice={4}
-                padding={{ left: 30, bottom: 10 }}
-                tooltip={{ mode: "bisect-x" }}>
-                <Svg>
-                  <Axis placement="left" grid rule />
-                  <Axis
-                    placement="bottom"
-                    format={(d) => d.toString()}
-                    rule
-                  />
-                  <Bars y="total_revenue" class="fill-primary" />
-                  <Bars y="total_revenue_compare"  class="fill-blue-600/80" />
-                  <!-- <Highlight area /> -->
-                </Svg>
-                <!-- TODO: Consertar bug valores legenda -->
-                <Tooltip.Root let:data={dadoComparar}>
-                  <Tooltip.Header> 
-                    {@html calculaAumento(dadoComparar.total_revenue, dadoComparar.total_revenue_compare)}
-                  </Tooltip.Header>
-                  <Tooltip.List>
-                    <Tooltip.Item label={dadoComparar.initialDate} value={dadoComparar.total_revenue} />
-                    <Tooltip.Item label={dadoComparar.endDate} value={dadoComparar.total_revenue_compare} />
-                  </Tooltip.List> 
-                </Tooltip.Root>
-              </Chart>
-            </div>        
-          </div>
-          <div class="w-full pr-3">
-            <h2>Produtos mais vendidos (Quantidade)</h2>
-            <div class="h-[300px] p-4 border rounded">
-              <BarChart data={topOrderedProducts} 
-                x="product_name" 
-                y="total_quantity_ordered"
-                props={{bars : {class: "fill-red-400 stroke-red-400"}}}
-              />
-            </div>
-          </div>
-          <div class="w-full lg:w-1/2 lg:pr-3">
-            <h2>Metodos de pagamento</h2>
-            <div class="h-[300px] p-4 border rounded">
-              <Chart 
-              data={mostPopularPaymentMethodsWithColor} x="usage_count" c="payment_method" cRange={mostPopularPaymentMethodsWithColor.map((c)=>c.color)}>
-                <Svg center>
-                  <Pie innerRadius={100} data={mostPopularPaymentMethodsWithColor} />
-                  <Pie outerRadius={90} data={mostPopularPaymentMethodsWithColor} />
-                </Svg>
-              </Chart>
-            </div>        
-          </div>
-          <div class="w-full lg:w-1/2">
-            <h2>Clientes que mais pediram</h2>
-            <div class="h-[300px] p-4 border rounded">
-              <BarChart data={topCustomers} x="customer_name" y="pedidos" />
-            </div>
-          </div>
-      {/if}      
-    </Card.Content>
+    <Card.Content>
+      <div class="flex flex-wrap">
+        <div class="w-full">
+          <SvChart 
+          config={{
+            type : 'bar',
+            data: {
+              labels : (dadoComparar.map((d) => d.product_name)),
+              datasets: [
+                {                  
+                  label: "10/02/2023",
+                  data: dadoComparar.map((d) => d.total_revenue),
+                  backgroundColor: [
+                    'rgba(0, 85, 199)'
+                  ],
+                  borderColor: [
+                    'rgb(255, 99, 132)',
+                  ],
+                  borderWidth: 0,
+                }
+              ]
+            },
+          }}
+          title={"Principais produtos de receita"}
+          
+          />
+        </div>
+        <div class="w-full">
+          <SvChart 
+          config={{
+            type: 'bar',
+            data: {
+              labels: (topOrderedProducts.map((p) => p.product_name)),
+              datasets: [
+                {
+                  label: "10/02/2023",
+                  data: topOrderedProducts.map((p) => p.total_quantity_ordered),
+                  backgroundColor: [
+                    'rgba(255, 217, 0)'
+                  ]
+                }
+                // Dataset de comparação vem aqui
+              ]
+            }
+          }}
+          title={"Produtos mais vendidos (Quantidade)"}
+          />
+        </div>
+        <div class="w-1/2">
+          <SvChart 
+          config={{
+            type : 'pie',
+            data: {
+              labels: mostPopularPaymentMethodsWithColor.map((p) => {return p.payment_method}),
+              datasets: [
+                {
+                  label: "Total: ",
+                  data: mostPopularPaymentMethodsWithColor.map((p) => p.usage_count)
+                },
+                // Coloca aqui o dataset de comparação
+              ] 
+            }
+          }}
+          title={"Metodos de pagamento"}
+          />
+        </div>
+        <div class="w-1/2">
+          
+          <SvChart 
+          config={{
+            type : "bar",
+            data: {
+              labels : topCustomers.map((t) => t.customer_name),
+              datasets: 
+              [
+                {
+                  label: "Total de pedidos",
+                  data: topCustomers.map((t) => t.pedidos) 
+                }
+              ]
+            }
+          }}
+          title={"Clientes que mais pediram"}
+          />
+        </div>
+      </div>
+    </Card.Content> 
   </Card.Root>
   <Card.Root class="w-full lg:w-3/12">
     <Card.Header>
