@@ -76,13 +76,16 @@
               {
                 label: "Dívidas",
                 data: [10,80,110],
-                backgroundColor:[
+                backgroundColor:
+                [
                   "rgb(255,255,0)"
-                ]
+                ],
+                barThickness : 50,
               }
             ]
           }
         }}
+        height={180}
         title={"Maiores dívidas (Vai usar a msm query de clientes PJ com dívida)"}
         />
       </div>

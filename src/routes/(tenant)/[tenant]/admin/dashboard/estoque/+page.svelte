@@ -41,7 +41,7 @@
     </Card.Header>
     <!-- <Card.Content class="flex flex-col md:flex-row gap-4"> -->
     <Card.Content class="flex flex-wrap">
-      <div class="w-full pr-3">
+      <div class="w-1/2 pr-3">
         <SvChart 
         config={{
           type : "bar",
@@ -50,11 +50,13 @@
             datasets : [
               {
                 label: "Total",
-                data: [50, 45]  
+                data: [50, 45],
+                barThickness: 50  
               }
             ]
           } 
         }}
+        height={300}
         title={"Estoque abaixo do mínimo"}
         />
       </div>

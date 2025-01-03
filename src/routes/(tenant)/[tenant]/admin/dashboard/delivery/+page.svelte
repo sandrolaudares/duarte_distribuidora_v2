@@ -37,7 +37,7 @@
     },
   ]
 
-  let larguraGrafico = "height:" + dataCard.length * 60+"px;";
+  let larguraGrafico = "height:" + dataCard.length * 30+"px;";
 </script>
 
 <NavDashboard 
@@ -86,7 +86,8 @@ cardQuatro={{
                 backgroundColor : 
                 [
                   'rgba(255, 217, 0)'
-                ]
+                ],
+                barThickness : 30,
               }
             ]
           },

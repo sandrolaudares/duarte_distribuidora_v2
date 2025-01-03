@@ -149,7 +149,7 @@
               labels : (dadoComparar.map((d) => d.product_name)),
               datasets: [
                 {                  
-                  label: "10/02/2023",
+                  label: "Receita",
                   data: dadoComparar.map((d) => d.total_revenue),
                   backgroundColor: [
                     'rgba(0, 85, 199)'
@@ -158,10 +158,12 @@
                     'rgb(255, 99, 132)',
                   ],
                   borderWidth: 0,
+                  barThickness : 50
                 }
               ]
             },
           }}
+          height={220}
           title={"Principais produtos de receita"}
           
           />
@@ -174,7 +176,7 @@
               labels: (topOrderedProducts.map((p) => p.product_name)),
               datasets: [
                 {
-                  label: "10/02/2023",
+                  label: "Quantidade",
                   data: topOrderedProducts.map((p) => p.total_quantity_ordered),
                   backgroundColor: [
                     'rgba(255, 217, 0)'
@@ -184,6 +186,7 @@
               ]
             }
           }}
+          height={200}
           title={"Produtos mais vendidos (Quantidade)"}
           />
         </div>
