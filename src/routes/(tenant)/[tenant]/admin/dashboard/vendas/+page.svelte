@@ -222,6 +222,7 @@
             }
           }}
           title={"Clientes que mais pediram"}
+          height={400}
           />
         </div>
       </div>
