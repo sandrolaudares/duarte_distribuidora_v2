@@ -61,4 +61,8 @@ export class Cart<Item extends { id: string | number }, ProductMeta, CartMeta> {
       }
     this.cart[p.id].quantity -= 1
   }
+
+  clear() {
+    this.cart = {}
+  }
 }

@@ -1,9 +1,10 @@
 <script lang="ts">
   import { getImagePath } from '$lib/utils/image'
-  import { getCartContext } from '$lib/stores/cart'
+  // import { getCartContext } from '$lib/stores/cart'
   import { icons } from '$lib/utils/icons'
   import Cardapio from '$lib/components/Cardapio.svelte'
   import type { RouterOutputs } from '$trpc/router'
+  import { getCartContext } from './cartContext.svelte'
 
   export let products:RouterOutputs['product']['queryCategorysWithProductItems']
   export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
@@ -39,7 +40,7 @@
     <div class="card w-full p-1 {p.items.length == 0 ? 'hidden' : ''}">
       <div class="grid grid-cols-1 gap-3">
         {#each p.items as item}
-          {@const cartItem = $cart[item.id]}
+          {@const cartItem = cart.cart[item.id]}
 
           <hr />
           <div class="flex w-full py-2">
@@ -63,16 +64,7 @@
                   <button
                     class="btn btn-primary hidden md:block"
                     on:click={() => {
-                      if (cartItem.quantity <= 1) {
-                        cart.removeItem(item.id)
-                      } else {
-                        cart.addItem({
-                          item: item,
-                          quantity: -1,
-                          is_retail:
-                            tipo_preco == 'retail_price' ? true : false,
-                        })
-                      }
+                      cart.subtractItem(item)
                     }}
                   >
                     {@html icons.minus()}
@@ -81,23 +73,22 @@
                 <input
                   min="1"
                   class="max-w-16 bg-base-100 text-right text-xl font-bold focus:border-yellow-500 md:min-w-10 md:max-w-28"
-                  value={$cart[item.id]?.quantity ?? 0}
+                  value={cartItem?.quantity ?? 0}
                   on:change={e => {
                     const quant_temp = (e.target as HTMLInputElement)?.value
-                    cart.setItem({
-                      item: item,
-                      quantity: Number(quant_temp),
-                      is_retail: tipo_preco == 'retail_price' ? true : false,
+                    cart.setItem(item, Number(quant_temp), {
+                      is_retail: tipo_preco === 'retail_price' ? true : false,
                     })
                   }}
                 />
                 <button
-                  on:click={() =>
-                    cart.addItem({
-                      item: item,
-                      quantity: 1,
-                      is_retail: tipo_preco == 'retail_price' ? true : false,
-                    })}
+                  on:click={() =>{
+                    
+                    cart.addItem(item, {
+                      is_retail: tipo_preco === 'retail_price' ? true : false,
+                    })
+                  }
+                            }
                   class="btn btn-primary"
                 >
                   {@html icons.plus()}

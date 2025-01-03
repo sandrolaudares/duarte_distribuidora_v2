@@ -5,65 +5,64 @@
   import { icons } from '$lib/utils'
   import { toast } from 'svelte-sonner'
   import CardPayments from './cards/CardPayments.svelte'
-  import { getCartContext } from '$lib/stores/cart'
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
   import { modal } from './modal'
   import Loading from './Loading.svelte'
-
-  export let total_pedido = 0
-
-  export let cliente_selecionado:
-    | RouterOutputs['customer']['getCustomers'][0]
-    | null = null
-
-  export let motoboySelecionado:
-    | RouterOutputs['auth']['getMotoboys'][0]
-    | null = null
-
-  export let payments: Omit<InsertOrderPayment, 'order_id'>[] = []
-
-  export let enderecoSelecionado: SelectAddress | null
-
-  export let save: (
-    payments: Omit<InsertOrderPayment, 'order_id'>[],
-    // isChecked: boolean,
-  ) => void
-
-  export let nulla: () => void = () => {};
-
-  export let taxaEntrega = 0
-
-  export let isDelivery = false
-  export let cashier_id = 0
+  import { getCartContext } from '../../routes/(tenant)/[tenant]/admin/cashier/[id]/cartContext.svelte'
+  import { onMount } from 'svelte'
 
   const cart = getCartContext()
 
-  $: total_paid = payments.reduce(
-    (acc, payment) => acc + payment.amount_paid,
-    0,
-  )
-  $: valor_a_pagar = total_pedido - total_paid
+  let {
+    payments,
+    nulla,
+    save,
+    total_pedido,
+    cashier_id,
+  }: {
+    payments: Omit<InsertOrderPayment, 'order_id'>[]
+    nulla: () => void
+    save: (payments: Omit<InsertOrderPayment, 'order_id'>[]) => void
+    total_pedido: number
+    cashier_id: number
+  } = $props()
 
-  $:console.log(valor_a_pagar)
+  let total_paid = $derived.by(() => {
+    return payments.reduce((acc, payment) => acc + payment.amount_paid, 0)
+  })
 
-  let valor_recebido_dinheiro = 0
-  let troco = 0
+  let valor_a_pagar = $state(0)
 
-  $: troco = valor_recebido_dinheiro - valor_a_pagar
+  onMount(() => {
+    valor_a_pagar = total_pedido - total_paid
+  })
 
-  let metodo_pagamento: InsertOrderPayment['payment_method'] | null
+  let valor_recebido_dinheiro = $state(0)
 
-  let isDiferent = false
-  let isPago = false
-  let isDinheiro = false
-  let isFiado = false
-  let isLoading = false
+  let troco = $derived.by(() => {
+    return valor_recebido_dinheiro - valor_a_pagar
+  })
+
+  // $effect(()=>{
+  //   valor_a_pagar = total_pedido - total_paid
+  //   troco = valor_recebido_dinheiro - valor_a_pagar
+  // })
+
+  let metodo_pagamento: InsertOrderPayment['payment_method'] | null =
+    $state(null)
+
+  let isDiferent = $state(false)
+  let isPago = $state(false)
+  let isDinheiro = $state(false)
+  let isFiado = $state(false)
+  let isLoading = $state(false)
   // export let isChecked = false
 
   function divideValor(n: number) {
     valor_a_pagar = total_pedido - total_paid
     valor_a_pagar = valor_a_pagar / n
+    console.log(valor_a_pagar)
   }
 
   function addPayment() {
@@ -109,29 +108,34 @@
   async function addOrderFiado() {
     try {
       isLoading = true
-      if (isDelivery && !motoboySelecionado) {
+      if (cart.meta.isDelivery && !cart.meta.motoboySelecionado) {
         toast.error('Selecione um motoboy para pedidos delivery')
         return
       }
-      if (cliente_selecionado) {
+      if(!cart.meta.isDelivery) {
+        cart.meta.taxaEntrega = 0
+      }
+      if (cart.meta.clienteSelecionado) {
         await trpc($page).customer.order.insertFiado.mutate({
-          order_items: Object.values($cart).map(item => ({
-            product_id: item.item.id,
+          order_items: Object.values(cart.cart).map(item => ({
+            product_id: item.item.product_id,
             quantity: item.quantity,
             price:
-              item.item[item.is_retail ? 'retail_price' : 'wholesale_price'],
+              item.item[
+                item.meta.is_retail ? 'retail_price' : 'wholesale_price'
+              ],
           })),
           order_info: {
-            customer_id: cliente_selecionado.id,
-            address_id: enderecoSelecionado
-              ? enderecoSelecionado.id
+            customer_id: cart.meta.clienteSelecionado.id,
+            address_id: cart.meta.enderecoSelecionado
+              ? cart.meta.enderecoSelecionado.id
               : undefined,
-            total: total_pedido - taxaEntrega,
+            total: cart.meta.isDelivery ? total_pedido - cart.meta.taxaEntrega : total_pedido,
             observation: 'TO DO',
-            motoboy_id: motoboySelecionado?.id,
+            motoboy_id: cart.meta.motoboySelecionado?.id,
             type: 'ATACADO',
-            taxa_entrega: isDelivery ? taxaEntrega : 0,
-            cachier_id: cashier_id
+            taxa_entrega: cart.meta.isDelivery ? cart.meta.taxaEntrega : 0,
+            cachier_id: cashier_id,
             //TODO: Type
             //TODO: Observation
           },
@@ -147,7 +151,6 @@
       console.error(error.message)
     }
   }
-  $: console.log(metodo_pagamento)
 </script>
 
 <h1 class="mb-2 text-center">
@@ -168,7 +171,7 @@
       <button
         class="btn btn-secondary"
         disabled={isLoading}
-        on:click={() => {
+        onclick={() => {
           isLoading = true
           save(payments)
         }}
@@ -184,7 +187,7 @@
         <button
           class="btn btn-secondary"
           disabled={payments.length > 0}
-          on:click={() => {
+          onclick={() => {
             isDiferent = false
             isPago = false
             isDinheiro = false
@@ -210,17 +213,11 @@
 
           <div>
             <CurrencyInput bind:value={valor_a_pagar} />
-            <button class="btn mt-2" on:click={() => divideValor(4)}>
-              25%
-            </button>
-            <button class="btn" on:click={() => divideValor(2)}>50%</button>
-            <button class="btn" on:click={() => divideValor(1.25)}>75%</button>
-            <button
-              class="btn"
-              on:click={() => (valor_a_pagar = total_pedido - total_paid)}
-            >
-              100%
-            </button>
+            <!-- <button class="btn mt-2" onclick={() => divideValor(4)}>25%</button>
+            <button class="btn" onclick={() => divideValor(2)}>50%</button>
+            <button class="btn" onclick={() => divideValor(1.25)}>75%</button>
+            <button class="btn" onclick={() => divideValor(1)}>100%</button> -->
+            <!--TODO: FIx CUrrency input não atualiza valor mesmo se valor_a_pagar muda-->
           </div>
           <p>
             Valor restante do pedido: R${(
@@ -275,7 +272,7 @@
         {#if !isDiferent}
           <button
             class="btn btn-primary"
-            on:click={() => {
+            onclick={() => {
               isDiferent = !isDiferent
               isFiado = false
               isDinheiro = false
@@ -287,10 +284,10 @@
             {@html icons.divide()}
           </button>
         {/if}
-        {#if cliente_selecionado && !isDiferent}
+        {#if cart.meta.clienteSelecionado && !isDiferent}
           <button
             class="btn btn-primary w-full"
-            on:click={() => {
+            onclick={() => {
               isFiado = true
               addOrderFiado()
               // nulla()
@@ -303,7 +300,7 @@
         {/if}
         <button
           class="btn btn-primary w-full"
-          on:click={() => {
+          onclick={() => {
             isPago = true
             isDinheiro = false
             isFiado = false
@@ -314,7 +311,7 @@
         </button>
         <button
           class="btn btn-primary w-full"
-          on:click={() => {
+          onclick={() => {
             isDinheiro = true
             isPago = false
             isFiado = false
@@ -329,7 +326,7 @@
         <hr />
         <button
           class="btn btn-secondary w-full"
-          on:click={addPayment}
+          onclick={addPayment}
           disabled={!(metodo_pagamento === 'dinheiro'
             ? valor_recebido_dinheiro >= valor_a_pagar
             : metodo_pagamento) || metodo_pagamento === null}
@@ -350,13 +347,13 @@
           para pagar o pedido!
         </p>
         <!-- <p class="mb-4">
-          {#if cliente_selecionado}
+          {#if cart.meta.clienteSelecionado}
             Deseja fazer com que R${((total_pedido - total_paid) / 100).toFixed(
               2,
             )} seja um pagamento fiado?
             <button
               class="text-info underline"
-              on:click={() => {
+              onclick={() => {
                 metodo_pagamento = 'fiado'
                 addPayment()
               }}
