@@ -7,6 +7,7 @@ import {
   withOrderBy,
   getSQLiteColumn,
   getOrderBy,
+  innerJoinOnMany,
 } from '$lib/server/db/utils'
 import {
   and,
@@ -20,6 +21,7 @@ import {
   lte,
 } from 'drizzle-orm'
 import { error } from '@sveltejs/kit'
+import { Monad } from '$lib/utils'
 
 export const load = (async ({ url, locals: { tenantDb } }) => {
   const size = 13
@@ -35,55 +37,61 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_order')
-  console.log('username', username)
-  let query = tenantDb!
-    .select({
-      id: schema.logsTable.id,
-      created_at: schema.logsTable.created_at,
-      text: schema.logsTable.text,
-      metadata: schema.logsTable.metadata,
-      error: schema.logsTable.error,
-      type: schema.logsTable.type,
-      pathname: schema.logsTable.pathname,
-      routeName: schema.logsTable.routeName,
-      currency: schema.logsTable.currency,
-      total: schema.customerOrderTable.total,
-      cashier: schema.cashierTable.name,
-      order_id: schema.customerOrderTable.id,
 
-      username: schema.userTable.username,
-    })
-    .from(schema.logsTable)
-    .$dynamic()
-    .leftJoin(
-      schema.userTable,
-      eq(schema.logsTable.created_by, schema.userTable.id),
+  console.log('username', username)
+  console.log('caixa', caixa)
+
+  let query = Monad.of(
+    tenantDb!
+      .select({
+        id: schema.logsTable.id,
+        created_at: schema.logsTable.created_at,
+        text: schema.logsTable.text,
+        metadata: schema.logsTable.metadata,
+        error: schema.logsTable.error,
+        type: schema.logsTable.type,
+        pathname: schema.logsTable.pathname,
+        routeName: schema.logsTable.routeName,
+        currency: schema.logsTable.currency,
+        total: schema.customerOrderTable.total,
+        cashier: schema.cashierTable.name,
+        order_id: schema.customerOrderTable.id,
+
+        username: schema.userTable.username,
+      })
+      .from(schema.logsTable)
+      .where(
+        and(
+          eq(schema.logsTable.type, 'CAIXA'),
+
+          dateStart && dateEnd
+            ? and(
+                gte(schema.logsTable.created_at, new Date(Number(dateStart))),
+                lte(schema.logsTable.created_at, new Date(Number(dateEnd))),
+              )
+            : undefined,
+        ),
+      )
+      .leftJoin(
+        schema.customerOrderTable,
+        eq(schema.logsTable.order_id, schema.customerOrderTable.id),
+      )
+
+      .$dynamic(),
+  )
+    .map(q =>
+      innerJoinOnMany(q, schema.userTable, [
+        eq(schema.logsTable.created_by, schema.userTable.id),
+        username ? like(schema.userTable.username, `%${username}%`) : undefined,
+      ]),
     )
-    .where(
-      and(
-        eq(schema.logsTable.type, 'CAIXA'),
-        // username ? like(schema.userTable.username, `${username}%`) : undefined,
-        // caixa ? like(schema.cashierTable.name, `${caixa}%`) : undefined,
-        dateStart && dateEnd
-          ? and(
-              gte(schema.logsTable.created_at, new Date(Number(dateStart))),
-              lte(schema.logsTable.created_at, new Date(Number(dateEnd))),
-            )
-          : undefined,
-      ),
+    .map(q =>
+      innerJoinOnMany(q, schema.cashierTable, [
+        eq(schema.logsTable.cashier_id, schema.cashierTable.id),
+        caixa ? like(schema.cashierTable.name, `%${caixa}%`) : undefined,
+      ]),
     )
-    .where(
-      username ? like(schema.userTable.username, `${username}%`) : undefined,
-    )
-    .leftJoin(
-      schema.customerOrderTable,
-      eq(schema.logsTable.order_id, schema.customerOrderTable.id),
-    )
-    .leftJoin(
-      schema.cashierTable,
-      eq(schema.logsTable.cashier_id, schema.cashierTable.id),
-    )
-    .where(caixa ? like(schema.cashierTable.name, `%${caixa}%`) : undefined)
+    .get()
     .orderBy(desc(schema.logsTable.created_at))
 
   if (sortId && sortOrder) {
@@ -103,34 +111,21 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
       .where(
         and(
           eq(schema.logsTable.type, 'CAIXA'),
-          username
-            ? like(schema.userTable.username, `${username}%`)
-            : undefined,
+          // username
+          //   ? like(schema.userTable.username, `${username}%`)
+          //   : undefined,
         ),
       )
+    // .catch(e => 0)
+    // .then(res => (typeof res === 'number' ? [{ count: res }] : res))
 
     return { rows: rows ?? [], count: total[0].count, size }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     console.error(e)
     // return error(404, e.message ?? e)
 
-    const r: {
-      id: number
-      created_at: Date | null
-      text: string
-      metadata: unknown
-      error: unknown
-      type: 'LOG' | 'SYSTEM' | 'ERROR' | 'CAIXA'
-      pathname: string | null
-      routeName: string | null
-      currency: number | null
-      total: number | null
-      cashier: string | null
-      order_id: number | null
-      username: string | null
-    }[] = []
-
-    return { rows: r, count: 0, size: 0 }
+    return { rows: [], count: 0, size: 0 }
   }
 
   return { rows: [], count: 0, size: 0 }
