@@ -160,6 +160,8 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - EDITAR DATA VENCIMENTO (EXIPIRE_AT) ✅
 - REFATORAR ONDE MOSTRA AS INFOS DO CLINTE NA PAGINA DO CAIXA✅
 - REPASSE ESTOQUE ENTRE DISTRIBUIDORAS✅
+- NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE ✅
+- PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS ✅
 
 ## PARCIAL PRONTOS OU APENAS REVISAR/AJUSTAR
 
@@ -180,13 +182,11 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 
 ## IMPORTANTES
 
-- PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS ✅
 
 ## FAZER AGORA
 
 - Alterar join do caixa na tela da transacao do caixa
 - TRANSAÇÕES DO CAIXA (TELAS)
-- NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE ✅
 - Unique name table de categoria
 - 100 rows como padrao nas table
 - Preco de custo nas transferencias e tela historico transafarencias tipo tela

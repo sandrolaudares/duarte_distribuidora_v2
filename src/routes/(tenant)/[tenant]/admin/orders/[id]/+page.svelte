@@ -20,7 +20,8 @@
   import DisplayCart from './DisplayCart.svelte'
   import CustomerDetails from './CustomerDetails.svelte'
   import { toast } from 'svelte-sonner'
-    import { goto } from '$app/navigation'
+  import { goto } from '$app/navigation'
+  import SenhaAdmin from '$lib/components/SenhaAdmin.svelte'
   let { data }: { data: PageData } = $props()
 
   const order = createCartContext(data.order_details)
@@ -29,7 +30,7 @@
 
   let isOpenModal: HTMLDialogElement | null = $state(null)
   let isOpenModalEdit: HTMLDialogElement | null = $state(null)
-  let isOpenModalAdd: HTMLDialogElement | null = $state(null)
+  let isOpenModalCancel: HTMLDialogElement | null = $state(null)
 
   let troco = $state(0)
   let taxaEntrega = 0
@@ -50,8 +51,8 @@
       Object.values(order.cart).reduce(
         (acc, { meta, quantity }) => acc + meta.price * quantity,
         0,
-      )
-    ) + ( order_details.taxa_entrega ?? 0)
+      ) + (order_details.taxa_entrega ?? 0)
+    )
   })
 
   async function handleUpdateOrder() {
@@ -81,18 +82,13 @@
   }
 
   async function handleDeleteOrder() {
-    const confirmed = confirm('Você tem certeza que deseja cancelar o pedido?')
-    if (confirmed) { 
-      try {
-        await trpc($page).customer.cancelOrder.mutate(order_details.id)
-        toast.success('Pedido cancelado com sucesso!')
-        goto('/admin/orders')
-      } catch (error) {
-        toast.error('Erro ao cancelar pedido!')
-        console.log(error)
-      }
-    } else {
-      toast.error('Pedido não cancelado!')
+    try {
+      await trpc($page).customer.cancelOrder.mutate(order_details.id)
+      toast.success('Pedido cancelado com sucesso!')
+      goto('/admin/orders')
+    } catch (error) {
+      toast.error('Erro ao cancelar pedido!')
+      console.log(error)
     }
   }
 </script>
@@ -119,7 +115,10 @@
             >
               <Pencil />
             </button>
-            <button class="btn btn-square btn-error btn-sm" onclick={handleDeleteOrder}>
+            <button
+              class="btn btn-square btn-error btn-sm"
+              onclick={() => isOpenModalCancel?.showModal()}
+            >
               <Trash2 />
             </button>
           </div>
@@ -332,3 +331,19 @@
     </form>
   </dialog>
 {/if}
+
+<dialog class="modal" bind:this={isOpenModalCancel}>
+  <div class="modal-box max-w-2xl">
+    <SenhaAdmin
+      reason="Cancelar pedido"
+      onSuccess={() => {
+        handleDeleteOrder()
+        isOpenModalCancel?.close()
+      }}
+    />
+  </div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
