@@ -28,6 +28,7 @@ export const skuTable = sqliteTable('estoque', {
   image: integer('image_id').references(() => imageTable.id),
   name: text('name').notNull(),
   quantity: integer('quantity').notNull().default(0),
+  minimum: integer('minimum').default(20),
 })
 
 export const skuRelations = relations(skuTable, ({ many, one }) => ({
@@ -107,7 +108,7 @@ export const supplierTable = sqliteTable('fornecedor', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
   ...timestamps,
- 
+
   razao_social: text('razao_social'),
   cnpj_cpf: text('cnpj_cpf'),
   ie_rg: text('ie_rg'),

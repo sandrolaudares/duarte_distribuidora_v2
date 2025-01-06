@@ -71,6 +71,13 @@
       "when": 1734905899404,
       "tag": "0009_workable_silver_samurai",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1736201336299,
+      "tag": "0010_slimy_spot",
+      "breakpoints": true
     }
   ]
 }

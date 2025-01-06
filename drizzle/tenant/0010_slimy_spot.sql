@@ -1,0 +1,1 @@
+ALTER TABLE `estoque` ADD `minimum` integer DEFAULT 20;
