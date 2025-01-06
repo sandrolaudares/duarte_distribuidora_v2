@@ -1,27 +1,30 @@
 <script lang="ts">
   import { getImagePath } from '$lib/utils/image'
-  // import { getCartContext } from '$lib/stores/cart'
   import { icons } from '$lib/utils/icons'
   import Cardapio from '$lib/components/Cardapio.svelte'
   import type { RouterOutputs } from '$trpc/router'
+
+  import { Cart } from '$lib/state/cart.svelte'
   import { getCartContext } from './cartContext.svelte'
 
-  export let products:RouterOutputs['product']['queryCategorysWithProductItems']
-  export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
+  let {
+    products,
+    tipo_preco = 'retail_price',
+  }: {
+    products: RouterOutputs['product']['queryCategorysWithProductItems']
+    tipo_preco?: 'retail_price' | 'wholesale_price'
+  } = $props()
 
-  let filteredResults = products;
-
-  //TODO:Fix types
+  let filteredResults = $state(products)
 
   const cart = getCartContext()
-
 </script>
 
 <Cardapio
   data={filteredResults}
   onFilterChange={value => {
     filteredResults = products
-      .map((product) => {
+      .map(product => {
         const filteredSubProducts = product.products.map(subProduct => {
           const filteredItems = subProduct.items.filter(item =>
             item.name.toLowerCase().includes(value),
@@ -31,7 +34,7 @@
 
         return { ...product, products: filteredSubProducts }
       })
-      .filter((product) =>
+      .filter(product =>
         product.products.some(subProduct => subProduct.items.length > 0),
       )
   }}
@@ -63,7 +66,7 @@
                 {#if cartItem?.quantity >= 1}
                   <button
                     class="btn btn-primary hidden md:block"
-                    on:click={() => {
+                    onclick={() => {
                       cart.subtractItem(item)
                     }}
                   >
@@ -74,21 +77,21 @@
                   min="1"
                   class="max-w-16 bg-base-100 text-right text-xl font-bold focus:border-yellow-500 md:min-w-10 md:max-w-28"
                   value={cartItem?.quantity ?? 0}
-                  on:change={e => {
+                  onchange={e => {
                     const quant_temp = (e.target as HTMLInputElement)?.value
                     cart.setItem(item, Number(quant_temp), {
                       is_retail: tipo_preco === 'retail_price' ? true : false,
+                      price : item[tipo_preco]
                     })
                   }}
                 />
                 <button
-                  on:click={() =>{
-                    
+                  onclick={() => {
                     cart.addItem(item, {
                       is_retail: tipo_preco === 'retail_price' ? true : false,
+                      price : item[tipo_preco]
                     })
-                  }
-                            }
+                  }}
                   class="btn btn-primary"
                 >
                   {@html icons.plus()}

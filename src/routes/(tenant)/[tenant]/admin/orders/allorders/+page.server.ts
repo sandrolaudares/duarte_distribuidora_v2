@@ -78,79 +78,10 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     .map(q =>
       innerJoinOnMany(q, schema.userTable, [
         eq(schema.userTable.id, schema.customerOrderTable.created_by),
-        cashier ? like(schema.userTable.username, `${cashier}%`) : undefined,
+        cashier ? like(schema.userTable.username, `%${cashier}%`) : undefined,
       ]),
     )
     .get()
-  // let query = innerJoinOnMany(
-  //   innerJoinOnMany(
-  //     tenantDb!
-  //       .select({
-  //         //Order:
-  //         id: schema.customerOrderTable.id,
-  //         created_at: schema.customerOrderTable.created_at,
-  //         updated_at: schema.customerOrderTable.updated_at,
-  //         is_fiado: schema.customerOrderTable.is_fiado,
-  //         observation: schema.customerOrderTable.observation,
-  //         amount_paid: schema.customerOrderTable.amount_paid,
-  //         total: schema.customerOrderTable.total,
-  //         status: schema.customerOrderTable.status,
-  //         type: schema.customerOrderTable.type,
-  //         expire_at: schema.customerOrderTable.expire_at,
-
-  //         //customer:
-  //         name: schema.customerTable.name,
-  //         email: schema.customerTable.email,
-  //         cellphone: schema.customerTable.cellphone,
-
-  //         //cashier
-  //         // cashier: schema.cashierTable.name,
-  //         created_by: schema.userTable.username,
-  //       })
-  //       .from(schema.customerOrderTable)
-  //       .$dynamic(),
-  //     schema.customerTable,
-  //     [
-  //       eq(schema.customerTable.id, schema.customerOrderTable.customer_id),
-  //       name ? like(schema.customerTable.name, `${name}%`) : undefined,
-  //     ],
-  //   ),
-  //   schema.userTable,
-  //   [
-  //     eq(schema.userTable.id, schema.customerOrderTable.created_by),
-  //     cashier ? like(schema.userTable.username, `${cashier}%`) : undefined,
-  //   ],
-  // )
-
-  // .innerJoin(
-  //   schema.customerTable,
-  //   and(
-  //     eq(schema.customerTable.id, schema.customerOrderTable.customer_id),
-  //     name ? like(schema.customerTable.name, `${name}%`) : undefined,
-  //   )
-  // )
-  // .leftJoin(
-  //   schema.cashierTable,
-  //   and(
-  //     eq(schema.cashierTable.id, schema.customerOrderTable.cachier_id),
-  //      cashier ? like(schema.cashierTable.name, `${cashier}%`) : undefined,
-  //   )
-  // )
-  // .where(
-  //   and(
-
-  //     dateStart && dateEnd
-  //       ? and(
-  //           gte(schema.customerOrderTable.created_at, new Date(Number(dateStart))),
-  //           lte(schema.customerOrderTable.created_at, new Date(Number(dateEnd))),
-  //         )
-  //       : undefined,
-
-  //     //TODO: Filtrar nome caixa tambem nao funciona, do mesmo jeito que no fiado filtrar nome
-  //   ),
-  // )
-  // .orderBy(desc(schema.customerOrderTable.created_at))
-  // .$dynamic();
 
   console.log(query.toSQL())
 
@@ -180,7 +111,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
       )
       .where(
         and(
-          name ? like(schema.customerTable.name, `${name}%`) : undefined,
+          name ? like(schema.customerTable.name, `%${name}%`) : undefined,
           dateStart && dateEnd
             ? and(
                 gte(
@@ -193,7 +124,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
                 ),
               )
             : undefined,
-          cashier ? like(schema.cashierTable.name, `${cashier}%`) : undefined,
+          // cashier ? like(schema.cashierTable.name, `%${cashier}%`) : undefined,
         ),
       )
 
@@ -204,4 +135,5 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     console.error(error)
     return { rows: [], count: 0, totalSum: 0 }
   }
+  return { rows: [], count: 0, totalSum: 0 }
 }) satisfies PageServerLoad

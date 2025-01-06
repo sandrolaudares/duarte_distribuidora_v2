@@ -173,4 +173,18 @@ export const stock = router({
   deleteItemStock: publicProcedure.input(z.string()).mutation(({ input, ctx:{tenantDb} }) => {
     return stockController(tenantDb).deleteItemStock(input)
   }),
+
+  updateSku: publicProcedure
+  .use(middleware.logged)
+  .use(middleware.auth)
+  .input(z.object({
+    sku: z.string(),
+    data: z.object({
+      name:z.string()
+   }),
+  })).mutation(({ input, ctx:{tenantDb} }) => {
+    const { sku,data }= input
+    return stockController(tenantDb).updateSKU(sku, data)
+  }),
+
 })

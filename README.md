@@ -134,7 +134,7 @@ npm run db:check
 
 Feel free to submit issues or pull requests. Contributions are welcome!
 
-## AGORA
+## PRONTOS
 
 - TABLE FIADO PODER SELECIONAR E MOSTRAR TOTAL DOS SELECIONADOS ✅
 - SALVAR LAT E LONG DA DISTRIBUIDORA NO DB ✅
@@ -160,6 +160,10 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - EDITAR DATA VENCIMENTO (EXIPIRE_AT) ✅
 - REFATORAR ONDE MOSTRA AS INFOS DO CLINTE NA PAGINA DO CAIXA✅
 - REPASSE ESTOQUE ENTRE DISTRIBUIDORAS✅
+- NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE ✅
+- PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS ✅
+
+## PARCIAL PRONTOS OU APENAS REVISAR/AJUSTAR
 
 - boolean pra esconder produtos do cardapio ✅
 - Verificar name filter fiado ✅
@@ -171,25 +175,41 @@ Feel free to submit issues or pull requests. Contributions are welcome!
   cadastradastra, financeiro realiza o pagamento na data correta, esse histórico
   precisa ficar registrado, pois em relatórios vamos precisar comparar vendas x
   despesas pra analisar o lucro mensal.) ✅
-- AJustar form criar tenant erros de endereco  ✅
-- DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES  ✅
+- AJustar form criar tenant erros de endereco ✅
+- DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES ✅
+- Editar nome SKU ✅
+- APLICAR EDITABLECELL NAS TABLES EXISTENTES ✅
+
+## IMPORTANTES
+
+
+## FAZER AGORA
 
 - Alterar join do caixa na tela da transacao do caixa
-- Permissoes no trpc pra cada func
-- Colunas na tabela dos logs
-- PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS
-- NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE
-- APLICAR EDITABLECELL NAS TABLES EXISTENTES
-
 - TRANSAÇÕES DO CAIXA (TELAS)
+- Unique name table de categoria
+- 100 rows como padrao nas table
+- Preco de custo nas transferencias e tela historico transafarencias tipo tela
+  fiado com total e valor do preço de custo
+- Parte do cliente fazer pedido 
+- TELA RESUMO DE CADA MOTOBOY ENTREGAS
+- Toggle tipo preço ao editar pedido
+- loading login
+
+## NAO TAO URGENTE
+
+- Refazer setar cargo ao user, não ta funcionando legal
+- Permissoes no trpc pra cada func
+- Colunas na tabela dos logs/Refatorar tela/melhorar
+- Excluir sku e setar produto como null pro sku
+- Contas cadastrar forma de pagamento
 
 - Alerta de compra em excesso ex, bloqueio automático caso tenha notas em
   atraso. (Desbloqueio somente com senha de gerente).
 - Adicionar campo de distancia na tabela endereço (calcular ao adicionar
   endereço talvez) acho legal adicionar um butao de recalcular
-
-- Parte do cliente fazer pedido
-- TELA RESUMO DE CADA MOTOBOY ENTREGAS
+- Responsividade site inteiro
+- Limpar filtros
 
 ## DEPOIS
 
@@ -197,6 +217,8 @@ Feel free to submit issues or pull requests. Contributions are welcome!
   atrasado perde 5 pontos. Esse score atualiza automaticamente toda vez que ele
   efetuar um pagamento. Pra auxiliar na tomada de decisões junto aos clientes pj
   que compram fiado.
+- Uma tela tipo um admin dashboard pro estoque, pra poder acessar transferencia,
+  etc
 
 # RELATORIOS:
 

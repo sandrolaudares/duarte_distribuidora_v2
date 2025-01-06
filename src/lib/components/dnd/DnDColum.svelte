@@ -32,7 +32,7 @@
   }
 </script>
 
-<div class="wrapper">
+<div class="wrapper max-h-[70vh]">
   <div class="column-title divider text-2xl">
     {#if collum}
       {@render collum(category)}
@@ -41,7 +41,7 @@
     {/if}
   </div>
   <div
-    class="column-content"
+    class="column-content h-full overflow-scroll"
     use:dndzone={{
       items,
       flipDurationMs: FILP_DURATION,
@@ -73,24 +73,23 @@
     height: 100%;
     width: 100%;
     /*Notice we make sure this container doesn't scroll so that the title stays on top and the dndzone inside is scrollable*/
-    overflow-y: hidden;
+    /* overflow-y: hidden; */
   }
   .column-content {
-    height: calc(100% - 2.5em);
-    /* Notice that the scroll container needs to be the dndzone if you want dragging near the edge to trigger scrolling */
-    overflow-y: scroll;
+    /* height: 100%;
+    overflow-y: scroll; */
   }
-  .column-title {
+  /* .column-title {
     height: 2.5em;
     font-weight: bold;
     display: flex;
     justify-content: center;
     align-items: center;
-  }
+  } */
   .card {
     /* height: 4em; */
     width: 100%;
-    margin: 0.4em 0;
+    margin: 0.3em 0;
     display: flex;
     justify-content: center;
     align-items: center;

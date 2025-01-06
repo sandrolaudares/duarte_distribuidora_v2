@@ -2,12 +2,13 @@ import { page } from '$app/stores'
 import { get } from 'svelte/store'
 import { goto } from '$app/navigation'
 import type { State } from '@vincjo/datatables/server'
+import { toast } from 'svelte-sonner'
 
 export class SSRFilters {
   Filters = $derived.by(() => get(page).url)
 
   constructor() {
-    console.log('Filters', this.Filters)
+    // console.log('Filters', this.Filters)
   }
 
   get(name: string) {
@@ -34,27 +35,29 @@ export class SSRFilters {
     const sort = s.sort
     const page = s.currentPage
     const rowsPerPage = s.rowsPerPage
+    try {
+      const url = new URL(this.Filters)
+      for (const { field, value } of filters) {
+        url.searchParams.set(String(field), String(value))
+      }
+      if (sort?.field && sort?.direction) {
+        // console.log('sort', sort)
+        url.searchParams.set('sort_id', sort.field?.toString())
+        url.searchParams.set('sort_direction', sort.direction)
+      }
+      if (page) {
+        url.searchParams.set('page', page.toString())
+      }
+      if (rowsPerPage) {
+        url.searchParams.set('pageSize', rowsPerPage.toString())
+      }
 
-    const url = new URL(this.Filters)
-    for (const { field, value } of filters) {
-      console.log('field', field, value)
-      //   @ts-expect-error - fuck ts
-      url.searchParams.set(field.toString(), value)
-    }
-    if (sort?.field && sort?.direction) {
-      console.log('sort', sort)
-      url.searchParams.set('sort_id', sort.field?.toString())
-      url.searchParams.set('sort_direction', sort.direction)
-    }
-    if (page) {
-      url.searchParams.set('page', page.toString())
-    }
-    if (rowsPerPage) {
-      url.searchParams.set('pageSize', rowsPerPage.toString())
-    }
-
-    if (typeof window !== 'undefined') {
-      goto(url, { keepFocus: true })
+      if (typeof window !== 'undefined') {
+        goto(url, { keepFocus: true })
+      }
+    } catch (error) {
+      console.error('error', error)
+      toast.error('Erro ao atualizar filtros')
     }
   }
 

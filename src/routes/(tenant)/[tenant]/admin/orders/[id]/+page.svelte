@@ -8,14 +8,33 @@
   import { page } from '$app/stores'
   import { onMount } from 'svelte'
   import type { SelectOrderPayment } from '$lib/server/db/schema'
+  import { Pencil, Plus, Trash2 } from 'lucide-svelte'
+  import * as Tooltip from '$lib/components/ui/tooltip/index'
+  import CardapioCaixa from '../../cashier/[id]/CardapioCaixa.svelte'
+  import CaixaColumn from '../../cashier/[id]/CaixaColumn.svelte'
 
-  export let data: PageData
+  import { Cart } from '$lib/state/cart.svelte'
+  import CashierMenu from './EditOrderMenu.svelte'
+  import { createCartContext } from './cartContext.svelte'
+  import EditOrderMenu from './EditOrderMenu.svelte'
+  import DisplayCart from './DisplayCart.svelte'
+  import CustomerDetails from './CustomerDetails.svelte'
+  import { toast } from 'svelte-sonner'
+  import { goto } from '$app/navigation'
+  import SenhaAdmin from '$lib/components/SenhaAdmin.svelte'
+  let { data }: { data: PageData } = $props()
+
+  const order = createCartContext(data.order_details)
 
   let order_details = data.order_details
 
-  let isOpenModal: HTMLDialogElement | null = null
+  let isOpenModal: HTMLDialogElement | null = $state(null)
+  let isOpenModalEdit: HTMLDialogElement | null = $state(null)
+  let isOpenModalCancel: HTMLDialogElement | null = $state(null)
 
-  let troco = 0
+  let troco = $state(0)
+  let taxaEntrega = 0
+  let isDelivery = false
 
   troco =
     order_details?.payments?.reduce(
@@ -23,7 +42,55 @@
       0,
     ) ?? 0
 
-  let amount_paid_order = (order_details?.amount_paid ?? 0) - troco
+  let amount_paid_order = $derived.by(() => {
+    return (order_details?.amount_paid ?? 0) - troco
+  })
+
+  let cartTotal = $derived.by(() => {
+    return (
+      Object.values(order.cart).reduce(
+        (acc, { meta, quantity }) => acc + meta.price * quantity,
+        0,
+      ) + (order_details.taxa_entrega ?? 0)
+    )
+  })
+
+  async function handleUpdateOrder() {
+    const confirmed = confirm('Você tem certeza que deseja atualizar o pedido?')
+    if (confirmed) {
+      try {
+        const toAdd = Object.values(order.cart).map(item => ({
+          item_id: item.item.id,
+          quantity: item.quantity,
+          price: item.meta.price,
+        }))
+
+        console.log(cartTotal)
+
+        await trpc($page).customer.updateOrder.mutate({
+          order_id: order_details.id,
+          data: { total: cartTotal },
+          items: toAdd,
+        })
+        toast.success('Pedido atualizado com sucesso!')
+      } catch (error) {
+        toast.error('Erro ao atualizar pedido!')
+      }
+    } else {
+      toast.error('Pedido não atualizado!')
+    }
+  }
+
+  async function handleDeleteOrder() {
+    try {
+      await trpc($page).customer.cancelOrder.mutate(order_details.id)
+      toast.success('Pedido cancelado com sucesso!')
+      goto('/admin/orders')
+    } catch (error) {
+      toast.error('Erro ao cancelar pedido!')
+      console.log(error)
+    }
+  }
 </script>
 
 {#if order_details}
@@ -33,9 +100,44 @@
     <div
       class=" px-4 {order_details.address ? 'lg:w-2/3' : 'w-full'}  2xl:px-0"
     >
-      <h2 class="text-xl font-semibold text-opacity-90 sm:text-2xl">
-        Detalhes do pedido
-      </h2>
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-opacity-90 sm:text-2xl">
+          Detalhes do pedido
+        </h2>
+        {#if (order_details.status === 'CONFIRMED' || order_details.status === 'PENDING') && order_details.amount_paid < order_details.total}
+          <div class="flex gap-2">
+            <!-- <button class="btn btn-square btn-primary btn-sm" onclick={()=>isOpenModalAdd?.showModal()}>
+            <Plus />
+          </button> -->
+            <button
+              class="btn btn-square btn-primary btn-sm"
+              onclick={() => isOpenModalEdit?.showModal()}
+            >
+              <Pencil />
+            </button>
+            <button
+              class="btn btn-square btn-error btn-sm"
+              onclick={() => isOpenModalCancel?.showModal()}
+            >
+              <Trash2 />
+            </button>
+          </div>
+        {:else}
+          <Tooltip.Provider>
+            <Tooltip.Root>
+              <Tooltip.Trigger class="btn btn-square btn-sm">
+                <Pencil class="opacity-50" />
+              </Tooltip.Trigger>
+              <Tooltip.Content>
+                <p>
+                  O pedido já está a caminho, foi entregue ou já foi pago, não é
+                  possivel editar
+                </p>
+              </Tooltip.Content>
+            </Tooltip.Root>
+          </Tooltip.Provider>
+        {/if}
+      </div>
 
       <div class="mt-6 sm:mt-8">
         <div class="relative w-full overflow-x-auto border-b border-base-200">
@@ -43,34 +145,14 @@
             class="w-full text-left font-medium text-opacity-90 md:table-fixed"
           >
             <tbody class="divide-y divide-base-200">
-              {#each order_details.items as item}
+              {#each data.order_details.items as item}
                 <tr>
-                  <td class="whitespace-nowrap py-4 md:w-[384px]">
-                    <div class="flex items-center gap-4">
-                      <div
-                        class="flex aspect-square h-14 w-14 shrink-0 items-center"
-                      >
-                        <img
-                          class="h-auto max-h-full w-full rounded-md"
-                          src={getImagePath(item.product.image)}
-                          alt="product"
-                        />
-                      </div>
-                      <h1>{item.product.name}</h1>
-                    </div>
-                  </td>
-
-                  <td
-                    class="p-4 text-right text-base font-normal text-opacity-90"
-                  >
-                    {item.quantity}x R${(item.price / 100).toFixed(2)}
-                  </td>
-
-                  <td
-                    class="p-4 text-right text-base font-bold text-opacity-90"
-                  >
-                    R${((item.price * item.quantity) / 100).toFixed(2)}
-                  </td>
+                  <DisplayCart
+                    image={item.product.image ?? 0}
+                    price={item.price}
+                    quantity={item.quantity}
+                    name={item.product.name}
+                  />
                 </tr>
               {/each}
             </tbody>
@@ -78,20 +160,22 @@
         </div>
 
         {#if order_details.taxa_entrega}
-        
-        <dl class="flex items-center justify-between gap-4 pt-2">
-          <dt class="text-md text-opacity-90">Subtotal:</dt>
-          <dd class="text-lg text-opacity-90">
-            R${((order_details.total - order_details.taxa_entrega) / 100).toFixed(2)}
-          </dd>
-        </dl>
-        
-        <dl class="flex items-center justify-between gap-4 pt-2">
-          <dt class="text-sm text-opacity-90">Taxa entrega:</dt>
-          <dd class="text-md text-opacity-90">
-            R${(order_details.taxa_entrega / 100).toFixed(2)}
-          </dd>
-        </dl>
+          <dl class="flex items-center justify-between gap-4 pt-2">
+            <dt class="text-md text-opacity-90">Subtotal:</dt>
+            <dd class="text-lg text-opacity-90">
+              R${(
+                (order_details.total - order_details.taxa_entrega) /
+                100
+              ).toFixed(2)}
+            </dd>
+          </dl>
+
+          <dl class="flex items-center justify-between gap-4 pt-2">
+            <dt class="text-sm text-opacity-90">Taxa entrega:</dt>
+            <dd class="text-md text-opacity-90">
+              R${(order_details.taxa_entrega / 100).toFixed(2)}
+            </dd>
+          </dl>
         {/if}
 
         <div class=" space-y-6">
@@ -106,7 +190,11 @@
             <h1 class="mb-3 text-lg font-semibold">Pagamentos:</h1>
             <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
               {#each order_details.payments as payment, i}
-                <CardPayments {payment} {i} created_by={payment.created_by?.email} />
+                <CardPayments
+                  {payment}
+                  {i}
+                  created_by={payment.created_by?.email}
+                />
               {/each}
             </div>
             {#if order_details.amount_paid - troco < order_details.total}
@@ -123,11 +211,11 @@
                       100
                     ).toFixed(2)}
                   </span>
-                   para pagar
+                  para pagar
                 </h1>
                 <button
                   class="btn btn-primary"
-                  on:click={() => isOpenModal?.showModal()}
+                  onclick={() => isOpenModal?.showModal()}
                 >
                   Realizar pagamento
                 </button>
@@ -143,63 +231,11 @@
       </div>
     </div>
 
-    {#if order_details.customer}
-      <div class="px-4 lg:w-1/3 2xl:px-0">
-        <h2 class="text-2xl font-semibold text-opacity-90">
-          Detalhes do Cliente
-        </h2>
-        <div class="mt-6 space-y-6 border-t border-base-200 py-6">
-          <dl class="space-y-4">
-            <div class="flex justify-between">
-              <dt class="text-lg font-semibold text-opacity-90">Nome:</dt>
-              <dd class="text-base font-normal text-opacity-50">
-                {order_details.customer.name}
-              </dd>
-            </div>
-            <div class="flex justify-between">
-              <dt class="text-lg font-semibold text-opacity-90">Email:</dt>
-              <dd class="text-base font-normal text-opacity-50">
-                {order_details.customer.email}
-              </dd>
-            </div>
-            <div class="flex justify-between">
-              <dt class="text-lg font-semibold text-opacity-90">Telefone:</dt>
-              <dd class="text-base font-normal text-opacity-50">
-                {order_details.customer.phone ?? 'Telefone não registrado!'}
-              </dd>
-            </div>
-          </dl>
-
-          {#if order_details.address}
-            <div class="mt-6 space-y-4 border-t border-base-200 py-6">
-              <h4 class="text-lg font-semibold text-opacity-90">
-                Endereço do Cliente
-              </h4>
-              <dl>
-                <dd class="mt-1 text-base font-normal text-opacity-50">
-                  {order_details.address.street}, {order_details.address.number}
-                  {order_details.address.complement}, {order_details.address
-                    .neighborhood}, {order_details.address.city} - {order_details
-                    .address.state}, CEP: {order_details.address.cep}
-                </dd>
-              </dl>
-              <!-- <div class="flex justify-end">
-                <button class="btn btn-link">Mudar endereço</button>
-              </div> -->
-              <!--TODO: mudar endereco e se !endereco colocar pra vincular se pedido ainda nao estiver pronto-->
-            </div>
-          {/if}
-        </div>
-      </div>
-    {/if}
+    <CustomerDetails {order_details} />
   </section>
 {/if}
 
-<!-- <pre>
-    {JSON.stringify(order_details, null, 2)}
-</pre> -->
-
-{#if order_details.amount_paid - troco < order_details.total}
+{#if order_details && order_details.amount_paid - troco < order_details.total}
   <dialog class="modal" bind:this={isOpenModal}>
     <div class="modal-box max-w-2xl">
       <PaymentFiado
@@ -215,3 +251,99 @@
     </form>
   </dialog>
 {/if}
+
+{#if order_details}
+  <dialog class="modal" bind:this={isOpenModalEdit}>
+    <div class="modal-box flex max-w-fit flex-col gap-5 xl:flex-row">
+      <div class="max-h-[100vh] max-w-4xl overflow-y-auto pr-5">
+        <EditOrderMenu products={data.products} />
+      </div>
+      <div class="max-h-[100vh] max-w-2xl overflow-y-auto pr-5">
+        <h1 class="text-2xl font-semibold">Carrinho:</h1>
+        <table
+          class="w-full text-left font-medium text-opacity-90 md:table-fixed"
+        >
+          <tbody class="divide-y divide-base-200">
+            {#each Object.entries(order.cart) as [key, { item }]}
+              {@const cartItem = order.cart[item.id]}
+              <tr>
+                <DisplayCart
+                  name={item.name}
+                  image={item.image ?? 0}
+                  price={cartItem.meta.price}
+                  quantity={cartItem.quantity}
+                />
+                <td class="w-12">
+                  <button
+                    class="btn btn-circle btn-error"
+                    onclick={() => order.removeItem(item)}
+                  >
+                    <Trash2 />
+                  </button>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+
+        {#if Object.values(order.cart).length > 0}
+          <div class="flex flex-col">
+            {#if order_details.taxa_entrega}
+              <dl class="flex items-center justify-between gap-4 pt-2">
+                <dt class="text-md text-opacity-90">Subtotal:</dt>
+                <dd class="text-lg text-opacity-90">
+                  R${((cartTotal - order_details.taxa_entrega) / 100).toFixed(
+                    2,
+                  )}
+                </dd>
+              </dl>
+
+              <dl class="flex items-center justify-between gap-4 pt-2">
+                <dt class="text-sm text-opacity-90">Taxa entrega:</dt>
+                <dd class="text-md text-opacity-90">
+                  R${(order_details.taxa_entrega / 100).toFixed(2)}
+                </dd>
+              </dl>
+            {/if}
+            <dl class="flex items-center justify-between gap-4 pt-2">
+              <dt class="text-lg font-bold text-opacity-90">Total:</dt>
+              <dd class="text-xl font-bold text-success">
+                R${(cartTotal / 100).toFixed(2)}
+              </dd>
+            </dl>
+            <hr />
+          </div>
+          <div class="flex justify-end">
+            <button class="btn btn-primary mt-4" onclick={handleUpdateOrder}>
+              Atualizar pedido!
+            </button>
+          </div>
+        {:else}
+          <h1 class="mt-20 text-center text-lg font-semibold">
+            Carrinho vazio
+          </h1>
+        {/if}
+      </div>
+    </div>
+
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+{/if}
+
+<dialog class="modal" bind:this={isOpenModalCancel}>
+  <div class="modal-box max-w-2xl">
+    <SenhaAdmin
+      reason="Cancelar pedido"
+      onSuccess={() => {
+        handleDeleteOrder()
+        isOpenModalCancel?.close()
+      }}
+    />
+  </div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

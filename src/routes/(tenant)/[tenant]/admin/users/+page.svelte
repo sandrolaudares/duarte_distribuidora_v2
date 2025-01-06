@@ -37,9 +37,13 @@
 
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
-    console.log(s)
-    filters.fromState(s)
-    await $navigating?.complete
+    try {
+      console.log(s)
+      filters.fromState(s)
+      await $navigating?.complete
+    } catch (error) {
+      console.error(error)
+    }
     return data.rows
   })
 
@@ -59,34 +63,36 @@
       toast.error(errors.nameError)
       return
     }
-    if(!newMotoboy.email) {
+    if (!newMotoboy.email) {
       errors.emailError = 'Email é obrigatório'
       toast.error(errors.emailError)
       return
     }
     try {
-      isLoading=true
+      isLoading = true
       newMotoboy.role = 'motoboy'
       await trpc($page).auth.insertUser.mutate(newMotoboy)
       newMotoboy.username = ''
       newMotoboy.email = ''
       toast.success('Motoboy inserido com sucesso!')
-      setTimeout(()=>{
-            isOpenModal?.close()
-            window.location.reload()
-            isLoading=false
-      },1300)
-
+      setTimeout(() => {
+        isOpenModal?.close()
+        window.location.reload()
+        isLoading = false
+      }, 1300)
     } catch (error: any) {
       toast.error(error.message)
       console.error(error.message)
-
     }
   }
 </script>
 
-<main class="container mx-auto h-full max-h-[calc(100vh-10vh)] flex flex-col items-end gap-2">
-  <button onclick={() => isOpenModal?.showModal()} class="btn btn-primary">Criar motoboy</button>
+<main
+  class="container mx-auto flex h-full max-h-[calc(100vh-10vh)] flex-col items-end gap-2"
+>
+  <button onclick={() => isOpenModal?.showModal()} class="btn btn-primary">
+    Criar motoboy
+  </button>
   <Datatable {table}>
     <!-- {#snippet header()}
       <Search {table} />
@@ -154,7 +160,7 @@
 
 <dialog class="modal" bind:this={isOpenModal}>
   <div class="modal-box max-w-lg">
-    <h1 class="text-lg mb-2">Criar motoboy</h1>
+    <h1 class="mb-2 text-lg">Criar motoboy</h1>
     <div class="flex flex-col gap-2">
       <label class="input input-bordered flex items-center gap-2">
         <svg
@@ -183,17 +189,16 @@
         />
       </label>
       {#if errors}
-      <p class="text-error">
-        {errors.emailError}
-        {errors.nameError}
-      </p>
+        <p class="text-error">
+          {errors.emailError}
+          {errors.nameError}
+        </p>
       {/if}
       <button
         class="btn btn-primary"
         disabled={isLoading}
         onclick={() => {
           handleInsertMotoboy()
-          
         }}
       >
         Adicionar

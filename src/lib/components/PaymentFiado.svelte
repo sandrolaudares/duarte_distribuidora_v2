@@ -16,9 +16,6 @@
 
   export let order_id: number
 
-  export let cliente_selecionado:
-    | RouterOutputs['customer']['getCustomers'][0]
-    | null = null
 
   export let closeFn: undefined | (() => void)
 
@@ -184,7 +181,7 @@
 
             <div>
               <CurrencyInput bind:value={valor_a_pagar} />
-              <button class="btn mt-2" on:click={() => divideValor(4)}>
+              <!-- <button class="btn mt-2" on:click={() => divideValor(4)}>
                 25%
               </button>
               <button class="btn" on:click={() => divideValor(2)}>50%</button>
@@ -197,7 +194,8 @@
                   (valor_a_pagar = total_pedido - total_paid_newPayments - amount_paid_order)}
               >
                 100%
-              </button>
+              </button> -->
+              <!--TODO: Fix valor_a_pagar nao atualiza no currency input-->
             </div>
             <p>
               Valor restante do pedido: R${(

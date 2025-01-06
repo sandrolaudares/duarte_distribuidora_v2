@@ -9,7 +9,7 @@
   import NavBar from '$lib/components/navbar/NavBar.svelte'
   // STORE
   import { createUserContext } from '$lib/stores/user'
-  import { createCartContext } from '$lib/stores/cart'
+  // import { createCartContext } from '$lib/stores/cart'
   // COMPONENTS
   import { ModalContainer } from '$lib/components/modal'
   import DrawerContainer from '$lib/components/drawer/base/DrawerContainer.svelte'
@@ -18,6 +18,7 @@
   import PreLoadingIndicator from '../../PreLoadingIndicator.svelte'
   import { navigating } from '$app/stores'
   import SideBar from '$lib/components/sidebar/SideBar.svelte'
+  import { createCartContext } from './admin/cashier/[id]/cartContext.svelte'
 
   export let data: LayoutData
 
