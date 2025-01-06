@@ -67,7 +67,23 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         created_by: schema.userTable.username,
       })
       .from(schema.customerOrderTable)
-      .$dynamic(),
+      .$dynamic()
+      .where(
+        and(
+          dateStart && dateEnd
+            ? and(
+                gte(
+                  schema.customerOrderTable.created_at,
+                  new Date(Number(dateStart)),
+                ),
+                lte(
+                  schema.customerOrderTable.created_at,
+                  new Date(Number(dateEnd)),
+                ),
+              )
+            : undefined,
+        ),
+      ),
   )
     .map(q =>
       innerJoinOnMany(q, schema.customerTable, [
