@@ -41,6 +41,9 @@
     </Card.Header>
     <!-- <Card.Content class="flex flex-col md:flex-row gap-4"> -->
     <Card.Content class="flex flex-wrap">
+      <div>
+        {JSON.stringify(data.totalItemsStock , null, 2)}
+      </div>
       <div class="w-1/2 pr-3">
         <SvChart 
         config={{

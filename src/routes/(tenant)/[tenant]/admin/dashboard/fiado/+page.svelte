@@ -31,18 +31,18 @@
                 barThickness : 30,
                 data: [30, 20, 50, 50],
                 backgroundColor: [
-                  'rgba(0, 128, 0)'
-                ],
-                
-              },
-              {
-                label: "Total pago",
-                barThickness : 30,
-                data: [30, 44, 30, 15],
-                backgroundColor: [
                   'rgba(255, 0, 0)'
                 ],
-                
+                  order: 2
+                },
+                {
+                  label: "Total pago",
+                  barThickness : 30,
+                  data: [30, 19, 30, 15],
+                  backgroundColor: [
+                  'rgba(0, 128, 0)'
+                ],
+                order: 1  
               }
             ]
           },
@@ -52,9 +52,6 @@
             //   padding: 20
             // },
             scales:{
-              x: {
-                stacked : true
-              },
               y: {
                 stacked : true
               }
@@ -71,7 +68,7 @@
         config={{
           type: "bar",
           data:{
-            labels : ["Ze da esquina", "Viciado em cachaça", "André"],
+            labels : ["Ze da esquina", "Viciado em cachaça", "Pedro"],
             datasets:[
               {
                 label: "Dívidas",

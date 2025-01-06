@@ -6,5 +6,3 @@
 
   let { data }: { data: PageData } = $props()
 </script>
-
-<DashboardPage distribuidoras={data.distribuidoras} />

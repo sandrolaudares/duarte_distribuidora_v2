@@ -27,4 +27,5 @@
 <h2 class="text-center text-xl font-semibold">
   {title}
 </h2>
+<!-- TODO: Ver com o estoque mínimo vai vim -->
 <canvas use:chart {id} {width} {height}></canvas>
