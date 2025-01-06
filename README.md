@@ -179,6 +179,7 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - DIMENSÕES TELA CAIXA, CABER EM TELAS MENORES ✅
 - Editar nome SKU ✅
 - APLICAR EDITABLECELL NAS TABLES EXISTENTES ✅
+- Limpar filtros✅
 
 ## IMPORTANTES
 
@@ -209,7 +210,6 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 - Adicionar campo de distancia na tabela endereço (calcular ao adicionar
   endereço talvez) acho legal adicionar um butao de recalcular
 - Responsividade site inteiro
-- Limpar filtros
 
 ## DEPOIS
 
