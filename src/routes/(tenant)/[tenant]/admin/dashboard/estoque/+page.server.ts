@@ -1,13 +1,16 @@
 import type { PageServerLoad } from './$types';
+import { count } from 'drizzle-orm';
+import * as s from '$db/schema'
 
-export const load = (async () => {
+export const load = (async ({ locals: { tenantDb : db }, url }) => {
   
-  // const getTotalItemsStock = !db
-  // .select()
+  const getTotalItemsStock = db!
+  .select({count : count(s.productItemTable.id)})
+  .from(s.productItemTable)
 
   return {
     // TODO: Total de itens no estoque
-    totalItemsStock : 0,
+    totalItemsStock : await getTotalItemsStock,
     // TODO: Entrada e saida naquele periodo
     stockInStockOut : 231321,
     // TODO: Categoria com menor quantidade de produtos
