@@ -7,18 +7,24 @@
   import SvChart from '../SvChart.svelte'
 
   let { data }: { data: PageData } = $props();
+
+  const { totalItemsStock, quantSaida, quantEntrada, skuLowStock } = data;
 </script>
+
+<div>
+  {JSON.stringify(skuLowStock, null, 10)}
+</div>
 
 <NavDashboard 
   cardUm={{
     titleCard : "Total", 
-    textCard : "",
+    textCard : totalItemsStock[0].count.toString(),
     subTitle : ""
   }}
   cardDois={{
     titleCard : "Entradas - Saídas", 
-    textCard : "",
-    subTitle : ""
+    textCard : (quantEntrada - quantSaida).toString(),
+    subTitle : `Entrada: ${quantEntrada} Saida: ${quantSaida}`
   }}
   cardTres={{
     titleCard : "Maior produto", 
@@ -41,9 +47,6 @@
     </Card.Header>
     <!-- <Card.Content class="flex flex-col md:flex-row gap-4"> -->
     <Card.Content class="flex flex-wrap">
-      <div>
-        {JSON.stringify(data.totalItemsStock , null, 2)}
-      </div>
       <div class="w-1/2 pr-3">
         <SvChart 
         config={{
