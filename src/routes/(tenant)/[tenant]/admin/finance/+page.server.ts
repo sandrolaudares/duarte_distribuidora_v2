@@ -7,7 +7,9 @@ import {
   withOrderBy,
   getSQLiteColumn,
   getOrderBy,
+  innerJoinOnMany,
 } from '$lib/server/db/utils'
+
 import {
   and,
   eq,
@@ -24,6 +26,7 @@ import {
 } from 'drizzle-orm'
 import { customer } from '$lib/server/db/controller'
 import { gte } from 'drizzle-orm'
+import { Monad } from '$lib/utils'
 
 export const load = (async ({ url, locals: { tenantDb } }) => {
   const { searchParams } = url
@@ -76,51 +79,54 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   ]
 
   try {
-    let query = tenantDb!
-      .select({
-        //Order:
-        id: schema.customerOrderTable.id,
-        created_at: schema.customerOrderTable.created_at,
-        updated_at: schema.customerOrderTable.updated_at,
-        is_fiado: schema.customerOrderTable.is_fiado,
-        observation: schema.customerOrderTable.observation,
-        amount_paid: schema.customerOrderTable.amount_paid,
-        total: schema.customerOrderTable.total,
-        status: schema.customerOrderTable.status,
-        type: schema.customerOrderTable.type,
-        expire_at: schema.customerOrderTable.expire_at,
+    let query = Monad.of(
+      tenantDb!
+        .select({
+          //Order:
+          id: schema.customerOrderTable.id,
+          created_at: schema.customerOrderTable.created_at,
+          updated_at: schema.customerOrderTable.updated_at,
+          is_fiado: schema.customerOrderTable.is_fiado,
+          observation: schema.customerOrderTable.observation,
+          amount_paid: schema.customerOrderTable.amount_paid,
+          total: schema.customerOrderTable.total,
+          status: schema.customerOrderTable.status,
+          type: schema.customerOrderTable.type,
+          expire_at: schema.customerOrderTable.expire_at,
 
-        //customer:
-        name: schema.customerTable.name,
-        email: schema.customerTable.email,
-        cellphone: schema.customerTable.cellphone,
+          //customer:
+          name: schema.customerTable.name,
+          email: schema.customerTable.email,
+          cellphone: schema.customerTable.cellphone,
 
-        //cashier
-        cashier: schema.cashierTable.name,
-      })
-      .from(schema.customerOrderTable)
-      .innerJoin(
-        schema.customerTable,
-        and(
-          name ? like(schema.customerTable.name, `%${name}%`) : undefined,
-          eq(schema.customerTable.id, schema.customerOrderTable.customer_id),
-        )
-      )
-      .leftJoin(
-        schema.cashierTable,
-        eq(schema.cashierTable.id, schema.customerOrderTable.cachier_id),
-      )
-      .$dynamic()
-      .where(
-        and(
-          gt(
-            schema.customerOrderTable.total,
-            schema.customerOrderTable.amount_paid,
+          //cashier
+          cashier: schema.cashierTable.name,
+        })
+        .from(schema.customerOrderTable)
+        .where(
+          and(
+            gt(
+              schema.customerOrderTable.total,
+              schema.customerOrderTable.amount_paid,
+            ),
+            eq(schema.customerOrderTable.is_fiado, true),
+            ...condicoes,
           ),
-          eq(schema.customerOrderTable.is_fiado, true),
-          ...condicoes,
-        ),
+        )
+        .$dynamic(),
+    )
+      .map(query =>
+        innerJoinOnMany(query, schema.customerTable, [
+          eq(schema.customerTable.id, schema.customerOrderTable.customer_id),
+          name ? like(schema.customerTable.name, `%${name}%`) : undefined,
+        ]),
       )
+      .map(query =>
+        innerJoinOnMany(query, schema.cashierTable, [
+          eq(schema.cashierTable.id, schema.customerOrderTable.cachier_id),
+        ]),
+      )
+      .get()
 
     console.log('Date Start:', dateStart, 'Date End:', dateEnd)
     console.log(sortId, sortOrder)
@@ -137,26 +143,22 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     const total = await tenantDb!
       .select({ count: count() })
       .from(schema.customerOrderTable)
-      .where(
-        and(
-          gt(
-            schema.customerOrderTable.total,
-            schema.customerOrderTable.amount_paid,
-          ),
-          eq(schema.customerOrderTable.is_fiado, true),
-          ...condicoes,
-          name ? like(schema.customerTable.name, `%${name}%`) : undefined,
-        ),
-      )
 
-    const totalSumResult = await tenantDb!
+    const [totalSumResult] = await tenantDb!
       .select({
         totalSum: sql<number>`SUM(${schema.customerOrderTable.total})`,
       })
       .from(schema.customerOrderTable)
-      .leftJoin(
+      .innerJoin(
         schema.customerTable,
-        eq(schema.customerTable.id, schema.customerOrderTable.customer_id),
+        and(
+          name ? like(schema.customerTable.name, `%${name}%`) : undefined,
+          eq(schema.customerTable.id, schema.customerOrderTable.customer_id),
+        ),
+      )
+      .leftJoin(
+        schema.cashierTable,
+        eq(schema.cashierTable.id, schema.customerOrderTable.cachier_id),
       )
       .where(
         and(
@@ -169,8 +171,9 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
           name ? like(schema.customerTable.name, `%${name}%`) : undefined,
         ),
       )
+      .$dynamic()
 
-    const totalSum = totalSumResult[0]?.totalSum ?? 0
+    const totalSum = totalSumResult?.totalSum ?? 0
 
     return { rows: rows ?? [], count: total[0].count, totalSum }
   } catch (error) {
