@@ -90,9 +90,12 @@
 <main
   class="container mx-auto flex h-full max-h-[calc(100vh-10vh)] flex-col items-end gap-2"
 >
+<div class="flex gap-2">
   <button onclick={() => isOpenModal?.showModal()} class="btn btn-primary">
     Criar motoboy
   </button>
+  <button class="btn btn-secondary" onclick={()=>filters.clear('username','email')}>Limpar filtros</button>
+</div>
   <Datatable {table}>
     <!-- {#snippet header()}
       <Search {table} />
@@ -119,7 +122,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each table.rows as row}
+        {#each data.rows as row}
           <tr>
             <td>{row.id}</td>
             <td><b>{row.username}</b></td>
@@ -128,7 +131,6 @@
               <b>
                 <EditRole
                   userId={row.id}
-                  userName={row.username}
                   userRole={row.role}
                 />
                 {#if row.role === 'caixa'}

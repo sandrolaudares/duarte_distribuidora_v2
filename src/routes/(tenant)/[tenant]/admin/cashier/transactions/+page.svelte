@@ -49,13 +49,17 @@
 </script>
 
 <main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+  <div class="flex justify-end mb-2">
+
+    <button class="btn btn-primary" onclick={()=>filters.clear('username','cashier','endDate','startDate')}>Limpar filtros</button>
+  </div>
   <Datatable {table} headless>
     <!-- {#snippet header()}
       <Search {table} />
      
     {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table table-zebra border">
+    <table class="table table-zebra border rounded-sm">
       <thead>
         <tr>
           <Th>ID</Th>

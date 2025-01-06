@@ -123,6 +123,7 @@
     <option value="todos" selected={true}>Todos</option>
     <option value="atrasados">Pagamentos atrasados</option>
   </select>
+  <button class="btn btn-primary" onclick={()=>filters.clear('name','startDate','endDate','startExpireDate','endExpireDate','atrasados')}>Limpar filtros</button>
   <Datatable {table} headless>
     <!-- {#snippet header()}
       <Search {table} />

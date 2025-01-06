@@ -119,9 +119,13 @@
   <section class="container mx-auto mb-4 px-4">
     <div class="mt-2 flex items-center justify-between">
       <h1 class="text-2xl font-semibold">Clientes:</h1>
-      <button class="btn btn-primary min-w-96" onclick={add}>
-        Criar cliente
-      </button>
+      <div class="flex gap-2">
+
+        <button class="btn btn-primary min-w-96" onclick={add}>
+          Criar cliente
+        </button>
+      <button class="btn btn-secondary" onclick={()=>filters.clear('name','phone')}>Limpar filtros</button>
+      </div>
     </div>
   </section>
   <Datatable {table}>
@@ -158,7 +162,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each table.rows as row}
+        {#each data.rows as row}
           <tr>
             <td>{row.id}</td>
             <td>
