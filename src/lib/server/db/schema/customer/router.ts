@@ -6,6 +6,7 @@ import {
   bugReport,
   customer as customerController,
   distribuidora,
+  product,
 } from '$db/controller'
 import {
   insertCustomerSchema,
@@ -14,13 +15,11 @@ import {
   paymentMethodEnum,
   paymentStatusEnum,
   insertOrderPaymentSchema,
-
   orderPaymentTable,
   customerOrderTable,
   type InsertOrderPayment,
   orderItemTable,
   orderTypeEnum,
-
   type InsertLogs,
 } from '$lib/server/db/schema'
 
@@ -135,7 +134,6 @@ export const customer = router({
       }
     }),
 
-
   getCustomers: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
     return await customerController(tenantDb).getCustomersWithAddress()
   }),
@@ -243,7 +241,7 @@ export const customer = router({
         //   })
         //   .returning()
 
-        if(!order.motoboy_id) {
+        if (!order.motoboy_id) {
           customerController(tenantDb).updateStockOnOrder(order.id)
         }
 
@@ -256,7 +254,7 @@ export const customer = router({
             cashier_id: order_info.cachier_id,
           },
           cashier_id: order_info.cachier_id,
-          order_id:order.id,
+          order_id: order.id,
           type: 'CAIXA',
           pathname: '/TODO:ROUTE',
           routeName: 'Fiado',
@@ -350,7 +348,7 @@ export const customer = router({
 
         for (const payment of order_info.payment_info) {
           await bugReport(tenantDb).insertLogs({
-            text: `Pagamento de R$${(payment.amount_paid/100).toFixed(2)} para pedido ${order.id}${payment.troco ? ` com troco de R$${(payment.troco/100).toFixed(2)}` : ''}`,
+            text: `Pagamento de R$${(payment.amount_paid / 100).toFixed(2)} para pedido ${order.id}${payment.troco ? ` com troco de R$${(payment.troco / 100).toFixed(2)}` : ''}`,
             created_by: userId,
             metadata: {
               order_id: order.id,
@@ -367,10 +365,9 @@ export const customer = router({
             routeName: 'Inserir pedido pago',
             currency: payment.amount_paid,
           })
-
         }
 
-        if(!order.motoboy_id) {
+        if (!order.motoboy_id) {
           customerController(tenantDb).updateStockOnOrder(order.id)
         }
         //TODO: se necessario inserir outro log só pro troco
@@ -417,7 +414,7 @@ export const customer = router({
           }),
         }),
       )
-      .mutation(async ({ input, ctx: { tenantDb,locals } }) => {
+      .mutation(async ({ input, ctx: { tenantDb, locals } }) => {
         const userId = locals.user?.id
         const { order_items, order_info } = input
         const customer = await customerController(tenantDb).getCustomerById(
@@ -468,7 +465,7 @@ export const customer = router({
             cashier_id: order_info.cachier_id,
           },
           cashier_id: order_info.cachier_id,
-          order_id:order.id,
+          order_id: order.id,
           type: 'CAIXA',
           pathname: '/TODO:ROUTE',
           routeName: 'Fiado',
@@ -523,7 +520,7 @@ export const customer = router({
           }
 
           await bugReport(tenantDb).insertLogs({
-            text: `Pagamento de R$${(payment_info.amount_paid/100).toFixed(2)} para pedido ${payment_info.order_id}`,
+            text: `Pagamento de R$${(payment_info.amount_paid / 100).toFixed(2)} para pedido ${payment_info.order_id}`,
             created_by: userId,
             metadata: {
               order_id: payment_info.order_id,
@@ -545,39 +542,39 @@ export const customer = router({
   }),
 
   updateOrderExpireDate: publicProcedure
-  .meta({
-    routeName: 'Atualizar Status do Pedido',
-    permission: 'atualizar_pedidos',
-  })
-  .use(middleware.logged)
-  .use(middleware.auth)
-  .input(
-    z.object({
-      order_id: z.number(),
-      expire_at: z.date(),
-    }),
-  )
-  .mutation(async ({ input, ctx }) => {
-    const { order_id, expire_at } = input
-    const { tenantDb } = ctx
-    const user = ctx.locals.user
-    await bugReport(tenantDb).insertLogs({
-      text: `${user?.username} atualizou a data de vencimento do pedido ${order_id} para ${format(expire_at,'dd/MM/yyyy')}`,
-      created_by: user?.id,
-      metadata: {
+    .meta({
+      routeName: 'Atualizar Status do Pedido',
+      permission: 'atualizar_pedidos',
+    })
+    .use(middleware.logged)
+    .use(middleware.auth)
+    .input(
+      z.object({
+        order_id: z.number(),
+        expire_at: z.date(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { order_id, expire_at } = input
+      const { tenantDb } = ctx
+      const user = ctx.locals.user
+      await bugReport(tenantDb).insertLogs({
+        text: `${user?.username} atualizou a data de vencimento do pedido ${order_id} para ${format(expire_at, 'dd/MM/yyyy')}`,
+        created_by: user?.id,
+        metadata: {
+          order_id,
+          expire_at,
+        },
+        order_id,
+        type: 'SYSTEM',
+        pathname: '',
+        routeName: 'Atualizar Pedido',
+      })
+      return await customerController(tenantDb).updateOrderExpireDate(
         order_id,
         expire_at,
-      },
-      order_id,
-      type: 'SYSTEM',
-      pathname: '',
-      routeName: 'Atualizar Pedido',
-    })
-    return await customerController(tenantDb).updateOrderExpireDate(
-      order_id,
-      expire_at,
-    )
-  }),
+      )
+    }),
 
   updateOrderStatus: publicProcedure
     .meta({
@@ -620,6 +617,53 @@ export const customer = router({
         order_id,
         status,
       )
+    }),
+
+  updateOrder: publicProcedure
+    .meta({
+      routeName: 'Atualizar Pedido',
+      permission: 'atualizar_pedidos',
+    })
+    .use(middleware.logged)
+    .use(middleware.auth)
+    .input(
+      z.object({
+        order_id: z.number(),
+        data: z.object({
+          total: z.number(),
+          observation: z.string().optional(),
+          motoboy_id: z.string().optional(),
+          taxa_entrega: z.number().optional(),
+        }),
+        items: z.array(
+          z.object({
+            item_id: z.number(),
+            quantity: z.number(),
+            price: z.number(),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { order_id, data, items } = input
+      const { tenantDb } = ctx
+      return await customerController(tenantDb).updateOrder(
+        order_id,
+        data,
+        items,
+      )
+    }),
+
+    cancelOrder : publicProcedure
+    .meta({
+      routeName: 'Deletar Pedido',
+      permission: 'atualizar_pedidos',
+    })
+    .use(middleware.logged)
+    .use(middleware.auth)
+    .input(z.number()).mutation(async ({ input, ctx }) => {
+      const { tenantDb } = ctx
+      return await customerController(tenantDb).cancelOrder(input)
     }),
 
   // updateOrderPaymentStatus: publicProcedure
@@ -722,7 +766,7 @@ export const customer = router({
     )
     .mutation(async ({ input, ctx }) => {
       const location = await geocodeAddress(
-        `${input.number}, ${input.street}, ${input.bairro}, ${input.city}, ${input.state}, ${input.cep}, ${input.country}`,
+        `${input.street}, ${input.number}, ${input.bairro}, ${input.city}, ${input.state}, ${input.cep}, ${input.country}`,
       )
 
       if (!location) {
@@ -737,6 +781,11 @@ export const customer = router({
         lon: location.lon,
       }
 
+      if(location.lat === 0 && location.lon === 0) {
+        throw new Error(
+          'Erro ao geocodificar endereço!',
+        )
+      }
       const tenantId = ctx.tenantInfo.tenantId
 
       const distribuidora = await getDistribuidoraLatLong(tenantId)
@@ -752,10 +801,10 @@ export const customer = router({
       return distance
     }),
 
-    getOrderById: publicProcedure
+  getOrderById: publicProcedure
     .use(middleware.logged)
     .input(z.number())
-    .query(({ input,ctx: { tenantDb } }) => {
+    .query(({ input, ctx: { tenantDb } }) => {
       return customerController(tenantDb).getOrderByID(input)
     }),
 })

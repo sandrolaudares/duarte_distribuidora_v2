@@ -25,6 +25,7 @@
   import { toast } from 'svelte-sonner'
   import { invalidate, invalidateAll } from '$app/navigation'
   import DateFilter from '$lib/components/DateFilter.svelte'
+  import * as Select from '$lib/components/ui/select/index'
 
   let { data }: { data: PageData } = $props()
 
@@ -39,9 +40,13 @@
 
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
-    console.log(s)
-    filters.fromState(s)
-    await $navigating?.complete
+    try {
+      console.log(s)
+      filters.fromState(s)
+      await $navigating?.complete
+    } catch (error) {
+      console.error(error)
+    }
     return data.rows
   })
 
@@ -120,6 +125,17 @@
       window.location.reload()
     }
   }
+
+  const filtersPaid = [
+    { value: 'todos', label: 'Todos' },
+    { value: 'paid', label: 'Pagos' },
+    { value: 'unpaid', label: 'Não pagos' },
+  ]
+
+  const triggerContent = $derived(
+    filtersPaid.find(f => f.value === paidFilter.value)?.label ??
+      'Selecione...',
+  )
 </script>
 
 <div class="container mx-auto p-4">
@@ -155,17 +171,24 @@
       </button>
     </div>
     <div class="flex gap-2 divide-x">
-      <select
+      <Select.Root
+        type="single"
         bind:value={paidFilter.value}
-        onchange={e => {
+        onValueChange={e => {
           paidFilter.set()
         }}
-        class="select select-bordered"
       >
-        <option value="todos" selected={true}>Todos</option>
-        <option value="paid">Pagos</option>
-        <option value="unpaid">Não pagos</option>
-      </select>
+        <Select.Trigger class="w-[180px] h-full">
+          {triggerContent}
+        </Select.Trigger>
+        <Select.Content>
+          {#each filtersPaid as filter}
+            <Select.Item value={filter.value} label={filter.label}>
+              {filter.label}
+            </Select.Item>
+          {/each}
+        </Select.Content>
+      </Select.Root>
     </div>
   </div>
 
@@ -216,7 +239,9 @@
               class:opacity-50={conta.isPaid}
             >
               <td class="p-3">{conta.titulo}</td>
-              <td class="p-3 {conta.descricao ? '':'text-error'}">{conta.descricao ? conta.descricao :'Não possui'}</td>
+              <td class="p-3 {conta.descricao ? '' : 'text-error'}">
+                {conta.descricao ? conta.descricao : 'Não possui'}
+              </td>
               <td class="p-3">{conta.supName}</td>
               <td class="p-3">{conta.catName ?? 'Não cadastrado'}</td>
               <td class="p-3">{format(conta.expire_at!, 'dd/MM/yyyy')}</td>

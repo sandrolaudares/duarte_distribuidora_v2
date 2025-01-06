@@ -37,9 +37,13 @@
 
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
-    console.log(s)
-    filters.fromState(s)
-    await $navigating?.complete
+    try {
+      console.log(s)
+      filters.fromState(s)
+      await $navigating?.complete
+    } catch (error) {
+      console.error(error)
+    }
     return data.rows
   })
 
@@ -119,6 +123,7 @@
     <option value="todos" selected={true}>Todos</option>
     <option value="atrasados">Pagamentos atrasados</option>
   </select>
+  <button class="btn btn-primary" onclick={()=>filters.clear('name','startDate','endDate','startExpireDate','endExpireDate','atrasados')}>Limpar filtros</button>
   <Datatable {table} headless>
     <!-- {#snippet header()}
       <Search {table} />
@@ -202,7 +207,7 @@
                   ? format(new Date(row.expire_at), 'dd/MM/yyyy')
                   : 'Não registrado'} -->
                 {#if isLoading}
-                Atualizando...
+                  Atualizando...
                 {:else}
                   <ChangeExpireDate
                     value={row.expire_at!}

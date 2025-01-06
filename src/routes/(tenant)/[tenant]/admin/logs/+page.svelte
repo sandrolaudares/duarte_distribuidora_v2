@@ -23,7 +23,7 @@
   import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
   import { format } from 'date-fns'
-  import { goto } from '$app/navigation';
+  import { goto } from '$app/navigation'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -35,9 +35,13 @@
 
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
-    console.log(s)
-    filters.fromState(s)
-    await $navigating?.complete
+    try {
+      console.log(s)
+      filters.fromState(s)
+      await $navigating?.complete
+    } catch (error) {
+      console.error(error)
+    }
     return data.rows
   })
 </script>
@@ -49,7 +53,7 @@
      
     {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table table-zebra border rounded-none">
+    <table class="table table-zebra rounded-none border">
       <thead>
         <tr>
           <ThSort {table} field="id">ID</ThSort>
@@ -62,21 +66,19 @@
           <Th>Metadata</Th>
           <Th>Erro</Th>
           <Th>Data</Th>
-          
         </tr>
         <tr>
           <Th />
-          <ThFilter {table} field="user_name"/>
-          <ThFilter {table} field="text"/>
-          <Th/>
-          <Th/>
-          <Th/>
-          <Th/>
-          <Th/>
-          <Th/>
-          <Th/>
+          <ThFilter {table} field="user_name" />
+          <ThFilter {table} field="text" />
+          <Th />
+          <Th />
+          <Th />
+          <Th />
+          <Th />
+          <Th />
+          <Th />
           <!--FINALIZAR ESSA TABLE, FILTRO DE DATA E ETC-->
-          
         </tr>
       </thead>
       <tbody>
@@ -88,11 +90,16 @@
             <td>{row.pathname}</td>
             <td>{row.routeName}</td>
             <td>{row.type}</td>
-            <td>{row.currency ? 'R$'+(row.currency/100).toFixed(2) : 'Não é transação'}</td>
+            <td>
+              {row.currency
+                ? 'R$' + (row.currency / 100).toFixed(2)
+                : 'Não é transação'}
+            </td>
             <td>{JSON.stringify(row.metadata)}</td>
             <td>{row.error ?? 'Não tem'}</td>
-            <td>{row.created_at ? format(row.created_at,'dd/MM/yyyy') :''}</td>
-            
+            <td>
+              {row.created_at ? format(row.created_at, 'dd/MM/yyyy') : ''}
+            </td>
           </tr>
         {/each}
       </tbody>
@@ -107,6 +114,7 @@
     {/snippet}
   </Datatable>
 </main>
+
 <style>
   thead {
     background-color: oklch(var(--b1)) !important;

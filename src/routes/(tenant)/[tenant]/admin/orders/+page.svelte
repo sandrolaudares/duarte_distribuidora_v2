@@ -101,6 +101,17 @@
       toast.error('Erro ao mudar status do pedido!')
     }
   }
+
+  async function handleDeleteOrder(id:number) {
+    try {
+      await trpc($page).customer.cancelOrder.mutate(id)
+      toast.success('Pedido cancelado com sucesso!')
+      // goto('/admin/orders')
+    } catch (error) {
+      toast.error('Erro ao cancelar pedido!')
+      console.log(error)
+    }
+  }
 </script>
 {#if isLoading}
 <div class="flex justify-center items-center m-32">
@@ -229,10 +240,7 @@
                     }}
                     cancel_order={async ()=>{
                       pedido.status = 'CANCELED'
-                      await changeStatusPedido({
-                        order_id: pedido.id,
-                        status:'CANCELED'
-                      })
+                      await handleDeleteOrder(pedido.id)
                     }}
                   />
                 {/if}

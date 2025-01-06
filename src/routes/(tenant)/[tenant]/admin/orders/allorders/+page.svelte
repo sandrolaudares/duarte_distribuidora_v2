@@ -23,7 +23,7 @@
   import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
   import { format } from 'date-fns'
-  import { goto } from '$app/navigation';
+  import { goto } from '$app/navigation'
 
   let { data }: { data: PageData } = $props()
 
@@ -37,15 +37,21 @@
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
     console.log(s)
-    filters.fromState(s)
-    await $navigating?.complete
+    try {
+      filters.fromState(s)
+      await $navigating?.complete
+    } catch (error) {
+      console.log(error)
+    }
     return data.rows
   })
-
 </script>
 
-<h1 class="my-5 text-center text-2xl font-medium">Todos os pedidos:</h1>
 <main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+  <div class="flex justify-between items-center">
+    <h1 class="my-5 text-center text-2xl font-medium">Todos os pedidos:</h1>
+    <button class="btn btn-primary" onclick={()=>filters.clear('name','created_by','startDate','endDate')}>Limpar filtros</button>
+  </div>
   <Datatable {table} headless>
     <!-- {#snippet header()}
       <Search {table} />
@@ -59,9 +65,7 @@
           <Th>Cliente</Th>
           <Th>Caixa</Th>
           <Th>Observações</Th>
-          <ThSort {table} field="created_at">
-            Data do pedido
-          </ThSort>
+          <ThSort {table} field="created_at">Data do pedido</ThSort>
           <ThSort {table} field="total">Valor do pedido</ThSort>
 
           <Th>Ver detalhes</Th>
@@ -72,13 +76,15 @@
           <ThFilter {table} field="created_by" />
           <Th />
           <Th>
-          <DateFilter onchange={(start,end)=>{
-            if(start != null && end !=null){
-              let startDate= start.toString()
-              let endDate = end.toString()
-              filters.update({startDate,endDate})
-            }
-            }}/>
+            <DateFilter
+              onchange={(start, end) => {
+                if (start != null && end != null) {
+                  let startDate = start.toString()
+                  let endDate = end.toString()
+                  filters.update({ startDate, endDate })
+                }
+              }}
+            />
           </Th>
           <Th />
 
@@ -92,8 +98,12 @@
             <td><b>{row.name}</b></td>
             <td><b>{row.created_by}</b></td>
             <td><b>{row.observation}</b></td>
-            <td><b>{row.created_at ? format(row.created_at,'dd/MM/yyyy') : ''}</b></td>
-            <td><b class="text-xl text-success">R${(row.total/100)}</b></td>
+            <td>
+              <b>
+                {row.created_at ? format(row.created_at, 'dd/MM/yyyy') : ''}
+              </b>
+            </td>
+            <td><b class="text-xl text-success">R${row.total / 100}</b></td>
 
             <td>
               <a href="/admin/orders/{row.id}" class="badge badge-primary">
@@ -127,6 +137,7 @@
     {/snippet}
   </Datatable>
 </main>
+
 <style>
   thead {
     background-color: oklch(var(--b1)) !important;

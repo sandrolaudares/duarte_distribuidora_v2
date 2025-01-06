@@ -308,5 +308,15 @@ export const icons = {
   <path d="M21 19V5" />`,
         cfg,
       ),
+    down_line: (cfg? : SVGoptions) =>
+      svgTemplate(
+        `<path d="M8 18L12 22L16 18"/><path d="M12 2V22"/>`,
+        cfg,
+      ),
+    up_line: (cfg? : SVGoptions) =>
+      svgTemplate(
+        `<path d="M8 6L12 2L16 6"/><path d="M12 2V22"/>`,
+        cfg,
+      ),
   },
 }

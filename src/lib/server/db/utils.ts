@@ -104,15 +104,15 @@ export function innerJoinOnMany<T extends SQLiteSelect>(
   const fFilters = filters.filter(f => f !== undefined)
 
   if (fFilters.length === 0) {
-    console.log('No join');
-    
+    // console.log('No join');
+
     return qb
   }
   if (fFilters.length > 1) {
-    console.log('Maior que um join',fFilters);
-    
+    // console.log('Maior que um join',fFilters);
+
     return qb.innerJoin(table, and(...filters))
   }
-  console.log('Um join só',filters)
+  // console.log('Um join só',filters)
   return qb.leftJoin(table, filters[0])
 }

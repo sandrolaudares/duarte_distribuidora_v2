@@ -23,6 +23,16 @@ export const stock = (db: TenantDbType) => ({
   insertSKU(data: InsertSku) {
     return db.insert(skuTable).values(data)
   },
+  updateSKU(
+    sku: SelectSku['sku'],
+    data: Partial<SelectSku>,
+  ) {
+    return db
+      .update(skuTable)
+      .set(data)
+      .where(eq(skuTable.sku, sku))
+      .run()
+  },
   getSKU() {
     return db.select().from(skuTable)
   },

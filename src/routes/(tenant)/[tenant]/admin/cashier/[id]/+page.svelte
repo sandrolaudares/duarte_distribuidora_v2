@@ -8,24 +8,17 @@
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
 
-  import type { RouterOutputs } from '$trpc/router'
   import { modal } from '$components/modal'
-
-  import { getCartContext } from '$lib/stores/cart'
-  import ModalEndereco from './ModalEndereco.svelte'
-  import ModalCliente from './ModalCliente.svelte'
-  import { onDestroy } from 'svelte'
-  //import ModalPagamento from './ModalPagamento.svelte'
   import CaixaColumn from './CaixaColumn.svelte'
   import type { InsertOrderPayment } from '$lib/server/db/schema'
   import PaymentCashier from '$lib/components/PaymentCashier.svelte'
   import CardapioCaixa from './CardapioCaixa.svelte'
   import CaixaLeftColumn from './CaixaLeftColumn.svelte'
-  import ModalMotoboy from './ModalMotoboy.svelte'
+  import { getCartContext } from './cartContext.svelte'
 
   const cart = getCartContext()
 
-  export let data: PageData
+  let { data }: { data: PageData } = $props()
 
   let { caixa, user, products } = data
 
@@ -33,55 +26,42 @@
 
   let isOpenModal: HTMLDialogElement | null = null
 
-  let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
+  let tipo_preco: 'retail_price' | 'wholesale_price' = $state('retail_price')
 
-  let observacao: string = ''
-
-  let clienteSelecionado: RouterOutputs['customer']['getCustomers'][0] | null =
-    null
-
-  let enderecoCliente:
-    | RouterOutputs['customer']['getCustomers'][0]['adresses'][0]
-    | null = null
-
-  let motoboySelecionado: RouterOutputs['auth']['getMotoboys'][0] | null = null
-
-  let isDelivery = false
-
-  let taxaEntrega = 0
+  let observacao: string = $state('')
 
   async function createOrder(payments: Omit<InsertOrderPayment, 'order_id'>[]) {
-    let total = Object.values($cart).reduce((acc, item) => {
+    let total = Object.values(cart.cart).reduce((acc, item) => {
       return (
         acc +
-        item.item[item.is_retail ? 'retail_price' : 'wholesale_price'] *
+        item.item[item.meta.is_retail ? 'retail_price' : 'wholesale_price'] *
           item.quantity
       )
     }, 0)
-    if (isDelivery && !motoboySelecionado) {
+    if (cart.meta.isDelivery && !cart.meta.motoboySelecionado) {
       toast.error('Selecione um motoboy para pedidos delivery')
       return
     }
     try {
-      console.log(enderecoCliente)
+      console.log(cart.meta.enderecoSelecionado)
       // TODO: add new cases
       const resp = await trpc($page).customer.order.insetPaidOrder.mutate({
         order_info: {
-          customer_id: clienteSelecionado?.id,
-          address_id: enderecoCliente?.id,
+          customer_id: cart.meta.clienteSelecionado?.id,
+          address_id: cart.meta.enderecoSelecionado?.id,
           total: total,
           observation: observacao,
-          motoboy_id: isDelivery ? motoboySelecionado?.id : undefined,
+          motoboy_id: cart.meta.isDelivery ? cart.meta.motoboySelecionado?.id : undefined,
           type: 'ATACADO',
           //TODO: Type
           cashier_id: caixa.id,
           payment_info: payments,
-          taxa_entrega: isDelivery ? taxaEntrega : 0,
+          taxa_entrega: cart.meta.isDelivery ? cart.meta.taxaEntrega : 0,
         },
-        order_items: Object.values($cart).map(item => ({
+        order_items: Object.values(cart.cart).map(item => ({
           product_id: item.item.id,
           quantity: item.quantity,
-          price: item.item[item.is_retail ? 'retail_price' : 'wholesale_price'],
+          price: item.item[item.meta.is_retail ? 'retail_price' : 'wholesale_price'],
         })),
       })
       if (!resp) {
@@ -100,43 +80,43 @@
   function reset() {
     setTimeout(() => {
         modal.close()
-        clienteSelecionado = null
-        enderecoCliente = null
-        motoboySelecionado = null
-        isDelivery = false
-        cart.set({})
+        cart.meta.clienteSelecionado = null
+        cart.meta.enderecoSelecionado = null
+        cart.meta.motoboySelecionado = null
+        cart.meta.isDelivery = false
+        cart.clear()
       }, 300)
   }
 
   async function orderWaiting() {
-    let total = Object.values($cart).reduce((acc, item) => {
+    let total = Object.values(cart.cart).reduce((acc, item) => {
       return (
         acc +
-        item.item[item.is_retail ? 'retail_price' : 'wholesale_price'] *
+        item.item[item.meta.is_retail ? 'retail_price' : 'wholesale_price'] *
           item.quantity
       )
     }, 0)
-    if (isDelivery && !motoboySelecionado) {
+    if (cart.meta.isDelivery && !cart.meta.motoboySelecionado) {
       toast.error('Selecione um motoboy para pedidos delivery')
       return
     }
     try {
       const resp = await trpc($page).customer.order.insertOrderWaiting.mutate({
         order_info: {
-          customer_id: clienteSelecionado?.id || 0,
-          address_id: enderecoCliente?.id || 0,
+          customer_id: cart.meta.clienteSelecionado?.id || 0,
+          address_id: cart.meta.enderecoSelecionado?.id || 0,
           total: total,
           observation: observacao,
-          motoboy_id: motoboySelecionado?.id || '0',
+          motoboy_id: cart.meta.motoboySelecionado?.id || '0',
           type: 'ATACADO',
           //TODO: Type
           cachier_id: caixa.id,
-          taxa_entrega: isDelivery ? taxaEntrega : 0,
+          taxa_entrega: cart.meta.isDelivery ? cart.meta.taxaEntrega : 0,
         },
-        order_items: Object.values($cart).map(item => ({
+        order_items: Object.values(cart.cart).map(item => ({
           product_id: item.item.id,
           quantity: item.quantity,
-          price: item.item[item.is_retail ? 'retail_price' : 'wholesale_price'],
+          price: item.item[item.meta.is_retail ? 'retail_price' : 'wholesale_price'],
         })),
       })
       if (!resp) {
@@ -151,7 +131,7 @@
     }
   }
 
-  let dinheiro_caixa = 0
+  let dinheiro_caixa = $state(0)
 
   async function handleAbrirCaixa() {
     try {
@@ -200,20 +180,16 @@
   }
 
   async function pagamentoModal() {
-    let total = Object.values($cart).reduce((acc, item) => {
+    let total = Object.values(cart.cart).reduce((acc, item) => {
       return (
         acc +
-        item.item[item.is_retail ? 'retail_price' : 'wholesale_price'] *
+        item.item[item.meta.is_retail ? 'retail_price' : 'wholesale_price'] *
           item.quantity
       )
     }, 0)
     modal.open(PaymentCashier, {
-      cliente_selecionado: clienteSelecionado,
-      total_pedido: isDelivery ? total + taxaEntrega : total,
-      motoboySelecionado: motoboySelecionado,
-      enderecoSelecionado: enderecoCliente,
-      isDelivery: isDelivery,
-      taxaEntrega:taxaEntrega,
+      total_pedido: cart.meta.isDelivery ? total + cart.meta.taxaEntrega : total,
+      payments: [],
       cashier_id :caixa.id,
       save: payments => {
         createOrder(payments)
@@ -227,7 +203,7 @@
 </script>
 
 <div class="m-4 flex justify-center gap-3">
-  <!-- <button class="btn btn-primary" on:click={seeTransactionsCaixa}>
+  <!-- <button class="btn btn-primary" onclick={seeTransactionsCaixa}>
     Ver transacoes do caixa
   </button> -->
 </div>
@@ -238,40 +214,34 @@
         <span class="label-text">Digite o valor no caixa!</span>
       </div>
       <CurrencyInput bind:value={dinheiro_caixa} />
-      <button class="btn btn-primary" on:click={handleAbrirCaixa}>
+      <button class="btn btn-primary" onclick={handleAbrirCaixa}>
         Abrir caixa
       </button>
     </label>
   </div>
 {:else}
   <div class="mb-3 flex justify-center gap-2">
-    <button class="btn btn-error" on:click={handleFecharCaixa}>
+    <button class="btn btn-error" onclick={handleFecharCaixa}>
       Fechar caixa
     </button>
   </div>
   <div class="mt-15 m-4 flex flex-col justify-center gap-4 md:flex-row">
     <CaixaLeftColumn
-      {caixa}
       {user}
       fee={data.tenant?.taxa_por_km ?? 0}
       bind:tipo_preco
-      bind:clienteSelecionado
-      bind:enderecoCliente
-      bind:isDelivery
-      bind:motoboySelecionado
-      bind:taxaEntrega
     />
     <div
       class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-4"
     >
-      <CaixaColumn bind:taxaEntrega bind:isDelivery />
+      <CaixaColumn />
     </div>
 
     <div class="col-auto flex h-auto flex-col justify-between gap-2 md:w-96">
       <div>
         <button
           class="btn btn-primary w-full"
-          on:click={() => isOpenModal?.showModal()}
+          onclick={() => isOpenModal?.showModal()}
         >
           ACESSAR PRODUTOS {@html icons.basket()}
         </button>
@@ -285,8 +255,8 @@
       <div class="flex flex-col gap-2">
         <button
           class="btn btn-secondary w-full disabled:bg-opacity-50"
-          disabled={Object.values($cart).length === 0 || !motoboySelecionado}
-          on:click={orderWaiting}
+          disabled={Object.values(cart.cart).length === 0 || !cart.meta.motoboySelecionado}
+          onclick={orderWaiting}
         >
           <span class="mr-1">PREPARAR PARA ENTREGA</span>
         </button>
@@ -296,8 +266,8 @@
         </button>
         <button
           class="btn btn-primary w-full disabled:bg-opacity-50"
-          disabled={Object.values($cart).length === 0}
-          on:click={pagamentoModal}
+          disabled={Object.values(cart.cart).length === 0}
+          onclick={pagamentoModal}
         >
           <span class="mr-1">PAGAMENTO</span>
           {@html icons.dolar()}

@@ -1,5 +1,8 @@
 <script lang="ts">
-  let { value = $bindable(),onchange }:{value:number,onchange?:()=>void} = $props()
+  let {
+    value = $bindable(),
+    onchange,
+  }: { value: number; onchange?: () => void } = $props()
 
   if (!value) {
     value = 0
@@ -11,7 +14,6 @@
   let currencyInput: HTMLInputElement
 
   const handleChange = () => {
-
     let cleanedInput = currencyInput.value
       .replace(/\D*/gm, '')
       .replace(/^0+/gm, '')
@@ -21,10 +23,16 @@
       amountFormatted = '0.00'
     } else {
       value = parseInt(cleanedInput, 10)
-      amountFormatted = (value / 100).toFixed(2);
+      amountFormatted = (value / 100).toFixed(2)
     }
     value = Number(amountFormatted.replace('.', ''))
   }
+
+  $effect(() => {
+    if (value) {
+      amountFormatted = (value / 100).toFixed(2)
+    }
+  })
 </script>
 
 <label class="input input-bordered flex items-center gap-2">
@@ -35,6 +43,6 @@
     value={amountFormatted}
     bind:this={currencyInput}
     oninput={handleChange}
-    onchange={onchange}
+    {onchange}
   />
 </label>

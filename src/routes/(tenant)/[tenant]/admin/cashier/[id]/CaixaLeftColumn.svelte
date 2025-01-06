@@ -2,7 +2,7 @@
   import ModalEndereco from './ModalEndereco.svelte'
   import ModalCliente from './ModalCliente.svelte'
   import { modal } from '$lib/components/modal'
-  import { getCartContext } from '$lib/stores/cart'
+  // import { getCartContext } from '$lib/stores/cart'
   import { icons } from '$lib/utils/icons'
   import type { RouterOutputs } from '$trpc/router'
   import ModalMotoboy from './ModalMotoboy.svelte'
@@ -15,46 +15,41 @@
   import UsedCredits from '$lib/components/UsedCredits.svelte'
   import AvailableCredits from '$lib/components/AvailableCredits.svelte'
   import CustomerInfo from '$lib/components/cards/CustomerInfo.svelte'
+  import { getCartContext } from './cartContext.svelte'
+  import type { SelectUser } from '$lib/server/db/schema'
 
-  export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
-  export let caixa
-  export let clienteSelecionado:
-    | RouterOutputs['customer']['getCustomers'][0]
-    | null = null
+  // export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
 
-  export let enderecoCliente:
-    | RouterOutputs['customer']['getCustomers'][0]['adresses'][0]
-    | null = null
+  let {
+    tipo_preco = $bindable('retail_price'),
+    user,
+    fee = 0,
+  }: {
+    tipo_preco: 'retail_price' | 'wholesale_price'
+    fee: number
+    user: SelectUser | null
+  } = $props()
 
-  export let user
-
-  export let motoboySelecionado:
-    | RouterOutputs['auth']['getMotoboys'][0]
-    | null = null
-
-  export let isDelivery = false
-
-  export let taxaEntrega = 0
+  // export let user
 
   const cart = getCartContext()
 
-  export let fee = 0
+  // export let fee = 0
 
   function handleSelectClient() {
     modal.open(ModalCliente, {
       selectedClient: client => {
-        clienteSelecionado = client
+        cart.meta.clienteSelecionado = client
         modal.open(ModalEndereco, {
           addresses: client.adresses,
-          customer_id: clienteSelecionado.id,
+          customer_id: cart.meta.clienteSelecionado.id,
           selectedAddress: address => {
-            enderecoCliente = address
-            //TODO:ARRUMAR TIPO
+            cart.meta.enderecoSelecionado = address
             console.log(address)
             getDistance()
           },
         })
-        if (clienteSelecionado.is_retail) {
+        if (cart.meta.clienteSelecionado.is_retail) {
           tipo_preco = 'retail_price'
         } else {
           tipo_preco = 'wholesale_price'
@@ -66,39 +61,40 @@
   function handleSelectMotoboy() {
     modal.open(ModalMotoboy, {
       selectedMotoboy: motoboy => {
-        motoboySelecionado = motoboy
+        cart.meta.motoboySelecionado = motoboy
       },
     })
   }
   function toggleDelivery() {
-    isDelivery = !isDelivery
+    cart.meta.isDelivery = !cart.meta.isDelivery
 
-    if (!isDelivery) {
-      motoboySelecionado = null
+    if (!cart.meta.isDelivery) {
+      cart.meta.motoboySelecionado = null
     }
   }
 
-  let distance = 0
+  let distance = $state(0)
 
-  let isLoading = false
+  let isLoading = $state(false)
 
   async function getDistance() {
     isLoading = true
     try {
-      if (enderecoCliente) {
+      if (cart.meta.enderecoSelecionado) {
         distance = await trpc($page).customer.calculateDistance.mutate({
-          number: enderecoCliente.number,
-          bairro: enderecoCliente?.neighborhood,
-          street: enderecoCliente.street,
-          city: enderecoCliente?.city,
-          state: enderecoCliente.state,
-          cep: enderecoCliente.cep,
-          country: enderecoCliente.country,
+          number: cart.meta.enderecoSelecionado.number,
+          bairro: cart.meta.enderecoSelecionado?.neighborhood,
+          street: cart.meta.enderecoSelecionado.street,
+          city: cart.meta.enderecoSelecionado?.city,
+          state: cart.meta.enderecoSelecionado.state,
+          cep: cart.meta.enderecoSelecionado.cep,
+          country: cart.meta.enderecoSelecionado.country,
         })
-        taxaEntrega = (distance / 1000) * (fee / 100)
-        taxaEntrega *= 100
-        taxaEntrega = Math.round(taxaEntrega / 100) * 100
-        console.log(taxaEntrega)
+
+        cart.meta.taxaEntrega = (distance / 1000) * (fee / 100)
+        cart.meta.taxaEntrega *= 100
+        cart.meta.taxaEntrega = Math.round(cart.meta.taxaEntrega / 100) * 100
+        console.log(cart.meta.taxaEntrega)
         console.log(distance)
         toast.success('Distancia: ' + (distance / 1000).toFixed(2) + 'km')
         isLoading = false
@@ -109,22 +105,25 @@
     }
   }
 
-  $: if (enderecoCliente) {
-    isDelivery = true
-  }
-  const formattedAddress = enderecoCliente
-  ? [
-      enderecoCliente.cep ? `${enderecoCliente.cep}` : '',
-      enderecoCliente.city,
-      enderecoCliente.neighborhood,
-      enderecoCliente.street,
-      enderecoCliente.number,
-      enderecoCliente.state,
-    ]
-      .filter(Boolean)
-      .join(', ')
-  : null;
-
+  $effect(() => {
+    if (cart.meta.enderecoSelecionado) {
+      cart.meta.isDelivery = true
+    }
+  })
+  const formattedAddress = cart.meta.enderecoSelecionado
+    ? [
+        cart.meta.enderecoSelecionado.cep
+          ? `${cart.meta.enderecoSelecionado.cep}`
+          : '',
+        cart.meta.enderecoSelecionado.city,
+        cart.meta.enderecoSelecionado.neighborhood,
+        cart.meta.enderecoSelecionado.street,
+        cart.meta.enderecoSelecionado.number,
+        cart.meta.enderecoSelecionado.state,
+      ]
+        .filter(Boolean)
+        .join(', ')
+    : null
 </script>
 
 <div class="flex h-auto flex-col-reverse justify-between md:flex-col">
@@ -145,11 +144,15 @@
       <div class="grid flex-grow place-items-center">
         <button
           class="btn btn-primary w-full"
-          on:click={() => {
+          onclick={() => {
             tipo_preco = 'retail_price'
+            Object.values(cart.cart).forEach(cartItem => {
+              cartItem.meta.is_retail = true
+            })
+            console.log(cart)
           }}
           disabled={tipo_preco === 'retail_price' ||
-            Object.values($cart).length >= 1}
+            Object.values(cart.cart).length >= 1}
         >
           Varejo
         </button>
@@ -158,11 +161,15 @@
       <div class="grid flex-grow place-items-center">
         <button
           class="btn btn-primary w-full"
-          on:click={() => {
+          onclick={() => {
             tipo_preco = 'wholesale_price'
+            Object.values(cart.cart).forEach(cartItem => {
+              cartItem.meta.is_retail = false
+            })
+            console.log(cart)
           }}
           disabled={tipo_preco === 'wholesale_price' ||
-            Object.values($cart).length >= 1}
+            Object.values(cart.cart).length >= 1}
         >
           Atacado
         </button>
@@ -179,66 +186,68 @@
   </div> -->
   <div class="mt-2 flex flex-col-reverse gap-2 md:flex-col">
     <div class="">
-      {#if clienteSelecionado}
+      {#if cart.meta.clienteSelecionado}
         <CustomerInfo
-          customer={clienteSelecionado}
+          customer={cart.meta.clienteSelecionado}
           address={formattedAddress}
-          distance={distance}
-          bind:deliveryFee={taxaEntrega}
-          isLoading={isLoading}
+          {distance}
+          bind:deliveryFee={cart.meta.taxaEntrega}
+          {isLoading}
           desvincular={() => {
-            clienteSelecionado = null
-            enderecoCliente = null
+            cart.meta.clienteSelecionado = null
+            cart.meta.enderecoSelecionado = null
             distance = 0
-            taxaEntrega = 0
+            cart.meta.taxaEntrega = 0
           }}
         >
-        <AvailableCredits
-              id={clienteSelecionado.id}
-              max_credit={clienteSelecionado.max_credit}
-            />
-      </CustomerInfo>
+          <AvailableCredits
+            id={cart.meta.clienteSelecionado.id}
+            max_credit={cart.meta.clienteSelecionado.max_credit}
+          />
+        </CustomerInfo>
       {:else}
         <button
           class="btn btn-outline w-full disabled:bg-opacity-50"
-          on:click={handleSelectClient}
+          onclick={handleSelectClient}
         >
           <span class="mr-1">Vincular compra a um cliente</span>
         </button>
       {/if}
     </div>
     <div class="my-1 flex flex-col items-center justify-center gap-1">
-      {#if clienteSelecionado && enderecoCliente}
+      {#if cart.meta.clienteSelecionado && cart.meta.enderecoSelecionado}
         <div class="flex items-center justify-center gap-3">
           <h1>É um pedido delivery?</h1>
           <input
             type="checkbox"
             class="toggle toggle-success"
-            checked={isDelivery}
-            on:click={toggleDelivery}
+            checked={cart.meta.isDelivery}
+            onclick={toggleDelivery}
           />
         </div>
       {/if}
-      {#if isDelivery && clienteSelecionado}
-        {#if motoboySelecionado}
+      {#if cart.meta.isDelivery && cart.meta.clienteSelecionado}
+        {#if cart.meta.motoboySelecionado}
           <div class="m-2 flex w-full items-center justify-center gap-3">
             <p class="flex flex-col">
               <span>
-                Motoboy: <strong>{motoboySelecionado.username}</strong>
+                Motoboy: <strong>
+                  {cart.meta.motoboySelecionado.username}
+                </strong>
               </span>
             </p>
             <button
               class="btn btn-accent btn-sm"
-              on:click={() => {
-                motoboySelecionado = null
-                isDelivery = false
+              onclick={() => {
+                cart.meta.motoboySelecionado = null
+                cart.meta.isDelivery = false
               }}
             >
               Desvincular
             </button>
           </div>
         {:else}
-          <button class="btn btn-outline w-full" on:click={handleSelectMotoboy}>
+          <button class="btn btn-outline w-full" onclick={handleSelectMotoboy}>
             Selecione o motoboy
           </button>
         {/if}
@@ -247,7 +256,9 @@
     <a
       href="/admin/cashier"
       class="btn btn-primary w-full disabled:bg-opacity-50"
-      on:click={() => cart.set({})}
+      onclick={() => {
+        cart.clear()
+      }}
     >
       <span class="mr-1">CANCELAR</span>
       {@html icons.x()}

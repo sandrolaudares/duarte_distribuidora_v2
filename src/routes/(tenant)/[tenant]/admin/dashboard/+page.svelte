@@ -1,5 +1,8 @@
 <script lang="ts">
-    import type { PageData } from './$types';
+  import { DashboardPage } from '$lib/components/dashboard/admin'
 
-    let { data }: { data: PageData } = $props();
+  // import DashboardPage from '$lib/components/dashboard/dashboard.svelte'
+  import type { PageData } from './$types'
+
+  let { data }: { data: PageData } = $props()
 </script>

@@ -149,7 +149,7 @@ import {ChartArea,BadgeDollarSign} from 'lucide-svelte/icons'
         },
         {
           name: 'Dashboards',
-          url: '/dashboard',
+          url: '/admin/dashboard',
           icon: ChartArea,
         },
       )

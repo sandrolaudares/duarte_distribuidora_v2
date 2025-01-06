@@ -35,9 +35,13 @@
 
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
-    console.log(s)
-    filters.fromState(s)
-    await $navigating?.complete
+    try {
+      console.log(s)
+      filters.fromState(s)
+      await $navigating?.complete
+    } catch (error) {
+      console.error(error)
+    }
     return data.rows
   })
 
@@ -95,7 +99,7 @@
     })
   }
 
-  async function handleUpdate(value:unknown, key = '', row:any) {
+  async function handleUpdate(value: unknown, key = '', row: any) {
     const last_val = row[key]
     try {
       await trpc($page).customer.updateCustomer.mutate({
@@ -115,9 +119,13 @@
   <section class="container mx-auto mb-4 px-4">
     <div class="mt-2 flex items-center justify-between">
       <h1 class="text-2xl font-semibold">Clientes:</h1>
-      <button class="btn btn-primary min-w-96" onclick={add}>
-        Criar cliente
-      </button>
+      <div class="flex gap-2">
+
+        <button class="btn btn-primary min-w-96" onclick={add}>
+          Criar cliente
+        </button>
+      <button class="btn btn-secondary" onclick={()=>filters.clear('name','phone')}>Limpar filtros</button>
+      </div>
     </div>
   </section>
   <Datatable {table}>
@@ -154,7 +162,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each table.rows as row}
+        {#each data.rows as row}
           <tr>
             <td>{row.id}</td>
             <td>
@@ -162,7 +170,7 @@
                 <EditableCell
                   value={row.name}
                   onUpdateValue={async newValue => {
-                    handleUpdate(newValue,'name',row)
+                    handleUpdate(newValue, 'name', row)
                   }}
                 />
               </b>
@@ -178,21 +186,31 @@
               </b>
             </td>
             <td><b>{row.cpf_cnpj}</b></td> -->
-            <td><b>{row.is_retail ? 'Pessoa física': 'Pessoa Juridica'}</b></td>
+            <td>
+              <b>{row.is_retail ? 'Pessoa física' : 'Pessoa Juridica'}</b>
+            </td>
             <!-- <td><b>{row.rg_ie}</b></td> -->
-            <td><b><EditableCell
-              value={row.phone}
-              onUpdateValue={async newValue => {
-                handleUpdate(newValue, 'phone', row)
-              }}
-            /></b></td>
+            <td>
+              <b>
+                <EditableCell
+                  value={row.phone}
+                  onUpdateValue={async newValue => {
+                    handleUpdate(newValue, 'phone', row)
+                  }}
+                />
+              </b>
+            </td>
             <td><b><UsedCredits id={row.id} /></b></td>
-            <td><b><EditableCurrency
-              value={row.max_credit}
-              onUpdateValue={async newValue => {
-                handleUpdate(newValue, 'max_credit', row)
-              }}
-            /></b></td>
+            <td>
+              <b>
+                <EditableCurrency
+                  value={row.max_credit}
+                  onUpdateValue={async newValue => {
+                    handleUpdate(newValue, 'max_credit', row)
+                  }}
+                />
+              </b>
+            </td>
             <td>
               <a href="/admin/customer/{row.id}" class="badge badge-primary">
                 Detalhes
@@ -213,6 +231,7 @@
     {/snippet}
   </Datatable>
 </main>
+
 <style>
   thead {
     background-color: oklch(var(--b1)) !important;

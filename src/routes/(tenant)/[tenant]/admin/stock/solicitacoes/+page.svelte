@@ -39,9 +39,13 @@
 
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
-    console.log(s)
-    filters.fromState(s)
-    await $navigating?.complete
+    try {
+      console.log(s)
+      filters.fromState(s)
+      await $navigating?.complete
+    } catch (error) {
+      console.error(error)
+    }
     return data.rows
   })
 
@@ -51,15 +55,17 @@
     return table.rows.filter(row => table.selected.includes(row.id))
   }
   let isLoading = $state(false)
-  async function handleComplete(){
+  async function handleComplete() {
     isLoading = true
     try {
-      for(const row of selectedRows){
-        const resp = await trpc($page).distribuidora.completeTransference.mutate(row.id)
+      for (const row of selectedRows) {
+        const resp = await trpc(
+          $page,
+        ).distribuidora.completeTransference.mutate(row.id)
         toast.success(resp)
       }
       invalidateAll()
-    } catch (error:any) {
+    } catch (error: any) {
       toast.error(error.message)
     } finally {
       isLoading = false
@@ -69,13 +75,13 @@
 </script>
 
 {#if isLoading}
-<div class="absolute left-1/2 top-1/2 z-50">
-  <Loading/>
-</div>
+  <div class="absolute left-1/2 top-1/2 z-50">
+    <Loading />
+  </div>
 {/if}
 
 <main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
-  <div class="flex justify-between items-center">
+  <div class="flex items-center justify-between">
     <h1 class="my-5 text-center text-2xl font-medium">
       Solicitações de transferencia:
     </h1>
@@ -198,7 +204,7 @@
         disabled={selectRows.length === 0 && isLoading}
         onclick={handleComplete}
       >
-        {isLoading ? 'Aceitando transferencia...':'Confirmar transferencia'}
+        {isLoading ? 'Aceitando transferencia...' : 'Confirmar transferencia'}
       </button>
     </div>
   </div>

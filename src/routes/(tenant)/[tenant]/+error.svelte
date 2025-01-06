@@ -20,6 +20,15 @@
           'Um erro inesperado aconteceu, atualize a página.'}
       </p>
       <a href="/" class="btn btn-primary">Voltar à página inicial</a>
+
+      <button
+        class="btn btn-ghost"
+        onclick={() => {
+          window.location.reload()
+        }}
+      >
+        Reload Page
+      </button>
     </div>
   </div>
 </main>

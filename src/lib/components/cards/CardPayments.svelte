@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { SelectOrderPayment } from "$lib/server/db/schema"
+  import type { InsertOrderPayment, SelectOrderPayment } from "$lib/server/db/schema"
   import { format } from "date-fns"
 
-  export let payment:SelectOrderPayment
+  export let payment:Omit<InsertOrderPayment,'order_id'>
   export let created_by = ''
   export let i
 </script>
@@ -11,7 +11,9 @@
   class="rounded-lg bg-base-200 p-4 shadow-sm"
 >
   Pagamento #{i + 1}
+  {#if payment.created_at}
   - {format(payment.created_at,'dd/MM/yyyy')}
+  {/if}
   <p class="bg-opacity-60">
     <span class="font-semibold">Quantidade paga:</span>
     R${(payment.amount_paid / 100).toFixed(2)}
