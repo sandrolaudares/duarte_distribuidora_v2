@@ -2,14 +2,33 @@
 import type { PageServerLoad } from './$types'
 
 import * as s from '$db/schema'
-import { desc, eq, sql, gt, gte } from 'drizzle-orm'
+import { desc, eq, sql, gt, gte, and, type AnyColumn } from 'drizzle-orm'
+import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
+import { format, formatDistance, formatRelative, subDays } from 'date-fns'
+
+import { withinDate } from '$db/utils'
 
 const LIMIT = 10 as const
 
 export const load = (async ({ locals: { tenantDb: db }, url }) => {
   const searchParams = url.searchParams
-  const startDate = searchParams.get('startDate') ?? 'timestanp'
-  const endDate = searchParams.get('endDate') ?? 'timestanp'
+
+  const sPstartDate = searchParams.get('startDate')
+  const sPendDate = searchParams.get('endDate')
+
+  const startDate =
+    typeof sPstartDate === 'string'
+      ? new Date(Number(sPstartDate))
+      : subDays(new Date(), 7)
+  const endDate =
+    typeof sPendDate === 'string' ? new Date(Number(sPendDate)) : new Date()
+  const compareStartDate = 'compareStartDate'
+  const compareEndDate = 'compareEndDate'
+
+  console.log('sPstartDate', sPstartDate)
+  console.log('sPendDate', sPendDate)
+  console.log('startDate', startDate.toLocaleDateString())
+  console.log('endDate', endDate.toLocaleDateString())
 
   const getTopOrderedNProducts = db!
     .select({
@@ -25,6 +44,7 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .groupBy(s.orderItemTable.product_id)
     .orderBy(desc(sql`sum(${s.orderItemTable.quantity})`))
     .limit(LIMIT)
+    .$dynamic()
 
   const getTopRRevenueProducts = db!
     .select({
@@ -42,6 +62,7 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
       desc(sql`sum(${s.orderItemTable.quantity} * ${s.orderItemTable.price})`),
     )
     .limit(LIMIT)
+    .$dynamic()
 
   const getMostPopularPaymentMethods = db!
     .select({
@@ -52,6 +73,8 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .groupBy(s.orderPaymentTable.payment_method)
     .orderBy(desc(sql`count(${s.orderPaymentTable.id})`))
     .limit(LIMIT)
+    .$dynamic()
+
   const getRevenueByMonth = db!
     .select({
       month: sql<string>`strftime('%Y-%m', ${s.customerOrderTable.created_at})`,
@@ -60,6 +83,8 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .from(s.customerOrderTable)
     .groupBy(sql`strftime('%Y-%m', ${s.customerOrderTable.created_at})`)
     .orderBy(desc(sql`strftime('%Y-%m', ${s.customerOrderTable.created_at})`))
+    .$dynamic()
+
   const getTopSellingCategories = db!
     .select({
       category_name: s.productCategoryTable.name,
@@ -83,6 +108,8 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
       desc(sql`sum(${s.orderItemTable.quantity} * ${s.orderItemTable.price})`),
     )
     .limit(LIMIT)
+    .$dynamic()
+
   const getCustomerNumberOrders = db!
     .select({
       customer_name: s.customerTable.name,
@@ -103,12 +130,14 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
       average_order_value: sql<number>`avg(${s.customerOrderTable.amount_paid})`,
     })
     .from(s.customerOrderTable)
+    .$dynamic()
 
   const getQuantOrders = db!
     .select({
       total_orders: sql<number>`count(${s.customerOrderTable.id})`,
     })
     .from(s.customerOrderTable)
+    .$dynamic()
 
   const getTopCustomers = db!
     .select({
@@ -132,7 +161,13 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .where(gt(s.customerOrderTable.amount_paid, 1))
 
   return {
-    topOrderedProducts: await getTopOrderedNProducts,
+    topOrderedProducts: await withinDate(
+      getTopOrderedNProducts,
+      s.orderItemTable.created_at,
+      startDate,
+      endDate,
+    ),
+
     topRevenueProducts: await getTopRRevenueProducts,
     mostPopularPaymentMethods: await getMostPopularPaymentMethods,
     revenueByMonth: await getRevenueByMonth,
@@ -149,6 +184,13 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     teste: {
       startDate,
       endDate,
+
+      dated: await withinDate(
+        getTopOrderedNProducts,
+        s.orderItemTable.created_at,
+        startDate,
+        endDate,
+      ),
     },
   }
 }) satisfies PageServerLoad

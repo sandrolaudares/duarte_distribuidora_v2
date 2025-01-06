@@ -4,7 +4,11 @@ import {
   asc,
   count,
   desc,
+  gte,
+  gt,
+  lt,
   like,
+  lte,
   SQL,
   sql,
   type AnyColumn,
@@ -115,4 +119,13 @@ export function innerJoinOnMany<T extends SQLiteSelect>(
   }
   // console.log('Um join só',filters)
   return qb.leftJoin(table, filters[0])
+}
+
+export function withinDate<T extends SQLiteSelect>(
+  qb: T,
+  column: AnyColumn,
+  startDate: Date,
+  endDate: Date,
+): T {
+  return qb.where(and(gte(column, startDate), lte(column, endDate)))
 }
