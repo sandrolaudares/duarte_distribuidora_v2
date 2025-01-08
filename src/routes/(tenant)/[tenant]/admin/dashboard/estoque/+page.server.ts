@@ -2,7 +2,7 @@
 import type { PageServerLoad } from './$types'
 import { asc, count, eq, lte } from 'drizzle-orm'
 import * as s from '$db/schema'
-import { withinDate } from '$db/utils';
+import { withinDate } from '$db/utils'
 
 export const load = (async ({ locals: { tenantDb: db }, url }) => {
   const getTotalItemsStock = db!
@@ -25,11 +25,17 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     // .where(lte(s.skuTable.quantity, s.skuTable.minimium))
     .orderBy(asc(s.skuTable.quantity))
     .limit(50)
-
+  const [totalItemsStock, quantSaida, quantEntrada, skuLowStock] =
+    await Promise.all([
+      getTotalItemsStock,
+      getQuantEntrada,
+      getQuantSaida,
+      getProductsWithLowestStock,
+    ])
   return {
-    totalItemsStock: await getTotalItemsStock,
-    quantSaida: (await getQuantSaida)[0].count,
-    quantEntrada: (await getQuantEntrada)[0].count,
-    skuLowStock: await getProductsWithLowestStock,
+    totalItemsStock,
+    quantSaida: quantSaida[0].count,
+    quantEntrada: quantEntrada[0].count,
+    skuLowStock: skuLowStock,
   }
 }) satisfies PageServerLoad
