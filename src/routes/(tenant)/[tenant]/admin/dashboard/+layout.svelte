@@ -91,6 +91,12 @@
             {/if}
           {/if}
           <DateFilter
+            startDate={filters.get('startDate')
+              ? new Date(Number(filters.get('startDate')!))
+              : null}
+            endDate={filters.get('endDate')
+              ? new Date(Number(filters.get('endDate')!))
+              : null}
             alignP={'right'}
             onchange={(startDate, endDate) => {
               if (!startDate || !endDate) return

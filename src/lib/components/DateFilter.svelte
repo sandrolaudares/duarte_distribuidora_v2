@@ -10,8 +10,8 @@
     | undefined
     | ((dateStart: number | null, dateEnd: number | null) => void) = undefined
 
-  let startDate: Date | null  = null
-  let endDate: Date |null  = null
+  export let startDate: Date | null = null
+  export let endDate: Date | null = null
   let dateFormat = 'dd/MM/yyyy'
   let isOpen = false
 
@@ -24,30 +24,39 @@
   const onClearDates = () => {
     startDate = null
     endDate = null
-    onchange?.(start, end);
+    onchange?.(start, end)
   }
 
   const toggleDatePicker = () => (isOpen = !isOpen)
   const formatDate = (date: Date) =>
     (date && format(new Date(date), dateFormat)) || ''
 
-  $: formattedStartDate = startDate ? formatDate(startDate) : '';
-  $: formattedEndDate = endDate ? formatDate(endDate) : '';
+  $: formattedStartDate = startDate ? formatDate(startDate) : ''
+  $: formattedEndDate = endDate ? formatDate(endDate) : ''
 
-  $: start = startDate ? new Date(startDate).setHours(0, 0, 0, 0) : null;
-  $: end = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : null;
+  $: start = startDate ? new Date(startDate).setHours(0, 0, 0, 0) : null
+  $: end = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : null
 
   $: {
-    if(endDate != null && startDate !=null){
+    if (endDate != null && startDate != null) {
       onchange?.(start, end)
     }
   }
 
-  export let alignP = "left";
+  export let alignP = 'left'
 </script>
 
 <div class="date-filter">
-  <Datepicker align={alignP} bind:isOpen bind:startDate bind:endDate {isRange} showPresets {enablePastDates} {enableFutureDates}>
+  <Datepicker
+    align={alignP}
+    bind:isOpen
+    bind:startDate
+    bind:endDate
+    {isRange}
+    showPresets
+    {enablePastDates}
+    {enableFutureDates}
+  >
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="date-field" on:click={toggleDatePicker} class:open={isOpen}>
