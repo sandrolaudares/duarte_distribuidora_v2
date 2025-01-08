@@ -28,8 +28,8 @@
   interface Props {
     cardUm : textCard,
     cardDois : textCard,
-    cardTres : textCard,
-    cardQuatro : textCard
+    cardTres : textCard | null,
+    cardQuatro : textCard | null
   }
 
   let { cardUm, cardDois, cardTres, cardQuatro } : Props = $props();
@@ -61,28 +61,26 @@
       <p class="text-muted-foreground text-xs">{cardDois.subTitle}</p>
     </Card.Content>
   </Card.Root>
-  <Card.Root>
+  <Card.Root class={cardTres ? '' : 'hidden'}>
     <Card.Header
     class="flex flex-row items-center justify-between space-y-0 pb-2"
     >
-      <Card.Title class="text-sm font-medium">{cardTres.titleCard}</Card.Title>
+      <Card.Title class="text-sm font-medium">{cardTres?.titleCard}</Card.Title>
       <!-- <CreditCard class="text-muted-foreground h-4 w-4" /> -->
     </Card.Header>
     <Card.Content>
-      <div class="text-2xl font-bold">{cardTres.textCard}</div>
-      <p class="text-muted-foreground text-xs">{cardTres.subTitle}</p>
+      <div class="text-2xl font-bold">{cardTres?.textCard}</div>
+      <p class="text-muted-foreground text-xs">{cardTres?.subTitle}</p>
     </Card.Content>
   </Card.Root>
-  <Card.Root>
-    <Card.Header
-    class="flex flex-row items-center justify-between space-y-0 pb-2"
-    >
-      <Card.Title class="text-sm font-medium">{cardQuatro.titleCard}</Card.Title>
+  <Card.Root class={cardQuatro ? '' : 'hidden'}>
+    <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Card.Title class="text-sm font-medium">{cardQuatro?.titleCard}</Card.Title>
       <!-- <Activity class="text-muted-foreground h-4 w-4" /> -->
     </Card.Header>
     <Card.Content>
-      <div class="text-2xl font-bold">{cardQuatro.textCard}</div>
-      <p class="text-muted-foreground text-xs">{cardQuatro.subTitle}</p>
+      <div class="text-2xl font-bold">{cardQuatro?.textCard}</div>
+      <p class="text-muted-foreground text-xs">{cardQuatro?.subTitle}</p>
     </Card.Content>
   </Card.Root>
 </div>

@@ -1,11 +1,10 @@
-import { page } from '$app/stores'
-import { get } from 'svelte/store'
+import { page } from '$app/state'
 import { goto } from '$app/navigation'
 import type { State } from '@vincjo/datatables/server'
 import { toast } from 'svelte-sonner'
 
 export class SSRFilters {
-  Filters = $derived.by(() => get(page).url)
+  Filters = $derived(page.url)
 
   constructor() {
     // console.log('Filters', this.Filters)

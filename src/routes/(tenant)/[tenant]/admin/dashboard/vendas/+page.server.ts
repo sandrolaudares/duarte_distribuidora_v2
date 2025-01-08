@@ -2,14 +2,63 @@
 import type { PageServerLoad } from './$types'
 
 import * as s from '$db/schema'
-import { desc, eq, sql, gt, gte } from 'drizzle-orm'
+import { desc, eq, sql, gt, gte, and, type AnyColumn } from 'drizzle-orm'
+import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
+import { format, formatDistance, formatRelative, subDays } from 'date-fns'
+
+import { withinDate2 } from '$db/utils'
 
 const LIMIT = 10 as const
 
 export const load = (async ({ locals: { tenantDb: db }, url }) => {
   const searchParams = url.searchParams
-  const startDate = searchParams.get('startDate') ?? 'timestanp'
-  const endDate = searchParams.get('endDate') ?? 'timestanp'
+
+  const sp_start_date = searchParams.get('startDate')
+  const sp_end_date = searchParams.get('endDate')
+
+  const startDate =
+    typeof sp_start_date === 'string'
+      ? new Date(Number(sp_start_date))
+      : subDays(new Date(), 7)
+
+  const endDate =
+    typeof sp_end_date === 'string' ? new Date(Number(sp_end_date)) : new Date()
+
+  const sp_compare_start_date = searchParams.get('compareStartDate')
+  const sp_compare_end_date = searchParams.get('compareEndDate')
+
+  const compareStartDate = sp_compare_start_date
+    ? new Date(Number(sp_compare_start_date))
+    : null
+
+  const compareEndDate = sp_compare_end_date
+    ? new Date(Number(sp_compare_end_date))
+    : null
+
+  const withinSelectedDate = withinDate2(startDate, endDate)
+  const withinCompareDate =
+    sp_compare_start_date && sp_compare_end_date
+      ? withinDate2(compareStartDate!, compareEndDate!)
+      : null
+
+  const comparationQuery = function <T extends SQLiteSelect>(
+    qb: T,
+    column: AnyColumn,
+  ): Promise<{ basePeriod: Awaited<T>; comparedPeriod?: Awaited<T> }> {
+    const promisses = [
+      withinSelectedDate(qb, column),
+      withinCompareDate?.(qb, column),
+    ].filter(q => q !== undefined)
+    return Promise.all(promisses).then(([basePeriod, comparedPeriod]) => ({
+      basePeriod,
+      comparedPeriod: comparedPeriod ?? undefined,
+    }))
+  }
+
+  console.log('sPstartDate', sp_start_date)
+  console.log('sPendDate', sp_end_date)
+  console.log('startDate', startDate.toLocaleDateString())
+  console.log('endDate', endDate.toLocaleDateString())
 
   const getTopOrderedNProducts = db!
     .select({
@@ -25,8 +74,9 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .groupBy(s.orderItemTable.product_id)
     .orderBy(desc(sql`sum(${s.orderItemTable.quantity})`))
     .limit(LIMIT)
+    .$dynamic()
 
-  const getTopRRevenueProducts = db!
+  const getTopRevenueProducts = db!
     .select({
       product_name: s.productItemTable.name,
       total_quantity_ordered: sql<number>`cast( sum(${s.orderItemTable.quantity}) as int)`,
@@ -42,6 +92,7 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
       desc(sql`sum(${s.orderItemTable.quantity} * ${s.orderItemTable.price})`),
     )
     .limit(LIMIT)
+    .$dynamic()
 
   const getMostPopularPaymentMethods = db!
     .select({
@@ -52,6 +103,8 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .groupBy(s.orderPaymentTable.payment_method)
     .orderBy(desc(sql`count(${s.orderPaymentTable.id})`))
     .limit(LIMIT)
+    .$dynamic()
+
   const getRevenueByMonth = db!
     .select({
       month: sql<string>`strftime('%Y-%m', ${s.customerOrderTable.created_at})`,
@@ -60,6 +113,8 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .from(s.customerOrderTable)
     .groupBy(sql`strftime('%Y-%m', ${s.customerOrderTable.created_at})`)
     .orderBy(desc(sql`strftime('%Y-%m', ${s.customerOrderTable.created_at})`))
+    .$dynamic()
+
   const getTopSellingCategories = db!
     .select({
       category_name: s.productCategoryTable.name,
@@ -83,6 +138,8 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
       desc(sql`sum(${s.orderItemTable.quantity} * ${s.orderItemTable.price})`),
     )
     .limit(LIMIT)
+    .$dynamic()
+
   const getCustomerNumberOrders = db!
     .select({
       customer_name: s.customerTable.name,
@@ -103,12 +160,14 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
       average_order_value: sql<number>`avg(${s.customerOrderTable.amount_paid})`,
     })
     .from(s.customerOrderTable)
+    .$dynamic()
 
   const getQuantOrders = db!
     .select({
       total_orders: sql<number>`count(${s.customerOrderTable.id})`,
     })
     .from(s.customerOrderTable)
+    .$dynamic()
 
   const getTopCustomers = db!
     .select({
@@ -123,6 +182,7 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .groupBy(s.customerOrderTable.customer_id)
     .orderBy(desc(sql`count(${s.customerOrderTable.id})`))
     .limit(LIMIT)
+    .$dynamic()
   // total in cents
   const getTotalPaidOrders = db!
     .select({
@@ -130,25 +190,76 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     })
     .from(s.customerOrderTable)
     .where(gt(s.customerOrderTable.amount_paid, 1))
+    .$dynamic()
 
+  // TODO: Clientes ociosos: Não compram a 2 semanas ou mais
+
+  const [
+    revenueByMonth,
+    financialSummary,
+    AvgOrderValue,
+    quantOrders,
+    topRevenueProducts,
+    topCustomers,
+  ] = await Promise.all([
+    comparationQuery(getRevenueByMonth, s.customerOrderTable.created_at),
+    comparationQuery(getTotalPaidOrders, s.customerOrderTable.created_at),
+    comparationQuery(getAvgOrderValue, s.customerOrderTable.created_at),
+    comparationQuery(getQuantOrders, s.customerOrderTable.created_at),
+    comparationQuery(getTopRevenueProducts, s.orderItemTable.created_at),
+    comparationQuery(getTopCustomers, s.customerOrderTable.created_at),
+  ])
   return {
-    topOrderedProducts: await getTopOrderedNProducts,
-    topRevenueProducts: await getTopRRevenueProducts,
-    mostPopularPaymentMethods: await getMostPopularPaymentMethods,
-    revenueByMonth: await getRevenueByMonth,
+    revenueByMonth,
+
+    financialSummary,
+
+    AvgOrderValue,
+
+    quantOrders,
+
+    topRevenueProducts,
+
+    topOrderedProducts: await withinSelectedDate(
+      getTopOrderedNProducts,
+      s.orderItemTable.created_at,
+    ),
+
+    mostPopularPaymentMethods: {
+      basePeriod: await getMostPopularPaymentMethods,
+      comparedPeriod: await getMostPopularPaymentMethods,
+    },
+
+    topCustomers,
+
+    clientesOciosos: {
+      basePeriod: [
+        {
+          name: 'Pedro',
+          lastOrder: '2023-01-01',
+          tempoQueNaoCompra: 'Posso calcular no front',
+        },
+      ],
+      comparedPeriod: [
+        {
+          name: 'Pedro',
+          lastOrder: '2023-01-01',
+          tempoQueNaoCompra: 'Posso calcular no front',
+        },
+      ],
+    },
+
     topSellingCategories: await getTopSellingCategories,
     topCustomerOrders: await getCustomerNumberOrders,
-    AvgOrderValue: await getAvgOrderValue,
-    quantOrders: await getQuantOrders,
-
-    // TODO: Subtrair (vendas a vista + recebimentos de fiado) - Contas pagas
-    financialSummary: (await getTotalPaidOrders)[0].total_paid,
-    // TODO: Query to get top 10 customers
-    topCustomers: await getTopCustomers,
 
     teste: {
       startDate,
       endDate,
+
+      dated: await withinSelectedDate(
+        getTopOrderedNProducts,
+        s.orderItemTable.created_at,
+      ),
     },
   }
 }) satisfies PageServerLoad
