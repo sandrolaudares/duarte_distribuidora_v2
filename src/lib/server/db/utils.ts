@@ -136,6 +136,15 @@ export function withinDate<T extends SQLiteSelect>(
   column: AnyColumn,
   startDate: Date = subDays(new Date(), 7),
   endDate: Date,
-): T {
+) {
   return qb.where(and(gte(column, startDate), lte(column, endDate)))
+}
+
+export function withinDate2(
+  startDate: Date = subDays(new Date(), 7),
+  endDate: Date,
+) {
+  return function <T extends SQLiteSelect>(qb: T, column: AnyColumn) {
+    return qb.where(and(gte(column, startDate), lte(column, endDate)))
+  }
 }

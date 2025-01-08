@@ -6,31 +6,57 @@ import { desc, eq, sql, gt, gte, and, type AnyColumn } from 'drizzle-orm'
 import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 import { format, formatDistance, formatRelative, subDays } from 'date-fns'
 
-import { withinDate } from '$db/utils'
+import { withinDate2 } from '$db/utils'
 
 const LIMIT = 10 as const
 
 export const load = (async ({ locals: { tenantDb: db }, url }) => {
   const searchParams = url.searchParams
 
-  const sPstartDate = searchParams.get('startDate')
-  const sPendDate = searchParams.get('endDate')
+  const sp_start_date = searchParams.get('startDate')
+  const sp_end_date = searchParams.get('endDate')
 
   const startDate =
-    typeof sPstartDate === 'string'
-    ? new Date(Number(sPstartDate))
-    : subDays(new Date(), 7)
+    typeof sp_start_date === 'string'
+      ? new Date(Number(sp_start_date))
+      : subDays(new Date(), 7)
 
   const endDate =
-    typeof sPendDate === 'string' 
-    ? new Date(Number(sPendDate)) 
-    : new Date()
+    typeof sp_end_date === 'string' ? new Date(Number(sp_end_date)) : new Date()
 
-  const compareStartDate = 'compareStartDate'
-  const compareEndDate = 'compareEndDate'
+  const sp_compare_start_date = searchParams.get('compareStartDate')
+  const sp_compare_end_date = searchParams.get('compareEndDate')
 
-  console.log('sPstartDate', sPstartDate)
-  console.log('sPendDate', sPendDate)
+  const compareStartDate = sp_compare_start_date
+    ? new Date(Number(sp_compare_start_date))
+    : null
+
+  const compareEndDate = sp_compare_end_date
+    ? new Date(Number(sp_compare_end_date))
+    : null
+
+  const withinSelectedDate = withinDate2(startDate, endDate)
+  const withinCompareDate =
+    sp_compare_start_date && sp_compare_end_date
+      ? withinDate2(compareStartDate!, compareEndDate!)
+      : null
+
+  const comparationQuery = function <T extends SQLiteSelect>(
+    qb: T,
+    column: AnyColumn,
+  ): Promise<{ basePeriod: Awaited<T>; comparedPeriod?: Awaited<T> }> {
+    const promisses = [
+      withinSelectedDate(qb, column),
+      withinCompareDate?.(qb, column),
+    ].filter(q => q !== undefined)
+    return Promise.all(promisses).then(([basePeriod, comparedPeriod]) => ({
+      basePeriod,
+      comparedPeriod: comparedPeriod ?? undefined,
+    }))
+  }
+
+  console.log('sPstartDate', sp_start_date)
+  console.log('sPendDate', sp_end_date)
   console.log('startDate', startDate.toLocaleDateString())
   console.log('endDate', endDate.toLocaleDateString())
 
@@ -156,6 +182,7 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .groupBy(s.customerOrderTable.customer_id)
     .orderBy(desc(sql`count(${s.customerOrderTable.id})`))
     .limit(LIMIT)
+    .$dynamic()
   // total in cents
   const getTotalPaidOrders = db!
     .select({
@@ -163,91 +190,75 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     })
     .from(s.customerOrderTable)
     .where(gt(s.customerOrderTable.amount_paid, 1))
+    .$dynamic()
 
   // TODO: Clientes ociosos: Não compram a 2 semanas ou mais
+
+  const [
+    revenueByMonth,
+    financialSummary,
+    AvgOrderValue,
+    quantOrders,
+    topRevenueProducts,
+    topCustomers,
+  ] = await Promise.all([
+    comparationQuery(getRevenueByMonth, s.customerOrderTable.created_at),
+    comparationQuery(getTotalPaidOrders, s.customerOrderTable.created_at),
+    comparationQuery(getAvgOrderValue, s.customerOrderTable.created_at),
+    comparationQuery(getQuantOrders, s.customerOrderTable.created_at),
+    comparationQuery(getTopRevenueProducts, s.orderItemTable.created_at),
+    comparationQuery(getTopCustomers, s.customerOrderTable.created_at),
+  ])
   return {
-    revenueByMonth: [
-      {
-        basePeriod : await withinDate(
-          getRevenueByMonth,
-          s.customerOrderTable.created_at,
-          startDate,
-          endDate,
-        ),
-        comparedPeriod : []
-      }
-    ],
-    
-    financialSummary: [
-      {
-        basePeriod : (await getTotalPaidOrders)[0].total_paid,
-        comparedPeriod : 0
-      }
-    ],
+    revenueByMonth,
 
-    AvgOrderValue: {
-      basePeriod : await getAvgOrderValue,
-      comparedPeriod : 0
-    },
+    financialSummary,
 
-    quantOrders: {
-      basePeriod : await getQuantOrders,
-      comparedPeriod : 0
-    },
+    AvgOrderValue,
 
-    topRevenueProducts: {
-      basePeriod : await getTopRevenueProducts,
-      comparedPeriodo : 0
-    },
-    
-    topOrderedProducts: await withinDate(
+    quantOrders,
+
+    topRevenueProducts,
+
+    topOrderedProducts: await withinSelectedDate(
       getTopOrderedNProducts,
       s.orderItemTable.created_at,
-      startDate,
-      endDate,
     ),
 
-    mostPopularPaymentMethods : {
-      basePeriod : await getMostPopularPaymentMethods,
-      comparedPeriod : await getMostPopularPaymentMethods
+    mostPopularPaymentMethods: {
+      basePeriod: await getMostPopularPaymentMethods,
+      comparedPeriod: await getMostPopularPaymentMethods,
     },
-    
-    topCustomers: {
-      basePeriod : await getTopCustomers,
-      comparedPeriod : await getTopCustomers
-    },
+
+    topCustomers,
 
     clientesOciosos: {
-      basePeriod : [
+      basePeriod: [
         {
           name: 'Pedro',
           lastOrder: '2023-01-01',
-          tempoQueNaoCompra: "Posso calcular no front"
-        }
+          tempoQueNaoCompra: 'Posso calcular no front',
+        },
       ],
-      comparedPeriod : [
+      comparedPeriod: [
         {
           name: 'Pedro',
           lastOrder: '2023-01-01',
-          tempoQueNaoCompra: "Posso calcular no front"
-        }
-      ]
+          tempoQueNaoCompra: 'Posso calcular no front',
+        },
+      ],
     },
-
 
     topSellingCategories: await getTopSellingCategories,
     topCustomerOrders: await getCustomerNumberOrders,
-    
 
     teste: {
       startDate,
       endDate,
 
-      dated: await withinDate(
+      dated: await withinSelectedDate(
         getTopOrderedNProducts,
         s.orderItemTable.created_at,
-        startDate,
-        endDate,
       ),
     },
   }

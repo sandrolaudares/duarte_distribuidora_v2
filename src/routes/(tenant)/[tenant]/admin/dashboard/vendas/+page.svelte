@@ -37,7 +37,24 @@
     mostPopularPaymentMethods,
   } = $derived(data)
 
-  let dadoCompararProdutoMaisVendido = [{}, {}]  
+  let topRevenueProductsC: ChartConfiguration = $derived({
+    type: 'bar',
+    data: {
+      labels: topRevenueProducts.basePeriod.map(d => d.product_name),
+      datasets: [
+        {
+          label: 'Receita',
+          data: topRevenueProducts.basePeriod.map(d => d.total_revenue),
+          backgroundColor: ['rgba(0, 85, 199)'],
+          borderColor: ['rgb(255, 99, 132)'],
+          borderWidth: 0,
+          barThickness: 50,
+        },
+      ],
+    },
+  })
+
+  let dadoCompararProdutoMaisVendido = [{}, {}]
 
   let carregaGrafico = false
 </script>
@@ -46,18 +63,24 @@
   cardUm={{
     titleCard: 'Total',
     textCard:
-      'R$ ' + (revenueByMonth[0].basePeriod[0].total_revenue / 100).toFixed(2).toString(),
+      'R$ ' +
+      (revenueByMonth.basePeriod[0].total_revenue / 100).toFixed(2).toString(),
     subTitle: '',
   }}
   cardDois={{
     titleCard: 'Resumo',
-    textCard: 'R$ ' + (financialSummary[0].basePeriod / 100).toFixed(2).toString(),
+    textCard:
+      'R$ ' +
+      (financialSummary.basePeriod[0].total_paid / 100).toFixed(2).toString(),
     subTitle: '',
   }}
   cardTres={{
     titleCard: 'Ticket Médio',
     textCard:
-      'R$ ' + (AvgOrderValue.basePeriod[0].average_order_value / 100).toFixed(2).toString(),
+      'R$ ' +
+      (AvgOrderValue.basePeriod[0].average_order_value / 100)
+        .toFixed(2)
+        .toString(),
     subTitle: '',
   }}
   cardQuatro={{
@@ -77,26 +100,13 @@
     <Card.Content>
       <div class="flex flex-wrap">
         <div class="w-full">
+          <!-- {#key topRevenueProducts} -->
           <SvChart
-            config={{
-              type: 'bar',
-              data: {
-                labels: topRevenueProducts.basePeriod.map(d => d.product_name),
-                datasets: [
-                  {
-                    label: 'Receita',
-                    data: topRevenueProducts.basePeriod.map(d => d.total_revenue),
-                    backgroundColor: ['rgba(0, 85, 199)'],
-                    borderColor: ['rgb(255, 99, 132)'],
-                    borderWidth: 0,
-                    barThickness: 50,
-                  },
-                ],
-              },
-            }}
+            config={topRevenueProductsC}
             height={220}
             title={'Principais produtos de receita'}
           />
+          <!-- {/key} -->
         </div>
         <div class="w-full">
           {#key topOrderedProducts}
@@ -120,7 +130,7 @@
                         p => p.total_quantity_ordered,
                       ),
                       backgroundColor: ['rgba(255, 217, 0)'],
-                    }
+                    },
                   ],
                 },
               }}
@@ -130,54 +140,60 @@
           {/key}
         </div>
         <div class="w-1/2">
-          <SvChart
-            config={{
-              type: 'pie',
-              data: {
-                labels: mostPopularPaymentMethods.basePeriod.map(p => {
-                  return p.payment_method
-                }),
-                datasets: [
-                  {
-                    label: 'Total: ',
-                    data: mostPopularPaymentMethods.basePeriod.map(
-                      p => p.usage_count,
-                    ),
-                  },
-                  // Coloca aqui o dataset de comparação
-                  {
-                    label: 'Total: ',
-                    data: mostPopularPaymentMethods.comparedPeriod.map(
-                      p => p.usage_count,
-                    ),
-                  }
-                ],
-              },
-            }}
-            title={'Metodos de pagamento'}
-          />
+          {#key mostPopularPaymentMethods}
+            <SvChart
+              config={{
+                type: 'pie',
+                data: {
+                  labels: mostPopularPaymentMethods.basePeriod.map(p => {
+                    return p.payment_method
+                  }),
+                  datasets: [
+                    {
+                      label: 'Total: ',
+                      data: mostPopularPaymentMethods.basePeriod.map(
+                        p => p.usage_count,
+                      ),
+                    },
+                    // Coloca aqui o dataset de comparação
+                    {
+                      label: 'Total: ',
+                      data: mostPopularPaymentMethods.comparedPeriod.map(
+                        p => p.usage_count,
+                      ),
+                    },
+                  ],
+                },
+              }}
+              title={'Metodos de pagamento'}
+            />
+          {/key}
         </div>
         <div class="w-1/2">
-          <SvChart
-            config={{
-              type: 'bar',
-              data: {
-                labels: topCustomers.basePeriod.map(t => t.customer_name),
-                datasets: [
-                  {
-                    label: 'Total de pedidos',
-                    data: topCustomers.basePeriod.map(t => t.pedidos),
-                  },
-                  {
-                    label: 'Total Periodo anterior',
-                    data: topCustomers.comparedPeriod.map(t => t.pedidos),
-                  }
-                ],
-              },
-            }}
-            title={'Clientes que mais pediram'}
-            height={400}
-          />
+          {#key topCustomers}
+            <SvChart
+              config={{
+                type: 'bar',
+                data: {
+                  labels: topCustomers.basePeriod.map(t => t.customer_name),
+                  datasets: [
+                    {
+                      label: 'Total de pedidos',
+                      data: topCustomers.basePeriod.map(t => t.pedidos),
+                    },
+                    {
+                      label: 'Total Periodo anterior',
+                      data: (topCustomers.comparedPeriod ?? []).map(
+                        t => t.pedidos,
+                      ),
+                    },
+                  ],
+                },
+              }}
+              title={'Clientes que mais pediram'}
+              height={400}
+            />
+          {/key}
         </div>
       </div>
     </Card.Content>
@@ -201,4 +217,3 @@
     </Card.Content>
   </Card.Root>
 </div>
-

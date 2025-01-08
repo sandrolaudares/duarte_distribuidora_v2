@@ -1,4 +1,4 @@
-<script lang="ts">
+<!-- <script lang="ts">
   import type { PageData } from './$types'
 
   import { getUserContext } from '$lib/stores/user'
@@ -28,38 +28,7 @@
       <h2 class="text-xl">
         Olá, {$user?.username}
       </h2>
-      <!-- <div class="flex items-center space-x-4">
-        <button
-          class="ring-offset-background focus-visible:ring-ring hover:text-accent-foreground inline-flex h-10 w-10 items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="h-6 w-6"
-          >
-            <rect width="16" height="13" x="6" y="4" rx="2"></rect>
-            <path d="m22 7-7.1 3.78c-.57.3-1.23.3-1.8 0L6 7"></path>
-            <path d="M2 8v11c0 1.1.9 2 2 2h14"></path>
-          </svg>
-          <span class="sr-only">Notifications</span>
-        </button>
-        <span
-          class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full border"
-        >
-          <img
-            class="aspect-square h-full w-full"
-            alt="Admin Avatar"
-            src="/placeholder-user.jpg"
-          />
-        </span>
-      </div> -->
+
     </div>
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
       <a
@@ -192,9 +161,7 @@
                   </div>
                 </div>
               </div>
-              <!-- <div class="text-muted-foreground text-sm">
-                {JSON.stringify(act.metadata, null, 2)}
-              </div> -->
+         
             </div>
           {/each}
         </div>
@@ -309,4 +276,4 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->
