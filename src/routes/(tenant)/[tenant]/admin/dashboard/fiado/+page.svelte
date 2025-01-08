@@ -38,7 +38,7 @@
                 {
                   label: "Total pago",
                   barThickness : 30,
-                  data: [30, 19, 30, 15],
+                  data: [30, 18, 30, 15],
                   backgroundColor: [
                   'rgba(0, 128, 0)'
                 ],
@@ -47,10 +47,6 @@
             ]
           },
           options:{
-            
-            // layout: {
-            //   padding: 20
-            // },
             scales:{
               y: {
                 stacked : true

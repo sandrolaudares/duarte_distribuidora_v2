@@ -9,49 +9,37 @@ export const load = (async ({ locals : { tenantDb : db }, url }) => {
   const searchParams = url.searchParams;
   const startDate = searchParams.get('startDate') ?? "timestanp";
   const endDate = searchParams.get('endDate') ?? "timestanp";
-
-  const getTotalDelivered = db!
-    .select({
-      totalDelivered : sql<number>`${s.customerOrderTable.type}`
-    })
-    .from(s.customerOrderTable)
-    .where(and(eq(s.customerOrderTable.type, "DELIVERY"), eq(s.customerOrderTable.status, "ENDED")))      
-    .limit(LIMIT);
   
   return {
-    // TODO: Conferir se está certo
-    totalDelivered : await getTotalDelivered,
+    // TODO: Total de corridas completas
+    totalDeliveredCompleted : 150,
+
     // TODO: Distância total de corridas
     TotalDeliveryFees : 156894.00,
+
     // TODO: Pedidos deliveris cancelados
     cancelingOrders : 31,
-    // TODO: Produtos que mais foram entregues
+
+    // TODO: Produtos que mais foram vendidos na modalidade delivery
     bestProduct : "Brahma Latão",
     
-    //TODO: Relatório Motoboy (Soma a quantidade de entrega e o valor total das taxas de entrega)
+    // TODO: Relatório Motoboy (Soma a quantidade de entrega e o valor total das taxas de entrega) -> Solicitado pelo Marlon
     couriersHighestNumberDeliveries : [
       {
         name :  "Vitor",
-        numberDeliveries : 78
+        numberDeliveries : 78,
+        totalAmountDeliveryFees : 200.54
       },
       {
         name :  "Gustavo",
-        numberDeliveries : 55
+        numberDeliveries : 55,
+        totalAmountDeliveryFees : 123.00
       },
       {
         name :  "Pedro",
-        numberDeliveries : 55
+        numberDeliveries : 55,
+        totalAmountDeliveryFees : 123.00
       },
-    ],
-    averageDeliveryTime : [
-      {
-        day : "Segunda",
-        time : "11:12"
-      },
-      {
-        day : "Terça",
-        time : "11:12"
-      },  
     ],
 
     startDate,

@@ -4,7 +4,11 @@ import {
   asc,
   count,
   desc,
+  gte,
+  gt,
+  lt,
   like,
+  lte,
   SQL,
   sql,
   type AnyColumn,
@@ -15,6 +19,8 @@ import {
   integer,
   type SQLiteSelect,
 } from 'drizzle-orm/sqlite-core'
+
+import { subDays } from 'date-fns'
 
 // export async function tableHelper<T extends SQLiteSelect>(
 //   qb: T,
@@ -115,4 +121,30 @@ export function innerJoinOnMany<T extends SQLiteSelect>(
   }
   // console.log('Um join só',filters)
   return qb.leftJoin(table, filters[0])
+}
+
+/**
+ * Adds a filter to the query to only include records where the given column's value is within the given date range.
+ * @param qb The query builder to add the filter to.
+ * @param column The column to filter on.
+ * @param startDate The start of the date range.
+ * @param endDate The end of the date range.
+ * @returns The query builder with the filter applied.
+ */
+export function withinDate<T extends SQLiteSelect>(
+  qb: T,
+  column: AnyColumn,
+  startDate: Date = subDays(new Date(), 7),
+  endDate: Date,
+) {
+  return qb.where(and(gte(column, startDate), lte(column, endDate)))
+}
+
+export function withinDate2(
+  startDate: Date = subDays(new Date(), 7),
+  endDate: Date,
+) {
+  return function <T extends SQLiteSelect>(qb: T, column: AnyColumn) {
+    return qb.where(and(gte(column, startDate), lte(column, endDate)))
+  }
 }

@@ -37,13 +37,15 @@
     },
   ]
 
+  const { totalDeliveredCompleted } = data;
+
   let larguraGrafico = "height:" + dataCard.length * 30+"px;";
 </script>
 
 <NavDashboard 
 cardUm={{
   titleCard : "Total de entregas", 
-  textCard : data.totalDelivered.toString(),
+  textCard : totalDeliveredCompleted.toString() ? totalDeliveredCompleted.toString() : "0",
   subTitle : ""
 }}
 cardDois={{

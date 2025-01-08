@@ -5,19 +5,16 @@
   import type { PageData } from './$types';
   import { RecentSales } from '$lib/components/dashboard/admin'
   import SvChart from '../SvChart.svelte'
+  import { map } from '@trpc/server/observable'
 
   let { data }: { data: PageData } = $props();
 
   const { totalItemsStock, quantSaida, quantEntrada, skuLowStock } = data;
 </script>
 
-<div>
-  {JSON.stringify(skuLowStock, null, 10)}
-</div>
-
 <NavDashboard 
   cardUm={{
-    titleCard : "Total", 
+    titleCard : "Total de SKUs no estoque", 
     textCard : totalItemsStock[0].count.toString(),
     subTitle : ""
   }}
@@ -26,16 +23,8 @@
     textCard : (quantEntrada - quantSaida).toString(),
     subTitle : `Entrada: ${quantEntrada} Saida: ${quantSaida}`
   }}
-  cardTres={{
-    titleCard : "Maior produto", 
-    textCard : "",
-    subTitle : ""
-  }}
-  cardQuatro={{
-    titleCard : "Maior categoria", 
-    textCard : "",
-    subTitle : ""
-  }}
+  cardTres={null}
+  cardQuatro={null}
 />
 
 <h1>Página de vendas</h1>
@@ -47,17 +36,28 @@
     </Card.Header>
     <!-- <Card.Content class="flex flex-col md:flex-row gap-4"> -->
     <Card.Content class="flex flex-wrap">
-      <div class="w-1/2 pr-3">
+      <div class="w-full">
         <SvChart 
         config={{
-          type : "bar",
+          type : "line",
           data : {
-            labels: ["Coca-cola 2 litros", "Budweiser"],
+            labels: skuLowStock.map((d) => d.sku),
             datasets : [
               {
-                label: "Total",
-                data: [50, 45],
-                barThickness: 50  
+                type: "line",
+                label: "Estoque mínimo",
+                data: skuLowStock.map((d) => d.quantity + 50),
+                pointStyle : "circle",
+                pointRadius: 5,
+                pointHoverRadius: 15,
+                backgroundColor: "rgb(0, 64, 128)", 
+                borderColor: "rgb(0, 64, 128)"
+              },
+              {
+                type: "bar",
+                label: "Estoque atual",
+                data: skuLowStock.map((d) => d.quantity),
+                backgroundColor: "rgb(0, 64, 128, 0.7)"
               }
             ]
           } 
@@ -74,13 +74,13 @@
     </Card.Header>
     <Card.Content>
       <!-- TODO: Mudar o recent sales -->
-      <RecentSales textRecentSale={[
-        {
-          title : "Receita",
-          text : "teste",
-          value : "R$ 200,00"
-        }
-      ]}/>
+      <RecentSales textRecentSale={
+        skuLowStock.map((d) => ({
+          title: d.name,
+          text: d.sku.toString(),
+          value: d.quantity.toString(),
+        }))
+      } />
     </Card.Content>
   </Card.Root>
 </div>
