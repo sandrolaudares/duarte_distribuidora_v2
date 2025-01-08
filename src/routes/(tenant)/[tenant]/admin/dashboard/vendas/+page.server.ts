@@ -164,6 +164,7 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .from(s.customerOrderTable)
     .where(gt(s.customerOrderTable.amount_paid, 1))
 
+  // TODO: Clientes ociosos: Não compram a 2 semanas ou mais
   return {
     revenueByMonth: [
       {
@@ -214,6 +215,23 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     topCustomers: {
       basePeriod : await getTopCustomers,
       comparedPeriod : await getTopCustomers
+    },
+
+    clientesOciosos: {
+      basePeriod : [
+        {
+          name: 'Pedro',
+          lastOrder: '2023-01-01',
+          tempoQueNaoCompra: "Posso calcular no front"
+        }
+      ],
+      comparedPeriod : [
+        {
+          name: 'Pedro',
+          lastOrder: '2023-01-01',
+          tempoQueNaoCompra: "Posso calcular no front"
+        }
+      ]
     },
 
 
