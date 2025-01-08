@@ -18,10 +18,14 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
 
   const startDate =
     typeof sPstartDate === 'string'
-      ? new Date(Number(sPstartDate))
-      : subDays(new Date(), 7)
+    ? new Date(Number(sPstartDate))
+    : subDays(new Date(), 7)
+
   const endDate =
-    typeof sPendDate === 'string' ? new Date(Number(sPendDate)) : new Date()
+    typeof sPendDate === 'string' 
+    ? new Date(Number(sPendDate)) 
+    : new Date()
+
   const compareStartDate = 'compareStartDate'
   const compareEndDate = 'compareEndDate'
 
@@ -46,7 +50,7 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .limit(LIMIT)
     .$dynamic()
 
-  const getTopRRevenueProducts = db!
+  const getTopRevenueProducts = db!
     .select({
       product_name: s.productItemTable.name,
       total_quantity_ordered: sql<number>`cast( sum(${s.orderItemTable.quantity}) as int)`,
@@ -161,6 +165,40 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .where(gt(s.customerOrderTable.amount_paid, 1))
 
   return {
+    revenueByMonth: [
+      {
+        basePeriod : await withinDate(
+          getRevenueByMonth,
+          s.customerOrderTable.created_at,
+          startDate,
+          endDate,
+        ),
+        comparedPeriod : []
+      }
+    ],
+    
+    financialSummary: [
+      {
+        basePeriod : (await getTotalPaidOrders)[0].total_paid,
+        comparedPeriod : 0
+      }
+    ],
+
+    AvgOrderValue: {
+      basePeriod : await getAvgOrderValue,
+      comparedPeriod : 0
+    },
+
+    quantOrders: {
+      basePeriod : await getQuantOrders,
+      comparedPeriod : 0
+    },
+
+    topRevenueProducts: {
+      basePeriod : await getTopRevenueProducts,
+      comparedPeriodo : 0
+    },
+    
     topOrderedProducts: await withinDate(
       getTopOrderedNProducts,
       s.orderItemTable.created_at,
@@ -168,18 +206,20 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
       endDate,
     ),
 
-    topRevenueProducts: await getTopRRevenueProducts,
-    mostPopularPaymentMethods: await getMostPopularPaymentMethods,
-    revenueByMonth: await getRevenueByMonth,
+    mostPopularPaymentMethods : {
+      basePeriod : await getMostPopularPaymentMethods,
+      comparedPeriod : await getMostPopularPaymentMethods
+    },
+    
+    topCustomers: {
+      basePeriod : await getTopCustomers,
+      comparedPeriod : await getTopCustomers
+    },
+
+
     topSellingCategories: await getTopSellingCategories,
     topCustomerOrders: await getCustomerNumberOrders,
-    AvgOrderValue: await getAvgOrderValue,
-    quantOrders: await getQuantOrders,
-
-    // TODO: Subtrair (vendas a vista + recebimentos de fiado) - Contas pagas
-    financialSummary: (await getTotalPaidOrders)[0].total_paid,
-    // TODO: Query to get top 10 customers
-    topCustomers: await getTopCustomers,
+    
 
     teste: {
       startDate,

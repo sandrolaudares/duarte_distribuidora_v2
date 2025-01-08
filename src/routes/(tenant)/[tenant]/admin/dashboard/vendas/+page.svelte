@@ -37,32 +37,7 @@
     mostPopularPaymentMethods,
   } = $derived(data)
 
-  let colorPaymentMethods = {
-    pix: '#3CB371',
-    credit_card: '#1E90FF',
-    debit_card: '#87CEEB',
-    dinheiro: '#006400',
-  }
-
-  const mostPopularPaymentMethodsWithColor = $derived.by(() =>
-    mostPopularPaymentMethods.map(method => ({
-      ...method,
-      color:
-        method.payment_method in colorPaymentMethods
-          ? colorPaymentMethods[method.payment_method]
-          : 'gray',
-    })),
-  )
-
-  let dadoCompararProdutoMaisVendido = [{}, {}]
-
-  let calculaAumento = (initial: number, end: number) => {
-    let calcula = parseFloat((100 - (end * 100) / initial).toFixed(2))
-    let htmlText =
-      calcula > 0 ? icons.arrows.down_line() : icons.arrows.up_line()
-    return `${htmlText} ${Math.abs(calcula)}%`
-    // icons.arrows()
-  }
+  let dadoCompararProdutoMaisVendido = [{}, {}]  
 
   let carregaGrafico = false
 </script>
@@ -71,24 +46,23 @@
   cardUm={{
     titleCard: 'Total',
     textCard:
-      'R$ ' + (revenueByMonth[0].total_revenue / 100).toFixed(2).toString(),
+      'R$ ' + (revenueByMonth[0].basePeriod[0].total_revenue / 100).toFixed(2).toString(),
     subTitle: '',
   }}
   cardDois={{
     titleCard: 'Resumo',
-    textCard: 'R$ ' + (financialSummary / 100).toFixed(2).toString(),
+    textCard: 'R$ ' + (financialSummary[0].basePeriod / 100).toFixed(2).toString(),
     subTitle: '',
   }}
   cardTres={{
     titleCard: 'Ticket Médio',
     textCard:
-      'R$ ' +
-      (AvgOrderValue[0].average_order_value / 100).toFixed(2).toString(),
+      'R$ ' + (AvgOrderValue.basePeriod[0].average_order_value / 100).toFixed(2).toString(),
     subTitle: '',
   }}
   cardQuatro={{
     titleCard: 'Total pedidos',
-    textCard: quantOrders[0].total_orders.toString(),
+    textCard: quantOrders.basePeriod[0].total_orders.toString(),
     subTitle: '',
   }}
 />
@@ -102,16 +76,16 @@
     </Card.Header>
     <Card.Content>
       <div class="flex flex-wrap">
-        <!-- <div class="w-full">
+        <div class="w-full">
           <SvChart
             config={{
               type: 'bar',
               data: {
-                labels: dadoComparar.map(d => d.product_name),
+                labels: topRevenueProducts.basePeriod.map(d => d.product_name),
                 datasets: [
                   {
                     label: 'Receita',
-                    data: dadoComparar.map(d => d.total_revenue),
+                    data: topRevenueProducts.basePeriod.map(d => d.total_revenue),
                     backgroundColor: ['rgba(0, 85, 199)'],
                     borderColor: ['rgb(255, 99, 132)'],
                     borderWidth: 0,
@@ -123,7 +97,7 @@
             height={220}
             title={'Principais produtos de receita'}
           />
-        </div> -->
+        </div>
         <div class="w-full">
           {#key topOrderedProducts}
             <SvChart
@@ -140,6 +114,13 @@
                       backgroundColor: ['rgba(255, 217, 0)'],
                     },
                     // Dataset de comparação vem aqui
+                    {
+                      label: 'Quantidade',
+                      data: topOrderedProducts.map(
+                        p => p.total_quantity_ordered,
+                      ),
+                      backgroundColor: ['rgba(255, 217, 0)'],
+                    }
                   ],
                 },
               }}
@@ -153,17 +134,23 @@
             config={{
               type: 'pie',
               data: {
-                labels: mostPopularPaymentMethodsWithColor.map(p => {
+                labels: mostPopularPaymentMethods.basePeriod.map(p => {
                   return p.payment_method
                 }),
                 datasets: [
                   {
                     label: 'Total: ',
-                    data: mostPopularPaymentMethodsWithColor.map(
+                    data: mostPopularPaymentMethods.basePeriod.map(
                       p => p.usage_count,
                     ),
                   },
                   // Coloca aqui o dataset de comparação
+                  {
+                    label: 'Total: ',
+                    data: mostPopularPaymentMethods.comparedPeriod.map(
+                      p => p.usage_count,
+                    ),
+                  }
                 ],
               },
             }}
@@ -175,12 +162,16 @@
             config={{
               type: 'bar',
               data: {
-                labels: topCustomers.map(t => t.customer_name),
+                labels: topCustomers.basePeriod.map(t => t.customer_name),
                 datasets: [
                   {
                     label: 'Total de pedidos',
-                    data: topCustomers.map(t => t.pedidos),
+                    data: topCustomers.basePeriod.map(t => t.pedidos),
                   },
+                  {
+                    label: 'Total Periodo anterior',
+                    data: topCustomers.comparedPeriod.map(t => t.pedidos),
+                  }
                 ],
               },
             }}
@@ -211,6 +202,3 @@
   </Card.Root>
 </div>
 
-<pre>
-  {JSON.stringify(topOrderedProducts, null, 2)}
-</pre>

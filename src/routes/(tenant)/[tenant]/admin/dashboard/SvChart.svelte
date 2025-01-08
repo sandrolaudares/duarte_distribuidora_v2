@@ -22,6 +22,14 @@
     if(!ctx) return
     const c = new Chart(ctx, config)
   }
+
+  let calculaAumento = (initial: number, end: number) => {
+    let calcula = parseFloat((100 - (end * 100) / initial).toFixed(2))
+    let htmlText =
+      calcula > 0 ? icons.arrows.down_line() : icons.arrows.up_line()
+    return `${htmlText} ${Math.abs(calcula)}%`
+    // icons.arrows()
+  }
 </script>
 
 <h2 class="text-center text-xl font-semibold">
