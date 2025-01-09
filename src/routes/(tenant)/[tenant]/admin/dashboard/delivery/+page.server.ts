@@ -24,6 +24,7 @@ export const load = (async ({ locals : { tenantDb : db }, url }) => {
     bestProduct : "Brahma Latão",
     
     // TODO: Relatório Motoboy (Soma a quantidade de entrega e o valor total das taxas de entrega) -> Solicitado pelo Marlon
+    // Texto que ele mandou: Relatório de entregas por motoboy, por período. Somando a quantidade de entregas e valor total das taxas de entregas. (Não faz muito sentido, mas foi o que ele pediu)
     couriersHighestNumberDeliveries : [
       {
         name :  "Vitor",
@@ -39,6 +40,25 @@ export const load = (async ({ locals : { tenantDb : db }, url }) => {
         name :  "Pedro",
         numberDeliveries : 55,
         totalAmountDeliveryFees : 123.00
+      },
+    ],
+
+    // TODO: Ultimas dez corridas
+    lastTenDeliveries : [
+      {
+        name :  "Vitor",
+        distance : 2.8,
+        value : 200.54
+      },
+      {
+        name :  "Gustavo",
+        distance : 1.8,
+        value : 123.00
+      },
+      {
+        name :  "Pedro",
+        distance : 3.6,
+        value : 123.00
       },
     ],
 

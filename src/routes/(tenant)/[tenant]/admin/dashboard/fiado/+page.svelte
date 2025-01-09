@@ -7,6 +7,8 @@
   import SvChart from '../SvChart.svelte'
 
   let { data }: { data: PageData } = $props();
+  const {corporateClientsSortedDelayOrder} = data
+
   let DebtorsNumber = 4;
 </script>
 
@@ -24,12 +26,12 @@
         config={{
           type: "bar",
           data:{
-            labels : ["Pimba master 2018", "Cabeça de lampada", "Bazinga", "Coca cola"],
+            labels : corporateClientsSortedDelayOrder.map((c) => c.debtorName),
             datasets : [
               {
                 label: "Divida",
                 barThickness : 30,
-                data: [30, 20, 50, 50],
+                data: corporateClientsSortedDelayOrder.map((c) => c.totalDebt),
                 backgroundColor: [
                   'rgba(255, 0, 0)'
                 ],
@@ -38,7 +40,7 @@
                 {
                   label: "Total pago",
                   barThickness : 30,
-                  data: [30, 18, 30, 15],
+                  data: corporateClientsSortedDelayOrder.map((c) => c.totalPaid),
                   backgroundColor: [
                   'rgba(0, 128, 0)'
                 ],
@@ -55,7 +57,7 @@
             indexAxis : "y"
           }
         }}
-        height={DebtorsNumber * 60}
+        height={corporateClientsSortedDelayOrder.length * 60}
         title={"Relatorio recebimento atingido"}
         />
       </div>
@@ -64,14 +66,14 @@
         config={{
           type: "bar",
           data:{
-            labels : ["Ze da esquina", "Viciado em cachaça", "Pedro"],
+            labels : corporateClientsSortedDelayOrder.map((c) => c.debtorName),
             datasets:[
               {
                 label: "Dívidas",
-                data: [10,80,110],
+                data: corporateClientsSortedDelayOrder.map((c) => c.totalDebt),
                 backgroundColor:
                 [
-                  "rgb(255,255,0)"
+                  "rgba(234, 203, 22, 1)"
                 ],
                 barThickness : 50,
               }

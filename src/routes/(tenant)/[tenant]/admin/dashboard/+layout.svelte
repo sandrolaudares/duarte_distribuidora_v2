@@ -77,6 +77,12 @@
             {#if checkbox}
               <div class="mr-5">
                 <DateFilter
+                  startDate={filters.get('compareStartDate')
+                    ? new Date(Number(filters.get('compareStartDate')!))
+                    : null}
+                  endDate={filters.get('compareEndDate')
+                    ? new Date(Number(filters.get('compareEndDate')!))
+                    : null}
                   alignP={'right'}
                   onchange={(startDate, endDate) => {
                     if (!startDate || !endDate) return
@@ -107,6 +113,11 @@
               })
             }}
           />
+          {#if checkbox}
+            <button class="btn btn-warning" onclick={() => {
+              filters.clear('compareStartDate', 'compareEndDate', 'startDate', 'endDate')
+            }}>Limpar</button>
+          {/if}
           <div class="flex items-center space-x-2">
             <!-- <DateFilter onchange={(startDate, endDate) => { 
             if (!startDate || !endDate) return 

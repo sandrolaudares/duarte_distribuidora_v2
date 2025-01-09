@@ -1,18 +1,37 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { PageServerLoad } from './$types'
-import { asc, count, eq, lte } from 'drizzle-orm'
+import { and, asc, count, eq, gte, lte } from 'drizzle-orm'
 import * as s from '$db/schema'
-import { withinDate } from '$db/utils'
+import { withinDate2 } from '$db/utils'
+import { subDays } from 'date-fns'
 
 export const load = (async ({ locals: { tenantDb: db }, url }) => {
+  const searchParams = url.searchParams
+  
+  const sp_start_date = searchParams.get('startDate')
+  const sp_end_date = searchParams.get('endDate')
+
+  const startDate =
+    typeof sp_start_date === 'string'
+      ? new Date(Number(sp_start_date))
+      : subDays(new Date(), 7)
+
+  const endDate =
+    typeof sp_end_date === 'string' ? new Date(Number(sp_end_date)) : new Date()
+  
   const getTotalItemsStock = db!
     .select({ count: count(s.productItemTable.id) })
     .from(s.productItemTable)
+    .where(
+      and(gte(s.productItemTable.created_at, new Date(Number(startDate))), 
+      lte(s.productItemTable.created_at, new Date(Number(endDate)))))
+    .$dynamic()
 
   const getQuantEntrada = db!
     .select({ count: count(s.stockTransactionTable.quantity) })
     .from(s.stockTransactionTable)
     .where(eq(s.stockTransactionTable.type, 'Entrada'))
+
   const getQuantSaida = db!
     .select({ count: count(s.stockTransactionTable.quantity) })
     .from(s.stockTransactionTable)
