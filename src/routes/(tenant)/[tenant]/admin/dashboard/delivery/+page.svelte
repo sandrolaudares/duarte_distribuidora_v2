@@ -6,40 +6,12 @@
   import { RecentSales } from '$lib/components/dashboard/admin'
   import { scaleBand } from 'd3-scale'
   import SvChart from '../SvChart.svelte'
+  import { convertIndexToString } from 'drizzle-orm/mysql-core'
+  import { text } from '@sveltejs/kit'
   
   let { data }: { data: PageData } = $props();
-  let dataCard = 
-  [
-    {
-      "NomeMotoboy": 'Gustavo',
-      "valueRelatorio": 68,
-      "baseline": 90
-    },
-    {
-      "NomeMotoboy": 'Vitor',
-      "valueRelatorio": 38,
-      "baseline": 45
-    },
-    {
-      "NomeMotoboy": 'Pedro',
-      "valueRelatorio": 38,
-      "baseline": 45
-    },
-    {
-      "NomeMotoboy": 'Jose',
-      "valueRelatorio": 38,
-      "baseline": 45
-    },
-    {
-      "NomeMotoboy": 'Joadsfdse',
-      "valueRelatorio": 38,
-      "baseline": 45
-    },
-  ]
 
-  const { totalDeliveredCompleted } = data;
-
-  let larguraGrafico = "height:" + dataCard.length * 30+"px;";
+  const { totalDeliveredCompleted, TotalDeliveryFees, cancelingOrders, bestProduct, couriersHighestNumberDeliveries } = data;
 </script>
 
 <NavDashboard 
@@ -50,17 +22,17 @@ cardUm={{
 }}
 cardDois={{
   titleCard : "Total taxas de entrega", 
-  textCard : "",
+  textCard : "R$" + ((TotalDeliveryFees / 100).toFixed(2)).toString(),
   subTitle : ""
 }}
 cardTres={{
   titleCard : "Pedidos cancelados", 
-  textCard : "",
+  textCard : cancelingOrders.toString(),
   subTitle : ""
 }}
 cardQuatro={{
   titleCard : "Melhor produto", 
-  textCard : "",
+  textCard : bestProduct,
   subTitle : ""
 }}
 />
@@ -79,12 +51,12 @@ cardQuatro={{
         config={{
           type : "bar", 
           data : {
-            labels : dataCard.map((d) => d.NomeMotoboy),
+            labels : couriersHighestNumberDeliveries.map((d) => d.name),
             datasets:
             [
               {
-                label : "Total",
-                data : dataCard.map((d) => d.valueRelatorio),
+                label : "Relatorio Motoboy",
+                data : couriersHighestNumberDeliveries.map((d) => parseFloat(d.numberDeliveries.toString()) + d.totalAmountDeliveryFees),
                 backgroundColor : 
                 [
                   'rgba(255, 217, 0)'
@@ -97,7 +69,7 @@ cardQuatro={{
             indexAxis: 'y',
           }
         }}
-        height={dataCard.length * 60}
+        height={couriersHighestNumberDeliveries.length * 60}
         title={"Relatório Motoboy (Soma a quantidade de entrega e o valor total das taxas de entrega) - vai ter que ser um gráfico em pé, mostrando todos os motoboys e a altura vai variar conforme a quantidade de motoboys naquela distribuidora"}
         />
         <!-- Axis = Heixo -->
@@ -111,13 +83,14 @@ cardQuatro={{
     <Card.Title>Ultimas entregas</Card.Title>
   </Card.Header>
   <Card.Content>
-    <RecentSales textRecentSale={[
-      {
-        title : "Receita",
-        text : "teste",
-        value : "R$ 200,00"
+    <RecentSales textRecentSale={
+    couriersHighestNumberDeliveries.map((c) => {
+      return {
+        title : c.name,
+        text : "Número de corridas: " + c.numberDeliveries.toString(),
+        value : "R$ " + (c.totalAmountDeliveryFees).toString()
       }
-      ]}/>
-    </Card.Content>
-  </Card.Root>
+    })}/>
+  </Card.Content>
+</Card.Root>
 </div>

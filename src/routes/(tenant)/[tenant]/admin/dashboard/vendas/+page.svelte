@@ -54,10 +54,14 @@
     },
   })
 
-  let dadoCompararProdutoMaisVendido = [{}, {}]
-
-  let carregaGrafico = false
 </script>
+
+<pre>
+  {#if revenueByMonth.comparedPeriod}
+  {JSON.stringify(revenueByMonth.basePeriod[0].total_revenue, null, 2)}
+    {JSON.stringify(revenueByMonth.comparedPeriod[0].total_revenue, null, 2)}
+  {/if}
+</pre>
 
 <NavDashboard
   cardUm={{
@@ -65,14 +69,14 @@
     textCard:
       'R$ ' +
       (revenueByMonth.basePeriod[0].total_revenue / 100).toFixed(2).toString(),
-    subTitle: '',
+    subTitle: revenueByMonth.comparedPeriod ? 'Periodo anterior: R$ ' + (revenueByMonth.comparedPeriod[0].total_revenue / 100).toString() : '',
   }}
   cardDois={{
     titleCard: 'Resumo',
     textCard:
       'R$ ' +
       (financialSummary.basePeriod[0].total_paid / 100).toFixed(2).toString(),
-    subTitle: '',
+    subTitle: financialSummary.comparedPeriod ? 'Periodo anterior: R$ ' + (financialSummary.comparedPeriod[0].total_paid / 100).toFixed(2).toString() : '',
   }}
   cardTres={{
     titleCard: 'Ticket Médio',
@@ -81,12 +85,12 @@
       (AvgOrderValue.basePeriod[0].average_order_value / 100)
         .toFixed(2)
         .toString(),
-    subTitle: '',
+    subTitle: AvgOrderValue.comparedPeriod ? 'Periodo anterior: R$ ' + (AvgOrderValue.comparedPeriod[0].average_order_value / 100).toFixed(2).toString() : '',
   }}
   cardQuatro={{
     titleCard: 'Total pedidos',
     textCard: quantOrders.basePeriod[0].total_orders.toString(),
-    subTitle: '',
+    subTitle: quantOrders.comparedPeriod ? 'Periodo anterior: ' + quantOrders.comparedPeriod[0].total_orders.toString() : '',
   }}
 />
 
