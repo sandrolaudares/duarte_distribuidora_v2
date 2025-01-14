@@ -12,7 +12,7 @@ const LIMIT = 10 as const
 
 export const load = (async ({ locals: { tenantDb: db }, url }) => {
   const searchParams = url.searchParams
-
+  
   const sp_start_date = searchParams.get('startDate')
   const sp_end_date = searchParams.get('endDate')
 

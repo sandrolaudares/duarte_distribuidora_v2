@@ -14,7 +14,7 @@
 
 <NavDashboard 
   cardUm={{
-    titleCard : "Total de SKUs no estoque", 
+    titleCard : "Total de SKUs criados no período", 
     textCard : totalItemsStock[0].count.toString(),
     subTitle : ""
   }}
@@ -50,8 +50,8 @@
                 pointStyle : "circle",
                 pointRadius: 5,
                 pointHoverRadius: 15,
-                backgroundColor: "rgb(0, 64, 128)", 
-                borderColor: "rgb(0, 64, 128)"
+                backgroundColor: "rgba(255, 0, 0, 1)", 
+                borderColor: "rgba(255, 0, 0, 0.3)"
               },
               {
                 type: "bar",
