@@ -201,6 +201,8 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     quantOrders,
     topRevenueProducts,
     topCustomers,
+    // topOrderedProducts,
+    mostPopularPaymentMethods
   ] = await Promise.all([
     comparationQuery(getRevenueByMonth, s.customerOrderTable.created_at),
     comparationQuery(getTotalPaidOrders, s.customerOrderTable.created_at),
@@ -208,6 +210,8 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     comparationQuery(getQuantOrders, s.customerOrderTable.created_at),
     comparationQuery(getTopRevenueProducts, s.orderItemTable.created_at),
     comparationQuery(getTopCustomers, s.customerOrderTable.created_at),
+    comparationQuery(getMostPopularPaymentMethods, s.orderPaymentTable.created_at),
+    // com
   ])
   return {
     revenueByMonth,
@@ -225,10 +229,7 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
       s.orderItemTable.created_at,
     ),
 
-    mostPopularPaymentMethods: {
-      basePeriod: await getMostPopularPaymentMethods,
-      comparedPeriod: await getMostPopularPaymentMethods,
-    },
+    mostPopularPaymentMethods,
 
     topCustomers,
 
@@ -251,15 +252,5 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
 
     topSellingCategories: await getTopSellingCategories,
     topCustomerOrders: await getCustomerNumberOrders,
-
-    teste: {
-      startDate,
-      endDate,
-
-      dated: await withinSelectedDate(
-        getTopOrderedNProducts,
-        s.orderItemTable.created_at,
-      ),
-    },
   }
 }) satisfies PageServerLoad

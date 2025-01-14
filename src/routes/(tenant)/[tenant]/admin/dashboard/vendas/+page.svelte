@@ -37,23 +37,6 @@
     mostPopularPaymentMethods,
   } = $derived(data)
 
-  let topRevenueProductsC: ChartConfiguration = $derived({
-    type: 'bar',
-    data: {
-      labels: topRevenueProducts.basePeriod.map(d => d.product_name),
-      datasets: [
-        {
-          label: 'Receita',
-          data: topRevenueProducts.basePeriod.map(d => d.total_revenue),
-          backgroundColor: ['rgba(0, 85, 199)'],
-          borderColor: ['rgb(255, 99, 132)'],
-          borderWidth: 0,
-          barThickness: 50,
-        },
-      ],
-    },
-  })
-
 </script>
 
 <pre>
@@ -63,7 +46,7 @@
   {/if}
 </pre>
 
-<NavDashboard
+<!-- <NavDashboard
   cardUm={{
     titleCard: 'Total',
     textCard:
@@ -92,7 +75,7 @@
     textCard: quantOrders.basePeriod[0].total_orders.toString(),
     subTitle: quantOrders.comparedPeriod ? 'Periodo anterior: ' + quantOrders.comparedPeriod[0].total_orders.toString() : '',
   }}
-/>
+/> -->
 
 <h1>Página de vendas</h1>
 
@@ -104,13 +87,29 @@
     <Card.Content>
       <div class="flex flex-wrap">
         <div class="w-full">
-          <!-- {#key topRevenueProducts} -->
+          {#key topRevenueProducts}
           <SvChart
-            config={topRevenueProductsC}
+          
+            config={{
+              type: 'bar',
+              data: {
+                labels: topRevenueProducts.basePeriod.map(d => d.product_name),
+                datasets: [
+                  {
+                    label: 'Receita',
+                    data: topRevenueProducts.basePeriod.map(d => d.total_revenue),
+                    backgroundColor: ['rgba(0, 85, 199)'],
+                    borderColor: ['rgb(255, 99, 132)'],
+                    borderWidth: 0,
+                    barThickness: 50,
+                  },
+                ],
+              },
+            }}
             height={220}
             title={'Principais produtos de receita'}
           />
-          <!-- {/key} -->
+          {/key}
         </div>
         <div class="w-full">
           {#key topOrderedProducts}
@@ -162,9 +161,9 @@
                     // Coloca aqui o dataset de comparação
                     {
                       label: 'Total: ',
-                      data: mostPopularPaymentMethods.comparedPeriod.map(
+                      data: mostPopularPaymentMethods.comparedPeriod?.map(
                         p => p.usage_count,
-                      ),
+                      ) ?? [],
                     },
                   ],
                 },
