@@ -211,7 +211,6 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     comparationQuery(getTopRevenueProducts, s.orderItemTable.created_at),
     comparationQuery(getTopCustomers, s.customerOrderTable.created_at),
     comparationQuery(getMostPopularPaymentMethods, s.orderPaymentTable.created_at),
-    // com
   ])
   return {
     revenueByMonth,

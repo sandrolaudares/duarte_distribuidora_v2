@@ -13,7 +13,6 @@
   import NavDashboard from '$lib/components/dashboard/admin/NavDashboard.svelte'
   import * as Tabs from '$lib/components/ui/tabs/index'
   import * as Card from '$lib/components/ui/card/index'
-  import { Overview, RecentSales } from '$lib/components/dashboard/admin'
   import { scaleBand } from 'd3-scale'
   import { format } from 'date-fns'
   import { icons } from '$lib/utils/icons'
@@ -21,6 +20,7 @@
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import SvChart from '../SvChart.svelte'
   import { type ChartConfiguration } from 'chart.js'
+  import { RecentSales } from '$lib/components/dashboard/admin'
 
   let { data }: { data: PageData } = $props()
 
@@ -39,57 +39,16 @@
 
 </script>
 
-<pre>
-  {#if revenueByMonth.comparedPeriod}
-  {JSON.stringify(revenueByMonth.basePeriod[0].total_revenue, null, 2)}
-    {JSON.stringify(revenueByMonth.comparedPeriod[0].total_revenue, null, 2)}
-  {/if}
-</pre>
-
-<!-- <NavDashboard
-  cardUm={{
-    titleCard: 'Total',
-    textCard:
-      'R$ ' +
-      (revenueByMonth.basePeriod[0].total_revenue / 100).toFixed(2).toString(),
-    subTitle: revenueByMonth.comparedPeriod ? 'Periodo anterior: R$ ' + (revenueByMonth.comparedPeriod[0].total_revenue / 100).toString() : '',
-  }}
-  cardDois={{
-    titleCard: 'Resumo',
-    textCard:
-      'R$ ' +
-      (financialSummary.basePeriod[0].total_paid / 100).toFixed(2).toString(),
-    subTitle: financialSummary.comparedPeriod ? 'Periodo anterior: R$ ' + (financialSummary.comparedPeriod[0].total_paid / 100).toFixed(2).toString() : '',
-  }}
-  cardTres={{
-    titleCard: 'Ticket Médio',
-    textCard:
-      'R$ ' +
-      (AvgOrderValue.basePeriod[0].average_order_value / 100)
-        .toFixed(2)
-        .toString(),
-    subTitle: AvgOrderValue.comparedPeriod ? 'Periodo anterior: R$ ' + (AvgOrderValue.comparedPeriod[0].average_order_value / 100).toFixed(2).toString() : '',
-  }}
-  cardQuatro={{
-    titleCard: 'Total pedidos',
-    textCard: quantOrders.basePeriod[0].total_orders.toString(),
-    subTitle: quantOrders.comparedPeriod ? 'Periodo anterior: ' + quantOrders.comparedPeriod[0].total_orders.toString() : '',
-  }}
-/> -->
-
-<h1>Página de vendas</h1>
-
 <div class="flex flex-col gap-3 lg:flex-row">
   <Card.Root class="w-full lg:w-9/12 ">
     <Card.Header>
-      <Card.Title>Overview</Card.Title>
+      <Card.Title>Gráficos</Card.Title>
     </Card.Header>
     <Card.Content>
       <div class="flex flex-wrap">
         <div class="w-full">
           {#key topRevenueProducts}
           <SvChart
-          
             config={{
               type: 'bar',
               data: {

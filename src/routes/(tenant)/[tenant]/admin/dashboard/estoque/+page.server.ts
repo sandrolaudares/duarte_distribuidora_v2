@@ -36,11 +36,11 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .select({ count: count(s.stockTransactionTable.quantity) })
     .from(s.stockTransactionTable)
     .where(eq(s.stockTransactionTable.type, 'Saida'))
-
   const getProductsWithLowestStock = db!
     .select()
     .from(s.skuTable)
     .where(lte(s.skuTable.quantity, 20))
+    // TODO: Colocar o estoque mínimo daquele produto para passar pro front
     // .where(lte(s.skuTable.quantity, s.skuTable.minimium))
     .orderBy(asc(s.skuTable.quantity))
     .limit(50)
