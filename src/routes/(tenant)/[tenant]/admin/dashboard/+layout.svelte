@@ -13,11 +13,13 @@
   import * as Tabs from '$lib/components/ui/tabs/index'
   import type { SelectTenant } from '$lib/server/db/central/schema.js'
   import DateFilter from '$lib/components/DateFilter.svelte'
+  import DateFilter2 from '$lib/components/DateFilter2.svelte'
+
   import { hr, ur } from '@faker-js/faker'
 
   import { writable } from 'svelte/store'
 
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   type Distribuidora = {
     name: string
@@ -57,7 +59,7 @@
 <div class="flex-col md:flex">
   <div class="flex-1 space-y-4 p-8 pt-6">
     <h2 class="text-3xl font-bold tracking-tight">Dashboard distribuidoras</h2>
-    <Tabs.Root value={$page.url.pathname} class="w-full space-y-4">
+    <Tabs.Root value={page.url.pathname} class="w-full space-y-4">
       <div class="flex items-center justify-between">
         <Tabs.List>
           {#each categorias as cat}
@@ -69,15 +71,15 @@
           {/each}
         </Tabs.List>
         <div class="flex items-center">
-          {#if $page.url.pathname === '/admin/dashboard/vendas'}
+          {#if page.url.pathname === '/admin/dashboard/vendas'}
             <div class="flex items-center space-x-2">
               <span class="label-text">Comparar</span>
               <input type="checkbox" class="checkbox" bind:checked={checkbox} />
             </div>
             {#if checkbox}
-            <h1 class="mx-3">Periodo Comparado: </h1>
-            <div class="mr-5">
-                <DateFilter
+              <div class="mr-5">
+                <DateFilter2 />
+                <!-- <DateFilter
                   startDate={filters.get('compareStartDate')
                     ? new Date(Number(filters.get('compareStartDate')!))
                     : null}
@@ -93,12 +95,22 @@
                       compareEndDate: endDate.toString(),
                     })
                   }}
-                />
+                /> -->
               </div>
               <h1 class="mx-3">Periodo Base: </h1>
             {/if}
           {/if}
-          <DateFilter
+          <DateFilter2
+            onChange={(startDate, endDate) => {
+              if (!startDate || !endDate) return
+
+              filters.update({
+                startDate: String(startDate),
+                endDate: String(endDate),
+              })
+            }}
+          />
+          <!-- <DateFilter
             startDate={filters.get('startDate')
               ? new Date(Number(filters.get('startDate')!))
               : null}
@@ -114,11 +126,21 @@
                 endDate: String(endDate),
               })
             }}
-          />
+          /> -->
           {#if checkbox}
-            <button class="btn btn-warning" onclick={() => {
-              filters.clear('compareStartDate', 'compareEndDate', 'startDate', 'endDate'); checkbox = false
-            }}>Limpar</button>
+            <button
+              class="btn btn-warning"
+              onclick={() => {
+                filters.clear(
+                  'compareStartDate',
+                  'compareEndDate',
+                  'startDate',
+                  'endDate',
+                )
+              }}
+            >
+              Limpar
+            </button>
           {/if}
           <div class="flex items-center space-x-2">
             <!-- <DateFilter onchange={(startDate, endDate) => { 

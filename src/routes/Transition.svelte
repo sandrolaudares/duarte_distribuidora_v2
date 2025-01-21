@@ -8,16 +8,6 @@
 
   export let key
 
-  onNavigate(navigation => {
-    if (!document.startViewTransition) return
-
-    return new Promise(resolve => {
-      document.startViewTransition?.(async () => {
-        resolve()
-        await navigation.complete
-      })
-    })
-  })
 </script>
 
 {#if $navigating}
