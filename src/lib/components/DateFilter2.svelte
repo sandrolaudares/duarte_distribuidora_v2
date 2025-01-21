@@ -104,7 +104,7 @@
         }}
       />
 
-      <div>
+      <div class="flex flex-col gap-1">
         {@render btn('Ultima Semana', {
           start: today('America/Sao_Paulo').subtract({ days: 7 }),
           end: today('America/Sao_Paulo'),
