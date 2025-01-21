@@ -21,6 +21,7 @@
   import SvChart from '../SvChart.svelte'
   import { type ChartConfiguration } from 'chart.js'
   import { RecentSales } from '$lib/components/dashboard/admin'
+  import Dashboard from '$lib/components/dashboard/admin/dashboard.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -35,9 +36,17 @@
     topCustomers,
     financialSummary,
     mostPopularPaymentMethods,
+    clientesOciosos
   } = $derived(data)
 
+
 </script>
+
+<!-- <NavDashboard /> -->
+
+<pre>
+  {JSON.stringify(topRevenueProducts, null, 2)}
+</pre>
 
 <div class="flex flex-col gap-3 lg:flex-row">
   <Card.Root class="w-full lg:w-9/12 ">
@@ -48,26 +57,40 @@
       <div class="flex flex-wrap">
         <div class="w-full">
           {#key topRevenueProducts}
-          <SvChart
-            config={{
-              type: 'bar',
-              data: {
-                labels: topRevenueProducts.basePeriod.map(d => d.product_name),
-                datasets: [
-                  {
-                    label: 'Receita',
-                    data: topRevenueProducts.basePeriod.map(d => d.total_revenue),
-                    backgroundColor: ['rgba(0, 85, 199)'],
-                    borderColor: ['rgb(255, 99, 132)'],
-                    borderWidth: 0,
-                    barThickness: 50,
-                  },
-                ],
-              },
-            }}
-            height={220}
-            title={'Principais produtos de receita'}
-          />
+          <!-- Carrega duas barras, com o produto mais vendido de cada periodo -->
+            <SvChart
+              config={{
+                type: 'bar',
+                data: {
+                  labels: topRevenueProducts.basePeriod.map((d, index) => {
+                    return topRevenueProducts.comparedPeriod
+                      ? d.product_name + ' | ' + topRevenueProducts.comparedPeriod[index].product_name
+                      : d.product_name;
+                  }),
+                  datasets: 
+                  [
+                    {
+                      label: 'Periodo base',
+                      data: topRevenueProducts.basePeriod?.map(d => d.total_revenue) ?? [],
+                      backgroundColor: ['rgba(0, 85, 199)'],
+                      borderColor: ['rgb(255, 99, 132)'],
+                      borderWidth: 0, 
+                      barThickness: 50,
+                    },
+                    {
+                      label: 'Periodo Comparado',
+                      data: topRevenueProducts.comparedPeriod?.map(d => d.total_revenue) ?? [],
+                      backgroundColor: ['rgba(132, 169, 71)'],
+                      borderColor: ['rgb(132, 169, 71)'],
+                      borderWidth: 0, 
+                      barThickness: 50
+                    }
+                  ],
+                },
+              }}
+              height={220}
+              title={'Principais produtos de receita'}
+            />
           {/key}
         </div>
         <div class="w-full">
@@ -76,28 +99,20 @@
               config={{
                 type: 'bar',
                 data: {
-                  labels: topOrderedProducts.map(p => p.product_name),
+                  labels: topOrderedProducts.map((p) => p.product_name),
                   datasets: [
                     {
                       label: 'Quantidade',
-                      data: topOrderedProducts.map(
+                      data: topOrderedProducts?.map(
                         p => p.total_quantity_ordered,
-                      ),
-                      backgroundColor: ['rgba(255, 217, 0)'],
-                    },
-                    // Dataset de comparação vem aqui
-                    {
-                      label: 'Quantidade',
-                      data: topOrderedProducts.map(
-                        p => p.total_quantity_ordered,
-                      ),
+                      ) ?? [],
                       backgroundColor: ['rgba(255, 217, 0)'],
                     },
                   ],
                 },
               }}
               height={200}
-              title={'Produtos mais vendidos (Quantidade)'}
+              title={'Produtos mais vendidos (Periodo selecionado)'}
             />
           {/key}
         </div>
@@ -107,15 +122,17 @@
               config={{
                 type: 'pie',
                 data: {
-                  labels: mostPopularPaymentMethods.basePeriod.map(p => {
-                    return p.payment_method
+                  labels: mostPopularPaymentMethods.basePeriod.map((p, index) => {
+                    return mostPopularPaymentMethods.comparedPeriod 
+                    ? p.payment_method + ' | ' + mostPopularPaymentMethods.comparedPeriod[index].payment_method
+                    : p.payment_method
                   }),
                   datasets: [
                     {
                       label: 'Total: ',
-                      data: mostPopularPaymentMethods.basePeriod.map(
+                      data: mostPopularPaymentMethods.basePeriod?.map(
                         p => p.usage_count,
-                      ),
+                      ) ?? [],
                     },
                     // Coloca aqui o dataset de comparação
                     {
@@ -137,17 +154,21 @@
               config={{
                 type: 'bar',
                 data: {
-                  labels: topCustomers.basePeriod.map(t => t.customer_name),
+                  labels: topCustomers.basePeriod.map((t, index) => {
+                    return topCustomers.comparedPeriod
+                    ? t.customer_name + ' | ' + topCustomers.comparedPeriod[index].customer_name
+                    : t.customer_name
+                  }),
                   datasets: [
                     {
                       label: 'Total de pedidos',
-                      data: topCustomers.basePeriod.map(t => t.pedidos),
+                      data: topCustomers.basePeriod?.map(t => t.pedidos) ?? [],
                     },
                     {
                       label: 'Total Periodo anterior',
-                      data: (topCustomers.comparedPeriod ?? []).map(
+                      data: topCustomers.comparedPeriod?.map(
                         t => t.pedidos,
-                      ),
+                      ) ?? [],
                     },
                   ],
                 },
@@ -168,13 +189,14 @@
     <Card.Content>
       <!-- TODO: Mudar o recent sales -->
       <RecentSales
-        textRecentSale={[
-          {
-            title: 'Receita',
-            text: 'teste',
-            value: 'R$ 200,00',
-          },
-        ]}
+        textRecentSale={
+          clientesOciosos.map((c) => {
+            return {
+              title: c.name,
+              value: c.ultimaCompra,
+            }
+          })
+        }
       />
     </Card.Content>
   </Card.Root>

@@ -75,7 +75,8 @@
               <input type="checkbox" class="checkbox" bind:checked={checkbox} />
             </div>
             {#if checkbox}
-              <div class="mr-5">
+            <h1 class="mx-3">Periodo Comparado: </h1>
+            <div class="mr-5">
                 <DateFilter
                   startDate={filters.get('compareStartDate')
                     ? new Date(Number(filters.get('compareStartDate')!))
@@ -94,6 +95,7 @@
                   }}
                 />
               </div>
+              <h1 class="mx-3">Periodo Base: </h1>
             {/if}
           {/if}
           <DateFilter
@@ -115,7 +117,7 @@
           />
           {#if checkbox}
             <button class="btn btn-warning" onclick={() => {
-              filters.clear('compareStartDate', 'compareEndDate', 'startDate', 'endDate')
+              filters.clear('compareStartDate', 'compareEndDate', 'startDate', 'endDate'); checkbox = false
             }}>Limpar</button>
           {/if}
           <div class="flex items-center space-x-2">
