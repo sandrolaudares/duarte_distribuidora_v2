@@ -1,5 +1,5 @@
 <script lang="ts">
-  import NavDashboard from '$lib/components/dashboard/admin/NavDashboard.svelte'
+  import NavDashboard from '../NavDashboard.svelte'
   import * as Card from '$lib/components/ui/card'
   import { BarChart, PieChart } from 'layerchart'
   import type { PageData } from './$types';

@@ -9,6 +9,11 @@ import { format, formatDistance, formatRelative, subDays } from 'date-fns'
 import { withinDate2 } from '$db/utils'
 import { redirect } from '@sveltejs/kit'
 
+import {
+  getLocalTimeZone,
+  today,
+} from '@internationalized/date'
+
 const LIMIT = 10 as const
 
 export const load = (async ({ locals: { tenantDb: db }, url }) => {
@@ -17,9 +22,11 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
   const sp_start_date = searchParams.get('startDate')
   const sp_end_date = searchParams.get('endDate')
 
-  // if(!sp_start_date || !sp_end_date){
-  //   return redirect(303, '/admin/dashboard/vendas?startDate={}&endDate={}')
-  // }
+  if((!sp_start_date || !sp_end_date)){
+    let start = (today('America/Sao_Paulo').subtract({ days: 7 })).toDate(getLocalTimeZone()).getTime()
+    let end = today('America/Sao_Paulo').toDate(getLocalTimeZone()).getTime()
+    return redirect(303, `/admin/dashboard/vendas?startDate=${start}&endDate=${end}`)
+  }
 
   const startDate =
     typeof sp_start_date === 'string'
@@ -197,7 +204,7 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .where(gt(s.customerOrderTable.amount_paid, 1))
     .$dynamic()
 
-  // TODO: Clientes ociosos: Não compram a 2 semanas ou mais, não vai ter comparação
+  // TODO: Fazer querie clientes ociosos: Não compram a 2 semanas ou mais, não vai ter comparação 
   const clientesOciosos = [
     {
       name : "Matheus",
@@ -210,7 +217,6 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
   ]
 
   const [
-    revenueByMonth,
     financialSummary,
     AvgOrderValue,
     quantOrders,
@@ -219,7 +225,6 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     // topOrderedProducts,
     mostPopularPaymentMethods
   ] = await Promise.all([
-    comparationQuery(getRevenueByMonth, s.customerOrderTable.created_at),
     comparationQuery(getTotalPaidOrders, s.customerOrderTable.created_at),
     comparationQuery(getAvgOrderValue, s.customerOrderTable.created_at),
     comparationQuery(getQuantOrders, s.customerOrderTable.created_at),
@@ -228,8 +233,6 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     comparationQuery(getMostPopularPaymentMethods, s.orderPaymentTable.created_at),
   ])
   return {
-    revenueByMonth,
-
     financialSummary,
 
     AvgOrderValue,

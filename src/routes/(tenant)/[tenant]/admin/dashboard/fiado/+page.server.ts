@@ -4,6 +4,11 @@ import type { PageServerLoad } from './$types'
 import * as s from '$db/schema'
 import { desc, eq, sql, gt, gte, lt, and, type AnyColumn, sum } from 'drizzle-orm'
 
+import {
+  getLocalTimeZone,
+  today,
+} from '@internationalized/date'
+import { redirect } from '@sveltejs/kit'
 
 import { withinDate2 } from '$db/utils'
 
@@ -13,6 +18,12 @@ export const load = (async ({ locals: { tenantDb: db } , url}) => {
   
   const sp_start_date = searchParams.get('startDate')
   const sp_end_date = searchParams.get('endDate')
+
+  if(!sp_start_date || !sp_end_date){
+    let start = (today('America/Sao_Paulo').subtract({ days: 7 })).toDate(getLocalTimeZone()).getTime()
+    let end = today('America/Sao_Paulo').toDate(getLocalTimeZone()).getTime()
+    return redirect(303, `/admin/dashboard/fiado?startDate=${start}&endDate=${end}`)
+  }
 
   const startDate =
     typeof sp_start_date === 'string'

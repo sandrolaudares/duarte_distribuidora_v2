@@ -1,32 +1,13 @@
 <script lang="ts">
-  import {
-    Axis,
-    BarChart,
-    Bars,
-    Chart,
-    Pie,
-    PieChart,
-    Svg,
-    Tooltip,
-  } from 'layerchart'
   import type { PageData } from './$types'
-  import NavDashboard from '$lib/components/dashboard/admin/NavDashboard.svelte'
-  import * as Tabs from '$lib/components/ui/tabs/index'
+  import NavDashboard from '../NavDashboard.svelte'
   import * as Card from '$lib/components/ui/card/index'
-  import { scaleBand } from 'd3-scale'
-  import { format } from 'date-fns'
-  import { icons } from '$lib/utils/icons'
-  import { page } from '$app/stores'
-  import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import SvChart from '../SvChart.svelte'
-  import { type ChartConfiguration } from 'chart.js'
   import { RecentSales } from '$lib/components/dashboard/admin'
-  import Dashboard from '$lib/components/dashboard/admin/dashboard.svelte'
 
   let { data }: { data: PageData } = $props()
 
   const {
-    revenueByMonth,
     topRevenueProducts,
     topSellingCategories,
     topCustomerOrders,
@@ -39,14 +20,28 @@
     clientesOciosos
   } = $derived(data)
 
+  let cards = $derived([
+    {
+      titleCard : "Total de pedidos",
+      textCard: financialSummary.basePeriod[0].total_paid ? (financialSummary.basePeriod[0].total_paid).toString() : "0",
+      subTitle: financialSummary.comparedPeriod ? "Periodo comparado: " + financialSummary.comparedPeriod[0].total_paid.toString() : ""
+    },
+    {
+      titleCard : "Valor médio do pedido",
+      textCard: "R$ " + (AvgOrderValue.basePeriod ? ((AvgOrderValue.basePeriod[0].average_order_value / 100).toFixed(2)).toString() : ""),
+      subTitle: AvgOrderValue.comparedPeriod ? "Periodo comparado: " + 
+        (AvgOrderValue.comparedPeriod[0].average_order_value / 100).toFixed(2).toString() : ""
+    },
+    {
+      titleCard : "Total de pedidos",
+      textCard : quantOrders.basePeriod[0].total_orders.toString(),
+      subTitle : quantOrders.comparedPeriod ? "Periodo comparado: " + quantOrders.comparedPeriod[0].total_orders.toString() : "",
+    }
+  ])
 
 </script>
 
-<!-- <NavDashboard /> -->
-
-<!-- <pre>
-  {JSON.stringify(topRevenueProducts, null, 2)}
-</pre> -->
+<NavDashboard {cards}/> 
 
 <div class="flex flex-col gap-3 lg:flex-row">
   <Card.Root class="w-full lg:w-9/12 ">
@@ -57,7 +52,7 @@
       <div class="flex flex-wrap">
         <div class="w-full">
           {#key topRevenueProducts}
-          <!-- Carrega duas barras, com o produto mais vendido de cada periodo -->
+          <!-- Carrega duas barras, com o produto mais vendido de cada período -->
             <SvChart
               config={{
                 type: 'bar',
@@ -75,7 +70,7 @@
                       backgroundColor: ['rgba(0, 85, 199)'],
                       borderColor: ['rgb(255, 99, 132)'],
                       borderWidth: 0, 
-                      barThickness: 50,
+                      barThickness: 30,
                     },
                     {
                       label: 'Periodo Comparado',
@@ -83,7 +78,7 @@
                       backgroundColor: ['rgba(132, 169, 71)'],
                       borderColor: ['rgb(132, 169, 71)'],
                       borderWidth: 0, 
-                      barThickness: 50
+                      barThickness: 30
                     }
                   ],
                 },
@@ -107,47 +102,61 @@
                         p => p.total_quantity_ordered,
                       ) ?? [],
                       backgroundColor: ['rgba(255, 217, 0)'],
+                      barThickness: 30
                     },
                   ],
                 },
               }}
               height={200}
-              title={'Produtos mais vendidos (Periodo selecionado)'}
+              title={'Produtos mais vendidos (Todo periodo selecionado)'}
             />
           {/key}
         </div>
         <div class="w-1/2">
           {#key mostPopularPaymentMethods}
-            <SvChart
-              config={{
-                type: 'pie',
-                data: {
-                  labels: mostPopularPaymentMethods.basePeriod.map((p, index) => {
-                    return mostPopularPaymentMethods.comparedPeriod 
-                    ? p.payment_method + ' | ' + mostPopularPaymentMethods.comparedPeriod[index].payment_method
-                    : p.payment_method
-                  }),
-                  datasets: [
-                    {
-                      label: 'Total: ',
-                      data: mostPopularPaymentMethods.basePeriod?.map(
-                        p => p.usage_count,
-                      ) ?? [],
-                    },
-                    // Coloca aqui o dataset de comparação
-                    {
-                      label: 'Total: ',
-                      data: mostPopularPaymentMethods.comparedPeriod?.map(
-                        p => p.usage_count,
-                      ) ?? [],
-                    },
-                  ],
-                },
-              }}
-              title={'Metodos de pagamento'}
-            />
+               <SvChart
+                 config={{
+                   type: 'pie',
+                   data: {
+                     labels: mostPopularPaymentMethods.basePeriod.map((p, index) => {
+                       return p.payment_method
+                     }),
+                     datasets: [
+                       {
+                         label: 'Total: ',
+                         data: mostPopularPaymentMethods.basePeriod?.map(
+                           p => p.usage_count,
+                         ) ?? [],
+                       },
+                     ],
+                   },
+                 }}
+                 title={'Metodos de pagamento'}
+               />
           {/key}  
         </div>
+        {#if mostPopularPaymentMethods.comparedPeriod}
+        <div class="w-1/2">
+          <SvChart
+          config={{
+            type: 'pie',
+            data: {
+              labels: mostPopularPaymentMethods.comparedPeriod.map((m) => {
+                return m.payment_method
+              }),
+              datasets: [
+                {
+                  label: 'Total: ',
+                  data: mostPopularPaymentMethods.comparedPeriod?.map(
+                    p => p.usage_count,
+                  ) ?? [],
+                },
+              ],
+            },
+          }}
+          title={'Periodo Comparado'}/>
+        </div>
+        {/if}
         <div class="w-1/2">
           {#key topCustomers}
             <SvChart

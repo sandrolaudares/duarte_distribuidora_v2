@@ -5,11 +5,23 @@ import { eq, sql, and, gt, count, desc } from 'drizzle-orm'
 import { subDays } from 'date-fns'
 import { withinDate2 } from '$lib/server/db/utils'
 
+import {
+  getLocalTimeZone,
+  today,
+} from '@internationalized/date'
+import { redirect } from '@sveltejs/kit'
+
 export const load = (async ({ locals: { tenantDb: db }, url }) => {
   const searchParams = url.searchParams
 
   const sp_start_date = searchParams.get('startDate')
   const sp_end_date = searchParams.get('endDate')
+
+  if(!sp_start_date || !sp_end_date){
+      let start = (today('America/Sao_Paulo').subtract({ days: 7 })).toDate(getLocalTimeZone()).getTime()
+      let end = today('America/Sao_Paulo').toDate(getLocalTimeZone()).getTime()
+      return redirect(303, `/admin/dashboard/delivery?startDate=${start}&endDate=${end}`)
+    }
 
   const startDate =
     typeof sp_start_date === 'string'

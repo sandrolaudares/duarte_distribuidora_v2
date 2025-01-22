@@ -16,6 +16,7 @@
 
   import * as Select from '$lib/components/ui/select/index.js'
   import Button from './ui/button/button.svelte'
+  import { SSRFilters } from '$lib/components/datatable/filter.svelte'  
 
   interface Props {
     startValue?: DateValue
@@ -47,6 +48,19 @@
     start: value.start ? df.format(value.start.toDate(getLocalTimeZone())) : '',
     end: value.end ? df.format(value.end.toDate(getLocalTimeZone())) : '',
   })
+
+  
+  let filters = new SSRFilters();
+
+  const clearCalendar = () => {
+    startValue = undefined;
+    value.start = undefined; 
+    value.end = undefined
+    if (title == "Comparar")
+      filters.clear("compareStartDate", "compareEndDate");
+    if (title == "Base")
+      filters.update({startDate: "0000000000000", endDate: "0000000000000"});
+  }
 </script>
 
 {#snippet btn(label: string, range: DateRange)}
@@ -65,8 +79,8 @@
   </Button>
 {/snippet}
 
-<div class="grid gap-2">
-  <Popover.Root>
+<div class="grid gap-2 ms-5">
+  <Popover.Root >
     <Popover.Trigger
       class={cn(
         buttonVariants({ variant: 'outline' }),
@@ -90,7 +104,7 @@
     </Popover.Trigger>
     <Popover.Content class="w-auto p-0" align="start">
       {#if title}
-        <p>{title}</p>
+        <p class="text-center mt-3 font-semibold text-lg">{title}</p>
       {/if}
       <RangeCalendar
         bind:value
@@ -121,6 +135,7 @@
           start: today('America/Sao_Paulo').subtract({ years: 1 }),
           end: today('America/Sao_Paulo'),
         })}
+        <button onclick={clearCalendar} class="btn btn-error">Limpar</button>
       </div>
     </Popover.Content>
   </Popover.Root>

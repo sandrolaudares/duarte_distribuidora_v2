@@ -42,6 +42,7 @@
   />
 {/if}
   <DateFilter2
+    title="Base"
     startValue={getFilterValue('startDate')}
     endValue={getFilterValue('endDate')}
     onChange={(startDate, endDate) => {
