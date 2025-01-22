@@ -44,9 +44,9 @@
 
 <!-- <NavDashboard /> -->
 
-<pre>
+<!-- <pre>
   {JSON.stringify(topRevenueProducts, null, 2)}
-</pre>
+</pre> -->
 
 <div class="flex flex-col gap-3 lg:flex-row">
   <Card.Root class="w-full lg:w-9/12 ">
@@ -146,7 +146,7 @@
               }}
               title={'Metodos de pagamento'}
             />
-          {/key}
+          {/key}  
         </div>
         <div class="w-1/2">
           {#key topCustomers}

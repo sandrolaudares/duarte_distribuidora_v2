@@ -7,6 +7,7 @@ import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 import { format, formatDistance, formatRelative, subDays } from 'date-fns'
 
 import { withinDate2 } from '$db/utils'
+import { redirect } from '@sveltejs/kit'
 
 const LIMIT = 10 as const
 
@@ -15,6 +16,10 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
   
   const sp_start_date = searchParams.get('startDate')
   const sp_end_date = searchParams.get('endDate')
+
+  // if(!sp_start_date || !sp_end_date){
+  //   return redirect(303, '/admin/dashboard/vendas?startDate={}&endDate={}')
+  // }
 
   const startDate =
     typeof sp_start_date === 'string'
