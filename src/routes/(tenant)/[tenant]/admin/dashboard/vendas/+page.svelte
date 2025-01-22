@@ -23,8 +23,8 @@
   let cards = $derived([
     {
       titleCard : "Total de pedidos",
-      textCard: financialSummary.basePeriod[0].total_paid ? (financialSummary.basePeriod[0].total_paid).toString() : "0",
-      subTitle: financialSummary.comparedPeriod ? "Periodo comparado: " + financialSummary.comparedPeriod[0].total_paid.toString() : ""
+      textCard: financialSummary.basePeriod[0].total_paid ? "R$ " + ((financialSummary.basePeriod[0].total_paid / 100).toFixed(2)).toString() : "0",
+      subTitle: financialSummary.comparedPeriod ? "Periodo comparado: " + ((financialSummary.comparedPeriod[0].total_paid / 100).toFixed(2)).toString() : ""
     },
     {
       titleCard : "Valor médio do pedido",
