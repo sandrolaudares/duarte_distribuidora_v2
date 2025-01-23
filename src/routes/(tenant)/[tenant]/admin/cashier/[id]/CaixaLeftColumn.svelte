@@ -45,7 +45,6 @@
           customer_id: cart.meta.clienteSelecionado.id,
           selectedAddress: address => {
             cart.meta.enderecoSelecionado = address
-            //TODO:ARRUMAR TIPO
             console.log(address)
             getDistance()
           },

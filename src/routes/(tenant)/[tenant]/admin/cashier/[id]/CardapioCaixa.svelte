@@ -11,8 +11,6 @@
 
   let filteredResults = products;
 
-  //TODO:Fix types
-
   const cart = getCartContext()
 
 </script>
