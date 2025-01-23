@@ -94,16 +94,26 @@
               config={{
                 type: 'bar',
                 data: {
-                  labels: topOrderedProducts.map((p) => p.product_name),
+                  labels: topOrderedProducts.basePeriod.map((p, index) => {
+                    return topOrderedProducts.comparedPeriod ?
+                    topOrderedProducts.basePeriod[index].product_name + ' | ' + topOrderedProducts.comparedPeriod[index].product_name
+                    : topOrderedProducts.basePeriod[index].product_name
+                  }),
                   datasets: [
                     {
                       label: 'Quantidade',
-                      data: topOrderedProducts?.map(
+                      data: topOrderedProducts.basePeriod.map(
                         p => p.total_quantity_ordered,
                       ) ?? [],
                       backgroundColor: ['rgba(255, 217, 0)'],
                       barThickness: 30
                     },
+                    {
+                      label: 'Quantidade periodo comparado',
+                      data : topOrderedProducts.comparedPeriod?.map(
+                        p => p.total_quantity_ordered,
+                      ) ?? []
+                    }
                   ],
                 },
               }}
