@@ -1,31 +1,13 @@
 <script lang="ts">
-  import {
-    Axis,
-    BarChart,
-    Bars,
-    Chart,
-    Pie,
-    PieChart,
-    Svg,
-    Tooltip,
-  } from 'layerchart'
   import type { PageData } from './$types'
-  import NavDashboard from '$lib/components/dashboard/admin/NavDashboard.svelte'
-  import * as Tabs from '$lib/components/ui/tabs/index'
+  import NavDashboard from '../NavDashboard.svelte'
   import * as Card from '$lib/components/ui/card/index'
-  import { Overview, RecentSales } from '$lib/components/dashboard/admin'
-  import { scaleBand } from 'd3-scale'
-  import { format } from 'date-fns'
-  import { icons } from '$lib/utils/icons'
-  import { page } from '$app/stores'
-  import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import SvChart from '../SvChart.svelte'
-  import { type ChartConfiguration } from 'chart.js'
+  import { RecentSales } from '$lib/components/dashboard/admin'
 
   let { data }: { data: PageData } = $props()
 
   const {
-    revenueByMonth,
     topRevenueProducts,
     topSellingCategories,
     topCustomerOrders,
@@ -35,82 +17,76 @@
     topCustomers,
     financialSummary,
     mostPopularPaymentMethods,
+    clientesOciosos
   } = $derived(data)
 
-  let topRevenueProductsC: ChartConfiguration = $derived({
-    type: 'bar',
-    data: {
-      labels: topRevenueProducts.basePeriod.map(d => d.product_name),
-      datasets: [
-        {
-          label: 'Receita',
-          data: topRevenueProducts.basePeriod.map(d => d.total_revenue),
-          backgroundColor: ['rgba(0, 85, 199)'],
-          borderColor: ['rgb(255, 99, 132)'],
-          borderWidth: 0,
-          barThickness: 50,
-        },
-      ],
+  let cards = $derived([
+    {
+      titleCard : "Total de pedidos",
+      textCard: financialSummary.basePeriod[0].total_paid ? "R$ " + ((financialSummary.basePeriod[0].total_paid / 100).toFixed(2)).toString() : "0",
+      subTitle: financialSummary.comparedPeriod ? "Periodo comparado: " + ((financialSummary.comparedPeriod[0].total_paid / 100).toFixed(2)).toString() : ""
     },
-  })
+    {
+      titleCard : "Valor médio do pedido",
+      textCard: "R$ " + (AvgOrderValue.basePeriod ? ((AvgOrderValue.basePeriod[0].average_order_value / 100).toFixed(2)).toString() : ""),
+      subTitle: AvgOrderValue.comparedPeriod ? "Periodo comparado: " + 
+        (AvgOrderValue.comparedPeriod[0].average_order_value / 100).toFixed(2).toString() : ""
+    },
+    {
+      titleCard : "Total de pedidos",
+      textCard : quantOrders.basePeriod[0].total_orders.toString(),
+      subTitle : quantOrders.comparedPeriod ? "Periodo comparado: " + quantOrders.comparedPeriod[0].total_orders.toString() : "",
+    }
+  ])
 
 </script>
 
-<pre>
-  {#if revenueByMonth.comparedPeriod}
-  {JSON.stringify(revenueByMonth.basePeriod[0].total_revenue, null, 2)}
-    {JSON.stringify(revenueByMonth.comparedPeriod[0].total_revenue, null, 2)}
-  {/if}
-</pre>
-
-<NavDashboard
-  cardUm={{
-    titleCard: 'Total',
-    textCard:
-      'R$ ' +
-      (revenueByMonth.basePeriod[0].total_revenue / 100).toFixed(2).toString(),
-    subTitle: revenueByMonth.comparedPeriod ? 'Periodo anterior: R$ ' + (revenueByMonth.comparedPeriod[0].total_revenue / 100).toString() : '',
-  }}
-  cardDois={{
-    titleCard: 'Resumo',
-    textCard:
-      'R$ ' +
-      (financialSummary.basePeriod[0].total_paid / 100).toFixed(2).toString(),
-    subTitle: financialSummary.comparedPeriod ? 'Periodo anterior: R$ ' + (financialSummary.comparedPeriod[0].total_paid / 100).toFixed(2).toString() : '',
-  }}
-  cardTres={{
-    titleCard: 'Ticket Médio',
-    textCard:
-      'R$ ' +
-      (AvgOrderValue.basePeriod[0].average_order_value / 100)
-        .toFixed(2)
-        .toString(),
-    subTitle: AvgOrderValue.comparedPeriod ? 'Periodo anterior: R$ ' + (AvgOrderValue.comparedPeriod[0].average_order_value / 100).toFixed(2).toString() : '',
-  }}
-  cardQuatro={{
-    titleCard: 'Total pedidos',
-    textCard: quantOrders.basePeriod[0].total_orders.toString(),
-    subTitle: quantOrders.comparedPeriod ? 'Periodo anterior: ' + quantOrders.comparedPeriod[0].total_orders.toString() : '',
-  }}
-/>
-
-<h1>Página de vendas</h1>
+<NavDashboard {cards}/> 
 
 <div class="flex flex-col gap-3 lg:flex-row">
   <Card.Root class="w-full lg:w-9/12 ">
     <Card.Header>
-      <Card.Title>Overview</Card.Title>
+      <Card.Title>Gráficos</Card.Title>
     </Card.Header>
     <Card.Content>
       <div class="flex flex-wrap">
         <div class="w-full">
-          <!-- {#key topRevenueProducts} -->
-          <SvChart
-            config={topRevenueProductsC}
-            height={220}
-            title={'Principais produtos de receita'}
-          />
-          <!-- {/key} -->
+          {#key topRevenueProducts}
+          <!-- Carrega duas barras, com o produto mais vendido de cada período -->
+            <SvChart
+              config={{
+                type: 'bar',
+                data: {
+                  labels: topRevenueProducts.basePeriod.map((d, index) => {
+                    return topRevenueProducts.comparedPeriod
+                      ? d.product_name + ' | ' + topRevenueProducts.comparedPeriod[index].product_name
+                      : d.product_name;
+                  }),
+                  datasets: 
+                  [
+                    {
+                      label: 'Periodo base',
+                      data: topRevenueProducts.basePeriod?.map(d => d.total_revenue) ?? [],
+                      backgroundColor: ['rgba(0, 85, 199)'],
+                      borderColor: ['rgb(255, 99, 132)'],
+                      borderWidth: 0, 
+                      barThickness: 30,
+                    },
+                    {
+                      label: 'Periodo Comparado',
+                      data: topRevenueProducts.comparedPeriod?.map(d => d.total_revenue) ?? [],
+                      backgroundColor: ['rgba(132, 169, 71)'],
+                      borderColor: ['rgb(132, 169, 71)'],
+                      borderWidth: 0, 
+                      barThickness: 30
+                    }
+                  ],
+                },
+              }}
+              height={220}
+              title={'Principais produtos de receita'}
+            />
+          {/key}
         </div>
         <div class="w-full">
           {#key topOrderedProducts}
@@ -118,78 +94,100 @@
               config={{
                 type: 'bar',
                 data: {
-                  labels: topOrderedProducts.map(p => p.product_name),
+                  labels: topOrderedProducts.basePeriod.map((p, index) => {
+                    return topOrderedProducts.comparedPeriod ?
+                    topOrderedProducts.basePeriod[index].product_name + ' | ' + topOrderedProducts.comparedPeriod[index].product_name
+                    : topOrderedProducts.basePeriod[index].product_name
+                  }),
                   datasets: [
                     {
                       label: 'Quantidade',
-                      data: topOrderedProducts.map(
+                      data: topOrderedProducts.basePeriod.map(
                         p => p.total_quantity_ordered,
-                      ),
+                      ) ?? [],
                       backgroundColor: ['rgba(255, 217, 0)'],
+                      barThickness: 30
                     },
-                    // Dataset de comparação vem aqui
                     {
-                      label: 'Quantidade',
-                      data: topOrderedProducts.map(
+                      label: 'Quantidade periodo comparado',
+                      data : topOrderedProducts.comparedPeriod?.map(
                         p => p.total_quantity_ordered,
-                      ),
-                      backgroundColor: ['rgba(255, 217, 0)'],
-                    },
+                      ) ?? []
+                    }
                   ],
                 },
               }}
               height={200}
-              title={'Produtos mais vendidos (Quantidade)'}
+              title={'Produtos mais vendidos (Todo periodo selecionado)'}
             />
           {/key}
         </div>
         <div class="w-1/2">
           {#key mostPopularPaymentMethods}
-            <SvChart
-              config={{
-                type: 'pie',
-                data: {
-                  labels: mostPopularPaymentMethods.basePeriod.map(p => {
-                    return p.payment_method
-                  }),
-                  datasets: [
-                    {
-                      label: 'Total: ',
-                      data: mostPopularPaymentMethods.basePeriod.map(
-                        p => p.usage_count,
-                      ),
-                    },
-                    // Coloca aqui o dataset de comparação
-                    {
-                      label: 'Total: ',
-                      data: mostPopularPaymentMethods.comparedPeriod.map(
-                        p => p.usage_count,
-                      ),
-                    },
-                  ],
-                },
-              }}
-              title={'Metodos de pagamento'}
-            />
-          {/key}
+               <SvChart
+                 config={{
+                   type: 'pie',
+                   data: {
+                     labels: mostPopularPaymentMethods.basePeriod.map((p, index) => {
+                       return p.payment_method
+                     }),
+                     datasets: [
+                       {
+                         label: 'Total: ',
+                         data: mostPopularPaymentMethods.basePeriod?.map(
+                           p => p.usage_count,
+                         ) ?? [],
+                       },
+                     ],
+                   },
+                 }}
+                 title={'Metodos de pagamento'}
+               />
+          {/key}  
         </div>
+        {#if mostPopularPaymentMethods.comparedPeriod}
+        <div class="w-1/2">
+          <SvChart
+          config={{
+            type: 'pie',
+            data: {
+              labels: mostPopularPaymentMethods.comparedPeriod.map((m) => {
+                return m.payment_method
+              }),
+              datasets: [
+                {
+                  label: 'Total: ',
+                  data: mostPopularPaymentMethods.comparedPeriod?.map(
+                    p => p.usage_count,
+                  ) ?? [],
+                },
+              ],
+            },
+          }}
+          title={'Periodo Comparado'}/>
+        </div>
+        {/if}
         <div class="w-1/2">
           {#key topCustomers}
             <SvChart
               config={{
                 type: 'bar',
                 data: {
-                  labels: topCustomers.basePeriod.map(t => t.customer_name),
+                  labels: topCustomers.basePeriod.map((t, index) => {
+                    return topCustomers.comparedPeriod
+                    ? t.customer_name + ' | ' + topCustomers.comparedPeriod[index].customer_name
+                    : t.customer_name
+                  }),
                   datasets: [
                     {
                       label: 'Total de pedidos',
-                      data: topCustomers.basePeriod.map(t => t.pedidos),
+                      data: topCustomers.basePeriod?.map(t => t.pedidos) ?? [],
                     },
                     {
                       label: 'Total Periodo anterior',
-                      data: (topCustomers.comparedPeriod ?? []).map(
+                      data: topCustomers.comparedPeriod?.map(
                         t => t.pedidos,
-                      ),
+                      ) ?? [],
                     },
                   ],
                 },
@@ -210,13 +208,14 @@
     <Card.Content>
       <!-- TODO: Mudar o recent sales -->
       <RecentSales
-        textRecentSale={[
-          {
-            title: 'Receita',
-            text: 'teste',
-            value: 'R$ 200,00',
-          },
-        ]}
+        textRecentSale={
+          clientesOciosos.map((c) => {
+            return {
+              title: c.name,
+              value: c.ultimaCompra,
+            }
+          })
+        }
       />
     </Card.Content>
   </Card.Root>

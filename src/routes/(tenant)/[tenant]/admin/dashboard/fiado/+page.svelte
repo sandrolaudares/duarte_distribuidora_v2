@@ -1,88 +1,83 @@
 <script lang="ts">
-  import NavDashboard from '$lib/components/dashboard/admin/NavDashboard.svelte'
+  import NavDashboard from '../NavDashboard.svelte'
   import * as Card from '$lib/components/ui/card'
   import { BarChart, PieChart } from 'layerchart'
-  import type { PageData } from './$types';
+  import type { PageData } from './$types'
   import { RecentSales } from '$lib/components/dashboard/admin'
   import SvChart from '../SvChart.svelte'
 
-  let { data }: { data: PageData } = $props();
-  const {corporateClientsSortedDelayOrder} = data
+  let { data }: { data: PageData } = $props()
+  const { corporateClientsSortedDelayOrder } = $derived(data);
 
-  let DebtorsNumber = 4;
 </script>
 
-<h1>Fiados</h1>
-
-<div class="flex flex-col lg:flex-row gap-3">
+<div class="flex flex-col gap-3 lg:flex-row">
   <Card.Root class="w-full lg:w-9/12 ">
     <Card.Header>
-      <Card.Title>Overview</Card.Title>
+      <Card.Title>Gráficos</Card.Title>
     </Card.Header>
     <!-- <Card.Content class="flex flex-col md:flex-row gap-4"> -->
     <Card.Content class="flex flex-wrap">
       <div class="w-full pr-3">
-        <SvChart 
-        config={{
-          type: "bar",
-          data:{
-            labels : corporateClientsSortedDelayOrder.map((c) => c.debtorName),
-            datasets : [
-              {
-                label: "Divida",
-                barThickness : 30,
-                data: corporateClientsSortedDelayOrder.map((c) => c.totalDebt),
-                backgroundColor: [
-                  'rgba(255, 0, 0)'
+        {#key corporateClientsSortedDelayOrder}
+          <SvChart
+            config={{
+              type: 'bar',
+              data: {
+                labels: corporateClientsSortedDelayOrder.map(c => c.debtorName),
+                datasets: [
+                  {
+                    label: 'Divida',
+                    barThickness: 30,
+                    data: corporateClientsSortedDelayOrder.map(c => c.totalDebt / 100),
+                    backgroundColor: ['rgba(255, 0, 0)'],
+                    order: 2,
+                  },
+                  {
+                    label: 'Total pago',
+                    barThickness: 30,
+                    data: corporateClientsSortedDelayOrder.map(c => c.totalPaid / 100),
+                    backgroundColor: ['rgba(0, 128, 0)'],
+                    order: 1,
+                  },
                 ],
-                  order: 2
+              },
+              options: {
+                scales: {
+                  y: {
+                    stacked: true,
+                  },
                 },
-                {
-                  label: "Total pago",
-                  barThickness : 30,
-                  data: corporateClientsSortedDelayOrder.map((c) => c.totalPaid),
-                  backgroundColor: [
-                  'rgba(0, 128, 0)'
-                ],
-                order: 1  
-              }
-            ]
-          },
-          options:{
-            scales:{
-              y: {
-                stacked : true
-              }
-            },
-            indexAxis : "y"
-          }
-        }}
-        height={corporateClientsSortedDelayOrder.length * 60}
-        title={"Relatorio recebimento atingido"}
-        />
+                indexAxis: 'y',
+              },
+            }}
+            height={corporateClientsSortedDelayOrder.length * 60}
+            title={'Relatorio recebimento atingido'}
+          />
+        {/key}
       </div>
       <div class="w-full">
-        <SvChart 
-        config={{
-          type: "bar",
-          data:{
-            labels : corporateClientsSortedDelayOrder.map((c) => c.debtorName),
-            datasets:[
-              {
-                label: "Dívidas",
-                data: corporateClientsSortedDelayOrder.map((c) => c.totalDebt),
-                backgroundColor:
-                [
-                  "rgba(234, 203, 22, 1)"
+        {#key corporateClientsSortedDelayOrder}
+          <SvChart
+            config={{
+              type: 'bar',
+              data: {
+                labels: corporateClientsSortedDelayOrder.map(c => c.debtorName).slice(0,5),
+                datasets: [
+                  {
+                    label: 'Dívida',
+                    data: corporateClientsSortedDelayOrder.map(c => c.totalDebt / 100).slice(0,5),
+                    backgroundColor: ['rgba(234, 203, 22, 1)'],
+                    barThickness: 50,
+                    
+                  },
                 ],
-                barThickness : 50,
-              }
-            ]
-          }
-        }}
-        height={180}
-        title={"Maiores dívidas (Vai usar a msm query de clientes PJ com dívida)"}
-        />
+              },
+            }}
+            height={180}
+            title={'Maiores dívidas'}
+          />
+        {/key}
       </div>
     </Card.Content>
   </Card.Root>
@@ -91,13 +86,16 @@
       <Card.Title>Clientes PJ com dívida</Card.Title>
     </Card.Header>
     <Card.Content>
-      <!-- TODO: Mudar o recent sales -->
-      <RecentSales textRecentSale={[
-        {
-          title : "Drinking Partner",
-          value : "R$ 200,00"
-        }
-      ]}/>
+      <RecentSales
+        textRecentSale={
+          corporateClientsSortedDelayOrder.map((c) => {
+            return {
+              title : c.debtorName,
+              value : "R$" + (c.totalDebt ? c.totalDebt / 100 : 0).toString(),
+              subTitle : c.totalOrders.toString()
+            }
+          })}
+      />
     </Card.Content>
   </Card.Root>
 </div>
