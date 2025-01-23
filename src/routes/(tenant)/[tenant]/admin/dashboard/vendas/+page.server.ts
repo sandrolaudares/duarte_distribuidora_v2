@@ -7,14 +7,29 @@ import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 import { format, formatDistance, formatRelative, subDays } from 'date-fns'
 
 import { withinDate2 } from '$db/utils'
+import { redirect } from '@sveltejs/kit'
+
+import { getLocalTimeZone, today } from '@internationalized/date'
 
 const LIMIT = 10 as const
 
 export const load = (async ({ locals: { tenantDb: db }, url }) => {
   const searchParams = url.searchParams
-  
+
   const sp_start_date = searchParams.get('startDate')
   const sp_end_date = searchParams.get('endDate')
+
+  if (!sp_start_date || !sp_end_date) {
+    const start = today('America/Sao_Paulo')
+      .subtract({ days: 7 })
+      .toDate(getLocalTimeZone())
+      .getTime()
+    const end = today('America/Sao_Paulo').toDate(getLocalTimeZone()).getTime()
+    return redirect(
+      303,
+      `/admin/dashboard/vendas?startDate=${start}&endDate=${end}`,
+    )
+  }
 
   const startDate =
     typeof sp_start_date === 'string'
@@ -35,30 +50,53 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     ? new Date(Number(sp_compare_end_date))
     : null
 
+  console.log(compareEndDate, compareStartDate, startDate, endDate)
+
   const withinSelectedDate = withinDate2(startDate, endDate)
   const withinCompareDate =
     sp_compare_start_date && sp_compare_end_date
       ? withinDate2(compareStartDate!, compareEndDate!)
       : null
 
-  const comparationQuery = function <T extends SQLiteSelect>(
+  const comparationQuery = async function <T extends SQLiteSelect>(
     qb: T,
     column: AnyColumn,
   ): Promise<{ basePeriod: Awaited<T>; comparedPeriod?: Awaited<T> }> {
-    const promisses = [
-      withinSelectedDate(qb, column),
-      withinCompareDate?.(qb, column),
-    ].filter(q => q !== undefined)
-    return Promise.all(promisses).then(([basePeriod, comparedPeriod]) => ({
-      basePeriod,
-      comparedPeriod: comparedPeriod ?? undefined,
-    }))
+    if (!withinCompareDate) {
+      const basePeriod = await withinSelectedDate(qb, column)
+      return { basePeriod, comparedPeriod: undefined }
+    }
+
+    // const [basePeriod, comparedPeriod] = await Promise.all([
+    //   withinSelectedDate(qb, column),
+    //   withinCompareDate(qb, column),
+    // ])
+
+    const basePeriod = await withinSelectedDate(qb, column)
+    const comparedPeriod = await withinCompareDate(qb, column)
+
+    return { basePeriod, comparedPeriod }
+    // if (!withinCompareDate) {
+    //   return Promise.all([withinSelectedDate(qb, column)]).then(
+    //     ([basePeriod]) => ({
+    //       basePeriod,
+    //       comparedPeriod: undefined,
+    //     }),
+    //   )
+    // }
+    // return Promise.all([
+    //   withinSelectedDate(qb, column),
+    //   withinCompareDate(qb, column),
+    // ]).then(([basePeriod, comparedPeriod]) => ({
+    //   basePeriod,
+    //   comparedPeriod: comparedPeriod,
+    // }))
   }
 
-  console.log('sPstartDate', sp_start_date)
-  console.log('sPendDate', sp_end_date)
-  console.log('startDate', startDate.toLocaleDateString())
-  console.log('endDate', endDate.toLocaleDateString())
+  console.log('sPstartDate=', sp_start_date)
+  console.log('sPendDate=', sp_end_date)
+  console.log('sPstartDateC=', sp_compare_start_date)
+  console.log('sPendDateC=', sp_compare_end_date)
 
   const getTopOrderedNProducts = db!
     .select({
@@ -154,6 +192,7 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .groupBy(s.customerOrderTable.customer_id)
     .orderBy(desc(sql`count(${s.customerOrderTable.id})`))
     .limit(LIMIT)
+    .$dynamic()
 
   const getAvgOrderValue = db!
     .select({
@@ -192,26 +231,44 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .where(gt(s.customerOrderTable.amount_paid, 1))
     .$dynamic()
 
-  // TODO: Clientes ociosos: Não compram a 2 semanas ou mais
+  // TODO: Fazer querie clientes ociosos: Não compram a 2 semanas ou mais, não vai ter comparação
+  const clientesOciosos = [
+    {
+      name: 'Matheus',
+      ultimaCompra: '21/12/2024',
+    },
+    {
+      name: 'Andre',
+      ultimaCompra: '17/11/2024',
+    },
+  ]
 
   const [
-    revenueByMonth,
     financialSummary,
     AvgOrderValue,
     quantOrders,
     topRevenueProducts,
     topCustomers,
+    mostPopularPaymentMethods,
+    topSellingCategories,
+    topCustomerOrders,
+    topOrderedProducts,
   ] = await Promise.all([
-    comparationQuery(getRevenueByMonth, s.customerOrderTable.created_at),
     comparationQuery(getTotalPaidOrders, s.customerOrderTable.created_at),
     comparationQuery(getAvgOrderValue, s.customerOrderTable.created_at),
     comparationQuery(getQuantOrders, s.customerOrderTable.created_at),
     comparationQuery(getTopRevenueProducts, s.orderItemTable.created_at),
     comparationQuery(getTopCustomers, s.customerOrderTable.created_at),
+    comparationQuery(
+      getMostPopularPaymentMethods,
+      s.orderPaymentTable.created_at,
+    ),
+    comparationQuery(getTopSellingCategories, s.orderItemTable.created_at),
+    comparationQuery(getCustomerNumberOrders, s.customerOrderTable.created_at),
+    comparationQuery(getTopOrderedNProducts, s.orderItemTable.created_at),
   ])
-  return {
-    revenueByMonth,
 
+  return {
     financialSummary,
 
     AvgOrderValue,
@@ -220,46 +277,15 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
 
     topRevenueProducts,
 
-    topOrderedProducts: await withinSelectedDate(
-      getTopOrderedNProducts,
-      s.orderItemTable.created_at,
-    ),
+    topOrderedProducts,
 
-    mostPopularPaymentMethods: {
-      basePeriod: await getMostPopularPaymentMethods,
-      comparedPeriod: await getMostPopularPaymentMethods,
-    },
+    mostPopularPaymentMethods,
 
     topCustomers,
 
-    clientesOciosos: {
-      basePeriod: [
-        {
-          name: 'Pedro',
-          lastOrder: '2023-01-01',
-          tempoQueNaoCompra: 'Posso calcular no front',
-        },
-      ],
-      comparedPeriod: [
-        {
-          name: 'Pedro',
-          lastOrder: '2023-01-01',
-          tempoQueNaoCompra: 'Posso calcular no front',
-        },
-      ],
-    },
+    clientesOciosos,
 
-    topSellingCategories: await getTopSellingCategories,
-    topCustomerOrders: await getCustomerNumberOrders,
-
-    teste: {
-      startDate,
-      endDate,
-
-      dated: await withinSelectedDate(
-        getTopOrderedNProducts,
-        s.orderItemTable.created_at,
-      ),
-    },
+    topSellingCategories,
+    topCustomerOrders,
   }
 }) satisfies PageServerLoad

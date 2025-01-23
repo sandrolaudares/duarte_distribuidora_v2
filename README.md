@@ -236,3 +236,14 @@ Feel free to submit issues or pull requests. Contributions are welcome!
 
 - Opção de emissão de Nota Fiscal eletrônica e Cupom Fiscal (Opcionais). Emissão
   de .xml para enviar para contabilidade.
+
+
+
+# MATHEUS 
+
+
+- Consertar graficos
+ 1 - levar em considerao quando o dataset de comparacao nao existe
+ 2 - quando as labels sao diferente (exemplo produtos mais vendidos)
+
+- Adicionar comparacao das outras queries no page.server de vendas

@@ -45,5 +45,11 @@
 <h2 class="text-center text-xl font-semibold">
   {title}
 </h2>
-<!-- TODO: Ver com o estoque mínimo vai vim -->
-<canvas use:chartjs {id} {width} {height}></canvas>
+
+{#if config.data.datasets[0].data.length > 0}
+  <canvas use:chartjs {id} {width} {height}></canvas>  
+  {:else}
+    <div class="h-full flex justify-center items-center ">
+      <h1 class="mb-10">Sem dados nesse periodo, selecione outro periodo</h1>
+    </div>
+{/if}
