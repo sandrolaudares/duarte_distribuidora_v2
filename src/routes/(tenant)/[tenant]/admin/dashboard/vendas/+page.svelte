@@ -121,7 +121,7 @@
                   ),
                   datasets: [
                     {
-                      label: 'Total: ',
+                      label: 'Total de pagamentos',
                       data:
                         mostPopularPaymentMethods.basePeriod?.map(
                           p => p.usage_count,
@@ -146,7 +146,7 @@
                     }),
                     datasets: [
                       {
-                        label: 'Total: ',
+                        label: 'Total de pagamentos',
                         data:
                           mostPopularPaymentMethods.comparedPeriod?.map(
                             p => p.usage_count,
@@ -187,7 +187,59 @@
           {/key}
         </div>
 
+        <div class="w-full">
+          {#key topCustomerOrders.basePeriod}
+            <DefaultBarSvChart
+              fnLabel={topCustomerOrders.basePeriod.map(c => c.customer_name)}
+              fnData={topCustomerOrders.basePeriod.map(c => c.total_orders)}
+              height={200}
+              title={'Clientes com maior número de pedidos - Periodo Base'}
+              color={"#F4D002"}
+            />
+          {/key}
+        </div>
       </div>
+
+      <div class="w-full">
+        {#key topCustomerOrders.comparedPeriod}
+          {#if topCustomerOrders.comparedPeriod}
+            <DefaultBarSvChart
+              fnLabel={topCustomerOrders.comparedPeriod.map(c => c.customer_name)}
+              fnData={topCustomerOrders.comparedPeriod.map(c => c.total_orders)}
+              height={200}
+              title={'Clientes com maior número de pedidos - Periodo Comparado'}
+              color={"#003E7D"}
+            />
+          {/if}
+        {/key}
+      </div>
+
+      <div class="w-full">
+        {#key topSellingCategories.basePeriod}
+          <DefaultBarSvChart
+            fnLabel={topSellingCategories.basePeriod.map(c => c.category_name)}
+            fnData={topSellingCategories.basePeriod.map(c => c.total_revenue)}
+            height={200}
+            title={'Categorias de produtos mais vendidas - Periodo Base'}
+            color={"#F4D002"}
+          />
+        {/key}
+      </div>
+
+      <div class="w-full">
+        {#key topSellingCategories.comparedPeriod}
+          {#if topSellingCategories.comparedPeriod}
+            <DefaultBarSvChart
+              fnLabel={topSellingCategories.comparedPeriod.map(c => c.category_name)}
+              fnData={topSellingCategories.comparedPeriod.map(c => c.total_revenue)}
+              height={200}
+              title={'Categorias de produtos mais vendidas - Periodo Comparado'}
+              color={"#003E7D"}
+            />
+          {/if}
+        {/key}
+      </div>
+
     </Card.Content>
   </Card.Root>
   <Card.Root class="w-full lg:w-3/12">
