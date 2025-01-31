@@ -14,9 +14,8 @@
     topSellingCategories,
     topCustomerOrders,
     topOrderedProducts,
-    AvgOrderValue, 
+    AvgOrderValue,
     quantOrders,
-    topCustomers,
     financialSummary,
     mostPopularPaymentMethods,
     clientesOciosos,
@@ -63,7 +62,6 @@
         : '',
     },
   ])
-
 </script>
 
 <NavDashboard {cards} />
@@ -89,12 +87,14 @@
           {#key topOrderedProducts}
             <DefaultBarSvChart
               fnLabel={topOrderedProducts.basePeriod.map(p => p.product_name)}
-              fnData={topOrderedProducts.basePeriod.map(p => p.total_quantity_ordered)}
+              fnData={topOrderedProducts.basePeriod.map(
+                p => p.total_quantity_ordered,
+              )}
               height={200}
               title={'Produtos mais vendidos - Periodo base'}
-              color={"#F4D002"}
-              tipoPeriodo={"Periodo base"}
-              tipoDadoEixoY={"Quant. de produtos vendidos"}
+              color={'#F4D002'}
+              tipoPeriodo={'Periodo base'}
+              tipoDadoEixoY={'Quant. de produtos vendidos'}
             />
           {/key}
         </div>
@@ -102,16 +102,19 @@
           {#if topOrderedProducts.comparedPeriod}
             {#key topOrderedProducts}
               <DefaultBarSvChart
-                fnLabel={topOrderedProducts.comparedPeriod.map(p => p.product_name)}
-                fnData={topOrderedProducts.comparedPeriod.map(p => p.total_quantity_ordered)}
+                fnLabel={topOrderedProducts.comparedPeriod.map(
+                  p => p.product_name,
+                )}
+                fnData={topOrderedProducts.comparedPeriod.map(
+                  p => p.total_quantity_ordered,
+                )}
                 height={200}
                 title={'Produtos mais vendidos - Periodo comparado'}
-                color={"#003E7D"}
-                tipoPeriodo={"Periodo comparado"}
-                tipoDadoEixoY={"Quant. de produtos vendidos"}
+                color={'#003E7D'}
+                tipoPeriodo={'Periodo comparado'}
+                tipoDadoEixoY={'Quant. de produtos vendidos'}
               />
             {/key}
-            
           {/if}
         </div>
         <div class="w-full"><div class="divider"></div></div>
@@ -167,38 +170,6 @@
             </div>
           {/if}
         {/key}
-        <div class="w-full">
-          <div class="divider"></div>
-        </div>
-        <div class="w-full">
-          {#key topCustomers.basePeriod}
-            <DefaultBarSvChart
-              fnLabel={topCustomers.basePeriod.map(c => c.customer_name)}
-              fnData={topCustomers.basePeriod.map(c => c.pedidos)}
-              height={200}
-              title={'Clientes com maior número de pedidos - Periodo Base'}
-              color={"#F4D002"}
-              tipoPeriodo={"Periodo base"}
-              tipoDadoEixoY={"Total de pedidos"}
-            />
-          {/key}
-        </div> 
-
-        <div class="w-full">
-          {#key topCustomers.comparedPeriod}
-            {#if topCustomers.comparedPeriod}
-              <DefaultBarSvChart
-                fnLabel={topCustomers.comparedPeriod.map(c => c.customer_name)}
-                fnData={topCustomers.comparedPeriod.map(c => c.pedidos)}
-                height={200}
-                title={'Clientes com maior número de pedidos - Periodo Comparado'}
-                color={"#003E7D"}
-                tipoPeriodo={"Periodo comparado"}
-                tipoDadoEixoY={"Total de pedidos"}
-              />
-            {/if}
-          {/key}
-        </div>
 
         <div class="w-full">
           <div class="divider"></div>
@@ -211,29 +182,31 @@
               fnData={topCustomerOrders.basePeriod.map(c => c.total_orders)}
               height={200}
               title={'Clientes com maior número de pedidos - Periodo Base'}
-              color={"#F4D002"}
-              tipoPeriodo={"Periodo base"}
-              tipoDadoEixoY={"Quantidade de pedidos"}
+              color={'#F4D002'}
+              tipoPeriodo={'Periodo base'}
+              tipoDadoEixoY={'Quantidade de pedidos'}
             />
           {/key}
         </div>
       </div>
 
-      <div class="w-full">
-        {#key topCustomerOrders.comparedPeriod}
-          {#if topCustomerOrders.comparedPeriod}
+      {#if topCustomerOrders.comparedPeriod}
+        <div class="w-full">
+          {#key topCustomerOrders.comparedPeriod}
             <DefaultBarSvChart
-              fnLabel={topCustomerOrders.comparedPeriod.map(c => c.customer_name)}
+              fnLabel={topCustomerOrders.comparedPeriod.map(
+                c => c.customer_name,
+              )}
               fnData={topCustomerOrders.comparedPeriod.map(c => c.total_orders)}
               height={200}
               title={'Clientes com maior número de pedidos - Periodo Comparado'}
-              color={"#003E7D"}
-              tipoPeriodo={"Periodo comparado"}
-              tipoDadoEixoY={"Quantidade de pedidos"}
+              color={'#003E7D'}
+              tipoPeriodo={'Periodo comparado'}
+              tipoDadoEixoY={'Quantidade de pedidos'}
             />
-          {/if}
-        {/key}
-      </div>
+          {/key}
+        </div>
+      {/if}
       <div class="w-full">
         <div class="divider"></div>
       </div>
@@ -244,9 +217,9 @@
             fnData={topSellingCategories.basePeriod.map(c => c.total_revenue)}
             height={200}
             title={'Categorias de produtos mais vendidas - Periodo Base'}
-            color={"#F4D002"}
-            tipoPeriodo={"Periodo base"}
-            tipoDadoEixoY={"Total faturado"}
+            color={'#F4D002'}
+            tipoPeriodo={'Periodo base'}
+            tipoDadoEixoY={'Total faturado'}
           />
         {/key}
       </div>
@@ -255,18 +228,21 @@
         {#key topSellingCategories.comparedPeriod}
           {#if topSellingCategories.comparedPeriod}
             <DefaultBarSvChart
-              fnLabel={topSellingCategories.comparedPeriod.map(c => c.category_name)}
-              fnData={topSellingCategories.comparedPeriod.map(c => c.total_revenue)}
+              fnLabel={topSellingCategories.comparedPeriod.map(
+                c => c.category_name,
+              )}
+              fnData={topSellingCategories.comparedPeriod.map(
+                c => c.total_revenue,
+              )}
               height={200}
               title={'Categorias de produtos mais vendidas - Periodo Comparado'}
-              color={"#003E7D"}
-              tipoPeriodo={"Periodo comparado"}
-              tipoDadoEixoY={"Total faturado"}
+              color={'#003E7D'}
+              tipoPeriodo={'Periodo comparado'}
+              tipoDadoEixoY={'Total faturado'}
             />
           {/if}
         {/key}
       </div>
-
     </Card.Content>
   </Card.Root>
   <Card.Root class="w-full lg:w-3/12">
