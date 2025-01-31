@@ -208,20 +208,7 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .from(s.customerOrderTable)
     .$dynamic()
 
-  const getTopCustomers = db!
-    .select({
-      customer_name: s.customerTable.name,
-      pedidos: sql<number>`count(${s.customerOrderTable.id})`,
-    })
-    .from(s.customerOrderTable)
-    .innerJoin(
-      s.customerTable,
-      eq(s.customerOrderTable.customer_id, s.customerTable.id),
-    )
-    .groupBy(s.customerOrderTable.customer_id)
-    .orderBy(desc(sql`count(${s.customerOrderTable.id})`))
-    .limit(LIMIT)
-    .$dynamic()
+
   // total in cents
   const getTotalPaidOrders = db!
     .select({
@@ -248,7 +235,7 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     AvgOrderValue,
     quantOrders,
     topRevenueProducts,
-    topCustomers,
+    
     mostPopularPaymentMethods,
     topSellingCategories,
     topCustomerOrders,
@@ -258,7 +245,6 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     comparationQuery(getAvgOrderValue, s.customerOrderTable.created_at),
     comparationQuery(getQuantOrders, s.customerOrderTable.created_at),
     comparationQuery(getTopRevenueProducts, s.orderItemTable.created_at),
-    comparationQuery(getTopCustomers, s.customerOrderTable.created_at),
     comparationQuery(
       getMostPopularPaymentMethods,
       s.orderPaymentTable.created_at,
@@ -280,8 +266,6 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     topOrderedProducts,
 
     mostPopularPaymentMethods,
-
-    topCustomers,
 
     clientesOciosos,
 
