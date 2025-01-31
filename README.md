@@ -1,7 +1,16 @@
-# Deds Template
+## License Notice
 
-My opinionated template for creating fast marketing websites that can have some
-more flavour if you put in the work
+This repository is intentionally unlicensed and adheres
+to a [no-permission license](https://choosealicense.com/no-permission/), as
+defined by [GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository#choosing-the-right-license).
+By accessing this repository, you acknowledge and agree to the following terms:
+
+- You are **not permitted to copy, distribute, or modify** any part of this repository.
+- Access to this repository is provided **exclusively for personal use** on your local machine. Any other use, including use in commercial projects, is prohibited.
+- Redistribution of any part of this repository or its contents, whether publicly or privately, is strictly prohibited.
+
+Violation of these terms will result in revocation of access.
+
 
 ### Installation
 
@@ -129,10 +138,6 @@ Check the database schema:
 ```bash
 npm run db:check
 ```
-
-# Contributing
-
-Feel free to submit issues or pull requests. Contributions are welcome!
 
 ## PRONTOS
 
