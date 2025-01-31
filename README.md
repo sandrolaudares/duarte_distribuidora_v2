@@ -17,10 +17,6 @@ Violation of these terms will result in revocation of access.
 Clone the repository and install the dependencies:
 
 ```bash
-git clone https://github.com/andre-brandao/template
-
-cd deds-template
-
 npm install
 # or
 pnpm install
