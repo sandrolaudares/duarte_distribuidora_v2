@@ -31,7 +31,7 @@
     data: {
       datasets : [{
         backgroundColor : "#F4D002",
-        label: "basePeriod",
+        label: "Periodo base",
         data : dataProps.basePeriod.map((d) => {
           return {
             x: d.total_quantity_ordered,
@@ -43,7 +43,7 @@
       },
     {
       backgroundColor : "#003E7D",
-      label: "comparedPeriod",
+      label: "Periodo comparado",
       data : dataProps.comparedPeriod?.map((d) => {
         return {
           x: d.total_quantity_ordered,

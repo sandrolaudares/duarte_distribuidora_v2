@@ -11,9 +11,11 @@
     color: string
     fnLabel : Array<string>
     fnData : Array<number>
+    tipoPeriodo : string
+    tipoDadoEixoY? : string
   }
 
-  let { width = 400, height = 300, id = '', title, color, fnLabel, fnData }: Props = $props()
+  let { width = 400, height = 300, id = '', title, color, fnLabel, fnData, tipoPeriodo, tipoDadoEixoY }: Props = $props()
 
   let config : ChartConfiguration = {
     type: 'bar',
@@ -21,13 +23,35 @@
       labels : fnLabel,
       datasets : [
         {
-          label: "basePeriod",
+          label: tipoPeriodo,
           backgroundColor : color,
           data : fnData,
           barThickness : 50
         },
       ]                  
     },
+    options :{
+      scales :{
+          y :{
+            title : {
+              display : tipoDadoEixoY ? true : false,
+              text : tipoDadoEixoY,
+              font : {
+                size : 18,
+                weight : "bolder",
+              }
+            },
+            ticks:{
+              callback : function(value){
+                if(tipoDadoEixoY == "Total faturado")
+                  return 'R$ ' + value.toLocaleString('pt-BR')
+                else
+                  return value
+              }
+            }
+          }
+      }
+    }
   }
 
   let chart: Chart | null = $state(null)

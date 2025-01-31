@@ -83,6 +83,7 @@
               title={'Principais produtos de receita'}
             />
           {/key}
+          <div class="divider"></div>
         </div>
         <div class="w-full">
           {#key topOrderedProducts}
@@ -92,6 +93,8 @@
               height={200}
               title={'Produtos mais vendidos - Periodo base'}
               color={"#F4D002"}
+              tipoPeriodo={"Periodo base"}
+              tipoDadoEixoY={"Quant. de produtos vendidos"}
             />
           {/key}
         </div>
@@ -104,10 +107,14 @@
                 height={200}
                 title={'Produtos mais vendidos - Periodo comparado'}
                 color={"#003E7D"}
+                tipoPeriodo={"Periodo comparado"}
+                tipoDadoEixoY={"Quant. de produtos vendidos"}
               />
             {/key}
+            
           {/if}
         </div>
+        <div class="w-full"><div class="divider"></div></div>
         {#key mostPopularPaymentMethods.basePeriod}
           <div class="w-1/2">
             <SvChart
@@ -160,7 +167,9 @@
             </div>
           {/if}
         {/key}
-        
+        <div class="w-full">
+          <div class="divider"></div>
+        </div>
         <div class="w-full">
           {#key topCustomers.basePeriod}
             <DefaultBarSvChart
@@ -169,6 +178,8 @@
               height={200}
               title={'Clientes com maior número de pedidos - Periodo Base'}
               color={"#F4D002"}
+              tipoPeriodo={"Periodo base"}
+              tipoDadoEixoY={"Total de pedidos"}
             />
           {/key}
         </div> 
@@ -182,9 +193,15 @@
                 height={200}
                 title={'Clientes com maior número de pedidos - Periodo Comparado'}
                 color={"#003E7D"}
+                tipoPeriodo={"Periodo comparado"}
+                tipoDadoEixoY={"Total de pedidos"}
               />
             {/if}
           {/key}
+        </div>
+
+        <div class="w-full">
+          <div class="divider"></div>
         </div>
 
         <div class="w-full">
@@ -195,6 +212,8 @@
               height={200}
               title={'Clientes com maior número de pedidos - Periodo Base'}
               color={"#F4D002"}
+              tipoPeriodo={"Periodo base"}
+              tipoDadoEixoY={"Quantidade de pedidos"}
             />
           {/key}
         </div>
@@ -209,11 +228,15 @@
               height={200}
               title={'Clientes com maior número de pedidos - Periodo Comparado'}
               color={"#003E7D"}
+              tipoPeriodo={"Periodo comparado"}
+              tipoDadoEixoY={"Quantidade de pedidos"}
             />
           {/if}
         {/key}
       </div>
-
+      <div class="w-full">
+        <div class="divider"></div>
+      </div>
       <div class="w-full">
         {#key topSellingCategories.basePeriod}
           <DefaultBarSvChart
@@ -222,6 +245,8 @@
             height={200}
             title={'Categorias de produtos mais vendidas - Periodo Base'}
             color={"#F4D002"}
+            tipoPeriodo={"Periodo base"}
+            tipoDadoEixoY={"Total faturado"}
           />
         {/key}
       </div>
@@ -235,6 +260,8 @@
               height={200}
               title={'Categorias de produtos mais vendidas - Periodo Comparado'}
               color={"#003E7D"}
+              tipoPeriodo={"Periodo comparado"}
+              tipoDadoEixoY={"Total faturado"}
             />
           {/if}
         {/key}
