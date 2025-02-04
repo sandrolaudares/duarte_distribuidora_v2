@@ -17,9 +17,6 @@ importers:
       '@oslojs/encoding':
         specifier: ^1.1.0
         version: 1.1.0
-      '@svelte-plugins/datepicker':
-        specifier: ^1.0.9
-        version: 1.0.9
       '@tanstack/svelte-table':
         specifier: 9.0.0-alpha.10
         version: 9.0.0-alpha.10(svelte@5.17.0)
@@ -1489,9 +1486,6 @@ packages:
     resolution: {integrity: sha512-D6qjsXGcvhTjv0kI4fU8tUuBDF/Ueee4SVX79VfNDXZa64TfCW1Slkb6Z7O1p7vflqZjcmOVdZlqf8gvJxc6og==}
     cpu: [x64]
     os: [win32]
-
-  '@svelte-plugins/datepicker@1.0.9':
-    resolution: {integrity: sha512-HagVB8jLUwNFbwfAcJBNURN1QMQ+qAQQjLJPH97GMqI6auo7jIxOMiSIEWpx7SxTDewHJAlH1izQy3cwBVV8oQ==}
 
   '@sveltejs/adapter-auto@3.3.1':
     resolution: {integrity: sha512-5Sc7WAxYdL6q9j/+D0jJKjGREGlfIevDyHSQ2eNETHcB1TKlQWHcAo8AS8H1QdjNvSXpvOwNjykDUHPEAyGgdQ==}
@@ -4477,8 +4471,6 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.30.1':
     optional: true
 
-  '@svelte-plugins/datepicker@1.0.9': {}
-
   '@sveltejs/adapter-auto@3.3.1(@sveltejs/kit@2.15.2(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.17.0)(vite@6.0.7(@types/node@22.2.0)(jiti@1.21.6)(yaml@2.5.0)))(svelte@5.17.0)(vite@6.0.7(@types/node@22.2.0)(jiti@1.21.6)(yaml@2.5.0)))':
     dependencies:
       '@sveltejs/kit': 2.15.2(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.17.0)(vite@6.0.7(@types/node@22.2.0)(jiti@1.21.6)(yaml@2.5.0)))(svelte@5.17.0)(vite@6.0.7(@types/node@22.2.0)(jiti@1.21.6)(yaml@2.5.0))
@@ -5111,7 +5103,6 @@ snapshots:
       '@libsql/client': 0.14.0
       '@oslojs/crypto': 1.0.1
       '@oslojs/encoding': 1.1.0
-      '@svelte-plugins/datepicker': 1.0.9
       '@tanstack/svelte-table': 9.0.0-alpha.10(svelte@5.17.0)
       '@trpc/client': 10.45.2(@trpc/server@10.45.2)
       '@tursodatabase/api': 1.9.0
