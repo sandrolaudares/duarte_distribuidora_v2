@@ -10,6 +10,7 @@ import { and, eq, SQL, count, like } from 'drizzle-orm'
 import { centralDb } from '$lib/server/db/central'
 import { stockTransference, tenants } from '$lib/server/db/central/schema'
 import { getDistribuidoras } from '$lib/server/db/central/constroller'
+import { pageConfig } from '$lib/config'
 
 export const load = (async ({ url, locals: { tenantDb, tenantInfo },depends}) => {
   depends('tenant:solicitacoes')
@@ -20,7 +21,7 @@ export const load = (async ({ url, locals: { tenantDb, tenantInfo },depends}) =>
   }
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
-  const size = 15
+  const size = pageConfig.rowPages
   const pageSize = Number(searchParams.get('pageSize') ?? size)
 
   const name = searchParams.get('sku_name')

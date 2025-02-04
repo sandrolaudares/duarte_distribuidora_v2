@@ -8,11 +8,12 @@ import type { PageServerLoad } from './$types'
 import * as schema from '$lib/server/db/schema'
 import { and, asc, count, eq, gte, like, lte, sql } from 'drizzle-orm'
 import { stock } from '$lib/server/db/controller'
+import { pageConfig } from '$lib/config'
 
 export const load = (async ({ url, locals: { tenantDb } }) => {
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
-  const pageSize = Number(searchParams.get('pageSize') ?? 100)
+  const pageSize = Number(searchParams.get('pageSize') ?? pageConfig.rowPages)
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_direction')

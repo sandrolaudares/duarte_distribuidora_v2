@@ -26,12 +26,13 @@ import {
 import { bugReport, customer, stock } from '$lib/server/db/controller'
 import { gte } from 'drizzle-orm'
 import { error } from '@sveltejs/kit'
+import { pageConfig } from '$lib/config'
 
 export const load = (async ({ params,url, locals: { tenantDb } }) => {
   const skuID = params.id
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
-  const pageSize = Number(searchParams.get('pageSize') ?? 10)
+  const pageSize = Number(searchParams.get('pageSize') ?? pageConfig.rowPages)
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_order')

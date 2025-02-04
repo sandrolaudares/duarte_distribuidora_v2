@@ -22,9 +22,10 @@ import {
 } from 'drizzle-orm'
 import { error } from '@sveltejs/kit'
 import { Monad } from '$lib/utils'
+import { pageConfig } from '$lib/config'
 
 export const load = (async ({ url, locals: { tenantDb } }) => {
-  const size = 13
+  const size = pageConfig.rowPages
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
   const pageSize = Number(searchParams.get('pageSize') ?? size)

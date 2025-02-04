@@ -35,6 +35,7 @@
   import { format } from 'date-fns'
   import { goto } from '$app/navigation'
   import { icons } from '$lib/utils'
+  import { pageConfig } from '$lib/config'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -42,7 +43,7 @@
   let estoque = data.sku
 
   const table = new TableHandler(data.rows, {
-    rowsPerPage: 13,
+    rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
   })
 

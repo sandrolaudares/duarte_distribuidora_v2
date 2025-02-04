@@ -24,6 +24,7 @@
   import { toast } from 'svelte-sonner'
   import EditCaixa from './EditCaixa.svelte'
   import type { Role } from '$lib/utils/permissions'
+  import { pageConfig } from '$lib/config'
 
   let { data }: { data: PageData } = $props()
   let isOpenModal: HTMLDialogElement | null = null
@@ -31,7 +32,7 @@
   const filters = new SSRFilters()
 
   const table = new TableHandler(data.rows, {
-    rowsPerPage: 10,
+    rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
   })
 

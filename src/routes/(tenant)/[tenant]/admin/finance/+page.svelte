@@ -25,13 +25,14 @@
   import ChangeExpireDate from './ChangeExpireDate.svelte'
   import { TreeDeciduous } from 'lucide-svelte'
   import { getFilterValue } from '$lib/utils'
+  import { pageConfig } from '$lib/config'
 
   let { data }: { data: PageData } = $props()
 
   const filters = new SSRFilters()
 
   const table = new TableHandler(data.rows, {
-    rowsPerPage: 100,
+    rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
     selectBy: 'id',
   })

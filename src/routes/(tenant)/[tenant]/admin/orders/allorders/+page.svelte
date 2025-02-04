@@ -30,7 +30,7 @@
   const filters = new SSRFilters()
 
   const table = new TableHandler(data.rows, {
-    rowsPerPage: 10,
+    rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
   })
 

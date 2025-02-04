@@ -21,13 +21,14 @@
   import { trpc } from '$trpc/client'
   import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
+  import { pageConfig } from '$lib/config'
 
   let { data }: { data: PageData } = $props()
 
   const filters = new SSRFilters()
 
   const table = new TableHandler(data.rows, {
-    rowsPerPage: 10,
+    rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
   })
 

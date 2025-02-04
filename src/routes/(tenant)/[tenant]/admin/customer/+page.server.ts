@@ -9,11 +9,12 @@ import {
   getOrderBy,
 } from '$lib/server/db/utils'
 import { and, eq, getTableColumns, SQL, count, like } from 'drizzle-orm'
+import { pageConfig } from '$lib/config'
 
 export const load = (async ({ url,locals:{tenantDb} }) => {
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
-  const pageSize = Number(searchParams.get('pageSize') ?? 20)
+  const pageSize = Number(searchParams.get('pageSize') ?? pageConfig.rowPages)
 
   const name = searchParams.get('name')
   const email = searchParams.get('email')

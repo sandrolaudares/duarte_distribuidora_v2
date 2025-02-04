@@ -26,6 +26,7 @@
   import { invalidate, invalidateAll } from '$app/navigation'
   import DateFilter from '$lib/components/DateFilter.svelte'
   import * as Select from '$lib/components/ui/select/index'
+  import { pageConfig } from '$lib/config'
 
   let { data }: { data: PageData } = $props()
 
@@ -34,7 +35,7 @@
   let isOpenModal: HTMLDialogElement | null = null
 
   const table = new TableHandler(data.rows, {
-    rowsPerPage: 100,
+    rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
   })
 
