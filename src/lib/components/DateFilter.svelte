@@ -124,7 +124,7 @@
       {/if}
       <div class="flex">
         {#if !futureDates}
-        <div class="flex flex-col gap-2 justify-between p-4">
+        <div class="flex flex-col gap-2  p-4">
           {@render btn('Ultima Semana', {
             start: today('America/Sao_Paulo').subtract({ days: 7 }),
             end: today('America/Sao_Paulo'),
