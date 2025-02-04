@@ -20,10 +20,10 @@
   import type { PageData } from './$types'
   import { toast } from 'svelte-sonner'
   import { trpc } from '$trpc/client'
-  import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
-  import { format } from 'date-fns'
   import { goto } from '$app/navigation'
+  import { pageConfig } from '$lib/config'
+  import { DateFormatter } from '@internationalized/date'
 
   let { data }: { data: PageData } = $props()
 
@@ -32,6 +32,10 @@
   const table = new TableHandler(data.rows, {
     rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
+  })
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
   })
 
   table.setPage(Number(filters.get('page')) || 1)
@@ -101,7 +105,7 @@
             <td><b>{row.observation}</b></td>
             <td>
               <b>
-                {row.created_at ? format(row.created_at, 'dd/MM/yyyy') : ''}
+                {row.created_at ? df.format(row.created_at) : ''}
               </b>
             </td>
             <td><b class="text-xl text-success">R${row.total / 100}</b></td>

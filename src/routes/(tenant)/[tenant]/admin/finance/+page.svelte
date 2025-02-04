@@ -18,14 +18,13 @@
   import type { PageData } from './$types'
   import { toast } from 'svelte-sonner'
   import { trpc } from '$trpc/client'
-  import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
   import DateFilter from '$lib/components/DateFilter.svelte'
-  import { format } from 'date-fns'
   import ChangeExpireDate from './ChangeExpireDate.svelte'
   import { TreeDeciduous } from 'lucide-svelte'
   import { getFilterValue } from '$lib/utils'
   import { pageConfig } from '$lib/config'
+  import { DateFormatter } from '@internationalized/date'
 
   let { data }: { data: PageData } = $props()
 
@@ -35,6 +34,10 @@
     rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
     selectBy: 'id',
+  })
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
   })
 
   table.setPage(Number(filters.get('page')) || 1)
@@ -204,7 +207,7 @@
             </td>
             <td>{row.id}</td>
             <td><b>{row.name}</b></td>
-            <td><b>{format(row.created_at!, 'dd/MM/yyyy')}</b></td>
+            <td><b>{df.format(row.created_at!)}</b></td>
             <td>
               <b>
                 <!-- {row.expire_at

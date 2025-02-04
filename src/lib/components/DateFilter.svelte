@@ -29,7 +29,7 @@
 
   let { startValue: sVProps, endValue, onChange, title, futureDates }: Props = $props()
 
-  const df = new DateFormatter('en-US', {
+  const df = new DateFormatter('pt-BR', {
     dateStyle: 'medium',
   })
 

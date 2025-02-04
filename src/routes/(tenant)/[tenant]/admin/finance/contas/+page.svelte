@@ -4,7 +4,6 @@
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import { fade, slide, fly } from 'svelte/transition'
   import type { PageData } from './$types'
-  import { format, isLastDayOfMonth } from 'date-fns'
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
 
@@ -27,6 +26,7 @@
   import DateFilter from '$lib/components/DateFilter.svelte'
   import * as Select from '$lib/components/ui/select/index'
   import { pageConfig } from '$lib/config'
+  import { DateFormatter } from '@internationalized/date'
 
   let { data }: { data: PageData } = $props()
 
@@ -37,6 +37,10 @@
   const table = new TableHandler(data.rows, {
     rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
+  })
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
   })
 
   table.setPage(Number(filters.get('page')) || 1)
@@ -245,11 +249,11 @@
               </td>
               <td class="p-3">{conta.supName}</td>
               <td class="p-3">{conta.catName ?? 'Não cadastrado'}</td>
-              <td class="p-3">{format(conta.expire_at!, 'dd/MM/yyyy')}</td>
+              <td class="p-3">{df.format(conta.expire_at!)}</td>
 
               <td class="p-3">
                 {conta.paid_at
-                  ? format(conta.paid_at, 'dd/MM/yyyy')
+                  ? df.format(conta.paid_at)
                   : 'Ainda não foi paga'}
               </td>
               <td class="p-3">R${(conta.valor_conta / 100).toFixed(2)}</td>
@@ -338,7 +342,7 @@
           id="expire_at"
           type="date"
           class="input input-bordered w-full"
-          min={format(new Date(), 'yyyy-MM-dd')}
+          min={df.format(new Date())}
           onchange={e => {
             const v = (e.target as HTMLInputElement).value
             const dateV = new Date(v + 'T00:00:00')

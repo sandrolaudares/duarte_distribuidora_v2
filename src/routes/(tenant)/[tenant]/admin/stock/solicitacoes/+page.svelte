@@ -16,7 +16,6 @@
 
   import type { PageData } from './$types'
   import NoResults from '$lib/components/NoResults.svelte'
-  import { format } from 'date-fns'
 
   import { toast } from 'svelte-sonner'
 
@@ -24,6 +23,7 @@
   import { page } from '$app/stores'
   import { goto, invalidate, invalidateAll } from '$app/navigation'
   import Loading from '$lib/components/Loading.svelte'
+  import { DateFormatter } from '@internationalized/date'
 
   let { data }: { data: PageData } = $props()
 
@@ -35,6 +35,10 @@
     rowsPerPage: data.size,
     totalRows: data.count,
     selectBy: 'id',
+  })
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
   })
 
   table.setPage(Number(filters.get('page')) || 1)
@@ -138,7 +142,7 @@
               )?.name}
             </td>
             <td>{row.quantity}</td>
-            <td>{format(row.created_at!, 'dd/MM/yyyy')}</td>
+            <td>{df.format(row.created_at!)}</td>
           </tr>
         {/each}
       </tbody>

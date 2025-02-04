@@ -20,10 +20,10 @@
   import type { PageData } from './$types'
   import { toast } from 'svelte-sonner'
   import { trpc } from '$trpc/client'
-  import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
-  import { format } from 'date-fns'
   import { goto } from '$app/navigation'
+  import { pageConfig } from '$lib/config'
+  import { DateFormatter } from '@internationalized/date'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -31,6 +31,10 @@
   const table = new TableHandler(data.rows, {
     rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
+  })
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
   })
 
   table.setPage(Number(filters.get('page')) || 1)
@@ -98,7 +102,7 @@
             <td>{JSON.stringify(row.metadata)}</td>
             <td>{row.error ?? 'Não tem'}</td>
             <td>
-              {row.created_at ? format(row.created_at, 'dd/MM/yyyy') : ''}
+              {row.created_at ? df.format(row.created_at) : ''}
             </td>
           </tr>
         {/each}

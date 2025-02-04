@@ -18,11 +18,10 @@
   import type { PageData } from './$types'
   import { toast } from 'svelte-sonner'
   import { trpc } from '$trpc/client'
-  import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
-  import DateFilter from '../../../../../lib/components/DateFilter.svelte'
-  import { format } from 'date-fns'
+  import DateFilter from '$lib/components/DateFilter.svelte'
   import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
+  import { DateFormatter } from '@internationalized/date'
 
   let { data }: { data: PageData } = $props()
 
@@ -43,6 +42,10 @@
       console.error(error)
     }
     return data.rows
+  })
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
   })
 
   function add() {
@@ -142,7 +145,7 @@
               />
             </td>
             <td>{row.quantity}</td>
-            <td>{format(row.created_at!, 'dd/MM/yyyy') ?? ''}</td>
+            <td>{df.format(row.created_at!) ?? ''}</td>
             <!--TODO: Change created at in DB to timestamp-->
             <td>
               <a href="/admin/stock/{row.sku}" class="badge badge-primary">

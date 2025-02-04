@@ -3,12 +3,12 @@
   import { getImagePath } from '$lib/utils'
   import type { RouterInputs, RouterOutputs } from '$trpc/router'
   import PaymentFiado from '../PaymentFiado.svelte'
-  import { format } from 'date-fns';
   import SenhaAdmin from '../SenhaAdmin.svelte'
 
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
   import { toast } from 'svelte-sonner'
+  import { DateFormatter } from '@internationalized/date'
 
   export let click_confirm = () => {}
   export let click_refuse = () => {}
@@ -26,14 +26,16 @@
   let isOpenModalCancel: HTMLDialogElement | null = null
 
   let amount_paid_order = (order?.amount_paid ?? 0) - troco
-
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
+  })
 </script>
 
 <div class="rounded-lg bg-base-200 bg-opacity-80 p-2 shadow-md">
   <div class="flex justify-between">
     <div class="flex items-center gap-3">
       <span class="font-semibold">
-        {format(order.created_at!,'dd/MM/yyyy')}
+        {df.format(order.created_at!)}
       </span>
         {#if order.is_fiado}
           <p class="text-sm font-semibold text-error">É um pedido fiado!</p>

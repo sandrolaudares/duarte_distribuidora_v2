@@ -25,14 +25,18 @@
     Pagination,
   } from '@vincjo/datatables'
   import NoResults from '$lib/components/NoResults.svelte'
-  import { format } from 'date-fns'
   import ThCalendar from './ThCalendar.svelte'
   import InfoCliente from './InfoCliente.svelte'
   import PedidoCliente from './PedidoCliente.svelte'
+  import { DateFormatter } from '@internationalized/date'
 
   export let table
 
   export let total = 0
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
+  })
 </script>
 
 <div class="mt-10 h-full max-h-[calc(100vh-38vh)]">
@@ -75,7 +79,7 @@
             <tr>
               <td>{row.id}</td>
               <td>{row.status}</td>
-              <td>{format(row.created_at, 'dd/MM/yyyy')}</td>
+              <td>{df.format(row.created_at, 'dd/MM/yyyy')}</td>
               <td>{row.observation}</td>
               <td class="text-lg font-semibold">
                 R${(row.total / 100).toFixed(2)}

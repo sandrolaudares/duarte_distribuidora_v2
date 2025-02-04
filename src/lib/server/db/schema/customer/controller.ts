@@ -38,7 +38,6 @@ import { cashierTable } from '../distribuidora'
 import { TRPCError } from '@trpc/server'
 import { userTable } from '../user'
 import type { TenantDbType } from '../../tenant'
-import { id } from 'date-fns/locale'
 import { error } from '@sveltejs/kit'
 
 export const customer = (db: TenantDbType) => ({

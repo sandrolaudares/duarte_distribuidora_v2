@@ -20,7 +20,7 @@ import {
   type SQLiteSelect,
 } from 'drizzle-orm/sqlite-core'
 
-import { subDays } from 'date-fns'
+import { today } from '@internationalized/date'
 
 // export async function tableHelper<T extends SQLiteSelect>(
 //   qb: T,
@@ -134,14 +134,14 @@ export function innerJoinOnMany<T extends SQLiteSelect>(
 export function withinDate<T extends SQLiteSelect>(
   qb: T,
   column: AnyColumn,
-  startDate: Date = subDays(new Date(), 7),
+  startDate = today('America/Sao_Paulo').subtract({ days: 7 }),
   endDate: Date,
 ) {
   return qb.where(and(gte(column, startDate), lte(column, endDate)))
 }
 
 export function withinDate2(
-  startDate: Date = subDays(new Date(), 7),
+  startDate = today('America/Sao_Paulo').subtract({ days: 7 }),
   endDate: Date,
 ) {
   return function <T extends SQLiteSelect>(qb: T, column: AnyColumn) {

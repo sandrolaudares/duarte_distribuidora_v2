@@ -1,6 +1,7 @@
 <script lang="ts" generics="Item">
+  import { DateFormatter } from '@internationalized/date'
+
   // import Datepicker from '$lib/components/input/date/datepicker.svelte'
-  import { format } from 'date-fns'
 
   // type Item = $$Generic;
 
@@ -25,6 +26,10 @@
     onUpdateValue(value)
     // }
   }
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
+  })
 </script>
 
 {#if isEditing === true}
@@ -39,8 +44,8 @@
           const dateV = new Date(v + 'T00:00:00')
           value = dateV
         }}
-        value={format(value, 'yyyy-MM-dd')}
-        min={format(new Date(), 'yyyy-MM-dd')}
+        value={df.format(value)}
+        min={df.format(new Date())}
       />
       <button type="submit">✅</button>
       <button on:click={handleCancel}>❌</button>
@@ -51,6 +56,6 @@
     on:click={() => (isEditing = true)}
     class={!value ? 'text-error' : ''}
   >
-    {value ? format(value, 'dd/MM/yyyy') : 'Não cadastrado'}
+    {value ? df.format(value) : 'Não cadastrado'}
   </button>
 {/if}

@@ -16,7 +16,6 @@
 
   import type { PageData } from './$types'
   import NoResults from '$lib/components/NoResults.svelte'
-  import { format } from 'date-fns'
 
   import { toast } from 'svelte-sonner'
 
@@ -25,6 +24,7 @@
   import { goto, invalidate, invalidateAll } from '$app/navigation'
   import Loading from '$lib/components/Loading.svelte'
   import DateFilter from '$lib/components/DateFilter.svelte'
+  import { DateFormatter } from '@internationalized/date'
 
   let { data }: { data: PageData } = $props()
 
@@ -36,6 +36,10 @@
     rowsPerPage: data.size,
     totalRows: data.count,
     selectBy: 'id',
+  })
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
   })
 
   table.setPage(Number(filters.get('page')) || 1)
@@ -101,7 +105,7 @@
           <tr>
             <td>{row.id}</td>
             <td>{row.sku_name}</td>
-            <td>{format(row.created_at!, 'dd/MM/yyyy')}</td>
+            <td>{df.format(row.created_at!)}</td>
             <td>
               {data.distribuidoras.find(
                 distribuidora => distribuidora.tenantId === row.toTenantId,

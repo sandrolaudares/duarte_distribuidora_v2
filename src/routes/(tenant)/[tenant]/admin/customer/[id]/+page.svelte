@@ -25,7 +25,6 @@
     Pagination,
   } from '@vincjo/datatables'
   import NoResults from '$lib/components/NoResults.svelte'
-  import { format } from 'date-fns'
   import ThCalendar from './ThCalendar.svelte'
   import InfoCliente from './InfoCliente.svelte'
   import PedidoCliente from './PedidoCliente.svelte'

@@ -1,10 +1,14 @@
 <script lang="ts">
   import type { InsertOrderPayment, SelectOrderPayment } from "$lib/server/db/schema"
-  import { format } from "date-fns"
+  import { DateFormatter } from "@internationalized/date"
 
   export let payment:Omit<InsertOrderPayment,'order_id'>
   export let created_by = ''
   export let i
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
+  })
 </script>
 
 <div
@@ -12,7 +16,7 @@
 >
   Pagamento #{i + 1}
   {#if payment.created_at}
-  - {format(payment.created_at,'dd/MM/yyyy')}
+  - {df.format(payment.created_at)}
   {/if}
   <p class="bg-opacity-60">
     <span class="font-semibold">Quantidade paga:</span>

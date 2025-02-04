@@ -31,7 +31,11 @@ import { TRPCError } from '@trpc/server'
 import { geocodeAddress, getDistanceFromLatLonInKm } from '$lib/utils/distance'
 import { env } from '$env/dynamic/private'
 import { getDistribuidoraLatLong } from '../../central/constroller'
-import { format } from 'date-fns'
+import { DateFormatter } from '@internationalized/date'
+
+const df = new DateFormatter('pt-BR', {
+  dateStyle: 'medium',
+})
 
 export const customer = router({
   insertCustomer: publicProcedure
@@ -559,7 +563,7 @@ export const customer = router({
       const { tenantDb } = ctx
       const user = ctx.locals.user
       await bugReport(tenantDb).insertLogs({
-        text: `${user?.username} atualizou a data de vencimento do pedido ${order_id} para ${format(expire_at, 'dd/MM/yyyy')}`,
+        text: `${user?.username} atualizou a data de vencimento do pedido ${order_id} para ${df.format(expire_at)}`,
         created_by: user?.id,
         metadata: {
           order_id,

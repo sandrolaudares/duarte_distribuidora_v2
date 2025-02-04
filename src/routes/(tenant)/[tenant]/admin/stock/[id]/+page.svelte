@@ -30,12 +30,11 @@
   import type { PageData } from './$types'
   import { toast } from 'svelte-sonner'
   import { trpc } from '$trpc/client'
-  import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
-  import { format } from 'date-fns'
   import { goto } from '$app/navigation'
   import { icons } from '$lib/utils'
   import { pageConfig } from '$lib/config'
+  import { DateFormatter } from '@internationalized/date'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -57,6 +56,10 @@
       console.error(error)
     }
     return data.rows
+  })
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
   })
 
   let chartData = $derived.by(() => {
@@ -149,7 +152,7 @@
               {#each data.rows as row}
                 <tr>
                   <td>
-                    {format(new Date(row.created_at || ''), 'dd/MM/yyyy')}
+                    {df.format(new Date(row.created_at || ''))}
                   </td>
                   <td>{row.type}</td>
                   <td>{row.quantity}</td>
@@ -188,7 +191,7 @@
               <Axis placement="left" grid rule />
               <Axis
                 placement="bottom"
-                format={d => format(d, 'dd/MM/yyyy')}
+                format={d => df.format(d)}
                 rule
                 tickLabelProps={{
                   rotate: 290,
@@ -206,7 +209,7 @@
 
             <Tooltip.Root let:data>
               <Tooltip.Header>
-                {format(data.created_at, 'dd/MM/yyy')}
+                {df.format(data.created_at)}
               </Tooltip.Header>
               <Tooltip.List>
                 <Tooltip.Item

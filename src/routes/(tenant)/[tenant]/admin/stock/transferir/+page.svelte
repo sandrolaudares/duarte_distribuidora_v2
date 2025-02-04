@@ -14,7 +14,6 @@
   import { createInsertSchema } from 'drizzle-zod'
   import { Item } from '$lib/components/ui/dropdown-menu'
   import ListaProdutos from './ListaProdutos.svelte'
-  import { se } from 'date-fns/locale'
 
   export let data: PageData
 

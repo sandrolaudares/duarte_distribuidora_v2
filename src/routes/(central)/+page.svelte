@@ -2,7 +2,6 @@
   import type { PageData } from './$types'
   import {PUBLIC_DOMAIN} from '$env/static/public'
   import { page } from '$app/stores'
-  import { format } from 'date-fns'
   export let data: PageData
 </script>
 
