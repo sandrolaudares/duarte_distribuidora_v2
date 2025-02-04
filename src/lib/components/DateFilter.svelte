@@ -1,105 +1,173 @@
 <script lang="ts">
+  import CalendarIcon from 'lucide-svelte/icons/calendar'
+  import type { DateRange } from 'bits-ui'
+  import {
+    CalendarDate,
+    DateFormatter,
+    type DateValue,
+    getLocalTimeZone,
+    today,
+    toCalendar,
+  } from '@internationalized/date'
+  import { cn } from '$lib/utils'
+  import { buttonVariants } from '$lib/components/ui/button/index.js'
+  import { RangeCalendar } from '$lib/components/ui/range-calendar/index.js'
+  import * as Popover from '$lib/components/ui/popover/index.js'
+
+  import * as Select from '$lib/components/ui/select/index.js'
+  import Button from './ui/button/button.svelte'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
-  import Datepicker from '$lib/components/input/date/datepicker.svelte'
-  import { format } from 'date-fns'
+  import Separator from './ui/separator/separator.svelte'
 
-  const today = new Date()
-  const filters = new SSRFilters()
-
-  export let onchange:
-    | undefined
-    | ((dateStart: number | null, dateEnd: number | null) => void) = undefined
-
-  export let startDate: Date | null = null
-  export let endDate: Date | null = null
-  let dateFormat = 'dd/MM/yyyy'
-  let isOpen = false
-
-  export let enableFutureDates = false
-  export let enablePastDates = true
-  export let isRange = true
-
-  let formattedStartDate = ''
-
-  const onClearDates = () => {
-    startDate = null
-    endDate = null
-    onchange?.(start, end)
+  interface Props {
+    startValue?: DateValue
+    endValue?: DateValue
+    onChange?: (startDate: number, endDate: number) => void
+    title?: string
+    futureDates?: boolean
   }
 
-  const toggleDatePicker = () => (isOpen = !isOpen)
-  const formatDate = (date: Date) =>
-    (date && format(new Date(date), dateFormat)) || ''
+  let { startValue: sVProps, endValue, onChange, title, futureDates }: Props = $props()
 
-  $: formattedStartDate = startDate ? formatDate(startDate) : ''
-  $: formattedEndDate = endDate ? formatDate(endDate) : ''
+  const df = new DateFormatter('en-US', {
+    dateStyle: 'medium',
+  })
 
-  $: start = startDate ? new Date(startDate).setHours(0, 0, 0, 0) : null
-  $: end = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : null
+  let value: DateRange = $state({
+    start: sVProps ? sVProps : undefined,
+    end: endValue ? endValue : undefined,
+  })
 
-  $: {
-    if (endDate != null && startDate != null) {
-      onchange?.(start, end)
+  let startValue: DateValue | undefined = $state(sVProps)
+
+  const DateRanges = [
+    { value: 0, label: 'Today' },
+    { value: 1, label: 'Tomorrow' },
+    { value: 3, label: 'In 3 days' },
+    { value: 7, label: 'In a week' },
+  ]
+  const valueString = $derived({
+    start: value.start ? df.format(value.start.toDate(getLocalTimeZone())) : '',
+    end: value.end ? df.format(value.end.toDate(getLocalTimeZone())) : '',
+  })
+
+  let filters = new SSRFilters()
+
+  const clearCalendar = () => {
+    startValue = undefined
+    value.start = undefined
+    value.end = undefined
+    if (title == 'Comparar'){
+      filters.clear('compareStartDate', 'compareEndDate')
+    } 
+    if(!title){
+      filters.clear('startDate', 'endDate')
     }
+    if (title == 'Base')
+      filters.update({
+        startDate: today('America/Sao_Paulo')
+          .subtract({ days: 7 })
+          .toDate(getLocalTimeZone())
+          .getTime()
+          .toString(),
+        endDate: today('America/Sao_Paulo')
+          .toDate(getLocalTimeZone())
+          .getTime()
+          .toString(),
+      })
   }
-
-  export let alignP = 'left'
 </script>
 
-<div class="date-filter">
-  <Datepicker
-    align={alignP}
-    bind:isOpen
-    bind:startDate
-    bind:endDate
-    {isRange}
-    showPresets
-    {enablePastDates}
-    {enableFutureDates}
+{#snippet btn(label: string, range: DateRange)}
+  <Button
+  variant="outlinePrimary"
+    onclick={() => {
+      value = range
+      if (onChange && range.start && range.end) {
+        onChange(
+          range.start.toDate(getLocalTimeZone()).getTime(),
+          range.end.toDate(getLocalTimeZone()).getTime(),
+        )
+      }
+    }}
   >
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <div class="date-field" on:click={toggleDatePicker} class:open={isOpen}>
-      <i class="icon-calendar" />
-      <div class="date">
-        {#if startDate}
-          {formattedStartDate} - {formattedEndDate}
+    {label}
+  </Button>
+{/snippet}
+
+<div class="ms-5 grid gap-2">
+  <Popover.Root>
+    <Popover.Trigger
+      class={cn(
+        buttonVariants({ variant: 'ghost' }),
+        !value && 'text-muted-foreground',
+      )}
+    >
+      <CalendarIcon class="mr-2 size-4" />
+      {#if value && value.start}
+        {#if value.end}
+          {df.format(value.start.toDate(getLocalTimeZone()))} - {df.format(
+            value.end.toDate(getLocalTimeZone()),
+          )}
         {:else}
-          Escolha uma data
+          {df.format(value.start.toDate(getLocalTimeZone()))}
         {/if}
-      </div>
-      {#if startDate}
-        <span on:click={onClearDates}>
-          <i class="os-icon-x" />
-        </span>
+      {:else if startValue}
+        {df.format(startValue.toDate(getLocalTimeZone()))}
+      {:else}
+        Escolha uma data
       {/if}
-    </div>
-  </Datepicker>
+    </Popover.Trigger>
+    <Popover.Content class="w-auto p-0" align="start">
+      {#if title}
+        <p class="mt-3 text-center text-lg font-semibold">{title}</p>
+      {/if}
+      <div class="flex">
+        {#if !futureDates}
+        <div class="flex flex-col gap-2 justify-between p-4">
+          {@render btn('Ultima Semana', {
+            start: today('America/Sao_Paulo').subtract({ days: 7 }),
+            end: today('America/Sao_Paulo'),
+          })}
+          {@render btn('Ultimo Mês', {
+            start: today('America/Sao_Paulo').subtract({ months: 1 }),
+            end: today('America/Sao_Paulo'),
+          })}
+          {@render btn('Ultimo Ano', {
+            start: today('America/Sao_Paulo').subtract({ years: 1 }),
+            end: today('America/Sao_Paulo'),
+          })}
+          {@render btn('Todo periodo', {
+            start: today('America/Sao_Paulo').subtract({ years: 50 }),
+            end: today('America/Sao_Paulo'),
+          })}
+          <button onclick={clearCalendar} class="btn btn-outline btn-error">Limpar</button>
+        </div>
+        <Separator orientation="vertical" class="my-4" />
+        {/if}
+        <RangeCalendar
+        isDateDisabled={(date) => 
+          futureDates 
+            ? false 
+            : date.toDate(getLocalTimeZone()).getTime() > today('America/Sao_Paulo').toDate(getLocalTimeZone()).getTime()
+        }
+          bind:value
+          onStartValueChange={v => {
+            startValue = v
+          }}
+          numberOfMonths={1}
+          onValueChange={v => {
+            if (onChange && v.start && v.end) {
+              onChange(
+                v.start.toDate(getLocalTimeZone()).getTime(),
+                v.end.toDate(getLocalTimeZone()).getTime(),
+              )
+            }
+          }}
+        />
+      </div>
+
+      
+    </Popover.Content>
+  </Popover.Root>
 </div>
-
-<style>
-  .date-field {
-    align-items: center;
-    background-color: #fff;
-    border-bottom: 1px solid #e8e9ea;
-    display: inline-flex;
-    gap: 8px;
-    min-width: 100px;
-    padding: 16px;
-    z-index: 9999;
-  }
-
-  .date-field.open {
-    border-bottom: 1px solid oklch(var(--p));
-    z-index: 9999;
-  }
-
-  .date-field .icon-calendar {
-    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAEmSURBVHgB7ZcPzcIwEMUfXz4BSCgKwAGgACRMAg6YBBxsOMABOAAHFAXgAK5Z2Y6lHbfQ8SfpL3lZaY/1rb01N+BHUKSMNBfEJjZWISA56Uo6C2KvVpkgFn9oRx9vICFtUT1JKO3tvRtZdjBxXQs+YY+1FenIfuesPUGVVLzfRWKvmrSzbbN19wS+kAb2+sCEuUxrYzkbe4YvCVM2Vr5NPAkVa+van7Wn38U95uTpN5TJ/A8ZKemAakmbmJJGpI0gVmwA0huieFItjG19DgTHtwIZhCfZq3ztCuzQYh+FKBSvusjAGs8PnLYkLgMf34JoIBqIBqKBaIAb0Kw9RlhMCTbzzPWAqYq7LsuPaGDUsYmznaOk5zChUJTNQ4TFVMkrOL4HPsoNn26PxROHCggAAAAASUVORK5CYII=)
-      no-repeat center center;
-    background-size: 14px 14px;
-    height: 14px;
-    width: 14px;
-    z-index: 9999;
-  }
-</style>
