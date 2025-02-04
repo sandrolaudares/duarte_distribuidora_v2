@@ -24,6 +24,7 @@
   import NoResults from '$lib/components/NoResults.svelte'
   import { format } from 'date-fns'
   import { goto, invalidate } from '$app/navigation'
+  import { getFilterValue } from '$lib/utils'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -79,12 +80,15 @@
           <Th />
           <Th>
             <DateFilter
-              onchange={(start, end) => {
-                if (start != null && end != null) {
-                  let startDate = start.toString()
-                  let endDate = end.toString()
-                  filters.update({ startDate, endDate })
-                }
+              startValue={getFilterValue(filters,'startDate')}
+              endValue={getFilterValue(filters,'endDate')}
+              onChange={(startDate, endDate) => {
+                if (!startDate || !endDate) return
+          
+                filters.update({
+                  startDate: String(startDate),
+                  endDate: String(endDate),
+                })
               }}
             />
           </Th>

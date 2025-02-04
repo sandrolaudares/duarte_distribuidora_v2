@@ -77,13 +77,14 @@
           <Th />
           <Th>
             <DateFilter
-              onchange={(start, end) => {
-                if (start != null && end != null) {
-                  let startDate = start.toString()
-                  let endDate = end.toString()
-                  filters.update({ startDate, endDate })
-                }
-              }}
+            onChange={(startDate, endDate) => {
+              if (!startDate || !endDate) return
+        
+              filters.update({
+                startDate: String(startDate),
+                endDate: String(endDate),
+              })
+            }}
             />
           </Th>
           <Th />

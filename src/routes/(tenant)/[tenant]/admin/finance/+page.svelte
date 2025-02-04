@@ -24,6 +24,7 @@
   import { format } from 'date-fns'
   import ChangeExpireDate from './ChangeExpireDate.svelte'
   import { TreeDeciduous } from 'lucide-svelte'
+  import { getFilterValue } from '$lib/utils'
 
   let { data }: { data: PageData } = $props()
 
@@ -151,27 +152,29 @@
           <ThFilter {table} field="name" />
           <Th>
             <DateFilter
-              onchange={(start, end) => {
-                if (start != null && end != null) {
-                  let startDate = start.toString()
-                  let endDate = end.toString()
-                  filters.update({ startDate, endDate })
-                }
-              }}
+            
+            onChange={(startDate, endDate) => {
+              if (!startDate || !endDate) return
+        
+              filters.update({
+                startDate: String(startDate),
+                endDate: String(endDate),
+              })
+            }}
             />
           </Th>
 
           <Th>
             <DateFilter
-              enableFutureDates={true}
-              enablePastDates={true}
-              onchange={(startExpire, endExpire) => {
-                if (startExpire != null && endExpire != null) {
-                  let startExpireDate = startExpire.toString()
-                  let endExpireDate = endExpire.toString()
-                  filters.update({ startExpireDate, endExpireDate })
-                }
-              }}
+            futureDates={true}
+            onChange={(startExpireDate, endExpireDate) => {
+              if (!startExpireDate || !endExpireDate) return
+        
+              filters.update({
+                startExpireDate: String(startExpireDate),
+                endExpireDate: String(endExpireDate),
+              })
+            }}
             />
           </Th>
           <Th />

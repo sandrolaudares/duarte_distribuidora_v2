@@ -12,8 +12,7 @@
   import * as Card from '$lib/components/ui/card/index'
   import * as Tabs from '$lib/components/ui/tabs/index'
   import type { SelectTenant } from '$lib/server/db/central/schema.js'
-  import DateFilter from '$lib/components/DateFilter.svelte'
-  import DateFilter2 from '$lib/components/DateFilter2.svelte'
+  // import DateFilter from '$lib/components/DateFilter.svelte'
 
   import { hr, ur } from '@faker-js/faker'
 

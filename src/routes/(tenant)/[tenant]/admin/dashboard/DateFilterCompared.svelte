@@ -7,7 +7,7 @@
     today,
     toCalendar,
   } from '@internationalized/date'
-  import DateFilter2 from '$lib/components/DateFilter2.svelte'
+  import DateFilter from '$lib/components/DateFilter.svelte'
   import { page } from '$app/state'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
 
@@ -27,7 +27,7 @@
 </script>
 
 {#if page.url.pathname.startsWith('/admin/dashboard/vendas')}
-  <DateFilter2
+  <DateFilter
     title="Comparar"
     startValue={getFilterValue('compareStartDate')}
     endValue={getFilterValue('compareEndDate')}
@@ -41,7 +41,7 @@
     }}
   />
 {/if}
-  <DateFilter2
+  <DateFilter
     title="Base"
     startValue={getFilterValue('startDate')}
     endValue={getFilterValue('endDate')}
