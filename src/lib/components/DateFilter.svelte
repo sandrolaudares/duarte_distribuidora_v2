@@ -120,7 +120,9 @@
     </Popover.Trigger>
     <Popover.Content class="w-auto p-0" align="start">
       {#if title}
-        <p class="mt-3 text-center text-lg font-semibold">{title}</p>
+      <div class="flex items-center justify-center divider mx-4">
+          <p class=" text-center text-lg font-semibold">{title}</p>
+      </div>
       {/if}
       <div class="flex">
         {#if !futureDates}
@@ -143,7 +145,7 @@
           })}
           <button onclick={clearCalendar} class="btn btn-outline btn-error">Limpar</button>
         </div>
-        <Separator orientation="vertical" class="my-4" />
+        <Separator orientation="vertical" class="my-4 bg-base-300" />
         {/if}
         <RangeCalendar
         isDateDisabled={(date) => 
