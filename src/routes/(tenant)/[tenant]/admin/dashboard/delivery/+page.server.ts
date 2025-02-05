@@ -2,7 +2,6 @@ import type { PageServerLoad } from './$types'
 
 import * as s from '$db/schema'
 import { eq, sql, and, gt, count, desc } from 'drizzle-orm'
-import { subDays } from 'date-fns'
 import { withinDate2 } from '$lib/server/db/utils'
 
 import {
@@ -18,15 +17,15 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
   const sp_end_date = searchParams.get('endDate')
 
   if(!sp_start_date || !sp_end_date){
-      let start = (today('America/Sao_Paulo').subtract({ days: 7 })).toDate(getLocalTimeZone()).getTime()
-      let end = today('America/Sao_Paulo').toDate(getLocalTimeZone()).getTime()
+      const start = (today('America/Sao_Paulo').subtract({ days: 7 })).toDate(getLocalTimeZone()).getTime()
+      const end = today('America/Sao_Paulo').toDate(getLocalTimeZone()).getTime()
       return redirect(303, `/admin/dashboard/delivery?startDate=${start}&endDate=${end}`)
     }
 
   const startDate =
     typeof sp_start_date === 'string'
       ? new Date(Number(sp_start_date))
-      : subDays(new Date(), 7)
+      : today('America/Sao_Paulo').subtract({ days: 7 }).toDate('America/Sao_Paulo')
 
   const endDate =
     typeof sp_end_date === 'string' ? new Date(Number(sp_end_date)) : new Date()

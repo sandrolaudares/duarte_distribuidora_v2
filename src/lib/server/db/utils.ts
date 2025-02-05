@@ -141,7 +141,7 @@ export function withinDate<T extends SQLiteSelect>(
 }
 
 export function withinDate2(
-  startDate = today('America/Sao_Paulo').subtract({ days: 7 }),
+  startDate = today('America/Sao_Paulo').subtract({ days: 7 }).toDate("America/Sao_Paulo"),
   endDate: Date,
 ) {
   return function <T extends SQLiteSelect>(qb: T, column: AnyColumn) {

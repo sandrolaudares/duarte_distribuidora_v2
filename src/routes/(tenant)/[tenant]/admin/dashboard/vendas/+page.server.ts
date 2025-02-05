@@ -4,7 +4,6 @@ import type { PageServerLoad } from './$types'
 import * as s from '$db/schema'
 import { desc, eq, sql, gt, gte, and, type AnyColumn } from 'drizzle-orm'
 import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
-import { format, formatDistance, formatRelative, subDays } from 'date-fns'
 
 import { withinDate2 } from '$db/utils'
 import { redirect } from '@sveltejs/kit'
@@ -34,7 +33,7 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
   const startDate =
     typeof sp_start_date === 'string'
       ? new Date(Number(sp_start_date))
-      : subDays(new Date(), 7)
+      : today('America/Sao_Paulo').subtract({ days: 7 }).toDate('America/Sao_Paulo')
 
   const endDate =
     typeof sp_end_date === 'string' ? new Date(Number(sp_end_date)) : new Date()
