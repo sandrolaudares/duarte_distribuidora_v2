@@ -163,6 +163,7 @@ npm run db:check
 - REPASSE ESTOQUE ENTRE DISTRIBUIDORAS✅
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE ✅
 - PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS ✅
+- 100 rows como padrao nas table✅
 
 ## PARCIAL PRONTOS OU APENAS REVISAR/AJUSTAR
 
@@ -190,7 +191,6 @@ npm run db:check
 - Alterar join do caixa na tela da transacao do caixa
 - TRANSAÇÕES DO CAIXA (TELAS)
 - Unique name table de categoria
-- 100 rows como padrao nas table
 - Preco de custo nas transferencias e tela historico transafarencias tipo tela
   fiado com total e valor do preço de custo
 - Parte do cliente fazer pedido 
