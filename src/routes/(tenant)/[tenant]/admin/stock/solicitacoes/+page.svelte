@@ -84,7 +84,7 @@
   </div>
 {/if}
 
-<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+<main class="mx-4 h-full max-h-[calc(100vh-20vh)]">
   <div class="flex items-center justify-between">
     <h1 class="my-5 text-center text-2xl font-medium">
       Solicitações de transferencia:

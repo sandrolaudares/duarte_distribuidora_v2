@@ -52,7 +52,7 @@
   $inspect(data.rows)
 </script>
 
-<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+<main class="mx-4 h-full max-h-[calc(100vh-20vh)]">
   <div class="flex justify-end mb-2">
 
     <button class="btn btn-primary" onclick={()=>filters.clear('username','cashier','endDate','startDate')}>Limpar filtros</button>

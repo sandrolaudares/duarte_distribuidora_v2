@@ -50,7 +50,7 @@
   })
 </script>
 
-<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+<main class="mx-4 h-full max-h-[calc(100vh-20vh)]">
   <Datatable {table} headless>
     <!-- {#snippet header()}
       <Search {table} />

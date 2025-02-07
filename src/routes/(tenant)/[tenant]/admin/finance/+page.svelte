@@ -112,7 +112,7 @@
 <h1 class="my-5 text-center text-2xl font-medium">
   Pedidos com pagamento pendente:
 </h1>
-<main class="container mx-auto h-full max-h-[calc(100vh-24vh)]">
+<main class="mx-4 h-full max-h-[calc(100vh-24vh)]">
   <select
     value="todos"
     onchange={e => {
@@ -136,7 +136,7 @@
     {/snippet} -->
     <div class="spinner" class:active={table.isLoading}></div>
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table border">
+    <table class="table ">
       <thead>
         <tr>
           <Th />

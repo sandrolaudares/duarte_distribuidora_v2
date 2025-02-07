@@ -11,19 +11,21 @@
   let filteredProducts = products
 
   $:console.log(filteredProducts)
+
+  // onFilterChange={value => {
+  //   filteredProducts = products.map(product => ({
+  //     ...product,
+  //     products: product.products.filter(productInner => {
+  //       let nome = productInner.name.toLowerCase()
+  //       return nome.includes(value.toLowerCase())
+  //     })
+  //   })).filter(product => product.products.length > 0)
+  // }}
 </script>
 
 <Cardapio
   data={filteredProducts}
-  onFilterChange={value => {
-    filteredProducts = products.map(product => ({
-      ...product,
-      products: product.products.filter(productInner => {
-        let nome = productInner.name.toLowerCase()
-        return nome.includes(value.toLowerCase())
-      })
-    })).filter(product => product.products.length > 0)
-  }}
+  
 >
   {#snippet card(c)}
     <a href="/products/{c.id}">

@@ -51,7 +51,7 @@
   })
 </script>
 
-<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+<main class="m-4 h-full max-h-[calc(100vh-20vh)]">
   <div class="flex justify-between items-center">
     <h1 class="my-5 text-center text-2xl font-medium">Todos os pedidos:</h1>
     <button class="btn btn-primary" onclick={()=>filters.clear('name','created_by','startDate','endDate')}>Limpar filtros</button>
@@ -62,7 +62,7 @@
      
     {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table table-zebra border">
+    <table class="table table-zebra ">
       <thead>
         <tr>
           <ThSort {table} field="id">ID</ThSort>

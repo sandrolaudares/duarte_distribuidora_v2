@@ -143,7 +143,7 @@
   )
 </script>
 
-<div class="container mx-auto p-4">
+<div class="mx-4 p-4">
   <h1 class="mb-6 text-3xl font-bold">Contas à pagar</h1>
   {#if messageCat}
     <p class="text-lg font-bold text-success">
