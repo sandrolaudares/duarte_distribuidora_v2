@@ -182,6 +182,7 @@ npm run db:check
 - Editar nome SKU ✅
 - APLICAR EDITABLECELL NAS TABLES EXISTENTES ✅
 - Limpar filtros✅
+- Refazer setar cargo ao user, não ta funcionando legal✅
 
 ## IMPORTANTES
 
@@ -200,7 +201,6 @@ npm run db:check
 
 ## NAO TAO URGENTE
 
-- Refazer setar cargo ao user, não ta funcionando legal
 - Permissoes no trpc pra cada func
 - Colunas na tabela dos logs/Refatorar tela/melhorar
 - Excluir sku e setar produto como null pro sku
