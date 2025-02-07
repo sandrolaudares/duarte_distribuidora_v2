@@ -12,6 +12,8 @@
   import ModalSku from '$lib/components/modal/ModalSKU.svelte'
   import { onMount } from 'svelte'
   import type { RouterOutputs } from '$trpc/router'
+  import { Checkbox } from '$lib/components/ui/checkbox/index'
+  import Separator from '$lib/components/ui/separator/separator.svelte'
   export let item: SelectProductItem
 
   let isChanged = false
@@ -46,6 +48,7 @@
           wholesale_price: item.wholesale_price,
           retail_price: item.retail_price,
           sku: item.sku ?? undefined,
+          visible: item.visible,
         },
       })
       console.log(resp)
@@ -134,6 +137,9 @@
       on:change={() => (isChanged = true)}
     />
   </div>
+  <div class=" flex w-full items-center justify-between font-light">  
+    Visivel no cardápio? <Checkbox id="visible" bind:checked={item.visible} onCheckedChange={() => (isChanged = true)} />
+  </div>
   {#if costPrice?.cost_price}
     <div class=" flex w-full items-center justify-between font-light">
       <span>Preco Custo:</span>
@@ -151,16 +157,17 @@
     />
   </div> -->
   <div
-    class="flex flex-col items-center justify-between gap-3 text-center md:flex-row"
+    class="flex flex-col items-center justify-between w-full gap-3 text-center md:flex-row"
   >
     <ImageInput
       image_id={item.image}
       name={item.name}
       save={updateProductItemImage}
     />
+    <Separator orientation="vertical" class="bg-base-300"/>
     <div class="flex flex-col gap-2">
       <div class="flex items-center justify-between gap-3">
-      Atacado:
+        Atacado:
 
         <CurrencyInput
           bind:value={item.wholesale_price}
@@ -178,7 +185,7 @@
   </div>
 
   {#if isChanged}
-    <button class="btn btn-outline mt-2" on:click={updateProductItemInfo}>
+    <button class="btn btn-primary mt-2 w-full" on:click={updateProductItemInfo}>
       Salvar alterações
     </button>
   {/if}

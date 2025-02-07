@@ -40,12 +40,18 @@
           name: 'wholesale_price',
           label: 'Preço de atacado',
           type: 'currency',
-          required: false,
+          required: true,
         },
         {
           name: 'retail_price',
           label: 'Preço de varejo',
           type: 'currency',
+          required: true,
+        },
+        {
+          name: 'visible',
+          label: 'Mostrar no cardápio',
+          type: 'checkbox',
           required: false,
         },
       ],
@@ -58,6 +64,7 @@
             wholesale_price: data.wholesale_price,
             retail_price: data.retail_price,
             product_id: produto.id,
+            visible: data.visible,
           })
           console.log(resp)
           produto.items.push(resp)
@@ -124,7 +131,7 @@
   let isChanged = false
 </script>
 
-<main class="container mx-auto flex flex-col">
+<main class="flex flex-col">
   <div
     class="card flex md:flex-row gap-3 items-center justify-between bg-surface-200 p-5 m-3"
   >
