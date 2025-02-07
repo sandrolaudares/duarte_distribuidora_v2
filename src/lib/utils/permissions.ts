@@ -33,5 +33,13 @@ export const roleEnum = [
   'caixa',
 ] as const
 
+export const roleLabels: Record<typeof roleEnum[number], string> = {
+  admin: 'Administrator',
+  employee: 'Funcionario',
+  customer: 'Cliente',
+  motoboy: 'Motoboy',
+  caixa: 'Caixa',
+}
+
 export type Role = (typeof roleEnum)[number]
 export type Permission = (typeof permissionsEnum)[number]

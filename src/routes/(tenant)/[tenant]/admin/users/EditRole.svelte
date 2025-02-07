@@ -4,7 +4,7 @@
   import Loading from '$lib/components/Loading.svelte'
   import { modal } from '$lib/components/modal'
   import type { DatabaseUser } from '$lib/server/db/schema'
-  import { roleEnum } from '$lib/utils/permissions'
+  import { roleEnum, roleLabels } from '$lib/utils/permissions'
   import type { Permission, Role } from '$lib/utils/permissions'
   import { trpc } from '$trpc/client'
   import { toast } from 'svelte-sonner'
@@ -44,11 +44,11 @@
     <Select.Trigger
       class="w-[180px] data-[placeholder]:text-primary-foreground "
     >
-      {selectedRole}
+      {roleLabels[selectedRole]}
     </Select.Trigger>
     <Select.Content>
       {#each roleEnum as role}
-        <Select.Item value={role}>{role}</Select.Item>
+        <Select.Item value={role}>{roleLabels[role]}</Select.Item>
       {/each}
     </Select.Content>
   </Select.Root>
