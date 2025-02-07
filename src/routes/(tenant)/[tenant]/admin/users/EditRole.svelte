@@ -8,54 +8,54 @@
   import type { Permission, Role } from '$lib/utils/permissions'
   import { trpc } from '$trpc/client'
   import { toast } from 'svelte-sonner'
+  import * as Select from '$lib/components/ui/select/index'
 
-  export let userId: string
-  export let userRole: Role
+  let { userId, userRole }: { userId: string; userRole: Role } = $props()
+
   // export let userName: string
 
-  let dialog: HTMLDialogElement
-  let selectedRole: Role
+  let selectedRole: Role = $state(userRole)
 
-  let isLoading = false
+  let isLoading = $state(false)
 
   async function handleUpdateUserRole() {
     isLoading = true
     try {
-      const response = await trpc($page).auth.updateUserRole.mutate({
+      const [response] = await trpc($page).auth.updateUserRole.mutate({
         userId: userId,
         role: selectedRole,
       })
       toast.success('Cargo editado com sucesso!')
+
       await invalidateAll()
-      // setTimeout(() => {
-      //   dialog.close()
-      //   window.location.reload()
-      // }, 1000)
-      userRole = response[0].role
+      userRole = response.role
+      selectedRole = response.role
     } catch (error: any) {
-      isLoading = false
       toast.error('Falha ao editar cargo')
       console.error(error.message)
+    } finally {
+      isLoading = false
     }
   }
 </script>
 
 <div class="flex items-center gap-2">
-  <label class="form-control my-3 w-full">
-    <select class="select select-bordered" bind:value={selectedRole}>
-      <!-- <option disabled selected>Escolha o cargo de {userName}</option> -->
-      <option value={userRole}>{userRole}</option>
+  <Select.Root type="single" bind:value={selectedRole}>
+    <Select.Trigger
+      class="w-[180px] data-[placeholder]:text-primary-foreground "
+    >
+      {selectedRole}
+    </Select.Trigger>
+    <Select.Content>
       {#each roleEnum as role}
-        {#if role !== userRole}
-          <option value={role}>{role}</option>
-        {/if}
+        <Select.Item value={role}>{role}</Select.Item>
       {/each}
-    </select>
-  </label>
+    </Select.Content>
+  </Select.Root>
 
   <button
     class="btn btn-primary"
-    disabled={(selectedRole === userRole) || isLoading}
+    disabled={selectedRole === userRole || isLoading}
     onclick={handleUpdateUserRole}
   >
     Salvar
