@@ -164,10 +164,10 @@ npm run db:check
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE ✅
 - PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS ✅
 - 100 rows como padrao nas table✅
+- boolean pra esconder produtos do cardapio ✅
 
 ## PARCIAL PRONTOS OU APENAS REVISAR/AJUSTAR
 
-- boolean pra esconder produtos do cardapio ✅
 - Verificar name filter fiado ✅
 - Editar motoboy pedidos aceitos
 - PODER EDITAR INFOS DISTRIBUIDORA NO /TENANT - perfil da distribuidora ✅
