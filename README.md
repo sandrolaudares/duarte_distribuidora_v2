@@ -183,6 +183,7 @@ npm run db:check
 - APLICAR EDITABLECELL NAS TABLES EXISTENTES ✅
 - Limpar filtros✅
 - Refazer setar cargo ao user, não ta funcionando legal✅
+- Contas cadastrar forma de pagamento✅
 
 ## IMPORTANTES
 
@@ -204,7 +205,6 @@ npm run db:check
 - Permissoes no trpc pra cada func
 - Colunas na tabela dos logs/Refatorar tela/melhorar
 - Excluir sku e setar produto como null pro sku
-- Contas cadastrar forma de pagamento
 
 - Alerta de compra em excesso ex, bloqueio automático caso tenha notas em
   atraso. (Desbloqueio somente com senha de gerente).
