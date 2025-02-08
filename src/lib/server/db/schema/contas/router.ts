@@ -31,6 +31,19 @@ export const contas = router({
       return await contasController(tenantDb).insertCategoria(input).returning()
     }),
 
+    insertTipoPagamento: publicProcedure
+    .meta({
+      routeName: 'Cadastrar tipo de pagamento',
+      permission: 'editar_clientes',
+      //EDIT PERMISSION
+    })
+    .use(middleware.auth)
+    .use(middleware.logged)
+    .input(insertCategoriaSchema)
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
+      return await contasController(tenantDb).insertTipoPagamento(input).returning()
+    }),
+
     pagarConta:publicProcedure
     .meta({
       routeName: 'Pagar conta',
