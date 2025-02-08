@@ -21,7 +21,7 @@
   } from '@vincjo/datatables/server'
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
   import NoResults from '$lib/components/NoResults.svelte'
-  import type { SelectConta } from '$lib/server/db/schema'
+  import type { SelectConta, SelectSupplier } from '$lib/server/db/schema'
   import { toast } from 'svelte-sonner'
   import { invalidate, invalidateAll } from '$app/navigation'
   import DateFilter from '$lib/components/DateFilter.svelte'
@@ -74,17 +74,29 @@
   async function createConta() {
     isLoading = true
 
-    let parsedCategoryId = null;
+    let parsedCategoryId = null
+    let parsedSupplierId = null
 
-    if(selectedCategory) {
+    if (selectedSupplier) {
+      if (selectedSupplier != null) {
+        parsedSupplierId = Number(selectedSupplier)
+        if (isNaN(parsedSupplierId)) {
+          toast.error('Fornecedor inválido')
+          isLoading = false
+          return
+        }
+      }
+    }
+
+    if (selectedCategory) {
       if (selectedCategory != null) {
         parsedCategoryId = Number(selectedCategory)
         if (isNaN(parsedCategoryId)) {
-            toast.error('Categoria inválida')
-            isLoading = false
-            return
+          toast.error('Categoria inválida')
+          isLoading = false
+          return
         }
-    }
+      }
     }
     try {
       await trpc($page).contas.insertConta.mutate({
@@ -93,17 +105,17 @@
         descricao: newConta.descricao,
         titulo: newConta.titulo,
         isPaid: newConta.isPaid,
-        fornecedor_id: newConta.fornecedor_id,
+        fornecedor_id: parsedSupplierId,
         categoria_id: parsedCategoryId,
       })
       await invalidateAll()
       toast.success('Sucesso ao criar conta')
-      table.rows=data.rows
+      table.rows = data.rows
     } catch (error: any) {
       toast.error(error.message)
     } finally {
       isLoading = false
-      
+
       // window.location.reload()
       //TODO: FIX PRA FUNCIONAR SEM RELOAD NA PAGINA
     }
@@ -156,13 +168,19 @@
       'Selecione...',
   )
 
-  let selectedCategory:string = $state("")
+  let selectedCategory: string = $state('')
 
   const categoryConfig = {
     value: (item: { id: number; nome: string }) => String(item.id),
     label: (item: { id: number; nome: string }) => item.nome,
-  };
+  }
 
+  let selectedSupplier: string = $state('')
+
+  const supplierConfig = {
+    value: (item: SelectSupplier) => String(item.id),
+    label: (item: SelectSupplier) => item.name,
+  }
 </script>
 
 <div class="mx-4 p-4">
@@ -231,17 +249,12 @@
                 <label for="fornecedor" class="label">
                   <span class="label-text">Fornecedor</span>
                 </label>
-                <select
-                  id="fornecedor"
-                  bind:value={newConta.fornecedor_id}
-                  class="select select-bordered w-full"
-                  required
-                >
-                  <option disabled value={0}>Selecione um fornecedor</option>
-                  {#each data.fornecedores as fornecedor}
-                    <option value={fornecedor.id}>{fornecedor.name}</option>
-                  {/each}
-                </select>
+                <SelectSearch
+                placeholder="o fornecedor"
+                  options={data.fornecedores}
+                  config={supplierConfig}
+                  bind:value={selectedSupplier}
+                />
               </div>
             </div>
             <div class="form-control">
@@ -255,9 +268,16 @@
                 bind:value={newConta.descricao}
               ></textarea>
             </div>
-            <div class="grid grid-cols-1 items-center gap-4 md:grid-cols-2 mt-2">
+            <div
+              class="mt-2 grid grid-cols-1 items-center gap-4 md:grid-cols-2"
+            >
               <div class=" form-control">
-                <SelectSearch bind:value={selectedCategory} options={data.categorias} config={categoryConfig} />
+                <SelectSearch
+                placeholder="categoria"
+                  bind:value={selectedCategory}
+                  options={data.categorias}
+                  config={categoryConfig}
+                />
               </div>
               <div class="form-control flex items-center">
                 <label class="label cursor-pointer">

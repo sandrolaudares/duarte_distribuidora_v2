@@ -18,7 +18,13 @@
     options,
     config,
     value = $bindable(),
-  }: { options: T[]; config: SelectItem<T>; value: string } = $props()
+    placeholder,
+  }: {
+    options: T[]
+    config: SelectItem<T>
+    value: string
+    placeholder: string
+  } = $props()
 
   let open = $state(false)
   //   let value = $state('')
@@ -52,14 +58,14 @@
         role="combobox"
         aria-expanded={open}
       >
-        {selectedValue || 'Selecione a categoria...'}
+        {selectedValue || `Selecione ${placeholder}...`}
         <!-- <ChevronsUpDown class="ml-2 size-4 shrink-0 opacity-50" /> -->
       </Button>
     {/snippet}
   </Popover.Trigger>
   <Popover.Content class="w-[200px] p-0">
     <Command.Root>
-      <Command.Input placeholder="Pesquise a categoria..." />
+      <Command.Input placeholder={`Pesquise ${placeholder}...`} />
       <Command.List>
         <Command.Empty>Nenhum encontrado.</Command.Empty>
         <Command.Group>
