@@ -16,6 +16,7 @@
 				link: "text-primary underline-offset-4 hover:underline",
 				outlinePrimary:
 					" hover:bg-primary hover:text-primary-foreground border",
+				select:"select select-bordered"
 			},
 			size: {
 				default: "h-10 px-4 py-2",
