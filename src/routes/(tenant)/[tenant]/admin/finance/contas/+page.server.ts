@@ -27,7 +27,14 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
 
   const pagosParams = searchParams.get('isPaid')
   console.log(pagosParams)
-  const pagos = pagosParams === 'paid' ? true : pagosParams === 'unpaid' ? false : pagosParams ==='todos'? undefined :undefined
+  const pagos =
+    pagosParams === 'paid'
+      ? true
+      : pagosParams === 'unpaid'
+        ? false
+        : pagosParams === 'todos'
+          ? undefined
+          : undefined
 
   console.log(pagos)
 
@@ -36,10 +43,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     pagos !== undefined ? eq(schema.contasPagarTable.isPaid, pagos) : undefined,
     dateStart && dateEnd
       ? and(
-          gte(
-            schema.contasPagarTable.paid_at,
-            new Date(Number(dateStart)),
-          ),
+          gte(schema.contasPagarTable.paid_at, new Date(Number(dateStart))),
           lte(schema.contasPagarTable.paid_at, new Date(Number(dateEnd))),
         )
       : undefined,
@@ -47,7 +51,9 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
 
   const fornecedores = await stock(tenantDb!).getSupplier()
   const categorias = await tenantDb!.select().from(schema.categoriaConta)
-  
+  const tipoPagamentoConta = await tenantDb!
+    .select()
+    .from(schema.tipoPagamentoConta)
 
   try {
     let query = tenantDb!
@@ -58,11 +64,13 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         isPaid: schema.contasPagarTable.isPaid,
         expire_at: schema.contasPagarTable.expire_at,
         valor_conta: schema.contasPagarTable.valor_conta,
-        paid_at:schema.contasPagarTable.paid_at,
+        paid_at: schema.contasPagarTable.paid_at,
 
         catName: schema.categoriaConta.nome,
 
         supName: schema.supplierTable.name,
+
+        pagName: schema.tipoPagamentoConta.nome,
       })
       .from(contasPagarTable)
       .where(and(...condicoes))
@@ -84,10 +92,15 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
           eq(schema.categoriaConta.id, contasPagarTable.categoria_id),
         ),
       )
-      .$dynamic().orderBy(
+      .leftJoin(
+        schema.tipoPagamentoConta,
+        eq(schema.tipoPagamentoConta.id, contasPagarTable.pagamento_id),
+      )
+      .$dynamic()
+      .orderBy(
         sql`CASE WHEN ${schema.contasPagarTable.isPaid} = false THEN 0 ELSE 1 END`,
-        asc(schema.contasPagarTable.expire_at)
-      );
+        asc(schema.contasPagarTable.expire_at),
+      )
 
     if (sortId && sortOrder) {
       query = withOrderBy(
@@ -156,9 +169,17 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
       totalSum,
       fornecedores,
       categorias,
+      tipoPagamentoConta,
     }
   } catch (error) {
     console.error(error)
-    return { rows: [], count: 0, totalSum: 0, fornecedores: [], categorias: [] }
+    return {
+      rows: [],
+      count: 0,
+      totalSum: 0,
+      fornecedores: [],
+      categorias: [],
+      tipoPagamentoConta: [],
+    }
   }
 }) satisfies PageServerLoad

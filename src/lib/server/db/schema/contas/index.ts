@@ -61,5 +61,8 @@ export type InsertConta = typeof contasPagarTable.$inferInsert
 export type SelectCategoria = typeof categoriaConta.$inferSelect
 export type InsertCategoria = typeof categoriaConta.$inferInsert
 
+export type SelectTipoPagamento = typeof tipoPagamentoConta.$inferSelect
+export type insertTipoPagamento = typeof tipoPagamentoConta.$inferInsert
+
 export const insertContaSchema = createInsertSchema(contasPagarTable, {})
 export const insertCategoriaSchema = createInsertSchema(categoriaConta, {})

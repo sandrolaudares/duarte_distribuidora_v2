@@ -56,6 +56,7 @@
             <Th>Fornecedor</Th>
             <Th>Categoria</Th>
             <Th>Data vencimento</Th>
+            <Th>Pago com</Th>
             <Th>Pago em</Th>
             <ThSort {table} field="valor_conta">Valor</ThSort>
             <Th></Th>
@@ -82,6 +83,7 @@
             <Th />
             <Th />
             <Th />
+            <Th />
           </tr>
         </thead>
 
@@ -92,21 +94,21 @@
               class="border-t border-gray-200 transition-colors hover:bg-gray-50"
               class:opacity-50={conta.isPaid}
             >
-              <td class="p-3">{conta.titulo}</td>
-              <td class="p-3 {conta.descricao ? '' : 'text-error'}">
+              <td class="p-2">{conta.titulo}</td>
+              <td class="p-2 {conta.descricao ? '' : 'text-error'}">
                 {conta.descricao ? conta.descricao : 'Não possui'}
               </td>
-              <td class="p-3">{conta.supName}</td>
-              <td class="p-3">{conta.catName ?? 'Não cadastrado'}</td>
-              <td class="p-3">{df.format(conta.expire_at!)}</td>
-
-              <td class="p-3">
+              <td class="p-2">{conta.supName}</td>
+              <td class="p-2">{conta.catName ?? 'Não cadastrado'}</td>
+              <td class="p-2">{df.format(conta.expire_at!)}</td>
+              <td class="p-2">{conta.pagName ?? "Não cadastrado"}</td>
+              <td class="p-2">
                 {conta.paid_at
                   ? df.format(conta.paid_at)
                   : 'Ainda não foi paga'}
-              </td>
-              <td class="p-3">R${(conta.valor_conta / 100).toFixed(2)}</td>
-              <td class="p-3">
+              </td> 
+              <td class="p-2">R${(conta.valor_conta / 100).toFixed(2)}</td>
+              <td class="p-2">
                 <span
                   class="rounded px-2 py-1 text-sm font-semibold"
                   class:bg-green-200={conta.isPaid}
@@ -117,7 +119,7 @@
                   {conta.isPaid ? 'Pago' : 'Não pago'}
                 </span>
               </td>
-              <td class="p-3">
+              <td class="p-2">
                 <button
                   onclick={() => pagar(conta.id)}
                   class="btn btn-sm"
