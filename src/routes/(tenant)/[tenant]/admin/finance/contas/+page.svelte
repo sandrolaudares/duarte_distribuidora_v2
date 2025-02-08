@@ -6,6 +6,7 @@
   import type { PageData } from './$types'
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
+  import * as Dialog from '$lib/components/ui/dialog/index'
 
   import {
     TableHandler,
@@ -27,12 +28,11 @@
   import * as Select from '$lib/components/ui/select/index'
   import { pageConfig } from '$lib/config'
   import { DateFormatter } from '@internationalized/date'
+  import SelectSearch from './selectSearch.svelte'
 
   let { data }: { data: PageData } = $props()
 
   const filters = new SSRFilters()
-
-  let isOpenModal: HTMLDialogElement | null = null
 
   const table = new TableHandler(data.rows, {
     rowsPerPage: pageConfig.rowPages,
@@ -73,6 +73,19 @@
   let isLoading = $state(false)
   async function createConta() {
     isLoading = true
+
+    let parsedCategoryId = null;
+
+    if(selectedCategory) {
+      if (selectedCategory != null) {
+        parsedCategoryId = Number(selectedCategory)
+        if (isNaN(parsedCategoryId)) {
+            toast.error('Categoria inválida')
+            isLoading = false
+            return
+        }
+    }
+    }
     try {
       await trpc($page).contas.insertConta.mutate({
         valor_conta: newConta.valor_conta,
@@ -81,16 +94,17 @@
         titulo: newConta.titulo,
         isPaid: newConta.isPaid,
         fornecedor_id: newConta.fornecedor_id,
-        categoria_id: newConta.categoria_id,
+        categoria_id: parsedCategoryId,
       })
       await invalidateAll()
       toast.success('Sucesso ao criar conta')
+      table.rows=data.rows
     } catch (error: any) {
       toast.error(error.message)
     } finally {
       isLoading = false
-      isOpenModal?.close()
-      window.location.reload()
+      
+      // window.location.reload()
       //TODO: FIX PRA FUNCIONAR SEM RELOAD NA PAGINA
     }
   }
@@ -141,6 +155,14 @@
     filtersPaid.find(f => f.value === paidFilter.value)?.label ??
       'Selecione...',
   )
+
+  let selectedCategory:string = $state("")
+
+  const categoryConfig = {
+    value: (item: { id: number; nome: string }) => String(item.id),
+    label: (item: { id: number; nome: string }) => item.nome,
+  };
+
 </script>
 
 <div class="mx-4 p-4">
@@ -153,13 +175,112 @@
 
   <div class="mb-6 flex justify-between rounded-lg bg-base-200 p-4 shadow">
     <div class="flex gap-2 divide-x">
-      <button
-        class="btn btn-primary"
-        onclick={() => isOpenModal?.showModal()}
-        disabled={isLoading}
-      >
-        Criar nova conta
-      </button>
+      <Dialog.Root>
+        <Dialog.Trigger>
+          <button class="btn btn-primary">Criar nova conta</button>
+        </Dialog.Trigger>
+        <Dialog.Content>
+          <Dialog.Header>
+            <Dialog.Title>Nova Conta</Dialog.Title>
+            <!-- <Dialog.Description>
+              This action cannot be undone. This will permanently delete your account
+              and remove your data from our servers.
+            </Dialog.Description> -->
+          </Dialog.Header>
+          <div>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div class="form-control">
+                <label for="titulo" class="label">
+                  <span class="label-text">Título da conta</span>
+                </label>
+                <input
+                  id="titulo"
+                  type="text"
+                  placeholder="Título da conta"
+                  class="input input-bordered w-full"
+                  bind:value={newConta.titulo}
+                  required
+                />
+              </div>
+              <!-- <CurrencyInput bind:value={newConta.valor_conta} /> -->
+              <div class="form-control">
+                <label for="valor" class="label">
+                  <span class="label-text">Valor</span>
+                </label>
+
+                <CurrencyInput bind:value={newConta.valor_conta} />
+              </div>
+              <div class="form-control">
+                <label for="expire_at" class="label">
+                  <span class="label-text">Data de vencimento</span>
+                </label>
+                <input
+                  id="expire_at"
+                  type="date"
+                  class="input input-bordered w-full"
+                  min={df.format(new Date())}
+                  onchange={e => {
+                    const v = (e.target as HTMLInputElement).value
+                    const dateV = new Date(v + 'T00:00:00')
+                    newConta.expire_at = dateV
+                  }}
+                  required
+                />
+              </div>
+              <div class="form-control">
+                <label for="fornecedor" class="label">
+                  <span class="label-text">Fornecedor</span>
+                </label>
+                <select
+                  id="fornecedor"
+                  bind:value={newConta.fornecedor_id}
+                  class="select select-bordered w-full"
+                  required
+                >
+                  <option disabled value={0}>Selecione um fornecedor</option>
+                  {#each data.fornecedores as fornecedor}
+                    <option value={fornecedor.id}>{fornecedor.name}</option>
+                  {/each}
+                </select>
+              </div>
+            </div>
+            <div class="form-control">
+              <label for="descricao" class="label">
+                <span class="label-text">Observações</span>
+              </label>
+              <textarea
+                id="descricao"
+                class="textarea textarea-bordered h-24"
+                placeholder="Observações"
+                bind:value={newConta.descricao}
+              ></textarea>
+            </div>
+            <div class="grid grid-cols-1 items-center gap-4 md:grid-cols-2 mt-2">
+              <div class=" form-control">
+                <SelectSearch bind:value={selectedCategory} options={data.categorias} config={categoryConfig} />
+              </div>
+              <div class="form-control flex items-center">
+                <label class="label cursor-pointer">
+                  <span class="label-text mr-4">Marcar como pago</span>
+                  <input
+                    type="checkbox"
+                    class="toggle toggle-primary"
+                    bind:checked={newConta.isPaid}
+                  />
+                </label>
+              </div>
+            </div>
+            <button
+              class="btn btn-primary mt-2 w-full"
+              onclick={createConta}
+              disabled={isLoading}
+            >
+              Criar conta
+            </button>
+          </div>
+        </Dialog.Content>
+      </Dialog.Root>
+
       <div class="inline-block w-0.5 self-stretch bg-base-100"></div>
       <input
         type="text"
@@ -183,7 +304,7 @@
           paidFilter.set()
         }}
       >
-        <Select.Trigger class="w-[180px] h-full">
+        <Select.Trigger class="h-full w-[180px]">
           {triggerContent}
         </Select.Trigger>
         <Select.Content>
@@ -303,123 +424,6 @@
     </span>
   </div>
 </div>
-
-<dialog
-  class="modal"
-  bind:this={isOpenModal}
-  in:fly={{ y: 50, duration: 300 }}
-  out:fade={{ duration: 200 }}
->
-  <div class="modal-box max-w-2xl">
-    <h2 class="mb-6 text-2xl font-semibold">Nova Conta</h2>
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <div class="form-control">
-        <label for="titulo" class="label">
-          <span class="label-text">Título da conta</span>
-        </label>
-        <input
-          id="titulo"
-          type="text"
-          placeholder="Título da conta"
-          class="input input-bordered w-full"
-          bind:value={newConta.titulo}
-          required
-        />
-      </div>
-      <!-- <CurrencyInput bind:value={newConta.valor_conta} /> -->
-      <div class="form-control">
-        <label for="valor" class="label">
-          <span class="label-text">Valor</span>
-        </label>
-
-        <CurrencyInput bind:value={newConta.valor_conta} />
-      </div>
-      <div class="form-control">
-        <label for="expire_at" class="label">
-          <span class="label-text">Data de vencimento</span>
-        </label>
-        <input
-          id="expire_at"
-          type="date"
-          class="input input-bordered w-full"
-          min={df.format(new Date())}
-          onchange={e => {
-            const v = (e.target as HTMLInputElement).value
-            const dateV = new Date(v + 'T00:00:00')
-            newConta.expire_at = dateV
-          }}
-          required
-        />
-      </div>
-      <div class="form-control">
-        <label for="fornecedor" class="label">
-          <span class="label-text">Fornecedor</span>
-        </label>
-        <select
-          id="fornecedor"
-          bind:value={newConta.fornecedor_id}
-          class="select select-bordered w-full"
-          required
-        >
-          <option disabled value={0}>Selecione um fornecedor</option>
-          {#each data.fornecedores as fornecedor}
-            <option value={fornecedor.id}>{fornecedor.name}</option>
-          {/each}
-        </select>
-      </div>
-    </div>
-    <div class="form-control">
-      <label for="descricao" class="label">
-        <span class="label-text">Observações</span>
-      </label>
-      <textarea
-        id="descricao"
-        class="textarea textarea-bordered h-24"
-        placeholder="Observações"
-        bind:value={newConta.descricao}
-      ></textarea>
-    </div>
-    <div class="grid grid-cols-1 items-center gap-4 md:grid-cols-2">
-      <div class="form-control">
-        <label for="categoria" class="label">
-          <span class="label-text">Categoria</span>
-        </label>
-        <select
-          id="categoria"
-          bind:value={newConta.categoria_id}
-          class="select select-bordered w-full"
-          required
-        >
-          <option disabled value={0}>Selecione uma categoria</option>
-          {#each data.categorias as categoria}
-            <option value={categoria.id}>{categoria.nome}</option>
-          {/each}
-        </select>
-      </div>
-      <div class="form-control flex items-center">
-        <label class="label cursor-pointer">
-          <span class="label-text mr-4">Marcar como pago</span>
-          <input
-            type="checkbox"
-            class="toggle toggle-primary"
-            bind:checked={newConta.isPaid}
-          />
-        </label>
-      </div>
-    </div>
-    <button
-      class="btn btn-primary mt-2 w-full"
-      onclick={createConta}
-      disabled={isLoading}
-    >
-      Criar conta
-    </button>
-  </div>
-
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
-</dialog>
 
 <style>
   .bgg {
