@@ -79,7 +79,7 @@
             <tr>
               <td>{row.id}</td>
               <td>{row.status}</td>
-              <td>{df.format(row.created_at, 'dd/MM/yyyy')}</td>
+              <td>{df.format(row.created_at)}</td>
               <td>{row.observation}</td>
               <td class="text-lg font-semibold">
                 R${(row.total / 100).toFixed(2)}
