@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm'
 import {
   categoriaConta,
   contasPagarTable,
+  tipoPagamentoConta,
   type InsertCategoria,
   type InsertConta,
 } from '.'
@@ -17,6 +18,9 @@ export const contasController = (db: TenantDbType) => ({
   },
   insertCategoria: (input: InsertCategoria) => {
     return db.insert(categoriaConta).values(input)
+  },
+  insertTipoPagamento: (input: InsertCategoria) => {
+    return db.insert(tipoPagamentoConta).values(input)
   },
   pagarConta: (id: number) => {
     return db
