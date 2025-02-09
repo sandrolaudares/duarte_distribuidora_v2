@@ -37,7 +37,7 @@ export const load = (async ({ url, locals: { tenantDb, tenantInfo },depends}) =>
 
   const baseConditions = and(
     eq(stockTransference.status, 'ACCEPTED'),
-    eq(stockTransference.fromTenantId, id),
+    eq(stockTransference.toTenantId, id),
     ...condicoes
   )
 
