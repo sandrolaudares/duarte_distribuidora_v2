@@ -113,7 +113,7 @@
             <td>
               {row.created_at ? df.format(row.created_at) : ''}
             </td>
-            <td class={row.metadata?.troco ? 'font-semibold' : 'text-error'}>
+            <td class={row.metadata?.troco !=null ? 'font-semibold' : 'text-error'}>
               {typeof row.metadata?.troco === 'number'
                 ? 'R$' + (row.metadata.troco / 100).toFixed(2)
                 : 'Não tem'}
