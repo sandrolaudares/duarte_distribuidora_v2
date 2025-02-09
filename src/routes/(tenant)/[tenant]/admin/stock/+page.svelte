@@ -22,13 +22,14 @@
   import DateFilter from '$lib/components/DateFilter.svelte'
   import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
   import { DateFormatter } from '@internationalized/date'
+  import { pageConfig } from '$lib/config'
 
   let { data }: { data: PageData } = $props()
 
   const filters = new SSRFilters()
 
   const table = new TableHandler(data.rows, {
-    rowsPerPage: 10,
+    rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
   })
 
