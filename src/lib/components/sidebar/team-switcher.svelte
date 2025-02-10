@@ -8,6 +8,7 @@
   import type { SelectTenant } from '$lib/server/db/central/schema'
   import { PUBLIC_DOMAIN } from '$env/static/public'
   import { page } from '$app/state'
+  import { dev } from '$app/environment'
 
   // This should be `Component` after lucide-svelte updates types
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,6 +20,8 @@
 
   // let activeTeam = $state(teams[0]);
   //TODO: SELECTED DISTRIBUIDORA
+
+  const prefix = dev ? 'http' : 'https'
 </script>
 
 <Sidebar.Menu>
@@ -55,7 +58,7 @@
       >
         <DropdownMenu.Label class=" text-xs">Distribuidoras</DropdownMenu.Label>
         {#each teams as team, index}
-          <a href="http://{team.subdomain}.{PUBLIC_DOMAIN.replace('/','')}{page.url.pathname}">
+          <a href="{prefix}://{team.subdomain}.{PUBLIC_DOMAIN.replace('/','')}{page.url.pathname}">
             <DropdownMenu.Item class="gap-2 p-2">
               <div
                 class="flex size-6 items-center justify-center rounded-sm border"
@@ -76,7 +79,7 @@
         </DropdownMenu.Item>
         <DropdownMenu.Separator />
         <DropdownMenu.Item class="gap-2 p-2">
-          <a class="font-medium text-foreground" href="https://{PUBLIC_DOMAIN}">
+          <a class="font-medium text-foreground" href="{prefix}://{PUBLIC_DOMAIN}">
             Voltar para central
           </a>
           <!--TODO: Arrumar o link-->

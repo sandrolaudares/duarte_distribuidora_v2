@@ -1,8 +1,10 @@
 <script lang="ts">
   import type { PageData } from './$types'
   import {PUBLIC_DOMAIN} from '$env/static/public'
-  import { page } from '$app/stores'
+  import { dev } from '$app/environment';
   export let data: PageData
+
+  const prefix = dev ? 'http' : 'https'
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -10,7 +12,7 @@
   {#if data.tenats.length > 0}
   <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
     {#each data.tenats as tenant}
-      <a href="http://{tenant.subdomain}.{PUBLIC_DOMAIN}" class="group block">
+      <a href="{prefix}://{tenant.subdomain}.{PUBLIC_DOMAIN}" class="group block">
         <div
           class="transform overflow-hidden rounded-xl bg-base-200 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
         >
