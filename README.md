@@ -165,6 +165,8 @@ npm run db:check
 - PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS ✅
 - 100 rows como padrao nas table✅
 - boolean pra esconder produtos do cardapio ✅
+- Adicionar campo de distancia na tabela endereço (calcular ao adicionar
+  endereço talvez) acho legal adicionar um butao de recalcular ✅
 
 ## PARCIAL PRONTOS OU APENAS REVISAR/AJUSTAR
 
@@ -205,11 +207,8 @@ npm run db:check
 - Permissoes no trpc pra cada func
 - Colunas na tabela dos logs/Refatorar tela/melhorar
 - Excluir sku e setar produto como null pro sku
-
 - Alerta de compra em excesso ex, bloqueio automático caso tenha notas em
   atraso. (Desbloqueio somente com senha de gerente).
-- Adicionar campo de distancia na tabela endereço (calcular ao adicionar
-  endereço talvez) acho legal adicionar um butao de recalcular
 - Responsividade site inteiro
 
 ## DEPOIS

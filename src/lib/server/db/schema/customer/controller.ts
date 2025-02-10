@@ -528,3 +528,4 @@ export const customer = (db: TenantDbType) => ({
 })
 export type CurrentOrders = ReturnType<typeof customer>['getCurrentOrders']
 export type UpdateOrder = ReturnType<typeof customer>['getOrderByID']
+export type CustomerWaddress = ReturnType<typeof customer>['getCustomerById']

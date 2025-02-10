@@ -9,23 +9,14 @@
   import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
   import EditableCurrency from '$lib/components/editableCells/EditableCurrency.svelte'
   import EditableTipoPessoa from '$lib/components/editableCells/EditableTipoPessoa.svelte'
+  import type { CustomerWaddress } from '$lib/server/db/schema/customer/controller'
 
-  export let customer
-  let endereco = {
-    number: '',
-    id: '',
-    created_at: '',
-    updated_at: '',
-    customer_id: '',
-    cep: '',
-    street: '',
-    complement: '',
-    neighborhood: '',
-    city: '',
-    state: '',
-    country: '',
-  }
-  let newcustomer = customer
+  let {
+    customer,
+  }: { customer: Exclude<Awaited<ReturnType<CustomerWaddress>>, undefined> } =
+    $props()
+
+  let isLoading = $state(false)
 
   async function handleDeleteCustomer(id: number) {
     try {
@@ -37,7 +28,7 @@
     }
   }
 
-  async function handleUpdate(value: unknown, key = '', row:any) {
+  async function handleUpdate(value: unknown, key = '', row: any) {
     const last_val = row[key]
     try {
       await trpc($page).customer.updateCustomer.mutate({
@@ -51,7 +42,7 @@
       row[key] = last_val
     }
   }
-  async function handleUpdateAddress(value: unknown, key = '', row:any) {
+  async function handleUpdateAddress(value: unknown, key = '', row: any) {
     const last_val = row[key]
     try {
       await trpc($page).customer.updateAddress.mutate({
@@ -65,6 +56,38 @@
       row[key] = last_val
     }
   }
+
+  async function recalcDistance(address: (typeof customer.adresses)[0]) {
+    isLoading = true
+    try {
+      let distance = await trpc($page).customer.calculateDistance.mutate({
+        cep: address.cep,
+        street: address.street,
+        number: address.number,
+        bairro: address.neighborhood,
+        city: address.city,
+        state: address.state, //select
+        country: 'BR',
+      })
+
+      distance = Math.round(distance)
+      address.distance = distance
+
+      if (distance) {
+        await trpc($page).customer.updateAddress.mutate({
+          id: address.id,
+          address: {
+            distance: distance,
+          },
+        })
+      }
+      toast.success('Distância recalculada com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao recalcular')
+    } finally {
+      isLoading = false
+    }
+  }
 </script>
 
 <div class="mx-4 flex items-center justify-between">
@@ -72,14 +95,14 @@
   <div class="flex gap-2">
     <button
       class="btn btn-error flex gap-2"
-      on:click={() => handleDeleteCustomer(customer.id)}
+      onclick={() => handleDeleteCustomer(customer.id)}
     >
       Deletar cliente
       {@html icons.trash()}
     </button>
     <button
       class="btn btn-primary flex gap-2"
-      on:click={() =>
+      onclick={() =>
         modal.open(AddressModal, {
           customer_id: customer.id,
         })}
@@ -91,7 +114,7 @@
 </div>
 <div class="mt-2 grid grid-cols-2">
   <div class="overflow-x-auto">
-    <table class="table table-zebra table-sm w-full">
+    <table class="table table-zebra table-xs w-full">
       <thead>
         <tr class="font-bold">
           <th>Criado em</th>
@@ -163,7 +186,7 @@
     </table>
   </div>
   <div class="overflow-x-auto">
-    <table class="table table-sm w-full">
+    <table class="table table-xs w-full">
       <thead>
         <tr>
           <th>CEP</th>
@@ -205,35 +228,63 @@
             </td>
             <td>
               <EditableCell
-              value={address.neighborhood}
-              onUpdateValue={async newValue => {
-                handleUpdateAddress(newValue, 'neighborhood', address)
-              }}
-            />
+                value={address.neighborhood}
+                onUpdateValue={async newValue => {
+                  handleUpdateAddress(newValue, 'neighborhood', address)
+                }}
+              />
             </td>
             <td>
               <EditableCell
-              value={address.number}
-              onUpdateValue={async newValue => {
-                handleUpdateAddress(newValue, 'number', address)
-              }}
-            />
+                value={address.number}
+                onUpdateValue={async newValue => {
+                  handleUpdateAddress(newValue, 'number', address)
+                }}
+              />
             </td>
             <td>
               <EditableCell
-              value={address.complement}
-              onUpdateValue={async newValue => {
-                handleUpdateAddress(newValue, 'complement', address)
-              }}
-            />
+                value={address.complement}
+                onUpdateValue={async newValue => {
+                  handleUpdateAddress(newValue, 'complement', address)
+                }}
+              />
             </td>
-            <td><EditableCell
-              value={address.state}
-              onUpdateValue={async newValue => {
-                handleUpdateAddress(newValue, 'state', address)
-              }}
-            /></td>
-            <td>{(address.distance / 1000).toFixed(0)}Km</td>
+            <td>
+              <EditableCell
+                value={address.state}
+                onUpdateValue={async newValue => {
+                  handleUpdateAddress(newValue, 'state', address)
+                }}
+              />
+            </td>
+            <!-- <td>{(address.distance / 1000).toFixed(0)}Km</td> -->
+            <td class="flex items-center">
+              {#if isLoading == true}
+                Calculando
+              {:else}
+                <EditableCell
+                  value={address.distance
+                    ? (address.distance / 1000).toFixed(0)
+                    : 'N/A'}
+                  onUpdateValue={async newValue => {
+                    handleUpdateAddress(Number(newValue), 'distance', address)
+
+                    setTimeout(() => {
+                      window.location.reload()
+                    }, 2000)
+                  }}
+                />{address.distance ? 'km' : ''}
+              {/if}
+            </td>
+            <td>
+              <button
+                class="badge badge-primary badge-xs"
+                onclick={() => recalcDistance(address)}
+              >
+                Recalcular
+              </button>
+            </td>
           </tr>
         {/each}
       </tbody>
