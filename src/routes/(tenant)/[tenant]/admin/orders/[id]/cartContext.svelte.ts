@@ -26,7 +26,7 @@ export function createCartContext(order_details: OrderDetailsNotUndefined) {
       item: item.product,
       quantity: item.quantity ?? 0,
       meta: {
-        is_retail:false,
+        is_retail:item.price === item.product.retail_price,
         price: item.price,
       },
     })),

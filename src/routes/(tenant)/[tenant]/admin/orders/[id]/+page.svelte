@@ -1,26 +1,18 @@
 <script lang="ts">
-  import PaymentCashier from '$lib/components/PaymentCashier.svelte'
   import type { PageData } from './$types'
-  import { getImagePath } from '$utils/image'
   import CardPayments from '$lib/components/cards/CardPayments.svelte'
   import PaymentFiado from '$lib/components/PaymentFiado.svelte'
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
-  import { onMount } from 'svelte'
-  import type { SelectOrderPayment } from '$lib/server/db/schema'
   import { Pencil, Plus, Trash2 } from 'lucide-svelte'
   import * as Tooltip from '$lib/components/ui/tooltip/index'
-  import CardapioCaixa from '../../cashier/[id]/CardapioCaixa.svelte'
-  import CaixaColumn from '../../cashier/[id]/CaixaColumn.svelte'
 
-  import { Cart } from '$lib/state/cart.svelte'
-  import CashierMenu from './EditOrderMenu.svelte'
   import { createCartContext } from './cartContext.svelte'
   import EditOrderMenu from './EditOrderMenu.svelte'
   import DisplayCart from './DisplayCart.svelte'
   import CustomerDetails from './CustomerDetails.svelte'
   import { toast } from 'svelte-sonner'
-  import { goto } from '$app/navigation'
+  import { goto, invalidateAll } from '$app/navigation'
   import SenhaAdmin from '$lib/components/SenhaAdmin.svelte'
   let { data }: { data: PageData } = $props()
 
@@ -49,20 +41,23 @@
   let cartTotal = $derived.by(() => {
     return (
       Object.values(order.cart).reduce(
-        (acc, { meta, quantity }) => acc + meta.price * quantity,
+        (acc, { meta, quantity,item }) => acc + (meta.is_retail ? item.retail_price:item.wholesale_price) * quantity,
         0,
       ) + (order_details.taxa_entrega ?? 0)
     )
   })
 
+  let isLoading = $state(false)
+
   async function handleUpdateOrder() {
     const confirmed = confirm('Você tem certeza que deseja atualizar o pedido?')
     if (confirmed) {
+      isLoading = true
       try {
         const toAdd = Object.values(order.cart).map(item => ({
           item_id: item.item.id,
           quantity: item.quantity,
-          price: item.meta.price,
+          price: item.meta.is_retail ? item.item.retail_price : item.item.wholesale_price,
         }))
 
         console.log(cartTotal)
@@ -73,8 +68,12 @@
           items: toAdd,
         })
         toast.success('Pedido atualizado com sucesso!')
+        invalidateAll()
       } catch (error) {
         toast.error('Erro ao atualizar pedido!')
+      } finally {
+        isLoading = false
+        isOpenModalEdit?.close()
       }
     } else {
       toast.error('Pedido não atualizado!')
@@ -270,8 +269,12 @@
                 <DisplayCart
                   name={item.name}
                   image={item.image ?? 0}
-                  price={cartItem.meta.price}
+                  price={cartItem.meta.is_retail
+                    ? cartItem.item.retail_price
+                    : cartItem.item.wholesale_price}
                   quantity={cartItem.quantity}
+                  bind:is_retail={cartItem.meta.is_retail}
+                  isEditable={true}
                 />
                 <td class="w-12">
                   <button
@@ -314,8 +317,12 @@
             <hr />
           </div>
           <div class="flex justify-end">
-            <button class="btn btn-primary mt-4" onclick={handleUpdateOrder}>
-              Atualizar pedido!
+            <button class="btn btn-primary mt-4" onclick={handleUpdateOrder} disabled={isLoading}>
+              {#if isLoading}
+                Atualizando pedido...
+              {:else}
+                Atualizar pedido!
+              {/if}
             </button>
           </div>
         {:else}
