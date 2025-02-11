@@ -167,6 +167,7 @@ npm run db:check
 - boolean pra esconder produtos do cardapio ✅
 - Adicionar campo de distancia na tabela endereço (calcular ao adicionar
   endereço talvez) acho legal adicionar um butao de recalcular ✅
+- Toggle tipo preço ao editar pedido ✅
 
 ## PARCIAL PRONTOS OU APENAS REVISAR/AJUSTAR
 
@@ -199,7 +200,6 @@ npm run db:check
   fiado com total e valor do preço de custo
 - Parte do cliente fazer pedido 
 - TELA RESUMO DE CADA MOTOBOY ENTREGAS
-- Toggle tipo preço ao editar pedido
 - loading login
 
 ## NAO TAO URGENTE
