@@ -10,7 +10,7 @@
 
   let filteredProducts = products
 
-  $:console.log(filteredProducts)
+  // $:console.log(filteredProducts)
 
   // onFilterChange={value => {
   //   filteredProducts = products.map(product => ({
@@ -24,7 +24,7 @@
 </script>
 
 <Cardapio
-  data={filteredProducts}
+  data={products}
   
 >
   {#snippet card(c)}
