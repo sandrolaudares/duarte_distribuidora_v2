@@ -4,6 +4,7 @@
   import { modal, FormModal } from '$lib/components/modal'
   import DateFilter from '$lib/components/DateFilter.svelte'
   import { page } from '$app/stores'
+  import * as Tooltip from '$lib/components/ui/tooltip/index'
 
   import {
     TableHandler,
@@ -24,6 +25,8 @@
   import { goto } from '$app/navigation'
   import { pageConfig } from '$lib/config'
   import { DateFormatter } from '@internationalized/date'
+  import { User } from 'lucide-svelte'
+  import SelectSearch from '../finance/contas/selectSearch.svelte'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -48,16 +51,36 @@
     }
     return data.rows
   })
+
+  const colorMap:{ [key: string]: string } = {
+    C: 'badge-accent',
+    L: 'badge-info',
+    S: 'badge-primary',
+  }
+
+  function getColor(type: string) {
+    const firstLetter = type.charAt(0).toUpperCase()
+    return colorMap[firstLetter] || 'badge-neutral'
+  }
+
+  let selectedType: string = $state('')
+
+  let logTypeEnum = ['LOG', 'SYSTEM', 'ERROR', 'CAIXA']
+
+  const typeConfig = {
+    value: (item: typeof logTypeEnum[0]) => item,
+    label: (item:typeof logTypeEnum[0]) => item,
+  }
 </script>
 
-<main class="mx-4 h-full max-h-[calc(100vh-20vh)]">
+<main class="mx-4 h-full max-h-[calc(100vh-10vh)]">
   <Datatable {table} headless>
     <!-- {#snippet header()}
-      <Search {table} />
-     
-    {/snippet} -->
+        <Search {table} />
+      
+      {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table table-zebra rounded-none border">
+    <table class="table table-zebra table-xs rounded-none">
       <thead>
         <tr>
           <ThSort {table} field="id">ID</ThSort>
@@ -77,7 +100,14 @@
           <ThFilter {table} field="text" />
           <Th />
           <Th />
-          <Th />
+          <Th >
+            <!-- <SelectSearch  
+            placeholder="o tipo"
+            options={logTypeEnum}
+            config={typeConfig}
+            bind:value={selectedType}/> -->
+            <!--TODO: Select search working com o server-->
+          </Th>
           <Th />
           <Th />
           <Th />
@@ -89,17 +119,47 @@
         {#each data.rows as row}
           <tr>
             <td>{row.id}</td>
-            <td>{row.user_name}</td>
+            <td class="flex items-center gap-2">
+              <User class="size-4" />{row.user_name}
+            </td>
             <td>{row.text}</td>
             <td>{row.pathname}</td>
             <td>{row.routeName}</td>
-            <td>{row.type}</td>
+            <td class="badge badge-xs {getColor(row.type)}">{row.type}</td>
             <td>
               {row.currency
                 ? 'R$' + (row.currency / 100).toFixed(2)
                 : 'Não é transação'}
             </td>
-            <td>{JSON.stringify(row.metadata)}</td>
+            <td>
+              <Tooltip.Provider>
+                <Tooltip.Root>
+                  <Tooltip.Trigger>
+                    <span class="badge badge-info badge-xs">Visualizar</span>
+                  </Tooltip.Trigger>
+                  <Tooltip.Content>
+                    <pre>{JSON.stringify(row.metadata, null, 2)}</pre>
+                    {#if row.metadata.order_id}
+                      <a
+                        class="badge badge-neutral badge-sm"
+                        href="/admin/orders/{row.metadata.order_id}"
+                      >
+                        Ver pedido
+                      </a>
+                    {/if}
+                    {#if row.metadata.customer_id}
+                      <a
+                        class="badge badge-neutral badge-sm"
+                        href="/customers/{row.metadata.customer_id}"
+                      >
+                        Ver cliente
+                      </a>
+                    {/if}
+                  </Tooltip.Content>
+                </Tooltip.Root>
+              </Tooltip.Provider>
+            </td>
+
             <td>{row.error ?? 'Não tem'}</td>
             <td>
               {row.created_at ? df.format(row.created_at) : ''}

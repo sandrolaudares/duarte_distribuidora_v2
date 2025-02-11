@@ -188,6 +188,7 @@ npm run db:check
 - Limpar filtros✅
 - Refazer setar cargo ao user, não ta funcionando legal✅
 - Contas cadastrar forma de pagamento✅
+- Colunas na tabela dos logs/Refatorar tela/melhorar ✅
 
 ## IMPORTANTES
 
@@ -205,7 +206,6 @@ npm run db:check
 ## NAO TAO URGENTE
 
 - Permissoes no trpc pra cada func
-- Colunas na tabela dos logs/Refatorar tela/melhorar
 - Excluir sku e setar produto como null pro sku
 - Alerta de compra em excesso ex, bloqueio automático caso tenha notas em
   atraso. (Desbloqueio somente com senha de gerente).
