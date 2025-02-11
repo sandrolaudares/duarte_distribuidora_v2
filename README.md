@@ -168,6 +168,7 @@ npm run db:check
 - Adicionar campo de distancia na tabela endereço (calcular ao adicionar
   endereço talvez) acho legal adicionar um butao de recalcular ✅
 - Toggle tipo preço ao editar pedido ✅
+- loading login ✅
 
 ## PARCIAL PRONTOS OU APENAS REVISAR/AJUSTAR
 
@@ -200,7 +201,6 @@ npm run db:check
   fiado com total e valor do preço de custo
 - Parte do cliente fazer pedido 
 - TELA RESUMO DE CADA MOTOBOY ENTREGAS
-- loading login
 
 ## NAO TAO URGENTE
 
