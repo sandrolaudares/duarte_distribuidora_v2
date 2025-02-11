@@ -94,7 +94,7 @@
 
 {#if order_details}
   <section
-    class="container mx-auto flex flex-col-reverse gap-5 pb-3 pt-8 antialiased md:pt-16 lg:flex-row"
+    class="mx-4 flex flex-col-reverse gap-5 pb-3 pt-8 antialiased md:pt-16 lg:flex-row"
   >
     <div
       class=" px-4 {order_details.address ? 'lg:w-2/3' : 'w-full'}  2xl:px-0"
