@@ -706,10 +706,29 @@ export const customer = router({
     .mutation(async ({ input, ctx }) => {
       const userID = ctx.locals.user?.id
       const { tenantDb } = ctx
-      return await customerController(tenantDb).insertOrderPayment({
-        ...input,
-        created_by: userID,
+
+      return await tenantDb.transaction(async (trx) =>{
+        await bugReport(tenantDb).insertLogs({
+          text: `Pedido ${input.order_id} atualizado, pagamento realizado, valor pago: R$${(input.amount_paid/100).toFixed(2)}`,
+          created_by: userID,
+          metadata: {
+            order_id: input.order_id,
+            // customer_id: input.customer_id,
+            cashier_id: input.cachier_id,
+          },
+          cashier_id: input.cachier_id,
+          order_id: input.order_id,
+          type: 'CAIXA',
+          pathname: '/TODO:ROUTE',
+          routeName: 'Fiado',
+        })
+  
+         await customerController(tenantDb).insertOrderPayment({
+          ...input,
+          created_by: userID,
+        })
       })
+
     }),
 
   getOrderPayments: publicProcedure
