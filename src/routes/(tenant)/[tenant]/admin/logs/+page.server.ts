@@ -42,7 +42,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const dateStart = searchParams.get('startDate')
   const dateEnd = searchParams.get('endDate')
 
-  let query = bugReport(tenantDb!).allLogs().$dynamic()
+  let query = bugReport(tenantDb!).allLogs().orderBy(desc(schema.logsTable.created_at)).$dynamic()
 
   if (sortId && sortOrder) {
     query = withOrderBy(

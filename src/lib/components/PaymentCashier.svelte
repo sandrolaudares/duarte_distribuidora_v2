@@ -20,12 +20,14 @@
     save,
     total_pedido,
     cashier_id,
+    observacao
   }: {
     payments: Omit<InsertOrderPayment, 'order_id'>[]
     nulla: () => void
     save: (payments: Omit<InsertOrderPayment, 'order_id'>[]) => void
     total_pedido: number
     cashier_id: number
+    observacao: string
   } = $props()
 
   let total_paid = $derived.by(() => {
@@ -103,6 +105,7 @@
     isFiado = false
     metodo_pagamento = null
     payments = [...payments]
+    valor_a_pagar = total_pedido - total_paid
   }
 
   async function addOrderFiado() {
@@ -133,13 +136,12 @@
             total: cart.meta.isDelivery
               ? total_pedido - cart.meta.taxaEntrega
               : total_pedido,
-            observation: 'TO DO',
+            observation: observacao,
             motoboy_id: cart.meta.motoboySelecionado?.id,
             type: 'ATACADO',
             taxa_entrega: cart.meta.isDelivery ? cart.meta.taxaEntrega : 0,
             cachier_id: cashier_id,
             //TODO: Type
-            //TODO: Observation
           },
         })
         nulla()
@@ -219,7 +221,6 @@
             <button class="btn" onclick={() => divideValor(2)}>50%</button>
             <button class="btn" onclick={() => divideValor(1.25)}>75%</button>
             <button class="btn" onclick={() => divideValor(1)}>100%</button>
-            <!--TODO: FIx CUrrency input não atualiza valor mesmo se valor_a_pagar muda-->
           </div>
           <p>
             Valor restante do pedido: R${(

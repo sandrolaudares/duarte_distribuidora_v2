@@ -50,7 +50,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   console.log(name)
 
   const condicoes = [
-    //TODO: NAME NÃO FILTRA
+    //TODO: Filtro nao fnciona legal, ao deletar nao reseta
     dateStart && dateEnd
       ? and(
           gte(

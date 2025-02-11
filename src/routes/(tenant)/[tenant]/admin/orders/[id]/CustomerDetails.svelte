@@ -49,7 +49,6 @@
           <!-- <div class="flex justify-end">
             <button class="btn btn-link">Mudar endereço</button>
           </div> -->
-          <!--TODO: mudar endereco e se !endereco colocar pra vincular se pedido ainda nao estiver pronto-->
         </div>
       {/if}
     </div>

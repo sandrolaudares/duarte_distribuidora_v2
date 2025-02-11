@@ -48,7 +48,6 @@
       {/if} -->
     </div>
     <div class="badge badge-info bg-opacity-40">
-      <!--TODO: data-->
       <a
         href="/admin/orders/{order.id}"
         class="flex items-center gap-2 text-info-content"

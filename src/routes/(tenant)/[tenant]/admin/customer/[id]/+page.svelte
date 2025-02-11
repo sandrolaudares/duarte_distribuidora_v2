@@ -35,13 +35,13 @@
   let { customer, orders } = data
 
   // let filtered = orders
-  const table = new TableHandler(orders, { rowsPerPage: 7 })
+  const table = new TableHandler(orders, { rowsPerPage: 100 })
 
 
   // $: sum = table.createCalculation('total').sum()
 
   const sum = $derived(table.createCalculation('total').sum())
-  //TODO: SOMA
+  //TODO: SOMA apenas rows renderizadas, não todas
 
 </script>
 

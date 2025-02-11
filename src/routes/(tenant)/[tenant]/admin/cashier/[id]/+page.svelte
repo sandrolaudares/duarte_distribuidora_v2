@@ -44,7 +44,6 @@
     }
     try {
       console.log(cart.meta.enderecoSelecionado)
-      // TODO: add new cases
       const resp = await trpc($page).customer.order.insetPaidOrder.mutate({
         order_info: {
           customer_id: cart.meta.clienteSelecionado?.id,
@@ -191,6 +190,7 @@
       total_pedido: cart.meta.isDelivery ? total + cart.meta.taxaEntrega : total,
       payments: [],
       cashier_id :caixa.id,
+      observacao,
       save: payments => {
         createOrder(payments)
       },

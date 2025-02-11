@@ -62,7 +62,7 @@
      
     {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table table-zebra ">
+    <table class="table table-zebra table-sm">
       <thead>
         <tr>
           <ThSort {table} field="id">ID</ThSort>
@@ -102,7 +102,7 @@
             <td>{row.id}</td>
             <td><b>{row.name}</b></td>
             <td><b>{row.created_by}</b></td>
-            <td><b>{row.observation}</b></td>
+            <td><b class:text-error={!row.observation}>{row.observation ? row.observation :'N/A'}</b></td>
             <td>
               <b>
                 {row.created_at ? df.format(row.created_at) : ''}

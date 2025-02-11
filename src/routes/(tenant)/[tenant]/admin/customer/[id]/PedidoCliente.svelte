@@ -42,7 +42,7 @@
 <div class="mt-10 h-full max-h-[calc(100vh-38vh)]">
     <Datatable basic {table} headless>
       {#snippet header()}{/snippet}
-      <table class="table table-zebra">
+      <table class="table table-zebra table-sm">
         <thead>
           <tr class="">
             <ThSort {table} field="id">ID</ThSort>
@@ -80,7 +80,7 @@
               <td>{row.id}</td>
               <td>{row.status}</td>
               <td>{df.format(row.created_at)}</td>
-              <td>{row.observation}</td>
+              <td class:text-error={!row.observation}>{row.observation ? row.observation : 'N/A'}</td>
               <td class="text-lg font-semibold">
                 R${(row.total / 100).toFixed(2)}
               </td>
@@ -101,7 +101,6 @@
                 R${(total/ 100).toFixed(2)}
               </span>
             </td>
-            <!--TODO: FIX TOTAL ta mostrando total das rows renderizadas, não de tudo-->
             <td></td>
           </tr>
         </tbody>

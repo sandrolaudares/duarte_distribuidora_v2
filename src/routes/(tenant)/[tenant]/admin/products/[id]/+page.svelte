@@ -117,7 +117,6 @@
         await trpc($page).product.deleteProduct.mutate(id)
   
         toast.success('Item deletado com sucesso!')
-        //TODO: Fix delete update sem recarregar
         window.history.back()
       } catch (error: any) {
         console.error(error.message)

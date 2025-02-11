@@ -202,6 +202,7 @@ npm run db:check
   fiado com total e valor do preço de custo
 - Parte do cliente fazer pedido 
 - TELA RESUMO DE CADA MOTOBOY ENTREGAS
+- Formatar ENUMs
 
 ## NAO TAO URGENTE
 
