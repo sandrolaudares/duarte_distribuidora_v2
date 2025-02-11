@@ -5,7 +5,9 @@
 
   import type { ActionData } from './$types'
 
-  export let form: ActionData
+  let { form }: { form: ActionData } = $props()
+
+  let isLoading = $state(false)
 </script>
 
 <SEO
@@ -18,7 +20,14 @@
 <main class="flex min-h-[90vh] items-center justify-center bg-base-200">
   <div class="w-full max-w-sm rounded-lg p-8 shadow-lg bg-base-100">
     <h1 class="text-center text-2xl font-semibold">Criar conta</h1>
-    <form method="post" use:enhance class="mt-6 flex flex-col gap-4">
+    <form method="post" use:enhance={() => {
+      isLoading = true
+
+      return async ({ update }) => {
+        await update()
+        isLoading = false
+      }
+    }} class="mt-6 flex flex-col gap-4">
       <div>
         <label for="username" class="block text-sm font-medium">
           Nome de usuario
@@ -49,7 +58,13 @@
           id="password"
         />
       </div>
-      <button class="btn btn-primary mt-4 w-full">Continue</button>
+      <button class="btn btn-primary mt-4 w-full" disabled={isLoading}>
+        {#if isLoading}
+          Carregando...
+        {:else}
+          Continuar
+        {/if}
+      </button>
       <p class=" mt-2 text-center text-sm text-red-500">{form?.message ?? ''}</p>
     </form>
     <p class="mt-4 text-center text-sm">
