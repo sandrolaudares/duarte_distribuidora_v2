@@ -26,7 +26,7 @@
   import { pageConfig } from '$lib/config'
   import { DateFormatter } from '@internationalized/date'
   import { User } from 'lucide-svelte'
-  import SelectSearch from '../finance/contas/selectSearch.svelte'
+  import SelectSearch from '$lib/components/selectSearch.svelte'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()

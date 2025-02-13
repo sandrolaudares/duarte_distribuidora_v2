@@ -20,7 +20,7 @@
   import { toast } from 'svelte-sonner'
   import { invalidate, invalidateAll } from '$app/navigation'
   import { DateFormatter } from '@internationalized/date'
-  import SelectSearch from './selectSearch.svelte'
+  import SelectSearch from '../../../../../../lib/components/selectSearch.svelte'
 
     let { table }= $props()
 

@@ -95,7 +95,7 @@
   </Button>
 {/snippet}
 
-<div class="ms-5 grid gap-2">
+<div class="m-0 grid gap-2">
   <Popover.Root>
     <Popover.Trigger
       class={cn(

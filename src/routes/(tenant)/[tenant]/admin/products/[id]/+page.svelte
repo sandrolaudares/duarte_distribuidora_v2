@@ -20,7 +20,7 @@
   
   function handleAddItem() {
     modal.open(FormModal, {
-      title: 'Add Product Item',
+      title: 'Adicionar item',
       fields: [
         {
           name: 'name',
@@ -202,7 +202,7 @@
     </div>
   </div>
 
-  <div class="m-3 flex flex-wrap justify-center gap-4">
+  <div class="m-3 grid grid-cols-4 justify-center gap-4">
     {#each produto.items as item, i (item.id)}
       <ProductItem {item} />
     {/each}

@@ -22,7 +22,7 @@
   import * as Select from '$lib/components/ui/select/index'
   import { pageConfig } from '$lib/config'
   import { DateFormatter } from '@internationalized/date'
-  import SelectSearch from './selectSearch.svelte'
+  import SelectSearch from '$lib/components/selectSearch.svelte'
   import TableConta from './TableConta.svelte'
   import Separator from '$lib/components/ui/separator/separator.svelte'
 

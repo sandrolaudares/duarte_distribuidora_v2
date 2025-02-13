@@ -100,7 +100,7 @@
         {#each data.rows as row}
           <tr>
             <td>{row.id}</td>
-            <td><b>{row.name}</b></td>
+            <td><b class:text-error={!row.name}>{row.name ? row.name : 'Não vinculado'}</b></td>
             <td><b>{row.created_by}</b></td>
             <td><b class:text-error={!row.observation}>{row.observation ? row.observation :'N/A'}</b></td>
             <td>
