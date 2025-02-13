@@ -129,7 +129,7 @@
             <td>
               {row.currency
                 ? 'R$' + (row.currency / 100).toFixed(2)
-                : 'Não é transação'}
+                : 'N/A'}
             </td>
             <td>
               <Tooltip.Provider>

@@ -169,6 +169,8 @@ npm run db:check
   endereço talvez) acho legal adicionar um butao de recalcular ✅
 - Toggle tipo preço ao editar pedido ✅
 - loading login ✅
+- Alterar join do caixa na tela da transacao do caixa✅
+- TRANSAÇÕES DO CAIXA (TELAS)✅
 
 ## PARCIAL PRONTOS OU APENAS REVISAR/AJUSTAR
 
@@ -195,14 +197,15 @@ npm run db:check
 
 ## FAZER AGORA
 
-- Alterar join do caixa na tela da transacao do caixa
-- TRANSAÇÕES DO CAIXA (TELAS)
 - Unique name table de categoria
 - Preco de custo nas transferencias e tela historico transafarencias tipo tela
   fiado com total e valor do preço de custo
 - Parte do cliente fazer pedido 
 - TELA RESUMO DE CADA MOTOBOY ENTREGAS
 - Formatar ENUMs
+- Datefilter tela de log
+- SelectFilter tela de log para tipo e usuario
+
 
 ## NAO TAO URGENTE
 
