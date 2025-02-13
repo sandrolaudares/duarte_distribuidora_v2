@@ -205,6 +205,7 @@ npm run db:check
 - Formatar ENUMs
 - Datefilter tela de log
 - SelectFilter tela de log para tipo e usuario
+- KG como unidade de medida nos produtos
 
 
 ## NAO TAO URGENTE
