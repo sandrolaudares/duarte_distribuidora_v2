@@ -38,10 +38,11 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_order')
-
+  
   console.log('username', username)
   console.log('caixa', caixa)
-
+  
+  try {
   let query = Monad.of(
     tenantDb!
       .select({
@@ -95,6 +96,8 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     .get()
     .orderBy(desc(schema.logsTable.created_at))
 
+    const cashier = await tenantDb!.select().from(schema.cashierTable)
+
   if (sortId && sortOrder) {
     query = withOrderBy(
       query,
@@ -103,7 +106,6 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     )
   }
 
-  try {
     const rows = await withPagination(query, page, pageSize)
 
     const total = await tenantDb!
@@ -120,14 +122,12 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     // .catch(e => 0)
     // .then(res => (typeof res === 'number' ? [{ count: res }] : res))
 
-    return { rows: rows ?? [], count: total[0].count, size }
+    return { rows: rows ?? [], count: total[0].count, size,cashier }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
     console.error(e)
     // return error(404, e.message ?? e)
 
-    return { rows: [], count: 0, size: 0 }
+    return { rows: [], count: 0, size: 0,cashier: [] }
   }
-
-  return { rows: [], count: 0, size: 0 }
 }) satisfies PageServerLoad

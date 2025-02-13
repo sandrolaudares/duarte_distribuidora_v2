@@ -24,6 +24,7 @@
   import { goto, invalidate } from '$app/navigation'
   import { getFilterValue } from '$lib/utils'
   import { DateFormatter } from '@internationalized/date'
+  import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -44,18 +45,27 @@
       filters.fromState(s)
       await $navigating?.complete
     } catch (error) {
-      toast.error('Erro ao carregar dados')
+      console.error(error)
     }
     return data.rows
   })
 
-  $inspect(data.rows)
+  // $inspect(data.rows)
+
+  let cashierFilter = $state(filters.get('cashier') || '')
 </script>
 
 <main class="mx-4 h-full max-h-[calc(100vh-20vh)]">
-  <div class="flex justify-end mb-2">
-
-    <button class="btn btn-primary" onclick={()=>filters.clear('username','cashier','endDate','startDate')}>Limpar filtros</button>
+  <div class="mb-2 flex justify-end">
+    <button
+      class="btn btn-primary"
+      onclick={() => {
+        filters.clear('username', 'cashier', 'endDate', 'startDate')
+        cashierFilter = ''
+      }}
+    >
+      Limpar filtros
+    </button>
   </div>
   <Datatable {table} headless>
     <!-- {#snippet header()}
@@ -63,7 +73,7 @@
      
     {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table table-zebra border rounded-sm">
+    <table class="table table-zebra rounded-sm border border-none">
       <thead>
         <tr>
           <Th>ID</Th>
@@ -79,15 +89,24 @@
         <tr>
           <Th />
           <ThFilter {table} field="username" />
-          <ThFilter {table} field="cashier" />
+          <!-- <ThFilter {table} field="cashier" /> -->
+          <Th>
+            <SelectFilter
+              filterKey="cashier"
+              bind:selectedValue={cashierFilter}
+              options={data.cashier}
+              config={{ value: c => c.name, label: c => c.name }}
+              placeholder={'o caixa'}
+            />
+          </Th>
           <Th />
           <Th>
             <DateFilter
-              startValue={getFilterValue(filters,'startDate')}
-              endValue={getFilterValue(filters,'endDate')}
+              startValue={getFilterValue(filters, 'startDate')}
+              endValue={getFilterValue(filters, 'endDate')}
               onChange={(startDate, endDate) => {
                 if (!startDate || !endDate) return
-          
+
                 filters.update({
                   startDate: String(startDate),
                   endDate: String(endDate),
@@ -113,7 +132,11 @@
             <td>
               {row.created_at ? df.format(row.created_at) : ''}
             </td>
-            <td class={row.metadata?.troco !=null ? 'font-semibold' : 'text-error'}>
+            <td
+              class={row.metadata?.troco != null
+                ? 'font-semibold'
+                : 'text-error'}
+            >
               {typeof row.metadata?.troco === 'number'
                 ? 'R$' + (row.metadata.troco / 100).toFixed(2)
                 : 'Não tem'}
