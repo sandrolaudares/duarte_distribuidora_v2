@@ -23,6 +23,7 @@
   import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
   import EditableCurrency from '$lib/components/editableCells/EditableCurrency.svelte'
   import { pageConfig } from '$lib/config'
+  import EditableTipoPessoa from '$lib/components/editableCells/EditableTipoPessoa.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -120,11 +121,15 @@
     <div class="mt-2 flex items-center justify-between">
       <h1 class="text-2xl font-semibold">Clientes:</h1>
       <div class="flex gap-2">
-
         <button class="btn btn-primary min-w-96" onclick={add}>
           Criar cliente
         </button>
-      <button class="btn btn-secondary" onclick={()=>filters.clear('name','phone')}>Limpar filtros</button>
+        <button
+          class="btn btn-secondary"
+          onclick={() => filters.clear('name', 'phone')}
+        >
+          Limpar filtros
+        </button>
       </div>
     </div>
   </section>
@@ -187,7 +192,14 @@
             </td>
             <td><b>{row.cpf_cnpj}</b></td> -->
             <td>
-              <b>{row.is_retail ? 'Pessoa física' : 'Pessoa Juridica'}</b>
+              <b>
+                <EditableTipoPessoa
+                  value={row.is_retail}
+                  onUpdateValue={async (newValue:boolean) => {
+                    handleUpdate(Boolean(newValue), 'is_retail', row)
+                  }}
+                />
+              </b>
             </td>
             <!-- <td><b>{row.rg_ie}</b></td> -->
             <td>

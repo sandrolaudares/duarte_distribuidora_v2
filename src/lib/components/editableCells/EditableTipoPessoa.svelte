@@ -1,13 +1,13 @@
 <script lang="ts" >
 
-    export let value:unknown
+    export let value:boolean
     export let onUpdateValue: (
-      newValue: unknown,
+      newValue: boolean,
     ) => void
   
     let isEditing = false
   
-    let inputElement: HTMLInputElement | undefined
+    let inputElement: HTMLSelectElement | undefined
     $: if (isEditing) {
       inputElement?.focus()
     }
@@ -27,16 +27,17 @@
     {#if !isEditing}
       <button
         on:click={() => (isEditing = true)}
-        class={!value ? 'text-error' : ''}
+        class={value === null ? 'text-error' : ''}
       >
-        {value ? value : 'Não cadastrado'}
+        <!-- {value != null ? value : 'Não cadastrado'} -->
+         {value === true ? 'Pessoa física' : 'Pessoa Juridica'}
       </button>
     {:else}
       <form on:submit|preventDefault={handleSubmit}>
-        <select class="select select-bordered w-full max-w-xs" bind:value={value}>
+         <select bind:this={inputElement} bind:value class="max-w-28">
             <option value={true}>Pessoa física</option>
             <option value={false}>Pessoa juridica</option>
-          </select>
+         </select>
         <button type="submit">✅</button>
         <button on:click={handleCancel}>❌</button>
       </form>

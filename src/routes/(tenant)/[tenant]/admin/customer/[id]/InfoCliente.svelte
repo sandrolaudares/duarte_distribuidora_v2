@@ -175,7 +175,7 @@
           </td>
           <td>
             <EditableTipoPessoa
-              value={customer.is_retail ? 'Pessoa física' : 'Pessoa jurídica'}
+              value={customer.is_retail}
               onUpdateValue={async newValue => {
                 handleUpdate(newValue, 'is_retail', customer)
               }}
