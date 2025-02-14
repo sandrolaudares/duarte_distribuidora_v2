@@ -27,6 +27,7 @@
   import { DateFormatter } from '@internationalized/date'
   import { User } from 'lucide-svelte'
   import SelectSearch from '$lib/components/selectSearch.svelte'
+  import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -64,13 +65,10 @@
   }
 
   let selectedType: string = $state('')
+  let selectedUser: string = $state('')
 
   let logTypeEnum = ['LOG', 'SYSTEM', 'ERROR', 'CAIXA']
 
-  const typeConfig = {
-    value: (item: typeof logTypeEnum[0]) => item,
-    label: (item:typeof logTypeEnum[0]) => item,
-  }
 </script>
 
 <main class="mx-4 h-full max-h-[calc(100vh-10vh)]">
@@ -96,22 +94,40 @@
         </tr>
         <tr>
           <Th />
-          <ThFilter {table} field="user_name" />
+          <Th>
+            <SelectFilter  
+            filterKey="user_name"
+            placeholder="o usuario"
+            options={data.users}
+            config={{ value: c => c.username, label: c => c.username }}
+            bind:selectedValue={selectedUser}/>
+          </Th>
           <ThFilter {table} field="text" />
           <Th />
           <Th />
           <Th >
-            <!-- <SelectSearch  
+            <SelectFilter  
+            filterKey="type"
             placeholder="o tipo"
             options={logTypeEnum}
-            config={typeConfig}
-            bind:value={selectedType}/> -->
-            <!--TODO: Select search working com o server-->
+            config={{ value: c => c, label: c => c }}
+            bind:selectedValue={selectedType}/>
           </Th>
           <Th />
           <Th />
           <Th />
-          <Th />
+          <Th>
+            <DateFilter
+            onChange={(startDate, endDate) => {
+              if (!startDate || !endDate) return
+        
+              filters.update({
+                startDate: String(startDate),
+                endDate: String(endDate),
+              })
+            }}
+            />
+          </Th>
           <!--FINALIZAR ESSA TABLE, FILTRO DE DATA E ETC-->
         </tr>
       </thead>

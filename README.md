@@ -208,6 +208,8 @@ npm run db:check
 - KG como unidade de medida nos produtos
 - Editar tipo pessoa em clientes
 - Tables ao apagar filtro não limpa os parametros
+- No componente DateFilter ao filtrar apenas um dia a data de inicio e de fim são iguais, data de inicio devia pegar o dia a partir das 00:00 e data de fim no mesmo dia até 23:59
+- Total nas transações do caixa
 
 
 ## NAO TAO URGENTE
