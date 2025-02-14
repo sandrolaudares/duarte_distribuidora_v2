@@ -10,7 +10,7 @@ import { stockTransference } from '$lib/server/db/central/schema'
 import { centralDb } from '$lib/server/db/central'
 import { eq } from 'drizzle-orm'
 
-export const load = (async ({depends}) => {
+export const load = (async ({ depends }) => {
   depends('central:transferir')
   try {
     const solicitacoes = await getCurrentTransfers()
@@ -82,6 +82,7 @@ export const actions: Actions = {
         .set({ quantity: quantity })
         .where(eq(stockTransference.id, id))
       return { success: true, message: 'Sucesso ao editar quantidade' }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       return { success: false, message: error.message }
     }

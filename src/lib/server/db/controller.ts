@@ -20,6 +20,7 @@ export const SKU_TRANSFERENCE_PARAMS = z.object({
   type: z.enum(['IN_TRANSFERENCE', 'OUT_TRANSFERENCE']),
   central_transference_id: z.number(),
   quantity: z.number(),
+  cost_price_cents: z.number().optional(),
 })
 
 export type SKU_TRANSFERENCE_POST_TYPE = z.infer<typeof SKU_TRANSFERENCE_PARAMS>

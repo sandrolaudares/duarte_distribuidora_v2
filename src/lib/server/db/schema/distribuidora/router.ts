@@ -93,7 +93,7 @@ export const distribuidora = router({
         metadata: {
           cashier_id: id,
         },
-        cashier_id:id,
+        cashier_id: id,
         type: 'CAIXA',
         pathname: '',
         routeName: 'Abrir caixa',
@@ -122,7 +122,7 @@ export const distribuidora = router({
         metadata: {
           cashier_id: id,
         },
-        cashier_id:id,
+        cashier_id: id,
         type: 'CAIXA',
         pathname: '',
         routeName: 'Fechar caixa',
@@ -188,7 +188,11 @@ export const distribuidora = router({
     .mutation(async ({ input, ctx }) => {
       const data = input
       console.log(data)
-      await solicitarTransference(data)
+
+      await solicitarTransference({
+        ...data,
+        meta_data: {},
+      })
     }),
 
   refuseTransference: publicProcedure
@@ -271,7 +275,10 @@ export const distribuidora = router({
           message: `${adminUser.username} validou ${input.reason}`,
         }
       } else {
-        throw new TRPCError({code:'UNAUTHORIZED',message:`Senha inválida para ${adminUser.username}`})
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: `Senha inválida para ${adminUser.username}`,
+        })
       }
     }),
 })

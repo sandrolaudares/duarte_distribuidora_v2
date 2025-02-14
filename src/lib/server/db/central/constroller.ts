@@ -181,7 +181,11 @@ export async function updateDistribuidora(
   id: SelectTenant['tenantId'],
   data: Partial<SelectTenant>,
 ) {
-  return db.update(tenants).set(data).where(eq(tenants.tenantId, id)).returning()
+  return db
+    .update(tenants)
+    .set(data)
+    .where(eq(tenants.tenantId, id))
+    .returning()
 }
 
 export async function getDistribuidoraLatLong(id: SelectTenant['tenantId']) {
@@ -262,7 +266,7 @@ export async function acceptTransference(
   })
   //TODO: validate quantidade do from
   try {
-    const skyFrom: SelectSku = await fetch(
+    const skyFrom: SelectSku & { lastCost?: number } = await fetch(
       `http://${transference?.fromTenantId}.${PUBLIC_DOMAIN}/api/stock/${transference?.sku}`,
     ).then(res => res.json())
 
@@ -300,6 +304,9 @@ export async function acceptTransference(
       .update(stockTransference)
       .set({
         status: 'ACCEPTED',
+        meta_data: {
+          cost_price_cents: transference.meta_data?.cost_price_cents,
+        },
       })
       .where(eq(stockTransference.id, stockTransferenceId))
     return {
@@ -402,6 +409,7 @@ export async function completeTransference(
           quantity: transference.quantity,
           type: 'IN_TRANSFERENCE',
           central_transference_id: transference.id,
+          cost_price_cents: transference.meta_data?.cost_price_cents,
         }),
       },
     )
