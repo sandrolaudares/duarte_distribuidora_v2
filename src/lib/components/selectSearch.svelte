@@ -12,7 +12,7 @@
   import { tick } from 'svelte'
   import * as Command from '$lib/components/ui/command/index.js'
   import * as Popover from '$lib/components/ui/popover/index.js'
-  import { Button } from '$lib/components/ui/button/index.js'
+  import { Button, type ButtonVariant } from '$lib/components/ui/button/index.js'
   import { cn } from '$lib/utils'
   import Separator from './ui/separator/separator.svelte'
 
@@ -22,6 +22,7 @@
     value: string
     placeholder?: string
     onValueChange?: (value: string) => void
+    variant?: ButtonVariant
   }
 
   let {
@@ -30,6 +31,7 @@
     value = $bindable(),
     placeholder,
     onValueChange,
+    variant,
   }: Props = $props()
 
   let open = $state(false)
@@ -58,7 +60,7 @@
   <Popover.Trigger bind:ref={triggerRef}>
     {#snippet child({ props })}
       <Button
-        variant="select"
+        variant={variant ?? 'select'}
         class="w-full justify-between"
         {...props}
         role="combobox"

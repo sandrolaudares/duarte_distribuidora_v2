@@ -27,6 +27,7 @@
 </script>
 
 <SelectSearch
+variant="ghost"
   {config}
   bind:value={selectedValue}
   {options}

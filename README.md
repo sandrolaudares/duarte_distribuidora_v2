@@ -171,6 +171,8 @@ npm run db:check
 - loading login ✅
 - Alterar join do caixa na tela da transacao do caixa✅
 - TRANSAÇÕES DO CAIXA (TELAS)✅
+- SelectFilter tela de log para tipo e usuario ✅
+- Datefilter tela de log ✅
 
 ## PARCIAL PRONTOS OU APENAS REVISAR/AJUSTAR
 
@@ -203,9 +205,9 @@ npm run db:check
 - Parte do cliente fazer pedido 
 - TELA RESUMO DE CADA MOTOBOY ENTREGAS
 - Formatar ENUMs
-- Datefilter tela de log
-- SelectFilter tela de log para tipo e usuario
 - KG como unidade de medida nos produtos
+- Editar tipo pessoa em clientes
+- Tables ao apagar filtro não limpa os parametros
 
 
 ## NAO TAO URGENTE
