@@ -173,6 +173,9 @@ npm run db:check
 - TRANSAÇÕES DO CAIXA (TELAS)✅
 - SelectFilter tela de log para tipo e usuario ✅
 - Datefilter tela de log ✅
+- Editar tipo pessoa em clientes ✅
+- Uma tela tipo um admin dashboard pro estoque, pra poder acessar transferencia,
+  etc ✅
 
 ## PARCIAL PRONTOS OU APENAS REVISAR/AJUSTAR
 
@@ -206,7 +209,6 @@ npm run db:check
 - TELA RESUMO DE CADA MOTOBOY ENTREGAS
 - Formatar ENUMs
 - KG como unidade de medida nos produtos
-- Editar tipo pessoa em clientes
 - Tables ao apagar filtro não limpa os parametros
 - No componente DateFilter ao filtrar apenas um dia a data de inicio e de fim são iguais, data de inicio devia pegar o dia a partir das 00:00 e data de fim no mesmo dia até 23:59
 - Total nas transações do caixa
@@ -226,8 +228,6 @@ npm run db:check
   atrasado perde 5 pontos. Esse score atualiza automaticamente toda vez que ele
   efetuar um pagamento. Pra auxiliar na tomada de decisões junto aos clientes pj
   que compram fiado.
-- Uma tela tipo um admin dashboard pro estoque, pra poder acessar transferencia,
-  etc
 
 # RELATORIOS:
 
