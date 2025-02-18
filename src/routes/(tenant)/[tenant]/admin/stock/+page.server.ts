@@ -1,51 +1,53 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { PageServerLoad } from './$types'
-
 import * as schema from '$lib/server/db/schema'
-import {
-  withPagination,
-  withOrderBy,
-  getSQLiteColumn,
-  getOrderBy,
-} from '$lib/server/db/utils'
-import { and, eq, getTableColumns, SQL, count, like } from 'drizzle-orm'
-import { pageConfig } from '$lib/config'
+import { count, eq, sql, sum } from 'drizzle-orm'
+import { stockTransference } from '$lib/server/db/central/schema'
+import { and } from 'drizzle-orm'
+import { centralDb } from '$lib/server/db/central'
+import { lte } from 'drizzle-orm'
 
-export const load = (async ({ url,locals:{tenantDb} }) => {
-  const { searchParams } = url
-  const page = Number(searchParams.get('page') ?? 1)
-  const pageSize = Number(searchParams.get('pageSize') ?? pageConfig.rowPages )
-
-  const name = searchParams.get('name')
-  // const email = searchParams.get('email')
-
-  const sortId = searchParams.get('sort_id')
-  const sortOrder = searchParams.get('sort_order')
-
-  let query = tenantDb!
+export const load = (async ({ locals: { tenantDb, tenantInfo } }) => {
+  const logs = await tenantDb!
     .select()
-    .from(schema.skuTable)
-    .where(name ? like(schema.skuTable.name, `%${name}%`) : undefined)
-    .$dynamic()
-
-  if (sortId && sortOrder) {
-    query = withOrderBy(
-      query,
-      getSQLiteColumn(schema.skuTable, sortId),
-      sortOrder,
+    .from(schema.stockTransactionTable)
+    .leftJoin(
+      schema.skuTable,
+      eq(schema.skuTable.sku, schema.stockTransactionTable.sku),
     )
-  }
+    .limit(3)
 
-    //TODO: FIX não aparece todos SKU, ao filtrar sim
+  const [totalItemsStock] = await tenantDb!
+    .select({ totalQuantity: sum(schema.skuTable.quantity) })
+    .from(schema.skuTable)
 
-  try {
-    const rows = await withPagination(query, page, pageSize)
+  const [totalValueInStock] = await tenantDb!
+    .select({
+      totalValue: sum(
+        sql`${schema.productItemTable.retail_price} * ${schema.skuTable.quantity}`,
+      ),
+    })
+    .from(schema.productItemTable)
+    .innerJoin(
+      schema.skuTable,
+      eq(schema.productItemTable.sku, schema.skuTable.sku),
+    )
 
-    const total = await tenantDb!.select({ count: count() }).from(schema.skuTable).where(name ? like(schema.skuTable.name, `${name}%`) : undefined)
+  const [totalPendingOrders] = await centralDb
+    .select({
+      orders: count(stockTransference),
+    })
+    .from(stockTransference)
+    .where(
+      and(
+        eq(stockTransference.status, 'ACCEPTED'),
+        eq(stockTransference.toTenantId, tenantInfo!.tenantId),
+      ),
+    )
 
-    return { rows: rows ?? [], count: total[0].count }
-  } catch (error) {
-    console.error(error)
-    return { rows: [], count: 0 }
-  }
+  const [qntLowStock] = await tenantDb!
+    .select({ qnt: count(schema.skuTable.sku) })
+    .from(schema.skuTable)
+    .where(lte(schema.skuTable.quantity, 15))
+
+  return { logs, totalItemsStock, totalValueInStock, totalPendingOrders,qntLowStock }
 }) satisfies PageServerLoad

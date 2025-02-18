@@ -167,7 +167,7 @@
     <button
       class="btn btn-success mt-6 w-96"
       on:click={entradaEstoque}
-      disabled={isLoading}
+      disabled={isLoading || Object.keys(produtosEntrada).length === 0}
     >
       {#if isLoading}
         Loading...

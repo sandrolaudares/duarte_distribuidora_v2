@@ -116,18 +116,18 @@ import {ChartArea,BadgeDollarSign} from 'lucide-svelte/icons'
               title: 'Estoque',
               url: '/admin/stock',
             },
-            {
-              title: 'Transferir estoque',
-              url: '/admin/stock/transferir',
-            },
-            {
-              title: 'Transferencias',
-              url: '/admin/stock/solicitacoes',
-            },
-            {
-              title: 'Historico transferencias',
-              url: '/admin/stock/solicitacoes/historico',
-            },
+            // {
+            //   title: 'Transferir estoque',
+            //   url: '/admin/stock/transferir',
+            // },
+            // {
+            //   title: 'Transferencias',
+            //   url: '/admin/stock/solicitacoes',
+            // },
+            // {
+            //   title: 'Historico transferencias',
+            //   url: '/admin/stock/solicitacoes/historico',
+            // },
           ],
         },
       )
