@@ -5,10 +5,11 @@
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
   import { toast } from 'svelte-sonner'
+  import type { SelectTenant } from '$lib/server/db/central/schema'
 
   let { data }: { data: PageData } = $props()
 
-  let newDistribuidora = data.tenant!
+  let newDistribuidora:SelectTenant = data.tenant!
 
   async function updateDistribuidora() {
     if (!data.tenant) {
@@ -19,10 +20,11 @@
         id: data.tenant.tenantId,
         data: {
           name: newDistribuidora.name,
-          address: newDistribuidora.address,
+          address: newDistribuidora.address !== null ? newDistribuidora.address : undefined,
           lat: Number(newDistribuidora.lat),
           lng: Number(newDistribuidora.lng),
-          taxa_por_km: newDistribuidora.taxa_por_km,
+          taxa_por_km: newDistribuidora.taxa_por_km !== null ? newDistribuidora.taxa_por_km : undefined,
+          subdomain: newDistribuidora.subdomain,
         },
       })
       console.log('Response',response)
@@ -41,10 +43,10 @@
         <header class="mb-8 flex items-center justify-between">
           <div>
             <h1 class="text-2xl font-semibold">
-              Bem vindo ao {data.tenant?.name}
+              Bem vindo ao {newDistribuidora.name}
             </h1>
             <p class="text-gray-500">
-              {data.tenant?.subdomain}.{PUBLIC_DOMAIN}
+              {newDistribuidora.subdomain}.{PUBLIC_DOMAIN}
             </p>
           </div>
           <div class="flex items-center gap-4">
@@ -105,8 +107,7 @@
             <label class="block">
               <span class="">Taxa por kilometro</span>
               <CurrencyInput
-                value={newDistribuidora.taxa_por_km}  
-                on:input={e => (newDistribuidora.taxa_por_km = e.detail.value)}
+                bind:value={newDistribuidora.taxa_por_km as number}  
               />
             </label>
 
@@ -135,7 +136,7 @@
                   marginheight="0"
                   marginwidth="0"
                   class="rounded-md shadow"
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${data.tenant?.lng - 0.02},${data.tenant?.lat - 0.02},${data.tenant?.lng + 0.02},${data.tenant?.lat + 0.02}&layer=mapnik&marker=${data.tenant?.lat},${data.tenant?.lng}`}
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${data.tenant?.lng},${data.tenant?.lat},${data.tenant?.lng},${data.tenant?.lat}&layer=mapnik&marker=${data.tenant?.lat},${data.tenant?.lng}`}
                 ></iframe>
               </div>
             </div>

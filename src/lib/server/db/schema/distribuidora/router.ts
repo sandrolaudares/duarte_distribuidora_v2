@@ -60,7 +60,7 @@ export const distribuidora = router({
       z.object({
         id: z.number(),
         data: z.object({
-          taxa_por_km: z.number(),
+          taxa_por_km: z.number().optional(),
           name: z.string().optional(),
           address: z.string().optional(),
           lat: z.number().optional(),

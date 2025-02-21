@@ -154,7 +154,15 @@
                     <span class="badge badge-info badge-xs">Visualizar</span>
                   </Tooltip.Trigger>
                   <Tooltip.Content>
-                    <pre>{JSON.stringify(row.metadata, null, 2)}</pre>
+                    <!-- <pre>{JSON.stringify(row.metadata, null, 2)}</pre> -->
+                     <div>
+                      {#each Object.keys(row.metadata) as key}
+                        <div>
+                          <span>{key}:</span>
+                          <span>{row.metadata[key]}</span>
+                        </div>
+                      {/each}
+                     </div>
                     {#if row.metadata.order_id}
                       <a
                         class="badge badge-neutral badge-sm"
