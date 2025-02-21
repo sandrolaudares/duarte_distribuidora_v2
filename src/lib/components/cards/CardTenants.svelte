@@ -5,6 +5,7 @@
   import { page } from '$app/stores'
   import { onMount } from 'svelte'
   import { toast } from 'svelte-sonner'
+  import { getDistanceFromLatLonInKm } from '$lib/utils/distance'
 
   type Props = {
     title: string
@@ -13,6 +14,8 @@
     href: string
     image: number
     id: number
+    distLat: number
+    distLon: number
   }
   let {
     title = 'Store Name',
@@ -21,6 +24,8 @@
     href = '',
     image = 0,
     id,
+    distLat,
+    distLon,
   }: Props = $props()
 
   let Addrr: GeolocationCoordinates | null = $state(null)
@@ -29,20 +34,35 @@
   let isLoading = $state(false)
 
   onMount(async () => {
-    console.log(`ID`, id)
     isLoading = true
     try {
       if (navigator.geolocation) {
-        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject);
-      });
-      Addrr = position.coords;
-      console.log(Addrr);
+        const position = await new Promise<GeolocationPosition>(
+          (resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject)
+          },
+        )
+        Addrr = position.coords
+        console.log(Addrr)
       }
       if (!id) {
         throw new Error('Tenant não encontrado!')
       }
-      await sendLatLong()
+      if (!Addrr) {
+        throw new Error('Erro ao pegar localização')
+      }
+      if (distLat === 0 || distLon === 0) {
+        throw new Error('Erro ao pegar localização da distribuidora')
+      }
+
+      distance = Number(
+        (
+          getDistanceFromLatLonInKm(
+            { lat: distLat, lon: distLon },
+            { lat: Addrr.latitude, lon: Addrr.longitude },
+          ) / 1000
+        ).toFixed(1),
+      )
     } catch (error) {
       console.error('Erro:', error)
       error = error
@@ -51,41 +71,19 @@
     }
   })
 
-  async function sendLatLong() {
-    const formData = new FormData()
-    formData.set('id', id.toString())
-    formData.set("lat", (Addrr?.latitude ?? 0).toString());
-    formData.set("lon", (Addrr?.longitude ?? 0).toString());
-
-    try {
-      const res = await fetch('?/calculateDistance', {
-        method: 'POST',
-        body: formData,
-      })
-      if (res.ok) {
-        const result = await res.json()
-        distance = JSON.parse(result.data)[1]
-        if(distance != undefined) {
-          distance = Number((distance/1000).toFixed(1))
-        }
-      } else {
-        console.error('Error fetching data')
-      }
-    } catch (error) {
-      console.error('Erro:', error)
-    }
+  const phoneMask = (value: string) => {
+    if (!value) return ''
+    value = value.replace(/\D/g, '')
+    value = value.replace(/(\d{2})(\d)/, '($1) $2')
+    value = value.replace(/(\d)(\d{4})$/, '$1-$2')
+    return value
   }
-
-  const phoneMask = (value:string) => {
-  if (!value) return ""
-  value = value.replace(/\D/g,'')
-  value = value.replace(/(\d{2})(\d)/,"($1) $2")
-  value = value.replace(/(\d)(\d{4})$/,"$1-$2")
-  return value
-}
 </script>
 
-<a {href} class="rounded-lg bg-base-100 shadow-lg relative z-0 transition-all duration-200 hover:scale-105">
+<a
+  {href}
+  class="relative z-0 rounded-lg bg-base-100 shadow-lg transition-all duration-200 hover:scale-105"
+>
   <div>
     <div>
       <img
