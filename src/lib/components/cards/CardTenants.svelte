@@ -97,7 +97,7 @@
         <h2 class=" text-xl font-semibold lg:text-2xl">{title}</h2>
         <p class="text-sm">
           {#if isLoading || distance === undefined}
-            <span class="animate-pulse">Calculando distancia...</span>
+            <!-- <span class="animate-pulse">Calculando distancia...</span> -->
           {:else}
             <span class="">
               {error == '' ? distance + 'km de você' : 'Erro ao calcular'}
