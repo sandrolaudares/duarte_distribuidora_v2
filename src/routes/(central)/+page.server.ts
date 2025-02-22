@@ -2,7 +2,7 @@ import type { PageServerLoad } from './$types'
 import { centralDb as db } from '$db/central'
 
 export const load = (async () => {
-  const tenats = await db.query.tenants.findMany({
+  const tenants = await db.query.tenants.findMany({
     columns: {
       tenantId: true,
       name: true,
@@ -14,6 +14,6 @@ export const load = (async () => {
     },
   })
   return {
-    tenats,
+    tenants,
   }
 }) satisfies PageServerLoad
