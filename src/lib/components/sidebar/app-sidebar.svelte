@@ -10,7 +10,7 @@
   import ShieldMap from 'lucide-svelte/icons/shield-check'
   import Transactions from 'lucide-svelte/icons/arrow-left-right'
 
-import {ChartArea,BadgeDollarSign} from 'lucide-svelte/icons'
+import {ChartArea,BadgeDollarSign, House} from 'lucide-svelte/icons'
   import Settings2 from 'lucide-svelte/icons/settings-2'
   import User from 'lucide-svelte/icons/user'
   import NavMain from '$lib/components/sidebar/nav-main.svelte'
