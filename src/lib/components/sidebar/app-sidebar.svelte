@@ -138,6 +138,11 @@ import {ChartArea,BadgeDollarSign} from 'lucide-svelte/icons'
           icon: Transactions,
         },
         {
+          name: 'Solicitações para central',
+          url: '/admin/solicitacoes',
+          icon: House,
+        },
+        {
           name: 'Logs',
           url: '/admin/logs',
           icon: scroll,
