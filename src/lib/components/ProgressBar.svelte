@@ -5,10 +5,10 @@
         title:string
         status:string
     }
+
+    let { steps,currentActive=$bindable(1) }: {steps:Steps[],currentActive:number} = $props()
   
-    export let steps:Steps[] = []
-    export let currentActive:number = 1
-    let circles
+    let circles:NodeListOf<HTMLElement>
     let progress:HTMLElement
   
     export const handleProgress = (stepIncrement:number) => {
@@ -47,6 +47,7 @@
   
     onMount(() => {
       circles = document.querySelectorAll('.circle');
+
       update();
     });
   
@@ -63,8 +64,10 @@
             : 'bg-base-300'}"
         ></div>
         <button
+
+        disabled={index > 0 && steps[index - 1].status === 'Pendente'}
           class="mt-2 flex"
-          on:click={() => {
+          onclick={() => {
             currentActive = index + 1
           }}
         >
