@@ -9,6 +9,7 @@
   import { PUBLIC_DOMAIN } from '$env/static/public'
   import { page } from '$app/state'
   import { dev } from '$app/environment'
+  import { PlusIcon } from 'lucide-svelte'
 
   // This should be `Component` after lucide-svelte updates types
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -71,6 +72,17 @@
             </DropdownMenu.Item>
           </a>
         {/each}
+        <a  href="/admin/criarDistribuidora">
+          <DropdownMenu.Item class="gap-2 p-2">
+            <div
+              class="flex size-6 items-center justify-center rounded-sm border"
+            >
+              <!-- <team.logo class="size-4 shrink-0" /> -->
+              <PlusIcon class="size-4" />
+            </div>
+            Criar nova distribuidora
+          </DropdownMenu.Item>
+        </a>
         <DropdownMenu.Separator />
         <DropdownMenu.Item class="gap-2 p-2">
           <a class="font-medium text-foreground" href="/tenantprofile">
