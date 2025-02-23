@@ -48,11 +48,11 @@
     return data.rows
   })
 
-  let newMotoboy = {
+  let newMotoboy = $state({
     username: '',
     email: '',
     role: 'motoboy' as Role,
-  }
+  })
   let errors = {
     emailError: '',
     nameError: '',
