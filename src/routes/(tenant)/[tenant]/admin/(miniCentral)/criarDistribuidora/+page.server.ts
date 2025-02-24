@@ -1,75 +1,40 @@
 import type { PageServerLoad, Actions } from './$types'
 
 import { createTenant } from '$lib/server/db/central/constroller'
-import { fail } from '@sveltejs/kit'
 import { geocodeAddress } from '$lib/utils/distance'
+import { zod } from 'sveltekit-superforms/adapters'
+import { superValidate, message } from 'sveltekit-superforms'
+import { schemaStep2 } from './schema'
 
 export const load = (async () => {
-  return {}
+  const form = await superValidate(zod(schemaStep2))
+  return { form }
 }) satisfies PageServerLoad
 
 export const actions: Actions = {
   create_tenant: async ({ request }) => {
-    // try {
-    const formData = await request.formData()
-    const tenantName = formData.get('tenantName')
-    const subdomain = formData.get('subdomain')
-    const name = formData.get('name')
-    const email = formData.get('email')
-    const password = formData.get('password')
-    const confirmPassword = formData.get('confirmPassword')
-    const phone = formData.get('phone')
-    const cep = formData.get('cep')
-    const street = formData.get('street')
-    const neighborhood = formData.get('neighborhood')
-    const number = formData.get('number')
-    const city = formData.get('city')
-    const state = formData.get('state')
+    const form = await superValidate(request, zod(schemaStep2))
+    const {
+      tenantName,
+      subdomain,
+      name,
+      email,
+      password,
+      phone,
+      cep,
+      street,
+      neighborhood,
+      number,
+      city,
+      state,
+    } = form.data
     const address = `${street}, ${number}, ${city}, ${neighborhood},  ${state}, ${cep}, BR`
-    
-    // console.log(formData)
-      if (!phone) {
-        return fail(400, { success: false, message: 'Telefone é obrigatório'})
-      }
-      if (!cep) {
-        return fail(400, { success: false, message: 'CEP é obrigatório' })
-      }
-      if (!street) {
-        return fail(400, { success: false, message: 'Rua é obrigatório' })
-      }
-      if (!neighborhood) {
-        return fail(400, { success: false, message: 'Bairro é obrigatório'})
-      }
-      if (!number) {
-        return fail(400, { success: false, message: 'Numero é obrigatório'})
-      }
-      if (!city) {
-        return fail(400, { success: false, message: 'Cidade é obrigatório'})
-      }
 
-      const formDataReturn = {
-        tenantName,
-        subdomain,
-        name,
-        email,
-        phone,
-        cep,
-        street,
-        neighborhood,
-        number,
-        city,
-        state,      
-      }
-
-    if (password !== confirmPassword) {
-      console.error('Senhas estão diferentes')
-      return fail(400, {
-        success: false,
-        message: 'Senhas estão diferentes',
-        form: formDataReturn
-      })
+    if (!form.valid) {
+      console.log(form.errors)
+      return message(form, 'Formulario inválido')
     }
-    const location = await geocodeAddress(address);
+    const location = await geocodeAddress(address)
 
     const result = await createTenant({
       email,
@@ -77,32 +42,24 @@ export const actions: Actions = {
       subdomain,
       tenantName,
       name: name,
-      phone:phone,
+      phone: phone,
       address,
       lat: location.lat,
       lon: location.lon,
     })
+
     if (!result.success || !result.data) {
-      console.error(result.message)
-      return fail(400, {
-        success: false,
-        message: result.message,
-        form: formDataReturn,
-      })
+      console.log(result)
+      return message(form, result.message || 'Erro ao criar distribuidora')
     }
     console.log('Distribuidora criada!')
     return {
       success: true,
       message: 'Distribuidora criada!',
-      data: result.data,
+      result: result.data,
+      form,
     }
-  // } catch (error:unknown) {
-  //   console.error("Error processing form data:", error);
-  //   return fail(400, {
-  //     success: false,
-  //     message: error.message,
-  //   })
-  // }
+    // return message(form, 'Distribuidora criada!')
   },
 }
 
