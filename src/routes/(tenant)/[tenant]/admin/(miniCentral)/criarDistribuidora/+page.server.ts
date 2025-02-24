@@ -50,7 +50,12 @@ export const actions: Actions = {
 
     if (!result.success || !result.data) {
       console.log(result)
-      return message(form, result.message || 'Erro ao criar distribuidora')
+      return {
+        success:false,
+        message: result.message || 'Erro ao criar distribuidora',
+        form,
+      }
+      // return message(form, result.message || 'Erro ao criar distribuidora')
     }
     console.log('Distribuidora criada!')
     return {

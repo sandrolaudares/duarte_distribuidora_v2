@@ -13,10 +13,19 @@
   import { schemaStep1, schemaStep2 } from './schema'
   import { page } from '$app/stores'
   import type { PageData, ActionData } from './$types';
+  import { dev } from '$app/environment'
+
+  import { PUBLIC_DOMAIN } from '$env/static/public'
 
   let { data,form }: { data: PageData; form:ActionData } = $props()
 
+  const prefix = dev ? 'http' : 'https'
+
   let success = $state(false)
+  let domain = $state({
+    href: '',
+    text: ''
+  })
   let err = $state('')
 
   const { form: formData, errors, message, enhance, delayed, allErrors } =
@@ -25,16 +34,22 @@
       onError: error => {
         success = false
         console.log(error)
-        err = error.result.error.message
+        err = form?.message ?? 'Erro ao criar distribuidora'
         toast.error(error.result.error.message)
       },
-      onUpdated: ({ form }) => {
-        if (form.valid) {
+      onUpdated: ({ form:formData }) => {
+        if (formData.valid) {
           success = true
-          // domain = form.
+          if(form?.result?.domain){
+            domain.text = form?.result?.domain
+            domain.href = form?.result?.domain
+          } else {
+            domain.text = 'Erro ao criar link, volte a central'
+            domain.href = `${prefix}://${PUBLIC_DOMAIN}`
+          }
         }
-        if (form.message && form.valid) {
-          toast.success(form.message)
+        if (formData.message && formData.valid) {
+          toast.success(formData.message)
         }
       },
       applyAction: true,
@@ -104,7 +119,7 @@
     console.log(responseapi)
   }
 </script>
-
+<!-- 
 {#if $message}
   <div
     class="status"
@@ -113,7 +128,7 @@
   >
     {$message}
   </div>
-{/if}
+{/if} -->
 
 <div
   class="bg-base-50 flex min-h-[80vh] items-center justify-center px-4 py-12 sm:px-6 lg:px-8"
@@ -156,12 +171,12 @@
             <div class="mt-2 text-sm text-green-700">
               <p>Nova distribuidora disponivel em:</p>
               <a
-                href={form?.result?.domain}
+                href={domain.href}
                 target="_blank"
                 rel="noopener noreferrer"
                 class="font-medium underline"
               >
-                {form?.result?.domain}
+                {domain.text}
               </a>
             </div>
           </div>
@@ -401,7 +416,11 @@
             type="submit"
             class="group relative flex w-full items-center justify-center gap-2 rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium hover:bg-opacity-70 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:bg-base-300"
           >
-            {$delayed ? 'Criando...' : 'Criar nova distribuidora'}
+            {$delayed ? `Criando...` : 'Criar nova distribuidora'}
+            {#if $delayed}
+            <svg xmlns="http://www.w3.org/2000/svg"width="24"
+            height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8A8 8 0 0 1 12 20Z" opacity=".5"/><path fill="currentColor" d="M20 12h2A10 10 0 0 0 12 2V4A8 8 0 0 1 20 12Z"><animateTransform attributeName="transform" dur="1s" from="0 12 12" repeatCount="indefinite" to="360 12 12" type="rotate"/></path></svg>
+            {/if}
             {#if !$delayed}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
