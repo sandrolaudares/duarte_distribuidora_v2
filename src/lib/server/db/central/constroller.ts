@@ -97,10 +97,10 @@ export async function createTenant(newTenantInfo: {
     }
   }
 
-  if (typeof name !== 'string' || name.length < 4) {
+  if (typeof name !== 'string' || name.length < 3) {
     return {
       success: false,
-      message: 'Nome deve possuir no minimo 4 caracteres',
+      message: 'Nome deve possuir no minimo 3 caracteres',
     }
   }
 

@@ -2,13 +2,13 @@ import { z } from "zod"
 
 export const schemaStep1 = z.object({
   tenantName: z.string().min(1, 'Nome da distribuidora é necessário'),
-  subdomain: z.string().min(1, 'Subdomínio é necessário'),
-  name: z.string().min(1, 'Nome é necessário'),
+  subdomain: z.string().min(4, 'Subdomínio é necessário'),
+  name: z.string().min(3, 'Nome é necessário'),
   email: z.string().email('Endereço de email inválido'),
-  password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
+  password: z.string().min(8, 'A senha deve ter pelo menos 8 caracteres'),
   confirmPassword: z
     .string()
-    .min(6, 'A confirmação da senha deve ter pelo menos 6 caracteres'),
+    .min(8, 'A confirmação da senha deve ter pelo menos 8 caracteres'),
 })
 
 export const schemaStep2 = schemaStep1
