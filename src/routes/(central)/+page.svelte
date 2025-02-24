@@ -10,13 +10,15 @@
   let { data }: { data: PageData } = $props()
 
   const prefix = dev ? 'http' : 'https'
-
 </script>
 
-<div class="h-full bg-base-100 py-8">
-  <h1 class="mb-8 text-center text-2xl lg:text-3xl font-medium">
-    Encontre a distribuidora mais próxima
-  </h1>
+<div class="h-screen bg-base-100 py-5">
+  <div class=" mx-2 mb-4 flex w-fit flex-col gap-3 sm:mx-auto">
+    <h1 class=" text-center text-2xl font-medium lg:text-3xl">
+      Encontre a distribuidora mais próxima
+    </h1>
+    
+  </div>
   <!-- <Input /> -->
   <div class="mt-6 h-full bg-gray-100 px-2 pt-8 lg:px-8">
     {#if data.tenants.length > 0}
