@@ -260,10 +260,10 @@
         >
           <span class="mr-1">PREPARAR PARA ENTREGA</span>
         </button>
-        <button class="btn btn-primary w-full disabled:bg-opacity-50">
+        <!-- <button class="btn btn-primary w-full disabled:bg-opacity-50">
           <span class="mr-1">IMPRIMIR</span>
           {@html icons.print()}
-        </button>
+        </button> -->
         <button
           class="btn btn-primary w-full disabled:bg-opacity-50"
           disabled={Object.values(cart.cart).length === 0}
