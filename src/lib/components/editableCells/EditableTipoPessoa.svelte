@@ -34,7 +34,7 @@
       </button>
     {:else}
       <form on:submit|preventDefault={handleSubmit}>
-         <select bind:this={inputElement} bind:value class="max-w-28">
+         <select bind:this={inputElement} bind:value>
             <option value={true}>Pessoa física</option>
             <option value={false}>Pessoa juridica</option>
          </select>
