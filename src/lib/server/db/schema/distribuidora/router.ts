@@ -222,6 +222,22 @@ export const distribuidora = router({
     return await distribuidoraController(tenantDb).getAdmins()
   }),
 
+  realizarImpressao: publicProcedure
+    .input(
+      z.object({
+        order_id: z.number(),
+        tenant_id: z.number(),
+      }),
+    )
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
+      const { order_id, tenant_id } = input
+      console.log(input)
+      return await distribuidoraController(tenantDb).imprimirPedido(
+        order_id,
+        tenant_id,
+      )
+    }),
+
   validateAdminPassword: publicProcedure
     .input(
       z.object({

@@ -24,6 +24,8 @@
   import EditableCurrency from '$lib/components/editableCells/EditableCurrency.svelte'
   import { pageConfig } from '$lib/config'
   import EditableTipoPessoa from '$lib/components/editableCells/EditableTipoPessoa.svelte'
+  import { invalidateAll } from '$app/navigation'
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -48,27 +50,22 @@
 
   function add() {
     modal.open(FormModal, {
-      title: 'Create new Customer',
+      title: 'Criar novo cliente',
       fields: [
         {
-          name: 'is_retail',
-          label: 'Pessoa Fisica',
-          type: 'checkbox',
-        },
-        {
-          label: 'Name',
+          label: 'Nome',
           name: 'name',
           type: 'text',
           required: true,
         },
         {
-          label: 'Phone',
-          name: 'phone',
+          label: 'Celular',
+          name: 'cellphone',
           type: 'text',
         },
         {
-          name: 'cellphone',
-          label: 'CellPhone',
+          label: 'Telefone',
+          name: 'phone',
           type: 'text',
         },
         {
@@ -81,15 +78,19 @@
           label: 'CPF/CNPJ',
           type: 'text',
         },
+        {
+          name: 'is_retail',
+          label: 'Pessoa Fisica',
+          type: 'checkbox',
+        },
       ],
       save: async toSave => {
         try {
           const resp = await trpc($page).customer.insertCustomer.mutate(toSave)
 
           if (resp) {
-            toast.success('Cliente criado')
-            // invalidate()
-            window.location.reload()
+            toast.success('Cliente criado com sucesso')
+            invalidateAll()
           }
         } catch (error: any) {
           toast.error(error.message)
@@ -134,23 +135,21 @@
     </div>
   </section>
   <Datatable {table}>
-    <!-- {#snippet header()}
-      <Search {table} />
-     
-    {/snippet} -->
-    <!-- svelte-ignore component_name_lowercase -->
+    {#if table.isLoading}
+      <LoadingBackground />
+    {/if}
     <table class="table table-zebra">
       <thead>
         <tr>
-          <ThSort {table} field="id">ID</ThSort>
-          <ThSort {table} field="name">Nome</ThSort>
-          <!-- <ThSort {table} field="email">Email</ThSort>
+          <Th>ID</Th>
+          <Th>Nome</Th>
+          <!-- <Th"email">Email</Th>
           <Th>CPF/CNPJ</Th> -->
-          <ThSort {table} field="is_retail">Tipo pessoa</ThSort>
+          <Th>Tipo pessoa</Th>
           <!-- <Th>RG/IE</Th> -->
           <Th>Telefone</Th>
           <Th>Créditos usados</Th>
-          <ThSort {table} field="max_credit">Máximo de créditos</ThSort>
+          <Th>Máximo de créditos</Th>
           <Th>Ver detalhes</Th>
         </tr>
         <tr>
@@ -233,7 +232,7 @@
         {/each}
       </tbody>
     </table>
-    {#if table.rows.length === 0}
+    {#if data.rows.length === 0}
       <NoResults />
     {/if}
     {#snippet footer()}

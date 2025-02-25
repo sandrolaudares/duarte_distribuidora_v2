@@ -49,6 +49,14 @@
     }
     return data.rows
   })
+
+  async function printOrder(order_id:number) {
+    console.log('print')
+    await trpc($page).distribuidora.realizarImpressao.mutate({
+      order_id:order_id,
+      tenant_id:data.tenant?.tenantId ?? 10
+    })
+  }
 </script>
 
 <main class="m-4 h-full max-h-[calc(100vh-20vh)]">
@@ -115,6 +123,7 @@
                 Detalhes
               </a>
             </td>
+            <td><button onclick={()=>printOrder(row.id)}>imprimir</button></td>
           </tr>
         {/each}
         <tr>
