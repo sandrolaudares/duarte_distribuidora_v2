@@ -59,6 +59,11 @@
   "type": "module",
   "dependencies": {
     "@libsql/client": "^0.14.0",
+    "@node-escpos/adapter": "^0.0.1",
+    "@node-escpos/console": "^0.0.1",
+    "@node-escpos/core": "^0.6.0",
+    "@node-escpos/network-adapter": "^0.0.1",
+    "@node-escpos/usb-adapter": "^0.3.1",
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
     "@tanstack/svelte-table": "9.0.0-alpha.10",
