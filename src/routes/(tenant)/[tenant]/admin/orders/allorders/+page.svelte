@@ -24,6 +24,9 @@
   import { goto } from '$app/navigation'
   import { pageConfig } from '$lib/config'
   import { DateFormatter } from '@internationalized/date'
+  import Console from "@node-escpos/console";
+import USB from "@node-escpos/usb-adapter"
+  import Printer from '@node-escpos/core'
 
   let { data }: { data: PageData } = $props()
 
@@ -51,11 +54,28 @@
   })
 
   async function printOrder(order_id:number) {
+    const device = new USB();
+    const options = { encoding: "GB18030" }
+    const printer = new Printer(device,options);
     console.log('print')
-    await trpc($page).distribuidora.realizarImpressao.mutate({
-      order_id:order_id,
-      tenant_id:data.tenant?.tenantId ?? 10
-    })
+    // await trpc($page).distribuidora.realizarImpressao.mutate({
+    //   order_id:order_id,
+    //   tenant_id:data.tenant?.tenantId ?? 10
+    // })
+    device.open(async (err) => {
+        if (err) {
+          console.error("Failed to open printer:", err);
+          return;
+        }
+        printer
+          .font('a')
+          .align('ct')
+          .style('bu')
+          .size(1, 1)
+          .text(`Testando`,)
+        .cut()
+        .close()
+      })
   }
 </script>
 
