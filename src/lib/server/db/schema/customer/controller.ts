@@ -179,6 +179,8 @@ export const customer = (db: TenantDbType) => ({
           },
         },
         transactions: true,
+        created_by: true,
+        motoboy: true,
       },
     })
   },

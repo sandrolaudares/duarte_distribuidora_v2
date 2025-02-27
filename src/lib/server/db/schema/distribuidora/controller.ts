@@ -22,9 +22,6 @@ import { eq, sql } from 'drizzle-orm'
 import type { TenantDbType } from '../../tenant'
 import { centralDb } from '$db/central'
 import { tenants, type SelectTenant } from '../../central/schema'
-import { Printer } from "@node-escpos/core";
-import Console from "@node-escpos/console";
-import USB from "@node-escpos/usb-adapter"
 
 export const distribuidora = (db: TenantDbType) => ({
   insertCashier: function insertCashier(data: InsertCashier) {
@@ -73,9 +70,6 @@ export const distribuidora = (db: TenantDbType) => ({
     tenantId: SelectTenant['tenantId'],
   ) => {
     
-    const device = new USB();
-    const options = { encoding: "GB18030" }
-    const printer = new Printer(device,options);
     try {
       
       const [tenant] = await centralDb
@@ -113,63 +107,63 @@ export const distribuidora = (db: TenantDbType) => ({
       //TODO: CNPJ
       //TODO: FULL ADDRESS
   
-      device.open(async (err) => {
-        if (err) {
-          console.error("Failed to open printer:", err);
-          return;
-        }
-        printer
-          .font('a')
-          .align('ct')
-          .style('bu')
-          .size(1, 1)
-          .text(`Duarte distribuidora ${tenant.name}`,)
-          .text(`${tenant.address}`)
-          .text(`${tenant.phone}`)
-          .text('TODO: CNPJ')
-          .text('--------------------------------')
-          .text(`IMPRESSO EM: ${dataFormatada} ${horaFormatada}`)
-          .text(`RELATÓRIO GERENCIAL`)
-          .align('lt')
-          .text(`${order.customer?.name}`)
-          .text(`${order.customer?.phone} - ${order.customer?.cellphone}`)
-          .text(
-            `Endereço de entrega ${order.address?.street}, ${order.address?.number}, ${order.address?.neighborhood}, ${order.address?.city}`,
-          )
-          .text(`Entregador: ${order.motoboy?.username}`)
-          .align('ct')
-          .text(`(Pedido: N.:${order.id})`)
-          .align('lt')
-          .tableCustom([
-            { text: 'Item', align: 'LEFT', width: 0.6 },
-            { text: 'Preço', align: 'RIGHT', width: 0.2 },
-          ])
-        order.items.forEach(item => {
-          printer.tableCustom([
-            {
-              text: `${item.quantity}x ${item.product.name}`,
-              align: 'LEFT',
-              width: 0.6,
-            },
-            { text: `R$ ${item.price.toFixed(2)}`, align: 'RIGHT', width: 0.2 },
-          ])
-        })
-        printer.align('ct')
-        .text('--------------------------------')
-        .align('rt')
-        .text(`TOTAL: R$${((order.total - (order.taxa_entrega ?? 0)).toFixed(2))}`)
-        .text(`+ ENTREGA: R$${(order.taxa_entrega ?? 0).toFixed(2)}`)
-        .text(`= TOTAL A PAGAR: R$${order.total.toFixed(2)}`)
-        .align('lt')
-        .text(`Atendente: ${order.created_by?.username}`)
-        .text('--------------------------------')
-        .cut()
-        .close()
-      })
-      console.log('Pedido impresso')
+      // device.open(async (err) => {
+      //   if (err) {
+      //     console.error("Failed to open printer:", err);
+      //     return;
+      //   }
+      //   printer
+      //     .font('a')
+      //     .align('ct')
+      //     .style('bu')
+      //     .size(1, 1)
+      //     .text(`Duarte distribuidora ${tenant.name}`,)
+      //     .text(`${tenant.address}`)
+      //     .text(`${tenant.phone}`)
+      //     .text('TODO: CNPJ')
+      //     .text('--------------------------------')
+      //     .text(`IMPRESSO EM: ${dataFormatada} ${horaFormatada}`)
+      //     .text(`RELATÓRIO GERENCIAL`)
+      //     .align('lt')
+      //     .text(`${order.customer?.name}`)
+      //     .text(`${order.customer?.phone} - ${order.customer?.cellphone}`)
+      //     .text(
+      //       `Endereço de entrega ${order.address?.street}, ${order.address?.number}, ${order.address?.neighborhood}, ${order.address?.city}`,
+      //     )
+      //     .text(`Entregador: ${order.motoboy?.username}`)
+      //     .align('ct')
+      //     .text(`(Pedido: N.:${order.id})`)
+      //     .align('lt')
+      //     .tableCustom([
+      //       { text: 'Item', align: 'LEFT', width: 0.6 },
+      //       { text: 'Preço', align: 'RIGHT', width: 0.2 },
+      //     ])
+      //   order.items.forEach(item => {
+      //     printer.tableCustom([
+      //       {
+      //         text: `${item.quantity}x ${item.product.name}`,
+      //         align: 'LEFT',
+      //         width: 0.6,
+      //       },
+      //       { text: `R$ ${item.price.toFixed(2)}`, align: 'RIGHT', width: 0.2 },
+      //     ])
+      //   })
+      //   printer.align('ct')
+      //   .text('--------------------------------')
+      //   .align('rt')
+      //   .text(`TOTAL: R$${((order.total - (order.taxa_entrega ?? 0)).toFixed(2))}`)
+      //   .text(`+ ENTREGA: R$${(order.taxa_entrega ?? 0).toFixed(2)}`)
+      //   .text(`= TOTAL A PAGAR: R$${order.total.toFixed(2)}`)
+      //   .align('lt')
+      //   .text(`Atendente: ${order.created_by?.username}`)
+      //   .text('--------------------------------')
+      //   .cut()
+      //   .close()
+      // })
+      // console.log('Pedido impresso')
 
     } catch (error:unknown) {
-      console.error(error.message)
+      // console.error(error.message)
     }
   },
 })

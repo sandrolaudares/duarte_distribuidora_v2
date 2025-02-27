@@ -24,9 +24,8 @@
   import { goto } from '$app/navigation'
   import { pageConfig } from '$lib/config'
   import { DateFormatter } from '@internationalized/date'
-  import Console from "@node-escpos/console";
-import USB from "@node-escpos/usb-adapter"
-  import Printer from '@node-escpos/core'
+  import Printer, { JustifyModes, PrinterModes } from 'esc-pos-printer'
+  import type { SelectCustomerOrder } from '$lib/server/db/schema'
 
   let { data }: { data: PageData } = $props()
 
@@ -53,36 +52,106 @@ import USB from "@node-escpos/usb-adapter"
     return data.rows
   })
 
-  async function printOrder(order_id:number) {
-    const device = new USB();
-    const options = { encoding: "GB18030" }
-    const printer = new Printer(device,options);
-    console.log('print')
-    // await trpc($page).distribuidora.realizarImpressao.mutate({
-    //   order_id:order_id,
-    //   tenant_id:data.tenant?.tenantId ?? 10
-    // })
-    device.open(async (err) => {
-        if (err) {
-          console.error("Failed to open printer:", err);
-          return;
-        }
-        printer
-          .font('a')
-          .align('ct')
-          .style('bu')
-          .size(1, 1)
-          .text(`Testando`,)
-        .cut()
-        .close()
+  function printEmphasis(printer: Printer,text:string) {
+    printer.setEmphasis(true)
+    printer.text(text)
+    printer.setEmphasis(false)
+  }
+
+  async function printOrder(order_id: SelectCustomerOrder['id']) {
+    toast.info('Imprimindo pedido...')
+    console.log('IMPRIMINDO PEDIDO')
+    const datt = new Date()
+
+    const dataFormatada = datt.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+    const horaFormatada = datt.toLocaleTimeString('pt-BR', { hour12: false })
+    try {
+      const order = await trpc($page).customer.getOrderById.query(order_id)
+
+      if (order === undefined || order === null) {
+        toast.error('Pedido não encontrado')
+        console.error('Pedido não encontrado')
+        return
+      }
+      const printer = new Printer()
+
+      const printerList = await printer.getPrinters()
+      printer.setPrinterName(printerList[0])
+      console.log(printerList)
+      printer.selectPrintMode(PrinterModes.MODE_FONT_A)
+      printer.justify(JustifyModes.justifyCenter)
+      printEmphasis(printer,`Duarte distribuidora ${data.tenant?.name}\n\n`)
+      printer.text(`${data.tenant?.address}\n`)
+      printer.text(`${data.tenant?.phone}\n`)
+      printer.text('TODO: CNPJ\n\n')
+      printEmphasis(printer,'----------------------------------------\n\n')
+      printer.text(`IMPRESSO EM: ${dataFormatada} ${horaFormatada}\n\n`)
+      printer.text(`RELATÓRIO GERENCIAL\n\n`)
+      printer.justify(JustifyModes.justifyLeft)
+      printer.text(`${order.customer?.name}\n`)
+      printer.text(
+        `${order.customer?.phone ? order.customer?.phone : ''} - ${order.customer?.cellphone ? order.customer?.cellphone : ''}\n`,
+      )
+      printer.text(
+        `Endereço de entrega: ${order.address?.street}, ${order.address?.number}, ${order.address?.neighborhood}, ${order.address?.city}\n`,
+      )
+      printer.text(`Entregador: ${order.motoboy?.username}\n\n`)
+      printer.justify(JustifyModes.justifyCenter)
+      printer.text(`(Pedido: N.:${order.id})\n`)
+      printer.justify(JustifyModes.justifyCenter)
+      printEmphasis(printer,'----------------------------------------\n')
+      printer.text('ITEM                               PREÇO\n')
+      printEmphasis(printer,'----------------------------------------\n\n')
+
+      order.items.forEach(item => {
+        const itemText = `${item.quantity}x ${item.product.name}`.padEnd(
+          35,
+          ' ',
+        ) // Adjust space as needed
+        const price = `R$${(item.price / 100).toFixed(2)}`
+
+        printer.justify(JustifyModes.justifyLeft)
+        printer.text(itemText)
+        printer.justify(JustifyModes.justifyRight)
+        printer.text(price + '\n')
       })
+      printEmphasis(printer,'\n----------------------------------------\n\n')
+      printer.justify(JustifyModes.justifyRight)
+      printer.text(
+        `TOTAL: R$${((order.total - (order.taxa_entrega ?? 0)) / 100).toFixed(2)}\n`,
+      )
+      printer.text(
+        `+ ENTREGA: R$${((order.taxa_entrega ?? 0) / 100).toFixed(2)}\n`,
+      )
+      printEmphasis(printer,`= TOTAL A PAGAR: R$${(order.total / 100).toFixed(2)}\n`)
+      printer.justify(JustifyModes.justifyLeft)
+      printer.text(`Atendente: ${order.created_by?.username}\n`)
+      printer.justify(JustifyModes.justifyCenter)
+      printEmphasis(printer,'----------------------------------------\n')
+      printer.feed(2)
+      printer.cut()
+      printer.close()
+      await printer.print()
+    } catch (error) {
+      console.log(error)
+    }
   }
 </script>
 
 <main class="m-4 h-full max-h-[calc(100vh-20vh)]">
-  <div class="flex justify-between items-center">
+  <div class="flex items-center justify-between">
     <h1 class="my-5 text-center text-2xl font-medium">Todos os pedidos:</h1>
-    <button class="btn btn-primary" onclick={()=>filters.clear('name','created_by','startDate','endDate')}>Limpar filtros</button>
+    <button
+      class="btn btn-primary"
+      onclick={() =>
+        filters.clear('name', 'created_by', 'startDate', 'endDate')}
+    >
+      Limpar filtros
+    </button>
   </div>
   <Datatable {table} headless>
     <!-- {#snippet header()}
@@ -109,14 +178,14 @@ import USB from "@node-escpos/usb-adapter"
           <Th />
           <Th>
             <DateFilter
-            onChange={(startDate, endDate) => {
-              if (!startDate || !endDate) return
-        
-              filters.update({
-                startDate: String(startDate),
-                endDate: String(endDate),
-              })
-            }}
+              onChange={(startDate, endDate) => {
+                if (!startDate || !endDate) return
+
+                filters.update({
+                  startDate: String(startDate),
+                  endDate: String(endDate),
+                })
+              }}
             />
           </Th>
           <Th />
@@ -128,9 +197,17 @@ import USB from "@node-escpos/usb-adapter"
         {#each data.rows as row}
           <tr>
             <td>{row.id}</td>
-            <td><b class:text-error={!row.name}>{row.name ? row.name : 'Não vinculado'}</b></td>
+            <td>
+              <b class:text-error={!row.name}>
+                {row.name ? row.name : 'Não vinculado'}
+              </b>
+            </td>
             <td><b>{row.created_by}</b></td>
-            <td><b class:text-error={!row.observation}>{row.observation ? row.observation :'N/A'}</b></td>
+            <td>
+              <b class:text-error={!row.observation}>
+                {row.observation ? row.observation : 'N/A'}
+              </b>
+            </td>
             <td>
               <b>
                 {row.created_at ? df.format(row.created_at) : ''}
@@ -143,7 +220,9 @@ import USB from "@node-escpos/usb-adapter"
                 Detalhes
               </a>
             </td>
-            <td><button onclick={()=>printOrder(row.id)}>imprimir</button></td>
+            <td>
+              <button onclick={() => printOrder(row.id)}>imprimir</button>
+            </td>
           </tr>
         {/each}
         <tr>
