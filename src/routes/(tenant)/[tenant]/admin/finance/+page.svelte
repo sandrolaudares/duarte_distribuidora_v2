@@ -70,13 +70,13 @@
     console.log(daysDiff)
 
     if (daysDiff < 0) {
-      return 'bg-error text-error-content bg-opacity-50 '
+      return 'badge badge-lg badge-error text-red-50'
     } else if (daysDiff <= 4) {
-      return 'bg-warning text-warning-content bg-opacity-50 '
+      return 'badge badge-lg badge-warning text-yellow-50'
     } else if (daysDiff <= 7) {
-      return 'table-zebra '
+      return ''
     }
-    return 'table-zebra '
+    return ' '
   }
 
   function calculateSum() {
@@ -128,7 +128,20 @@
     <option value="todos" selected={true}>Todos</option>
     <option value="atrasados">Pagamentos atrasados</option>
   </select>
-  <button class="btn btn-primary" onclick={()=>filters.clear('name','startDate','endDate','startExpireDate','endExpireDate','atrasados')}>Limpar filtros</button>
+  <button
+    class="btn btn-primary"
+    onclick={() =>
+      filters.clear(
+        'name',
+        'startDate',
+        'endDate',
+        'startExpireDate',
+        'endExpireDate',
+        'atrasados',
+      )}
+  >
+    Limpar filtros
+  </button>
   <Datatable {table} headless>
     <!-- {#snippet header()}
       <Search {table} />
@@ -136,7 +149,7 @@
     {/snippet} -->
     <div class="spinner" class:active={table.isLoading}></div>
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table ">
+    <table class=" table">
       <thead>
         <tr>
           <Th />
@@ -156,29 +169,28 @@
           <ThFilter {table} field="name" />
           <Th>
             <DateFilter
-            
-            onChange={(startDate, endDate) => {
-              if (!startDate || !endDate) return
-        
-              filters.update({
-                startDate: String(startDate),
-                endDate: String(endDate),
-              })
-            }}
+              onChange={(startDate, endDate) => {
+                if (!startDate || !endDate) return
+
+                filters.update({
+                  startDate: String(startDate),
+                  endDate: String(endDate),
+                })
+              }}
             />
           </Th>
 
           <Th>
             <DateFilter
-            futureDates={true}
-            onChange={(startExpireDate, endExpireDate) => {
-              if (!startExpireDate || !endExpireDate) return
-        
-              filters.update({
-                startExpireDate: String(startExpireDate),
-                endExpireDate: String(endExpireDate),
-              })
-            }}
+              futureDates={true}
+              onChange={(startExpireDate, endExpireDate) => {
+                if (!startExpireDate || !endExpireDate) return
+
+                filters.update({
+                  startExpireDate: String(startExpireDate),
+                  endExpireDate: String(endExpireDate),
+                })
+              }}
             />
           </Th>
           <Th />
@@ -189,13 +201,7 @@
       </thead>
       <tbody>
         {#each data.rows as row}
-          <tr
-            class={table.selected.includes(row.id)
-              ? 'bg-base-300'
-              : row.expire_at
-                ? getBgColor(row.expire_at)
-                : ''}
-          >
+          <tr class={table.selected.includes(row.id) ? 'bg-base-200' : ''}>
             <td>
               <input
                 type="checkbox"
@@ -206,27 +212,25 @@
               />
             </td>
             <td>{row.id}</td>
-            <td><b>{row.name}</b></td>
-            <td><b>{df.format(row.created_at!)}</b></td>
+            <td>{row.name}</td>
+            <td>{df.format(row.created_at!)}</td>
             <td>
-              <b>
-                <!-- {row.expire_at
+              <!-- {row.expire_at
                   ? format(new Date(row.expire_at), 'dd/MM/yyyy')
                   : 'Não registrado'} -->
-                {#if isLoading}
-                  Atualizando...
-                {:else}
-                  <ChangeExpireDate
-                    value={row.expire_at!}
-                    onUpdateValue={async (value: Date) => {
-                      handleUpdate(value, 'expire_at', row)
-                    }}
-                  />
-                {/if}
-              </b>
+              {#if isLoading}
+                Atualizando...
+              {:else}
+                <ChangeExpireDate
+                  value={row.expire_at!}
+                  onUpdateValue={async (value: Date) => {
+                    handleUpdate(value, 'expire_at', row)
+                  }}
+                />
+              {/if}
             </td>
             <td>
-              <b>
+              <b class="{row.expire_at ? getBgColor(row.expire_at): ''} text-center">
                 {#if row.expire_at}
                   {#if differenceInDays(row.expire_at) < 0}
                     VENCIDO!

@@ -143,7 +143,7 @@
   })
 </script>
 
-<main class="container mx-auto mt-10">
+<main class="mx-3">
   <Tabs.Root
     value={activeDist}
     onValueChange={v => {

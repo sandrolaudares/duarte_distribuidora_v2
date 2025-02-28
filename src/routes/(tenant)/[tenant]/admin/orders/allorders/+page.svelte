@@ -156,13 +156,13 @@
       Limpar filtros
     </button>
   </div>
-  <Datatable {table} >
+  <Datatable {table}>
     <!-- {#snippet header()}
       <Search {table} />
      
     {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="">
+    <table class="table table-sm">
       <thead>
         <tr>
           <ThSort {table} field="id">ID</ThSort>
@@ -206,7 +206,7 @@
                 {row.name ? row.name : 'Não vinculado'}
             </td>
             <td>{row.created_by}</td>
-            <td  class:text-error={!row.observation}>
+            <td class:text-error={!row.observation}>
                 {row.observation ? row.observation : 'N/A'}
             </td>
             <td>

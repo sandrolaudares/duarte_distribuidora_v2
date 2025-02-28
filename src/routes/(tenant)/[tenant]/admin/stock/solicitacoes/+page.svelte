@@ -97,9 +97,9 @@
       Aceitar transferencia
     </button>
   </div>
-  <Datatable {table} headless>
+  <Datatable {table} >
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table table-zebra rounded-none border">
+    <table class="table rounded-none">
       <thead>
         <tr>
           <Th></Th>

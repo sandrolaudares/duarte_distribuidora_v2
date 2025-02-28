@@ -20,7 +20,6 @@
   import { toast } from 'svelte-sonner'
   import { invalidate, invalidateAll } from '$app/navigation'
   import { DateFormatter } from '@internationalized/date'
-  import SelectSearch from '../../../../../../lib/components/selectSearch.svelte'
 
     let { table }= $props()
 
@@ -45,109 +44,109 @@
   }
 </script>
 
+<div class="h-full max-h-[68vh] p-0 m-0">
+  <Datatable {table} >
+    <table class="w-full table table-xs">
+      <thead class="bgg">
+        <tr class="text-left">
+          <Th>Titulo</Th>
+          <Th>Observações</Th>
+          <Th>Fornecedor</Th>
+          <Th>Categoria</Th>
+          <Th>Data vencimento</Th>
+          <Th>Pago com</Th>
+          <Th>Pago em</Th>
+          <ThSort {table} field="valor_conta">Valor</ThSort>
+          <Th></Th>
+          <Th></Th>
+        </tr>
+        <tr>
+          <ThFilter {table} field="titulo" />
+          <Th />
+          <ThFilter {table} field="supName" />
+          <!-- <ThFilter {table} field="catName" /> -->
+          <Th />
+          <Th />
+          <Th>
+            <!-- <DateFilter
+            onchange={(start, end) => {
+              if (start != null && end != null) {
+                let startDate = start.toString()
+                let endDate = end.toString()
+                filters.update({ startDate, endDate })
+              }
+            }}
+          /> -->
+          </Th>
+          <Th />
+          <Th />
+          <Th />
+          <Th />
+        </tr>
+      </thead>
 
-<div class="bg-base overflow-x-auto rounded-lg shadow">
-    <Datatable {table} headless>
-      <table class="w-full">
-        <thead>
-          <tr class="bgg bg-base-200 text-left">
-            <Th>Titulo</Th>
-            <Th>Observações</Th>
-            <Th>Fornecedor</Th>
-            <Th>Categoria</Th>
-            <Th>Data vencimento</Th>
-            <Th>Pago com</Th>
-            <Th>Pago em</Th>
-            <ThSort {table} field="valor_conta">Valor</ThSort>
-            <Th></Th>
-            <Th></Th>
+      <tbody>
+        {#each table.rows as conta}
+          <tr
+            transition:fade|local
+            class="border-t border-gray-200 transition-colors hover:bg-gray-50"
+            class:opacity-50={conta.isPaid}
+          >
+            <td>{conta.titulo}</td>
+            <td class="p-2 {conta.descricao ? '' : 'text-error'}">
+              {conta.descricao ? conta.descricao : 'Não possui'}
+            </td>
+            <td>{conta.supName}</td>
+            <td>{conta.catName ?? 'Não cadastrado'}</td>
+            <td>{df.format(conta.expire_at!)}</td>
+            <td>{conta.pagName ?? "Não cadastrado"}</td>
+            <td>
+              {conta.paid_at
+                ? df.format(conta.paid_at)
+                : 'Ainda não foi paga'}
+            </td> 
+            <td class="p-2 font-bold">R${(conta.valor_conta / 100).toFixed(2)}</td>
+            <td class="p-0">
+              <span
+                class="badge text-xs"
+                class:bg-green-200={conta.isPaid}
+                class:text-green-800={conta.isPaid}
+                class:bg-red-200={!conta.isPaid}
+                class:text-red-800={!conta.isPaid}
+              >
+                {conta.isPaid ? 'Pago' : 'Não pago'}
+              </span>
+            </td>
+            <td>
+              <button
+                onclick={() => pagar(conta.id)}
+                class="btn btn-sm text-xs"
+                class:btn-success={!conta.isPaid}
+                class:text-success-content={!conta.isPaid}
+                disabled={isLoading || conta.isPaid}
+              >
+                {conta.isPaid ? 'PAGO' : 'Pagar'}
+              </button>
+            </td>
           </tr>
-          <tr>
-            <ThFilter {table} field="titulo" />
-            <Th />
-            <ThFilter {table} field="supName" />
-            <!-- <ThFilter {table} field="catName" /> -->
-            <Th />
-            <Th />
-            <Th>
-              <!-- <DateFilter
-              onchange={(start, end) => {
-                if (start != null && end != null) {
-                  let startDate = start.toString()
-                  let endDate = end.toString()
-                  filters.update({ startDate, endDate })
-                }
-              }}
-            /> -->
-            </Th>
-            <Th />
-            <Th />
-            <Th />
-            <Th />
-          </tr>
-        </thead>
+        {/each}
+      </tbody>
+    </table>
+    {#if table.rows.length === 0}
+      <NoResults />
+    {/if}
+    {#snippet footer()}
+      <RowsPerPage {table} />
+      <div></div>
+      <Pagination {table} />
+    {/snippet}
+  </Datatable>
 
-        <tbody>
-          {#each table.rows as conta}
-            <tr
-              transition:fade|local
-              class="border-t border-gray-200 transition-colors hover:bg-gray-50"
-              class:opacity-50={conta.isPaid}
-            >
-              <td class="p-2">{conta.titulo}</td>
-              <td class="p-2 {conta.descricao ? '' : 'text-error'}">
-                {conta.descricao ? conta.descricao : 'Não possui'}
-              </td>
-              <td class="p-2">{conta.supName}</td>
-              <td class="p-2">{conta.catName ?? 'Não cadastrado'}</td>
-              <td class="p-2">{df.format(conta.expire_at!)}</td>
-              <td class="p-2">{conta.pagName ?? "Não cadastrado"}</td>
-              <td class="p-2">
-                {conta.paid_at
-                  ? df.format(conta.paid_at)
-                  : 'Ainda não foi paga'}
-              </td> 
-              <td class="p-2">R${(conta.valor_conta / 100).toFixed(2)}</td>
-              <td class="p-2">
-                <span
-                  class="rounded px-2 py-1 text-sm font-semibold"
-                  class:bg-green-200={conta.isPaid}
-                  class:text-green-800={conta.isPaid}
-                  class:bg-red-200={!conta.isPaid}
-                  class:text-red-800={!conta.isPaid}
-                >
-                  {conta.isPaid ? 'Pago' : 'Não pago'}
-                </span>
-              </td>
-              <td class="p-2">
-                <button
-                  onclick={() => pagar(conta.id)}
-                  class="btn btn-sm"
-                  class:btn-success={!conta.isPaid}
-                  class:text-success-content={!conta.isPaid}
-                  disabled={isLoading || conta.isPaid}
-                >
-                  {conta.isPaid ? 'PAGO' : 'Pagar'}
-                </button>
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
-      {#if table.rows.length === 0}
-        <NoResults />
-      {/if}
-      {#snippet footer()}
-        <RowsPerPage {table} />
-        <div></div>
-        <Pagination {table} />
-      {/snippet}
-    </Datatable>
-  </div>
+</div>
 
   <style>
     .bgg {
-      background-color: oklch(var(--b2)) !important;
+      background-color: oklch(var(--b1)) !important;
     }
   </style>
   

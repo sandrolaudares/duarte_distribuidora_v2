@@ -170,14 +170,12 @@
           <tr>
             <td>{row.id}</td>
             <td>
-              <b>
                 <EditableCell
                   value={row.name}
                   onUpdateValue={async newValue => {
                     handleUpdate(newValue, 'name', row)
                   }}
                 />
-              </b>
             </td>
             <!-- <td>
               <b>
@@ -191,36 +189,30 @@
             </td>
             <td><b>{row.cpf_cnpj}</b></td> -->
             <td>
-              <b>
                 <EditableTipoPessoa
                   value={row.is_retail}
                   onUpdateValue={async (newValue:boolean) => {
                     handleUpdate(Boolean(newValue), 'is_retail', row)
                   }}
                 />
-              </b>
             </td>
             <!-- <td><b>{row.rg_ie}</b></td> -->
             <td>
-              <b>
                 <EditableCell
                   value={row.phone}
                   onUpdateValue={async newValue => {
                     handleUpdate(newValue, 'phone', row)
                   }}
                 />
-              </b>
             </td>
-            <td><b><UsedCredits id={row.id} /></b></td>
+            <td><UsedCredits id={row.id} /></td>
             <td>
-              <b>
                 <EditableCurrency
                   value={row.max_credit}
                   onUpdateValue={async newValue => {
                     handleUpdate(newValue, 'max_credit', row)
                   }}
                 />
-              </b>
             </td>
             <td>
               <a href="/admin/customer/{row.id}" class="badge badge-primary">

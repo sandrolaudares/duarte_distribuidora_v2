@@ -109,14 +109,14 @@
       </a>
     </div>
   </div>
-  <Datatable {table} headless={true}>
+  <Datatable {table} >
     <!-- {#snippet header()}
       <Search {table} />
      
     {/snippet} -->
     <div class="spinner" class:active={table.isLoading}></div>
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table table-zebra">
+    <table class="table">
       <thead>
         <tr>
           <ThSort {table} field="sku">SKU</ThSort>

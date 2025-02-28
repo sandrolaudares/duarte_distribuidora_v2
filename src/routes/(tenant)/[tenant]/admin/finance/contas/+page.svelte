@@ -159,7 +159,7 @@
 
   const triggerContent = $derived(
     filtersPaid.find(f => f.value === paidFilter.value)?.label ??
-      'Selecione...',
+      'Filtrar...',
   )
 
   let selectedCategory: string = $state('')
@@ -184,19 +184,19 @@
   }
 </script>
 
-<div class="mx-4 p-4">
-  <h1 class="mb-6 text-3xl font-bold">Contas à pagar</h1>
+<div class="m-2 h-full max-h-[calc(100vh-20vh)]">
+  <!-- <h1 class="mb-6 text-3xl font-bold">Contas à pagar</h1> -->
   {#if messageCat}
     <p class="text-lg font-bold text-success">
       {messageCat}
     </p>
   {/if}
 
-  <div class="mb-6 flex justify-between rounded-lg bg-base-200 p-4 shadow">
+  <div class="mb-6 flex justify-between rounded-lg bg-base-200 p-2 shadow">
     <div class="flex gap-2 divide-x">
       <Dialog.Root>
         <Dialog.Trigger>
-          <button class="btn btn-primary">Criar nova conta</button>
+          <button class="btn btn-sm btn-primary h-full">Criar nova conta</button>
         </Dialog.Trigger>
         <Dialog.Content>
           <Dialog.Header>
@@ -310,11 +310,11 @@
       <input
         type="text"
         bind:value={nameCat}
-        class="input input-bordered max-w-[200px]"
+        class="input input-bordered input-sm max-w-[200px] h-full"
         placeholder="Nova categoria"
       />
       <button
-        class="btn btn-secondary"
+        class="btn btn-secondary btn-sm h-full"
         onclick={createCategoria}
         disabled={isLoading || nameCat === ''}
       >
@@ -326,11 +326,11 @@
       <input
         type="text"
         bind:value={nameTipoPag}
-        class="input input-bordered max-w-[200px]"
+        class="input input-bordered input-sm h-full max-w-[200px]"
         placeholder="Tipo de pagamento"
       />
       <button
-        class="btn btn-secondary"
+        class="btn btn-secondary btn-sm h-full"
         onclick={createTipoPag}
         disabled={isLoading || nameTipoPag === ''}
       >
@@ -362,10 +362,10 @@
   <TableConta {table} />
 
   <div
-    class="mt-6 flex items-center justify-between rounded-lg bg-gray-100 p-4 shadow"
+    class="my-3 flex items-center justify-between rounded-lg bg-gray-100 p-2 shadow"
   >
-    <h2 class="text-xl font-semibold text-gray-800">Total das contas:</h2>
-    <span class="text-2xl font-bold text-success">
+    <h2 class="text-lg font-semibold text-gray-800">Total das contas:</h2>
+    <span class="text-xl font-bold text-success">
       R${(data.totalSum / 100).toFixed(2)}
     </span>
   </div>
