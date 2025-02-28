@@ -111,7 +111,7 @@
         const itemText = `${item.quantity}x ${item.product.name}`.padEnd(
           35,
           ' ',
-        ) // Adjust space as needed
+        ) 
         const price = `R$${(item.price / 100).toFixed(2)}`
 
         printer.justify(JustifyModes.justifyLeft)
