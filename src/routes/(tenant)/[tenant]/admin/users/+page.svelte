@@ -91,7 +91,7 @@
 <main
   class=" m-4 flex h-full max-h-[calc(100vh-10vh)] flex-col gap-2"
 >
-<div class="flex gap-2">
+<div class="flex gap-2 justify-end">
   <button onclick={() => isOpenModal?.showModal()} class="btn btn-primary">
     Criar motoboy
   </button>
