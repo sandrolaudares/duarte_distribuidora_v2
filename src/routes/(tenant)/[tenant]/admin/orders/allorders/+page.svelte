@@ -26,6 +26,8 @@
   import { DateFormatter } from '@internationalized/date'
   import Printer, { JustifyModes, PrinterModes } from 'esc-pos-printer'
   import type { SelectCustomerOrder } from '$lib/server/db/schema'
+  import Print from 'lucide-svelte/icons/printer';
+
 
   let { data }: { data: PageData } = $props()
 
@@ -138,6 +140,7 @@
       await printer.print()
     } catch (error) {
       console.log(error)
+      toast.error('Erro! Verifique se a impressora está conectada')
     }
   }
 </script>
@@ -159,7 +162,7 @@
      
     {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table table-zebra table-sm">
+    <table class="table table-zebra table-xs">
       <thead>
         <tr>
           <ThSort {table} field="id">ID</ThSort>
@@ -170,6 +173,7 @@
           <ThSort {table} field="total">Valor do pedido</ThSort>
 
           <Th>Ver detalhes</Th>
+          <Th>Imprimir</Th>
         </tr>
         <tr>
           <Th />
@@ -190,6 +194,7 @@
           </Th>
           <Th />
 
+          <Th />
           <Th />
         </tr>
       </thead>
@@ -213,7 +218,7 @@
                 {row.created_at ? df.format(row.created_at) : ''}
               </b>
             </td>
-            <td><b class="text-xl text-success">R${row.total / 100}</b></td>
+            <td><b class="text-lg text-success">R${row.total / 100}</b></td>
 
             <td>
               <a href="/admin/orders/{row.id}" class="badge badge-primary">
@@ -221,7 +226,8 @@
               </a>
             </td>
             <td>
-              <button onclick={() => printOrder(row.id)}>imprimir</button>
+              <button onclick={() => printOrder(row.id)}><Print />
+              </button>
             </td>
           </tr>
         {/each}
