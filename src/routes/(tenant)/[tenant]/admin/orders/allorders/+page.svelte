@@ -156,13 +156,13 @@
       Limpar filtros
     </button>
   </div>
-  <Datatable {table} headless>
+  <Datatable {table} >
     <!-- {#snippet header()}
       <Search {table} />
      
     {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table table-zebra table-xs">
+    <table class="">
       <thead>
         <tr>
           <ThSort {table} field="id">ID</ThSort>
@@ -202,21 +202,15 @@
         {#each data.rows as row}
           <tr>
             <td>{row.id}</td>
-            <td>
-              <b class:text-error={!row.name}>
+            <td class:text-error={!row.name}>
                 {row.name ? row.name : 'Não vinculado'}
-              </b>
             </td>
-            <td><b>{row.created_by}</b></td>
-            <td>
-              <b class:text-error={!row.observation}>
+            <td>{row.created_by}</td>
+            <td  class:text-error={!row.observation}>
                 {row.observation ? row.observation : 'N/A'}
-              </b>
             </td>
             <td>
-              <b>
                 {row.created_at ? df.format(row.created_at) : ''}
-              </b>
             </td>
             <td><b class="text-lg text-success">R${row.total / 100}</b></td>
 
@@ -242,6 +236,7 @@
               R${(data.totalSum / 100).toFixed(2)}
             </span>
           </td>
+          <td></td>
           <td></td>
         </tr>
       </tbody>
