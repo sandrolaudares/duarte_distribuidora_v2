@@ -216,6 +216,13 @@ npm run db:check
 - Verificar tela de criar distribuidora, quando da erro o form exportado na page não muda
 - Adicionar horario funcionamento na distribuidora
 - Add image to tenant
+- Refactor change epire date no fiado
+- colocar o loading que ta no customer em todas tables
+- Fix a ordenação nas tables
+- Filter table page conta
+- Editar contas
+- Fix myprofile
+- Lembrar de feixar caia diariamente
 
 
 ## NAO TAO URGENTE
