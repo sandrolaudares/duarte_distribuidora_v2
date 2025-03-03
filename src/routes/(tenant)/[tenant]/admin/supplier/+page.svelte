@@ -105,7 +105,6 @@
           <Th />
           <ThFilter {table} field="telephone_1" />
           <Th />
-          <Th />
         </tr>
       </thead>
       <tbody>
