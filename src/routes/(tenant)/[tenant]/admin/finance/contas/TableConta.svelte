@@ -5,7 +5,7 @@
   import { page } from '$app/stores'
 
   import {
-    TableHandler,
+    type TableHandler,
     Datatable,
     ThSort,
     ThFilter,
@@ -20,8 +20,10 @@
   import { toast } from 'svelte-sonner'
   import { invalidate, invalidateAll } from '$app/navigation'
   import { DateFormatter } from '@internationalized/date'
+  import type { PageData } from './$types'
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
 
-    let { table }= $props()
+    let { table }:{table: TableHandler<PageData['rows'][0]>}= $props()
 
     const df = new DateFormatter('pt-BR', {
     dateStyle: 'medium',
@@ -33,19 +35,22 @@
     isLoading = true
     try {
       await trpc($page).contas.pagarConta.mutate(id)
-      await invalidateAll()
+      table.invalidate()
       toast.success('Sucesso ao pagar conta')
     } catch (error: any) {
       toast.error(error.message)
     } finally {
       isLoading = false
-      window.location.reload()
+      // window.location.reload()
     }
   }
 </script>
 
 <div class="h-full max-h-[68vh] p-0 m-0">
   <Datatable {table} >
+    {#if table.isLoading}
+      <LoadingBackground />
+    {/if}
     <table class="w-full table table-xs">
       <thead class="bgg">
         <tr class="text-left">

@@ -24,6 +24,7 @@
   import { goto, invalidate, invalidateAll } from '$app/navigation'
   import Loading from '$lib/components/Loading.svelte'
   import { DateFormatter } from '@internationalized/date'
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -99,6 +100,9 @@
   </div>
   <Datatable {table} >
     <!-- svelte-ignore component_name_lowercase -->
+    {#if table.isLoading}
+      <LoadingBackground />
+    {/if}
     <table class="table rounded-none">
       <thead>
         <tr>

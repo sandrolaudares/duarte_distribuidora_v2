@@ -27,6 +27,7 @@
   import Printer, { JustifyModes, PrinterModes } from 'esc-pos-printer'
   import type { SelectCustomerOrder } from '$lib/server/db/schema'
   import Print from 'lucide-svelte/icons/printer';
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
 
 
   let { data }: { data: PageData } = $props()
@@ -162,6 +163,9 @@
      
     {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
+    {#if table.isLoading}
+      <LoadingBackground />
+    {/if}
     <table class="table table-sm">
       <thead>
         <tr>

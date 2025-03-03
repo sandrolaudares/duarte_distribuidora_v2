@@ -25,6 +25,7 @@
   import { getFilterValue } from '$lib/utils'
   import { DateFormatter } from '@internationalized/date'
   import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -73,6 +74,9 @@
      
     {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
+    {#if table.isLoading}
+      <LoadingBackground />
+    {/if}
     <table class="table table-zebra rounded-sm border border-none">
       <thead>
         <tr>

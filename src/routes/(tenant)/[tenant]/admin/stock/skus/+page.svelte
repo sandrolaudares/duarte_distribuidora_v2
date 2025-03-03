@@ -15,7 +15,7 @@
     type State,
   } from '@vincjo/datatables/server'
 
-  import type { PageData } from '../$types'
+  import type { PageData } from './$types'
   import { toast } from 'svelte-sonner'
   import { trpc } from '$trpc/client'
   import NoResults from '$lib/components/NoResults.svelte'
@@ -23,6 +23,7 @@
   import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
   import { DateFormatter } from '@internationalized/date'
   import { pageConfig } from '$lib/config'
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -114,6 +115,9 @@
       <Search {table} />
      
     {/snippet} -->
+    {#if table.isLoading}
+      <LoadingBackground />
+    {/if}
     <div class="spinner" class:active={table.isLoading}></div>
     <!-- svelte-ignore component_name_lowercase -->
     <table class="table">
@@ -140,8 +144,8 @@
             <td>
               <EditableCell
                 value={row.name}
-                onUpdateValue={async (newValue: string) => {
-                  handleUpdateSku(newValue, 'name', row)
+                onUpdateValue={async (newValue) => {
+                  handleUpdateSku(newValue as string, 'name', row)
                 }}
               />
             </td>

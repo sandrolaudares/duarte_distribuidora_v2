@@ -28,6 +28,7 @@
   import { User } from 'lucide-svelte'
   import SelectSearch from '$lib/components/selectSearch.svelte'
   import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -78,6 +79,9 @@
       
       {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
+    {#if table.isLoading}
+      <LoadingBackground />
+    {/if}
     <table class="table table-zebra table-xs rounded-none">
       <thead>
         <tr>

@@ -25,6 +25,7 @@
   import { getFilterValue } from '$lib/utils'
   import { pageConfig } from '$lib/config'
   import { DateFormatter } from '@internationalized/date'
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -147,7 +148,9 @@
       <Search {table} />
      
     {/snippet} -->
-    <div class="spinner" class:active={table.isLoading}></div>
+    {#if table.isLoading}
+      <LoadingBackground />
+    {/if}
     <!-- svelte-ignore component_name_lowercase -->
     <table class=" table">
       <thead>

@@ -25,6 +25,7 @@
   import EditCaixa from './EditCaixa.svelte'
   import type { Role } from '$lib/utils/permissions'
   import { pageConfig } from '$lib/config'
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
 
   let { data }: { data: PageData } = $props()
   let isOpenModal: HTMLDialogElement | null = null
@@ -102,6 +103,9 @@
       <Search {table} />
      
     {/snippet} -->
+    {#if table.isLoading}
+      <LoadingBackground />
+    {/if}
     <table class="table table-zebra">
       <thead>
         <tr>
