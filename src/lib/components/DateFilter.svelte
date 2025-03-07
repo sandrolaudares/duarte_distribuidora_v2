@@ -25,9 +25,17 @@
     onChange?: (startDate: number, endDate: number) => void
     title?: string
     futureDates?: boolean
+    filters?: SSRFilters
   }
 
-  let { startValue: sVProps, endValue, onChange, title, futureDates }: Props = $props()
+  let {
+    startValue: sVProps,
+    endValue,
+    onChange,
+    title,
+    futureDates,
+    filters = $bindable(),
+  }: Props = $props()
 
   const df = new DateFormatter('pt-BR', {
     dateStyle: 'medium',
@@ -51,36 +59,34 @@
     end: value.end ? df.format(value.end.toDate(getLocalTimeZone())) : '',
   })
 
-  let filters = new SSRFilters()
+  // let filters = new SSRFilters()
 
   const clearCalendar = () => {
     startValue = undefined
     value.start = undefined
     value.end = undefined
-    if (title == 'Comparar'){
-      filters.clear('compareStartDate', 'compareEndDate')
-    } 
-    if(!title){
-      filters.clear('startDate', 'endDate')
-    }
-    if (title == 'Base')
-      filters.update({
-        startDate: today('America/Sao_Paulo')
-          .subtract({ days: 7 })
-          .toDate(getLocalTimeZone())
-          .getTime()
-          .toString(),
-        endDate: today('America/Sao_Paulo')
-          .toDate(getLocalTimeZone())
-          .getTime()
-          .toString(),
-      })
+
+    console.log('clearing compare')
+    filters?.clear('compareStartDate', 'compareEndDate', 'startDate', 'endDate')
+
+    // if (title == 'Base')
+    //   filters.update({
+    //     startDate: today('America/Sao_Paulo')
+    //       .subtract({ days: 7 })
+    //       .toDate(getLocalTimeZone())
+    //       .getTime()
+    //       .toString(),
+    //     endDate: today('America/Sao_Paulo')
+    //       .toDate(getLocalTimeZone())
+    //       .getTime()
+    //       .toString(),
+    //   })
   }
 </script>
 
 {#snippet btn(label: string, range: DateRange)}
   <Button
-  variant="outlinePrimary"
+    variant="outlinePrimary"
     onclick={() => {
       value = range
       if (onChange && range.start && range.end) {
@@ -120,39 +126,41 @@
     </Popover.Trigger>
     <Popover.Content class="w-auto p-0" align="start">
       {#if title}
-      <div class="flex items-center justify-center divider mx-4">
+        <div class="divider mx-4 flex items-center justify-center">
           <p class=" text-center text-lg font-semibold">{title}</p>
-      </div>
+        </div>
       {/if}
       <div class="flex">
         {#if !futureDates}
-        <div class="flex flex-col gap-2  p-4">
-          {@render btn('Ultima Semana', {
-            start: today('America/Sao_Paulo').subtract({ days: 7 }),
-            end: today('America/Sao_Paulo'),
-          })}
-          {@render btn('Ultimo Mês', {
-            start: today('America/Sao_Paulo').subtract({ months: 1 }),
-            end: today('America/Sao_Paulo'),
-          })}
-          {@render btn('Ultimo Ano', {
-            start: today('America/Sao_Paulo').subtract({ years: 1 }),
-            end: today('America/Sao_Paulo'),
-          })}
-          {@render btn('Todo periodo', {
-            start: today('America/Sao_Paulo').subtract({ years: 50 }),
-            end: today('America/Sao_Paulo'),
-          })}
-          <button onclick={clearCalendar} class="btn btn-outline btn-error">Limpar</button>
-        </div>
-        <Separator orientation="vertical" class="my-4 bg-base-300" />
+          <div class="flex flex-col gap-2 p-4">
+            {@render btn('Ultima Semana', {
+              start: today('America/Sao_Paulo').subtract({ days: 7 }),
+              end: today('America/Sao_Paulo'),
+            })}
+            {@render btn('Ultimo Mês', {
+              start: today('America/Sao_Paulo').subtract({ months: 1 }),
+              end: today('America/Sao_Paulo'),
+            })}
+            {@render btn('Ultimo Ano', {
+              start: today('America/Sao_Paulo').subtract({ years: 1 }),
+              end: today('America/Sao_Paulo'),
+            })}
+            {@render btn('Todo periodo', {
+              start: today('America/Sao_Paulo').subtract({ years: 50 }),
+              end: today('America/Sao_Paulo'),
+            })}
+            <button onclick={clearCalendar} class="btn btn-outline btn-error">
+              Limpar
+            </button>
+          </div>
+          <Separator orientation="vertical" class="my-4 bg-base-300" />
         {/if}
         <RangeCalendar
-        isDateDisabled={(date) => 
-          futureDates 
-            ? false 
-            : date.toDate(getLocalTimeZone()).getTime() > today('America/Sao_Paulo').toDate(getLocalTimeZone()).getTime()
-        }
+          isDateDisabled={date =>
+            futureDates
+              ? false
+              : date.toDate(getLocalTimeZone()).getTime() >
+                today('America/Sao_Paulo').toDate(getLocalTimeZone()).getTime()}
           bind:value
           onStartValueChange={v => {
             startValue = v
@@ -168,8 +176,6 @@
           }}
         />
       </div>
-
-      
     </Popover.Content>
   </Popover.Root>
 </div>

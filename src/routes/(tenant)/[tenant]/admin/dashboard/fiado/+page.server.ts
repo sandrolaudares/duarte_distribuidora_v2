@@ -25,17 +25,17 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
   const sp_start_date = searchParams.get('startDate')
   const sp_end_date = searchParams.get('endDate')
 
-  if (!sp_start_date || !sp_end_date) {
-    const start = today('America/Sao_Paulo')
-      .subtract({ days: 7 })
-      .toDate(getLocalTimeZone())
-      .getTime()
-    const end = today('America/Sao_Paulo').toDate(getLocalTimeZone()).getTime()
-    return redirect(
-      303,
-      `/admin/dashboard/fiado?startDate=${start}&endDate=${end}`,
-    )
-  }
+  // if (!sp_start_date || !sp_end_date) {
+  //   const start = today('America/Sao_Paulo')
+  //     .subtract({ days: 7 })
+  //     .toDate(getLocalTimeZone())
+  //     .getTime()
+  //   const end = today('America/Sao_Paulo').toDate(getLocalTimeZone()).getTime()
+  //   return redirect(
+  //     303,
+  //     `/admin/dashboard/fiado?startDate=${start}&endDate=${end}`,
+  //   )
+  // }
 
   const startDate =
     typeof sp_start_date === 'string'

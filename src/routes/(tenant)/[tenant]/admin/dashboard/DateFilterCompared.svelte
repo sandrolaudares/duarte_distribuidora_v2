@@ -11,7 +11,10 @@
   import { page } from '$app/state'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
 
-  const filters = new SSRFilters()
+  interface Props {
+    filters?: SSRFilters
+  }
+  let { filters = $bindable(new SSRFilters()) }: Props = $props()
 
   function getFilterValue(filterName: string) {
     let startValue = filters.get(filterName)
@@ -31,6 +34,7 @@
     title="Comparar"
     startValue={getFilterValue('compareStartDate')}
     endValue={getFilterValue('compareEndDate')}
+    bind:filters
     onChange={(startDate, endDate) => {
       if (!startDate || !endDate) return
 
@@ -41,16 +45,17 @@
     }}
   />
 {/if}
-  <DateFilter
-    title="Base"
-    startValue={getFilterValue('startDate')}
-    endValue={getFilterValue('endDate')}
-    onChange={(startDate, endDate) => {
-      if (!startDate || !endDate) return
+<DateFilter
+  title="Base"
+  startValue={getFilterValue('startDate')}
+  endValue={getFilterValue('endDate')}
+  bind:filters
+  onChange={(startDate, endDate) => {
+    if (!startDate || !endDate) return
 
-      filters.update({
-        startDate: String(startDate),
-        endDate: String(endDate),
-      })
-    }}
-  />
+    filters.update({
+      startDate: String(startDate),
+      endDate: String(endDate),
+    })
+  }}
+/>
