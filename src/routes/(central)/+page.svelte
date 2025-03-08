@@ -14,7 +14,8 @@
     ArrowRight,
     Menu,
   } from 'lucide-svelte'
-  import logo from '$lib/assets/home/logo-duarte.jpg'
+
+  let logo = '/logo-duarte.jpg';
 
   let { data }: { data: PageData } = $props()
 

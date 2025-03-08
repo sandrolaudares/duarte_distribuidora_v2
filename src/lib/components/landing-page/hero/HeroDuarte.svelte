@@ -1,5 +1,5 @@
 <script>
-  import logo from '$lib/assets/home/logo-duarte.jpg'
+    let logo = '/logo-duarte.jpg';
 </script>
 
 <div class="flex min-h-[80vh] flex-col items-center justify-center">
