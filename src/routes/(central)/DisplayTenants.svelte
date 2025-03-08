@@ -23,50 +23,52 @@
   let distances: Record<string, number> = $state({})
   let isLoading = $state(true)
 
-  onMount(async () => {
+  onMount(() => {
     isLoading = true
-    try {
-      if (navigator.geolocation) {
-        const position = await new Promise<GeolocationPosition>(
-          (resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject)
-          },
-        )
-        Addrr = position.coords
-        console.log(Addrr)
-      }
-      if (!Addrr) {
-        throw new Error('Erro ao pegar localização')
-      }
-      tenants.forEach(tenant => {
-        if (!tenant.lat || !tenant.lng) {
-          console.warn(`Erro ao calcular: ${tenant.name}.`)
-          return
-        }
-        if (!Addrr) {
-          throw new Error('Erro ao pegar localização')
-        }
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        resolve => {
+          Addrr = resolve.coords
+          console.log(Addrr)
 
-        const tenantDistance =
-          getDistanceFromLatLonInKm(
-            { lat: tenant.lat, lon: tenant.lng },
-            { lat: Addrr.latitude, lon: Addrr.longitude },
-          ) / 1000
+          tenants.forEach(tenant => {
+            if (!tenant.lat || !tenant.lng) {
+              console.warn(`Erro ao calcular: ${tenant.name}.`)
+              return
+            }
 
-        distances[tenant.tenantId] = Number(tenantDistance.toFixed(1))
-      })
+            if (!Addrr) {
+              throw new Error('Erro ao pegar localização')
+            }
 
-      tenants.sort((a, b) => {
-        if (distances[a.tenantId] === undefined || distances[b.tenantId] === undefined) return 0
+            const tenantDistance =
+              getDistanceFromLatLonInKm(
+                { lat: tenant.lat, lon: tenant.lng },
+                { lat: Addrr.latitude, lon: Addrr.longitude },
+              ) / 1000
 
-        return distances[a.tenantId] - distances[b.tenantId]
-      })
-      tenants = [...tenants]
-    } catch (error) {
-      console.error('Erro:', error)
-      error = error
-    } finally {
-      isLoading = false
+            distances[tenant.tenantId] = Number(tenantDistance.toFixed(1))
+          })
+
+          tenants.sort((a, b) => {
+            if (
+              distances[a.tenantId] === undefined ||
+              distances[b.tenantId] === undefined
+            )
+              return 0
+
+            return distances[a.tenantId] - distances[b.tenantId]
+          })
+          tenants = [...tenants]
+          isLoading = false
+        },
+        reject => {
+          console.error('Erro:', reject)
+          error = reject.message
+          isLoading = false
+        },
+
+      )
     }
   })
 
