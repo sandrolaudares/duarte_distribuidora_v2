@@ -65,7 +65,7 @@
 
             <div>
               <span
-                class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${isSessionExpired(session.expiresAt) ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}
+                class={`md:inline-flex items-center rounded-full hidden px-2.5 py-0.5 text-xs font-medium ${isSessionExpired(session.expiresAt) ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}
               >
                 {isSessionExpired(session.expiresAt) ? 'Expired' : 'Active'}
               </span>
