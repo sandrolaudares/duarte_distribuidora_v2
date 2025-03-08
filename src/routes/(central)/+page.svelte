@@ -6,21 +6,46 @@
   import { onMount } from 'svelte'
   import { getDistanceFromLatLonInKm } from '$lib/utils/distance'
   import DisplayTenants from './DisplayTenants.svelte'
+  import {
+    Search,
+    ShoppingCart,
+    User,
+    Store,
+    ArrowRight,
+    Menu,
+  } from 'lucide-svelte'
+  import logo from '$lib/assets/home/logo-duarte.jpg'
 
   let { data }: { data: PageData } = $props()
 
   const prefix = dev ? 'http' : 'https'
 </script>
 
-<div class="h-screen bg-base-100 py-5">
-  <div class=" mx-2 mb-4 flex w-fit flex-col gap-3 sm:mx-auto">
-    <h1 class=" text-center text-2xl font-medium lg:text-3xl">
-      Encontre a distribuidora mais próxima
-    </h1>
-    
+<div class="h-screen bg-base-100">
+  <div class=" mx-2 flex w-fit flex-col gap-3 sm:mx-auto">
+    <section class="py-12">
+      <div class="container mx-auto">
+        <div class="flex justify-center">
+          <img class="h-48 w-48 md:h-64 md:w-64" src={logo} alt="Logo" />
+        </div>
+        <h1
+          class="mb-6 text-center text-3xl font-bold tracking-tight sm:text-3xl md:text-4xl"
+        >
+          Encontre a distribuidora mais próxima
+        </h1>
+
+        <p
+          class="text-md mx-auto max-w-2xl text-center text-gray-400 sm:text-xl"
+        >
+          Escolha a distribuidora mais próxima de você para acessar as opções
+          para pedir
+        </p>
+
+        <!-- <Input /> -->
+      </div>
+    </section>
   </div>
-  <!-- <Input /> -->
-  <div class="mt-6 h-full bg-gray-100 px-2 pt-8 lg:px-8">
+  <div class=" h-full bg-gray-100 px-2 pt-8 lg:px-8">
     {#if data.tenants.length > 0}
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <DisplayTenants tenants={data.tenants} />
