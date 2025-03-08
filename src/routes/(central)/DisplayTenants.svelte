@@ -11,6 +11,8 @@
   import { PUBLIC_DOMAIN } from '$env/static/public'
   import { Skeleton } from '$lib/components/ui/skeleton/index'
   import CardSkeletonTenants from '$lib/components/cards/CardSkeletonTenants.svelte'
+  import { flip } from 'svelte/animate'
+  import { cubicInOut } from 'svelte/easing'
 
   const prefix = dev ? 'http' : 'https'
 
@@ -55,13 +57,11 @@
       })
 
       tenants.sort((a, b) => {
-        if (
-          distances[a.tenantId] === undefined ||
-          distances[b.tenantId] === undefined
-        )
-          return 0
+        if (distances[a.tenantId] === undefined || distances[b.tenantId] === undefined) return 0
+
         return distances[a.tenantId] - distances[b.tenantId]
       })
+      tenants = [...tenants]
     } catch (error) {
       console.error('Erro:', error)
       error = error
@@ -79,53 +79,54 @@
   }
 </script>
 
-{#if isLoading}
+<!-- {#if isLoading}
   {#each {length: tenants.length}}
    <CardSkeletonTenants />
   {/each}
-{:else}
-  {#each tenants as tenant}
-    <a
-      href={`${prefix}://${tenant.subdomain}.${PUBLIC_DOMAIN}`}
-      class="relative z-0 rounded-lg bg-base-100 shadow-lg transition-all duration-200 hover:scale-105"
-    >
+{:else} -->
+{#each tenants as tenant (tenant.tenantId)}
+  <a
+    animate:flip={{ duration: 900, delay: 100, easing: cubicInOut }}
+    href={`${prefix}://${tenant.subdomain}.${PUBLIC_DOMAIN}`}
+    class="relative z-0 rounded-lg bg-base-100 shadow-lg transition-all duration-200 hover:scale-105"
+  >
+    <div>
       <div>
-        <div>
-          <img
-            src={getImagePath(0)}
-            alt=""
-            class="h-full max-h-60 w-full rounded-t-lg object-cover"
-          />
+        <img
+          src={getImagePath(0)}
+          alt=""
+          class="h-full max-h-60 w-full rounded-t-lg object-cover"
+        />
+      </div>
+      <div class="p-4 lg:p-6">
+        <div
+          class="mb-5 flex flex-col items-center justify-between lg:flex-row"
+        >
+          <h2 class=" text-lg font-semibold lg:text-xl">{tenant.name}</h2>
+          <p class="text-sm">
+            {#if isLoading || distances[tenant.tenantId] === undefined}
+              <!-- <span class="animate-pulse">Calculando distancia...</span> -->
+            {:else}
+              <span class="">
+                {error == ''
+                  ? distances[tenant.tenantId] + 'km de você'
+                  : 'Erro ao calcular'}
+              </span>
+            {/if}
+          </p>
         </div>
-        <div class="p-4 lg:p-6">
-          <div
-            class="mb-5 flex flex-col items-center justify-between lg:flex-row"
-          >
-            <h2 class=" text-lg font-semibold lg:text-xl">{tenant.name}</h2>
-            <p class="text-sm">
-              {#if isLoading || distances[tenant.tenantId] === undefined}
-                <!-- <span class="animate-pulse">Calculando distancia...</span> -->
-              {:else}
-                <span class="">
-                  {error == ''
-                    ? distances[tenant.tenantId] + 'km de você'
-                    : 'Erro ao calcular'}
-                </span>
-              {/if}
-            </p>
-          </div>
-          <div class="flex flex-col gap-2">
-            <p class="lg:text-md flex items-center gap-2 text-xs">
-              <MapPin class="min-h-6 min-w-6" />
-              {tenant.address}
-            </p>
-            <p class="lg:text-md flex items-center gap-2 text-xs">
-              <Phone class="min-h-6 min-w-6" />
-              {phoneMask(tenant.phone ?? '')}
-            </p>
-          </div>
+        <div class="flex flex-col gap-2">
+          <p class="lg:text-md flex items-center gap-2 text-xs">
+            <MapPin class="min-h-6 min-w-6" />
+            {tenant.address}
+          </p>
+          <p class="lg:text-md flex items-center gap-2 text-xs">
+            <Phone class="min-h-6 min-w-6" />
+            {phoneMask(tenant.phone ?? '')}
+          </p>
         </div>
       </div>
-    </a>
-  {/each}
-{/if}
+    </div>
+  </a>
+{/each}
+<!-- {/if} -->
