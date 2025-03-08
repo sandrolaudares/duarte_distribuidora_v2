@@ -14,6 +14,7 @@
   const sessions = data.user_sessions
 
   import { onMount } from 'svelte'
+  import UserSessions from './UserSessions.svelte'
 
   let nottifPermGranted: boolean | null = null
   let isSubscribed = false
@@ -46,21 +47,20 @@
   }
 
   async function sendSubscriptionToServer(subscription: PushSubscription) {
-    try {
-      console.log(subscription)
-      const res = await trpc(
-        $page,
-      ).pushNotification.addPushNotificationDevice.query({
-        subscription,
-      })
-
-      if (!res.success) {
-        console.error(`Error saving subscription on server ${res.error}`)
-      }
-    } catch (error) {
-      console.error('Error saving subscription on server:', error)
-      unsubscribe()
-    }
+    // try {
+    //   console.log(subscription)
+    // const res = await trpc(
+    //   $page,
+    // ).pushNotification.addPushNotificationDevice.query({
+    //   subscription,
+    // })
+    // if (!res.success) {
+    //   console.error(`Error saving subscription on server ${res.error}`)
+    // }
+    // } catch (error) {
+    //   console.error('Error saving subscription on server:', error)
+    //   unsubscribe()
+    // }
     // try {
     //   const res = await fetch('/api/addSubscription', {
     //     method: 'POST',
@@ -126,9 +126,21 @@
     }
   }
 
-  async function testNotification() {
-    await trpc($page).pushNotification.sendTestNotification.query()
-  }
+  // async function testNotification() {
+  //   await trpc($page).pushNotification.sendTestNotification.query()
+  // }
+
+  let formattedDate = $user?.created_at
+    ? new Intl.DateTimeFormat('pt-BR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }).format($user.created_at)
+    : 'Unknown'
+
+  let initials = $user?.username
+    ? $user.username.substring(0, 2).toUpperCase()
+    : ''
 </script>
 
 <SEO
@@ -138,8 +150,260 @@
   })}
 />
 
-<main class="min-h-[91vh] bg-base-200 p-5">
-  <div
+<main class="min-h-[91vh] bg-base-200">
+  <div class="container mx-auto max-w-2xl px-4 py-8">
+    <div class="rounded-lg border bg-base-100 shadow-sm">
+      <div class="p-6">
+        <div
+          class="flex flex-col items-center gap-6 sm:flex-row sm:items-start"
+        >
+          <div
+            class="relative h-20 w-20 overflow-hidden rounded-full bg-gray-100"
+          >
+            <!-- <img src="/placeholder.svg?height=80&width=80" alt="Profile picture" class="h-full w-full object-cover" /> -->
+            <div
+              class="absolute inset-0 flex items-center justify-center bg-gray-100 text-lg font-medium"
+            >
+              {initials}
+            </div>
+          </div>
+
+          <div class="flex-1 space-y-1 text-center sm:text-left">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <h2 class="text-2xl font-bold">{$user.username}</h2>
+              <div
+                class="flex items-center justify-center gap-2 sm:justify-start"
+              >
+                <span
+                  class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${$user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                >
+                  {$user.is_active ? 'Active' : 'Inactive'}
+                </span>
+                <span
+                  class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium capitalize text-gray-800"
+                >
+                  {$user.role}
+                </span>
+              </div>
+            </div>
+
+            <div
+              class="mt-2 flex items-center justify-center gap-1 sm:justify-start"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 text-gray-500"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                ></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              <span class="text-sm">{$user.email}</span>
+              {#if $user.emailVerified}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="ml-1 h-4 w-4 text-green-500"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+              {:else}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="ml-1 h-4 w-4 text-red-500"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="15" y1="9" x2="9" y2="15"></line>
+                  <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+              {/if}
+            </div>
+
+            <div
+              class="flex items-center justify-center gap-1 sm:justify-start"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 text-gray-500"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <span class="text-sm">Conta criada em {formattedDate}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="my-4 h-px bg-gray-200"></div>
+
+      <div class="p-6">
+        <div class="space-y-4">
+          <div>
+            <h3 class="mb-2 flex items-center gap-2 text-sm font-medium">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              Permissões
+            </h3>
+
+            <div class="flex flex-wrap gap-2">
+              {#if $user.meta.permissions && $user.meta.permissions.length > 0}
+                {#each $user.meta.permissions as permission}
+                  <span
+                    class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
+                  >
+                    {permission}
+                  </span>
+                {/each}
+              {:else}
+                <span class="text-sm text-gray-500">
+                  Usuario não tem permissões
+                </span>
+              {/if}
+            </div>
+          </div>
+          <div>
+            <h3 class="mb-2 flex items-center gap-2 text-sm font-medium">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              Status da conta
+            </h3>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="rounded-md bg-gray-100 p-3">
+                <div class="text-sm font-medium">Verificação do email</div>
+                <div class="mt-1 flex items-center">
+                  {#if $user.emailVerified}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="mr-1 h-4 w-4 text-green-500"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <span class="text-sm">Verificado</span>
+                  {:else}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="mr-1 h-4 w-4 text-red-500"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="15" y1="9" x2="9" y2="15"></line>
+                      <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    <span class="text-sm">Não verificado</span>
+                  {/if}
+                </div>
+              </div>
+
+              <div class="rounded-md bg-gray-100 p-3">
+                <div class="text-sm font-medium">Status da conta</div>
+                <div class="mt-1 flex items-center">
+                  {#if $user.is_active}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="mr-1 h-4 w-4 text-green-500"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <span class="text-sm">Active</span>
+                  {:else}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="mr-1 h-4 w-4 text-red-500"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="15" y1="9" x2="9" y2="15"></line>
+                      <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    <span class="text-sm">Inativo</span>
+                  {/if}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6">
+      <UserSessions userSessions={sessions} />
+    </div>
+  </div>
+
+  <!-- <div
     class="mx-auto w-full max-w-md rounded-lg border border-primary bg-base-100 shadow-sm"
   >
     <div class="flex flex-col space-y-1.5 p-6">
@@ -155,7 +419,7 @@
           >
             <img
               class="aspect-square h-full w-full object-cover"
-              src="https://generated.vusercontent.net/placeholder-user.jpg"
+              src="https://generated.vusercontent.net/placeholder-$user.jpg"
               alt="profile"
             />
           </span>
@@ -229,5 +493,5 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 </main>
