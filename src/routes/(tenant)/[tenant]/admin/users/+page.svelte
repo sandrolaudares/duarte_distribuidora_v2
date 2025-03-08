@@ -123,7 +123,6 @@
           <Th />
           <Th />
           <Th />
-          <Th />
         </tr>
       </thead>
       <tbody>

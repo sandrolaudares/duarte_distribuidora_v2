@@ -22,6 +22,7 @@
   import { DateFormatter } from '@internationalized/date'
   import type { PageData } from './$types'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
+  import { differenceInDays, getBgColor } from '$lib/utils/expire'
 
     let { table }:{table: TableHandler<PageData['rows'][0]>}= $props()
 
@@ -58,19 +59,25 @@
           <Th>Observações</Th>
           <Th>Fornecedor</Th>
           <Th>Categoria</Th>
-          <Th>Data vencimento</Th>
+          <!-- <Th>Data vencimento</Th> -->
           <Th>Pago com</Th>
           <Th>Pago em</Th>
+          <Th>Vence em</Th>
           <ThSort {table} field="valor_conta">Valor</ThSort>
           <Th></Th>
-          <Th></Th>
+          <!-- <Th></Th> -->
         </tr>
         <tr>
-          <ThFilter {table} field="titulo" />
+          <th class="max-w-40 p-0">
+            <ThFilter {table} field="titulo" />
+          </th>
           <Th />
-          <ThFilter {table} field="supName" />
+          <th class="max-w-40 p-0">
+            <ThFilter {table} field="supName" />
+          </th>
           <!-- <ThFilter {table} field="catName" /> -->
           <Th />
+          <!-- <Th /> -->
           <Th />
           <Th>
             <!-- <DateFilter
@@ -85,7 +92,7 @@
           </Th>
           <Th />
           <Th />
-          <Th />
+          <!-- <Th /> -->
           <Th />
         </tr>
       </thead>
@@ -103,15 +110,28 @@
             </td>
             <td>{conta.supName}</td>
             <td>{conta.catName ?? 'Não cadastrado'}</td>
-            <td>{df.format(conta.expire_at!)}</td>
+            <!-- <td>{df.format(conta.expire_at!)}</td> -->
             <td>{conta.pagName ?? "Não cadastrado"}</td>
             <td>
               {conta.paid_at
                 ? df.format(conta.paid_at)
                 : 'Ainda não foi paga'}
             </td> 
+            <td> <b class="{conta.expire_at && !conta.isPaid ? getBgColor(conta.expire_at): ''} text-center">
+              {#if conta.expire_at}
+                {#if differenceInDays(conta.expire_at) < 0 && !conta.isPaid}
+                  VENCIDO!
+                {:else if differenceInDays(conta.expire_at) === 0 && !conta.isPaid}
+                  Vence hoje!
+                {:else if !conta.isPaid}
+                  {differenceInDays(conta.expire_at) + ' dias'}
+                {:else}
+                  ----
+                {/if}
+              {/if}
+            </b></td>
             <td class="p-2 font-bold">R${(conta.valor_conta / 100).toFixed(2)}</td>
-            <td class="p-0">
+            <!-- <td class="p-0">
               <span
                 class="badge text-xs"
                 class:bg-green-200={conta.isPaid}
@@ -121,7 +141,7 @@
               >
                 {conta.isPaid ? 'Pago' : 'Não pago'}
               </span>
-            </td>
+            </td> -->
             <td>
               <button
                 onclick={() => pagar(conta.id)}

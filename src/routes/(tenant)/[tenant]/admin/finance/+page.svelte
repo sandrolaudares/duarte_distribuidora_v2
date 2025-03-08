@@ -26,6 +26,7 @@
   import { pageConfig } from '$lib/config'
   import { DateFormatter } from '@internationalized/date'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
+  import { differenceInDays, getBgColor } from '$lib/utils/expire'
 
   let { data }: { data: PageData } = $props()
 
@@ -52,33 +53,6 @@
     }
     return data.rows
   })
-
-  function differenceInDays(expireAt: Date): number {
-    const today = new Date()
-    const expirationDate = new Date(expireAt)
-
-    today.setHours(0, 0, 0, 0)
-    expirationDate.setHours(0, 0, 0, 0)
-
-    const timeDifference = expirationDate.getTime() - today.getTime()
-    const dayDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24))
-
-    return dayDifference
-  }
-
-  function getBgColor(expireAt: Date) {
-    const daysDiff = differenceInDays(expireAt)
-    console.log(daysDiff)
-
-    if (daysDiff < 0) {
-      return 'badge badge-lg badge-error text-red-50'
-    } else if (daysDiff <= 4) {
-      return 'badge badge-lg badge-warning text-yellow-50'
-    } else if (daysDiff <= 7) {
-      return ''
-    }
-    return ' '
-  }
 
   function calculateSum() {
     return data.rows
