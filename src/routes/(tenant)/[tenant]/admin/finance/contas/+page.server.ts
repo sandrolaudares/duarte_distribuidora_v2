@@ -9,6 +9,10 @@ import * as schema from '$lib/server/db/schema'
 import { and, asc, count, eq, gte, like, lte, sql } from 'drizzle-orm'
 import { stock } from '$lib/server/db/controller'
 import { pageConfig } from '$lib/config'
+import { Monad } from '$lib/utils'
+import { innerJoinOnMany } from '$lib/server/db/utils'
+import type { TenantDbType } from '$lib/server/db/tenant'
+import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 
 export const load = (async ({ url, locals: { tenantDb } }) => {
   const { searchParams } = url
@@ -20,13 +24,13 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
 
   const titulo = searchParams.get('titulo')
   const fornecedor = searchParams.get('supName')
-  const categoria = searchParams.get('catName')
+  const categoria = searchParams.get('catId')
+  const catId = Number(categoria)
 
   const dateStart = searchParams.get('startDate')
   const dateEnd = searchParams.get('endDate')
 
   const pagosParams = searchParams.get('isPaid')
-  console.log(pagosParams)
   const pagos =
     pagosParams === 'paid'
       ? true
@@ -35,8 +39,6 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         : pagosParams === 'todos'
           ? undefined
           : undefined
-
-  console.log(pagos)
 
   const condicoes = [
     titulo ? like(schema.contasPagarTable.titulo, `%${titulo}%`) : undefined,
@@ -56,8 +58,63 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     .from(schema.tipoPagamentoConta)
 
   try {
-    let query = tenantDb!
-      .select({
+    const cte = tenantDb!.select().from(contasPagarTable).as('cte')
+
+    const _withs = (drizzle: TenantDbType) => drizzle.with(cte)
+
+    const _joins = <T extends SQLiteSelect>(qb: T) => {
+      return Monad.of(qb)
+        .map(query =>
+          innerJoinOnMany(query, schema.supplierTable, [
+            eq(schema.supplierTable.id, schema.contasPagarTable.fornecedor_id),
+            fornecedor
+              ? like(schema.supplierTable.name, `%${fornecedor}%`)
+              : undefined,
+          ]),
+        )
+        .map(query =>
+          innerJoinOnMany(query, schema.categoriaConta, [
+            eq(schema.categoriaConta.id, schema.contasPagarTable.categoria_id),
+            categoria ? eq(schema.categoriaConta.id, catId) : undefined,
+          ]),
+        )
+        .map(query =>
+          innerJoinOnMany(query, schema.tipoPagamentoConta, [
+            eq(
+              schema.tipoPagamentoConta.id,
+              schema.contasPagarTable.pagamento_id,
+            ),
+          ]),
+        )
+        .get()
+        .orderBy(
+          sql`CASE WHEN ${schema.contasPagarTable.isPaid} = false THEN 0 ELSE 1 END`,
+          asc(schema.contasPagarTable.expire_at),
+        )
+    }
+
+    const _countSelectBuilder = (drizzle: TenantDbType) =>
+      _withs(drizzle).select({ count: count() })
+
+    const queryCount = (drizzle: TenantDbType) =>
+      _joins(
+        _countSelectBuilder(drizzle).from(schema.contasPagarTable).$dynamic(),
+      )
+
+    const _tontalSumSelectBuilder = (drizzle: TenantDbType) =>
+      _withs(drizzle).select({
+        sum: sql<number>`SUM(${schema.contasPagarTable.valor_conta})`,
+      })
+
+    const queryTotalSum = (drizzle: TenantDbType) =>
+      _joins(
+        _tontalSumSelectBuilder(drizzle)
+          .from(schema.contasPagarTable)
+          .$dynamic(),
+      )
+
+    const _itemsSelectBuilder = (drizzle: TenantDbType) =>
+      _withs(drizzle).select({
         titulo: schema.contasPagarTable.titulo,
         id: schema.contasPagarTable.id,
         descricao: schema.contasPagarTable.descricao,
@@ -72,35 +129,13 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
 
         pagName: schema.tipoPagamentoConta.nome,
       })
-      .from(contasPagarTable)
-      .where(and(...condicoes))
-      .innerJoin(
-        schema.supplierTable,
-        and(
-          fornecedor
-            ? like(schema.supplierTable.name, `%${fornecedor}%`)
-            : undefined,
-          eq(schema.supplierTable.id, contasPagarTable.fornecedor_id),
-        ),
+
+    const queryItems = (drizzle: TenantDbType) =>
+      _joins(
+        _itemsSelectBuilder(drizzle).from(schema.contasPagarTable).$dynamic(),
       )
-      .leftJoin(
-        schema.categoriaConta,
-        and(
-          categoria
-            ? like(schema.categoriaConta.nome, `%${categoria}%`)
-            : undefined,
-          eq(schema.categoriaConta.id, contasPagarTable.categoria_id),
-        ),
-      )
-      .leftJoin(
-        schema.tipoPagamentoConta,
-        eq(schema.tipoPagamentoConta.id, contasPagarTable.pagamento_id),
-      )
-      .$dynamic()
-      .orderBy(
-        sql`CASE WHEN ${schema.contasPagarTable.isPaid} = false THEN 0 ELSE 1 END`,
-        asc(schema.contasPagarTable.expire_at),
-      )
+
+    let query = queryItems(tenantDb!).where(and(...condicoes))
 
     if (sortId && sortOrder) {
       query = withOrderBy(
@@ -110,63 +145,13 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
       )
     }
     const rows = await withPagination(query, page, pageSize)
-
-    const total = await tenantDb!
-      .select({ count: count() })
-      .from(contasPagarTable)
-      .innerJoin(
-        schema.supplierTable,
-        and(
-          fornecedor
-            ? like(schema.supplierTable.name, `%${fornecedor}%`)
-            : undefined,
-          eq(schema.supplierTable.id, contasPagarTable.fornecedor_id),
-        ),
-      )
-      .leftJoin(
-        schema.categoriaConta,
-        and(
-          categoria
-            ? like(schema.categoriaConta.nome, `%${categoria}%`)
-            : undefined,
-          eq(schema.categoriaConta.id, contasPagarTable.categoria_id),
-        ),
-      )
-      .$dynamic()
-      .where(and(...condicoes))
-
-    const totalSumResult = await tenantDb!
-      .select({
-        totalSum: sql<number>`SUM(${schema.contasPagarTable.valor_conta})`,
-      })
-      .from(contasPagarTable)
-      .innerJoin(
-        schema.supplierTable,
-        and(
-          fornecedor
-            ? like(schema.supplierTable.name, `%${fornecedor}%`)
-            : undefined,
-          eq(schema.supplierTable.id, contasPagarTable.fornecedor_id),
-        ),
-      )
-      .leftJoin(
-        schema.categoriaConta,
-        and(
-          categoria
-            ? like(schema.categoriaConta.nome, `%${categoria}%`)
-            : undefined,
-          eq(schema.categoriaConta.id, contasPagarTable.categoria_id),
-        ),
-      )
-      .where(and(...condicoes))
-      .$dynamic()
-
-    const totalSum = totalSumResult[0]?.totalSum ?? 0
+    const [total] = await queryCount(tenantDb!).where(and(...condicoes))
+    const [totalSum] = await queryTotalSum(tenantDb!).where(and(...condicoes))
 
     return {
       rows: rows ?? [],
-      count: total[0].count,
-      totalSum,
+      count: total.count,
+      totalSum: totalSum.sum,
       fornecedores,
       categorias,
       tipoPagamentoConta,
