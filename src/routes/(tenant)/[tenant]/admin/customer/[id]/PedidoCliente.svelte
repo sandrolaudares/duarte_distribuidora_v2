@@ -30,7 +30,7 @@
   import PedidoCliente from './PedidoCliente.svelte'
   import { DateFormatter } from '@internationalized/date'
 
-  export let table
+  export let table: TableHandler<PageData['orders'][0]>
 
   export let total = 0
 
@@ -79,7 +79,7 @@
             <tr>
               <td>{row.id}</td>
               <td>{row.status}</td>
-              <td>{df.format(row.created_at)}</td>
+              <td>{row.created_at ? df.format(row.created_at) : 'N/A'}</td>
               <td class:text-error={!row.observation}>{row.observation ? row.observation : 'N/A'}</td>
               <td class="text-lg font-semibold">
                 R${(row.total / 100).toFixed(2)}

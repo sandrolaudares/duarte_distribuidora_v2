@@ -16,9 +16,9 @@ export function differenceInDays(expireAt: Date): number {
     console.log(daysDiff)
 
     if (daysDiff < 0) {
-      return 'badge badge-lg badge-error text-red-50'
+      return 'badge badge-md badge-error text-red-50'
     } else if (daysDiff <= 4) {
-      return 'badge badge-lg badge-warning text-yellow-50'
+      return 'badge badge-md badge-warning text-yellow-50'
     } else if (daysDiff <= 7) {
       return ''
     }

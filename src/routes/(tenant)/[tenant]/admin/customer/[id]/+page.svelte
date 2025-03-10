@@ -35,7 +35,16 @@
   let { customer, orders } = data
 
   // let filtered = orders
-  const table = new TableHandler(orders, { rowsPerPage: 100 })
+  const table = new TableHandler(orders, { rowsPerPage: 100,
+    i18n: {
+      show: 'Mostrar',
+      entries: 'entradas',
+      previous: 'Anterior',
+      next: 'Próximo',
+      noRows: 'Nenhum encontrado',
+      filter: 'Filtrar',
+    },
+  })
 
 
   // $: sum = table.createCalculation('total').sum()

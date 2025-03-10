@@ -27,6 +27,7 @@
   import { DateFormatter } from '@internationalized/date'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
   import { differenceInDays, getBgColor } from '$lib/utils/expire'
+  import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -36,6 +37,14 @@
     rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
     selectBy: 'id',
+    i18n: {
+      show: 'Mostrar',
+      entries: 'entradas',
+      previous: 'Anterior',
+      next: 'Próximo',
+      noRows: 'Nenhum encontrado',
+      filter: 'Filtrar',
+    },
   })
 
   const df = new DateFormatter('pt-BR', {
@@ -82,6 +91,8 @@
       isLoading = false
     }
   }
+  
+  let selectedCustomer: string = $state('')
 </script>
 
 <h1 class="my-5 text-center text-2xl font-medium">
@@ -143,7 +154,16 @@
         <tr>
           <Th />
           <Th />
-          <ThFilter {table} field="name" />
+          <!-- <ThFilter {table} field="name" /> -->
+           <Th>
+            <SelectFilter
+            filterKey="name"
+            placeholder="o cliente"
+            options={data.customers}
+            config={{ value: c => c.name, label: c => c.name }}
+            bind:selectedValue={selectedCustomer}
+          />
+           </Th>
           <Th>
             <DateFilter
               onChange={(startDate, endDate) => {

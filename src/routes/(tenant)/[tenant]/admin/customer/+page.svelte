@@ -34,6 +34,14 @@
   const table = new TableHandler(data.rows, {
     rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
+    i18n: {
+      show: 'Mostrar',
+      entries: 'entradas',
+      previous: 'Anterior',
+      next: 'Próximo',
+      noRows: 'Nenhum encontrado',
+      filter: 'Filtrar',
+    },
   })
 
   table.setPage(Number(filters.get('page')) || 1)

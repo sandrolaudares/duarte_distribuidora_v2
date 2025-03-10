@@ -36,6 +36,14 @@
     rowsPerPage: data.size,
     totalRows: data.count,
     selectBy: 'id',
+    i18n: {
+      show: 'Mostrar',
+      entries: 'entradas',
+      previous: 'Anterior',
+      next: 'Próximo',
+      noRows: 'Nenhum encontrado',
+      filter: 'Filtrar',
+    },
   })
 
   const df = new DateFormatter('pt-BR', {

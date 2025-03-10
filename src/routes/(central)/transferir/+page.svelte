@@ -27,6 +27,14 @@
   const table = new TableHandler(data.solicitacoes, {
     rowsPerPage: data.solicitacoes.length,
     selectBy: 'id',
+    i18n: {
+      show: 'Mostrar',
+      entries: 'entradas',
+      previous: 'Anterior',
+      next: 'Próximo',
+      noRows: 'Nenhum encontrado',
+      filter: 'Filtrar',
+    },
   })
 
   let isLoading = $state(false)
