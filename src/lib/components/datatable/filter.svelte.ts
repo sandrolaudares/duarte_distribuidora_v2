@@ -6,7 +6,6 @@ import { toast } from 'svelte-sonner'
 export class SSRFilters {
   Filters = $derived(page.url)
 
-
   get(name: string) {
     return this.Filters.searchParams.get(name)
   }
@@ -32,7 +31,7 @@ export class SSRFilters {
     const page = s.currentPage
     const rowsPerPage = s.rowsPerPage
     try {
-      const url = new URL(this.Filters)
+      const url = new URL(this.Filters.origin + this.Filters.pathname)
       for (const { field, value } of filters) {
         url.searchParams.set(String(field), String(value))
       }
@@ -63,7 +62,7 @@ export class SSRFilters {
     console.log('clear', url)
     if (typeof window !== 'undefined') {
       const newURL = url.origin + url.pathname
-  
+
       await goto(newURL, { keepFocus: true })
     }
   }

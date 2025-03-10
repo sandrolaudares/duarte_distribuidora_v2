@@ -1,6 +1,6 @@
 <script lang="ts">
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { onMount } from 'svelte'
   import { toast } from 'svelte-sonner'
   import Loading from './Loading.svelte'
@@ -13,7 +13,7 @@
   async function validateAdmin() {
     isLoading = true
     try {
-      const resp = await trpc($page).distribuidora.validateAdminPassword.query({
+      const resp = await trpc(page).distribuidora.validateAdminPassword.query({
         reason,
         password,
         admin_id: selectedAdminId,
@@ -35,7 +35,7 @@
 </script>
 
 <div>
-  {#await trpc($page).distribuidora.getAdmins.query()}
+  {#await trpc(page).distribuidora.getAdmins.query()}
     <Loading />
   {:then admins}
   <h1>Valide senha de adiministrador</h1>

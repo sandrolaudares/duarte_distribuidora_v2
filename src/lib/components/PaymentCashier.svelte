@@ -6,7 +6,7 @@
   import { toast } from 'svelte-sonner'
   import CardPayments from './cards/CardPayments.svelte'
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { modal } from './modal'
   import Loading from './Loading.svelte'
   import { getCartContext } from '../../routes/(tenant)/[tenant]/admin/cashier/[id]/cartContext.svelte'
@@ -119,7 +119,7 @@
         cart.meta.taxaEntrega = 0
       }
       if (cart.meta.clienteSelecionado) {
-        await trpc($page).customer.order.insertFiado.mutate({
+        await trpc(page).customer.order.insertFiado.mutate({
           order_items: Object.values(cart.cart).map(item => ({
             product_id: item.item.product_id,
             quantity: item.quantity,

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { debounce } from '$lib/utils'
   import type { Check, Field, TableHandlerInterface } from '@vincjo/datatables'
 
   type T = $$Generic<Row>
@@ -10,6 +11,8 @@
   let { table, field, check = undefined }: Props = $props()
 
   const filter = table.createFilter(field, check)
+  
+  const debouncedSet = debounce(filter.set, 500)
 </script>
 
 <th>
@@ -18,7 +21,7 @@
     placeholder={table.i18n.filter}
     spellcheck="false"
     bind:value={filter.value}
-    oninput={() => filter.set()}
+    oninput={debouncedSet}
   />
 </th>
 
