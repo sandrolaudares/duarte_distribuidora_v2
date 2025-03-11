@@ -18,7 +18,6 @@
 
   let { tenants }: { tenants: SelectTenant[] } = $props()
 
-  let Addrr: GeolocationCoordinates | null = $state(null)
   let error = $state('')
   let distances: Record<string, number> = $state({})
   let isLoading = $state(true)
@@ -27,9 +26,7 @@
     isLoading = true
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        resolve => {
-          Addrr = resolve.coords
-          console.log(Addrr)
+        ({ coords: Addrr }) => {
 
           tenants.forEach(tenant => {
             if (!tenant.lat || !tenant.lng) {
@@ -67,7 +64,6 @@
           error = reject.message
           isLoading = false
         },
-
       )
     }
   })
