@@ -31,5 +31,5 @@
 {:else if value !== null}
   {formatCurrency(value)}
 {:else}
-  R$ 0.00
+  R$ 0,00
 {/if}

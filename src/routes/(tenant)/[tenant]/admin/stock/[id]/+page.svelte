@@ -165,7 +165,7 @@
                   <td>{row.type}</td>
                   <td>{row.quantity}</td>
                   <td>
-                    {row.cost_price ? formatCurrency(row.cost_price) : 'R$ 0.00'}
+                    {row.cost_price ? formatCurrency(row.cost_price) : 'R$ 0,00'}
                   </td>
                 </tr>
               {/each}
