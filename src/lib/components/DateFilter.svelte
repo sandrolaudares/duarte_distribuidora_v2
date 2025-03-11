@@ -63,8 +63,8 @@
 
   const clearCalendar = () => {
     startValue = undefined
-    value.start = undefined
-    value.end = undefined
+    endValue = undefined
+    value = { start: undefined, end: undefined }
 
     console.log('clearing compare')
     filters?.clear('compareStartDate', 'compareEndDate', 'startDate', 'endDate')
@@ -179,6 +179,13 @@
           }}
         />
       </div>
+      {#if futureDates}
+      <div class="p-3">
+        <button onclick={clearCalendar} class="btn btn-outline btn-error w-full">
+          Limpar
+        </button>
+      </div>
+      {/if}
     </Popover.Content>
   </Popover.Root>
 </div>
