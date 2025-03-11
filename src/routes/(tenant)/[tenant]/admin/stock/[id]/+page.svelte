@@ -141,13 +141,13 @@
     </div>
     <div class="mb-5 flex gap-2">
       <div class=" h-[70vh] w-full max-w-[50%] overflow-x-auto">
-        <Datatable {table} headless>
+        <Datatable {table} >
           <!-- {#snippet header()}
           <Search {table} />
          
         {/snippet} -->
           <!-- svelte-ignore component_name_lowercase -->
-          <table class="table table-zebra rounded-sm border">
+          <table class="table table-zebra rounded-sm">
             <thead>
               <tr>
                 <Th>Data</Th>
