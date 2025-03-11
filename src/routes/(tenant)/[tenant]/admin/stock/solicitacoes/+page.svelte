@@ -137,7 +137,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each data.rows as row}
+        {#each data.rows as row (row.id)}
           <tr class:active={table.selected.includes(row.id)}>
             <td>
               <input

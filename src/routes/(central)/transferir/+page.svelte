@@ -216,7 +216,7 @@
               </tr>
             </thead>
             <tbody>
-              {#each table.rows.filter(s => s.toTenantId === distribuidora.tenantId) as row}
+              {#each table.rows.filter(s => s.toTenantId === distribuidora.tenantId) as row (row.id)}
                 <tr class:active={table.selected.includes(row.id)}>
                   <td>
                     <input

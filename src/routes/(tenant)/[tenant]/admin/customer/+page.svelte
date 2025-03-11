@@ -174,7 +174,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each data.rows as row}
+        {#each data.rows as row (row.id)}
           <tr>
             <td>{row.id}</td>
             <td>

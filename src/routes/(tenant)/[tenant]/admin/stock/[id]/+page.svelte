@@ -157,7 +157,7 @@
               </tr>
             </thead>
             <tbody>
-              {#each data.rows as row}
+              {#each data.rows as row (row.id)}
                 <tr>
                   <td>
                     {df.format(new Date(row.created_at || ''))}
