@@ -22,9 +22,16 @@
   import DateFilter from '$lib/components/DateFilter.svelte'
   import ChangeExpireDate from './ChangeExpireDate.svelte'
   import { pageConfig } from '$lib/config'
-  import { DateFormatter, type DateValue, getLocalTimeZone } from '@internationalized/date'
+  import {
+    DateFormatter,
+    type DateValue,
+    getLocalTimeZone,
+  } from '@internationalized/date'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
   import { differenceInDays, getBgColor } from '$lib/utils/expire'
+  import { invalidateAll } from '$app/navigation'
+  import { flip } from 'svelte/animate'
+  import { cubicInOut } from 'svelte/easing'
 
   let { data }: { data: PageData } = $props()
 
@@ -67,30 +74,30 @@
   }
   let sum = $derived(calculateSum())
 
-  let isLoading = $state(false)
+  let loadingRows: Record<number, boolean> = $state({})
 
   async function handleUpdate(value: Date, key = '', row: any) {
+    loadingRows[row.id] = true
     const last_val = row[key]
-    try {
-      isLoading = true
 
+    try {
       await trpc(page).customer.updateOrderExpireDate.mutate({
         order_id: row.id,
         expire_at: value,
       })
       row[key] = value
       toast.success('Atualizado com sucesso!')
-      table.invalidate()
+      // table.invalidate()
+      invalidateAll()
+      // table.rows = data.rows
     } catch (error) {
       row[key] = last_val
       toast.error('Erro ao atualizar')
     } finally {
-      isLoading = false
+      loadingRows[row.id] = false
     }
   }
 
-  let value = $state<DateValue | undefined>();
-    let contentRef = $state<HTMLElement | null>(null);
 </script>
 
 <h1 class="my-5 text-center text-2xl font-medium">
@@ -150,6 +157,7 @@
           <ThFilter {table} field="name" />
           <Th>
             <DateFilter
+            {filters}
               onChange={(startDate, endDate) => {
                 if (!startDate || !endDate) return
 
@@ -163,6 +171,7 @@
 
           <Th>
             <DateFilter
+              {filters}
               futureDates={true}
               onChange={(startExpireDate, endExpireDate) => {
                 if (!startExpireDate || !endExpireDate) return
@@ -182,7 +191,7 @@
       </thead>
       <tbody>
         {#each data.rows as row (row.id)}
-          <tr class={table.selected.includes(row.id) ? 'bg-base-200' : ''}>
+          <tr class={table.selected.includes(row.id) ? 'bg-base-200' : ''} animate:flip={{ duration: 900, delay: 100, easing: cubicInOut }}>
             <td>
               <input
                 type="checkbox"
@@ -196,26 +205,35 @@
             <td>{row.name}</td>
             <td>{row.created_at ? df.format(row.created_at) : ''}</td>
             <td>
-              {#if isLoading}
+              {#if loadingRows[row.id] == true}
                 Atualizando...
               {:else}
                 <ChangeExpireDate
-                  value={row.expire_at ?? new Date()}
-                  onUpdateValue={async (value: Date) => {
-                    handleUpdate(value, 'expire_at', row)
+                  {df}
+                  value={row.expire_at ? new Date(row.expire_at) : new Date()}
+                  onUpdateValue={async value => {
+                    const dateValue = new Date(value)
+                    dateValue.setUTCHours(23, 59, 59, 999)
+
+                    handleUpdate(dateValue, 'expire_at', row)
                   }}
                 />
               {/if}
             </td>
             <td>
-              <b class="{row.expire_at ? getBgColor(row.expire_at): ''} text-center">
-                {#if row.expire_at}
-                  {#if differenceInDays(row.expire_at) < 0}
-                    VENCIDO!
-                  {:else if differenceInDays(row.expire_at) === 0}
-                    Vence hoje!
-                  {:else}
-                    {differenceInDays(row.expire_at) + ' dias'}
+              <b
+                class="{row.expire_at ? getBgColor(row.expire_at) : ''} text-center">
+                {#if loadingRows[row.id] == true}
+                  Atualizando...
+                {:else}
+                  {#if row.expire_at}
+                    {#if differenceInDays(row.expire_at) < 0}
+                      VENCIDO!
+                    {:else if differenceInDays(row.expire_at) === 0}
+                      Vence hoje!
+                    {:else}
+                      {differenceInDays(row.expire_at) + ' dias'}
+                    {/if}
                   {/if}
                 {/if}
               </b>
