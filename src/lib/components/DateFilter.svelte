@@ -167,11 +167,14 @@
           }}
           numberOfMonths={1}
           onValueChange={v => {
-            if (onChange && v.start && v.end) {
-              onChange(
-                v.start.toDate(getLocalTimeZone()).getTime(),
-                v.end.toDate(getLocalTimeZone()).getTime(),
-              )
+             if (onChange && v.start && v.end) {
+              const startDate = new Date(v.start.toDate(getLocalTimeZone()));
+              const endDate = new Date(v.end.toDate(getLocalTimeZone()));
+
+              startDate.setHours(0, 0, 0, 0);
+              endDate.setHours(23, 59, 59, 999);
+
+              onChange(startDate.getTime(), endDate.getTime());
             }
           }}
         />
