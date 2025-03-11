@@ -1,12 +1,6 @@
 <script lang="ts" generics="Item">
   import { DateFormatter } from '@internationalized/date'
 
-  // import Datepicker from '$lib/components/input/date/datepicker.svelte'
-
-  // type Item = $$Generic;
-
-  // export let row
-  // export let column
   export let value: Date
   export let onUpdateValue: (newValue: Date) => void
 
@@ -30,6 +24,7 @@
   const df = new DateFormatter('pt-BR', {
     dateStyle: 'medium',
   })
+  
 </script>
 
 {#if isEditing === true}
@@ -37,14 +32,10 @@
     <div class="date-filter flex gap-2">
       <input
         type="date"
+        id="expire_at"
+        class="input input-bordered h-3/4 w-full"
         bind:this={inputElement}
-        on:change={e => {
-          const v = (e.target as HTMLInputElement).value
-          console.log(v)
-          const dateV = new Date(v + 'T00:00:00')
-          value = dateV
-        }}
-        value={df.format(value)}
+        value={value}
         min={df.format(new Date())}
       />
       <button type="submit">✅</button>

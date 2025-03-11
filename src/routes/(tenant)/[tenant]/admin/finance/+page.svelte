@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { navigating } from '$app/stores'
+  import { navigating } from '$app/state'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import { modal, FormModal } from '$lib/components/modal'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import {
     TableHandler,
     Datatable,
@@ -21,13 +21,10 @@
   import NoResults from '$lib/components/NoResults.svelte'
   import DateFilter from '$lib/components/DateFilter.svelte'
   import ChangeExpireDate from './ChangeExpireDate.svelte'
-  import { TreeDeciduous } from 'lucide-svelte'
-  import { getFilterValue } from '$lib/utils'
   import { pageConfig } from '$lib/config'
-  import { DateFormatter } from '@internationalized/date'
+  import { DateFormatter, type DateValue, getLocalTimeZone } from '@internationalized/date'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
   import { differenceInDays, getBgColor } from '$lib/utils/expire'
-  import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -56,7 +53,7 @@
     try {
       console.log(s)
       filters.fromState(s)
-      await $navigating?.complete
+      await navigating?.complete
     } catch (error) {
       console.error(error)
     }
@@ -76,23 +73,24 @@
     const last_val = row[key]
     try {
       isLoading = true
-      await trpc($page).customer.updateOrderExpireDate.mutate({
+
+      await trpc(page).customer.updateOrderExpireDate.mutate({
         order_id: row.id,
         expire_at: value,
       })
       row[key] = value
       toast.success('Atualizado com sucesso!')
-      setTimeout(() => {
-        window.location.reload()
-      }, 500)
+      table.invalidate()
     } catch (error) {
       row[key] = last_val
       toast.error('Erro ao atualizar')
+    } finally {
       isLoading = false
     }
   }
-  
-  let selectedCustomer: string = $state('')
+
+  let value = $state<DateValue | undefined>();
+    let contentRef = $state<HTMLElement | null>(null);
 </script>
 
 <h1 class="my-5 text-center text-2xl font-medium">
@@ -129,14 +127,9 @@
     Limpar filtros
   </button>
   <Datatable {table} headless>
-    <!-- {#snippet header()}
-      <Search {table} />
-     
-    {/snippet} -->
     {#if table.isLoading}
       <LoadingBackground />
     {/if}
-    <!-- svelte-ignore component_name_lowercase -->
     <table class=" table">
       <thead>
         <tr>
@@ -154,16 +147,7 @@
         <tr>
           <Th />
           <Th />
-          <!-- <ThFilter {table} field="name" /> -->
-           <Th>
-            <SelectFilter
-            filterKey="name"
-            placeholder="o cliente"
-            options={data.customers}
-            config={{ value: c => c.name, label: c => c.name }}
-            bind:selectedValue={selectedCustomer}
-          />
-           </Th>
+          <ThFilter {table} field="name" />
           <Th>
             <DateFilter
               onChange={(startDate, endDate) => {
@@ -197,7 +181,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each data.rows as row}
+        {#each data.rows as row (row.id)}
           <tr class={table.selected.includes(row.id) ? 'bg-base-200' : ''}>
             <td>
               <input
@@ -210,16 +194,13 @@
             </td>
             <td>{row.id}</td>
             <td>{row.name}</td>
-            <td>{df.format(row.created_at!)}</td>
+            <td>{row.created_at ? df.format(row.created_at) : ''}</td>
             <td>
-              <!-- {row.expire_at
-                  ? format(new Date(row.expire_at), 'dd/MM/yyyy')
-                  : 'Não registrado'} -->
               {#if isLoading}
                 Atualizando...
               {:else}
                 <ChangeExpireDate
-                  value={row.expire_at!}
+                  value={row.expire_at ?? new Date()}
                   onUpdateValue={async (value: Date) => {
                     handleUpdate(value, 'expire_at', row)
                   }}
