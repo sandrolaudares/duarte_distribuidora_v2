@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { formatCurrency } from "$lib/utils"
+
   let {
     totalItems = 0,
     lowStockItems = 0,
@@ -40,7 +42,7 @@
     <div>
       <dt class="text-sm font-medium opacity-50">Valor total em estoque</dt>
       <dd class="text-2xl">
-        R$ <span class=" font-bold">{(totalValue / 100).toFixed(2)}</span>
+        <span class=" font-bold">{formatCurrency(totalValue)}</span>
       </dd>
     </div>
   </dl>

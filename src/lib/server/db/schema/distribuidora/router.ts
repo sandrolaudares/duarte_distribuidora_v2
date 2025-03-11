@@ -28,6 +28,7 @@ import {
 import { createInsertSchema } from 'drizzle-zod'
 import { TRPCError } from '@trpc/server'
 import { verify } from '../user/password'
+import { formatCurrency } from '$lib/utils'
 
 export const distribuidora = router({
   insertCashier: publicProcedure
@@ -88,7 +89,7 @@ export const distribuidora = router({
       const { tenantDb, user } = ctx
 
       await bugReport(tenantDb).insertLogs({
-        text: `Abertura de caixa com R$${(data.amount / 100).toFixed(2)}`,
+        text: `Abertura de caixa com ${formatCurrency(data.amount)}`,
         created_by: user?.id,
         metadata: {
           cashier_id: id,
@@ -117,7 +118,7 @@ export const distribuidora = router({
       const [info] = await distribuidoraController(tenantDb).getCashierById(id)
 
       await bugReport(tenantDb).insertLogs({
-        text: `Fechamento de caixa com R$${(info.currency / 100).toFixed(2)}`,
+        text: `Fechamento de caixa com ${formatCurrency(info.currency)}`,
         created_by: user?.id,
         metadata: {
           cashier_id: id,

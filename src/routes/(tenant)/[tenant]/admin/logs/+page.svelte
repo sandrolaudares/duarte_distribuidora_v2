@@ -29,6 +29,7 @@
   import SelectSearch from '$lib/components/selectSearch.svelte'
   import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
+  import { formatCurrency } from '$lib/utils'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -156,7 +157,7 @@
             <td class="badge badge-xs {getColor(row.type)}">{row.type}</td>
             <td>
               {row.currency
-                ? 'R$' + (row.currency / 100).toFixed(2)
+                ? formatCurrency(row.currency)
                 : 'N/A'}
             </td>
             <td>

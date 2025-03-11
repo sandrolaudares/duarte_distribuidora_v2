@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { RouterOutputs } from '$trpc/router'
   import * as Card from '$lib/components/ui/card/index'
-  import { getImagePath } from '$lib/utils'
+  import { formatCurrency, getImagePath } from '$lib/utils'
   import { getCartContext } from './cartContext.svelte'
 
   let {
@@ -41,9 +41,9 @@ $effect(()=>{
 </td>
 
 <td class="p-4 text-right text-base font-normal text-opacity-90">
-  {quantity}x R${(price / 100).toFixed(2)}
+  {quantity}x {formatCurrency(price)}
 </td>
 
 <td class="p-4 text-right text-base font-bold text-opacity-90">
-  R${((price * quantity) / 100).toFixed(2)}
+  {formatCurrency(price*quantity)}
 </td>

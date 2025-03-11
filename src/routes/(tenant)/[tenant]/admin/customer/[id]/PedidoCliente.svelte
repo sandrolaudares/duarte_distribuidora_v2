@@ -29,6 +29,7 @@
   import InfoCliente from './InfoCliente.svelte'
   import PedidoCliente from './PedidoCliente.svelte'
   import { DateFormatter } from '@internationalized/date'
+  import { formatCurrency } from '$lib/utils'
 
   export let table: TableHandler<PageData['orders'][0]>
 
@@ -40,9 +41,9 @@
 </script>
 
 <div class="mt-10 h-full max-h-[calc(100vh-38vh)]">
-    <Datatable basic {table} headless>
+    <Datatable basic {table} >
       {#snippet header()}{/snippet}
-      <table class="table table-zebra table-sm">
+      <table class="table table-sm">
         <thead>
           <tr class="">
             <ThSort {table} field="id">ID</ThSort>
@@ -82,7 +83,7 @@
               <td>{row.created_at ? df.format(row.created_at) : 'N/A'}</td>
               <td class:text-error={!row.observation}>{row.observation ? row.observation : 'N/A'}</td>
               <td class="text-lg font-semibold">
-                R${(row.total / 100).toFixed(2)}
+                {formatCurrency(row.total)}
               </td>
               <td>
                 <a href="/admin/orders/{row.id}" class="badge badge-primary">
@@ -98,7 +99,7 @@
             <td></td>
             <td class="text-xl font-bold">
               Total: <span class="text-secondary">
-                R${(total/ 100).toFixed(2)}
+                {formatCurrency(total)}
               </span>
             </td>
             <td></td>
@@ -109,7 +110,16 @@
         <NoResults type={'Pedido'} />
       {/if}
       {#snippet footer()}
-        <Pagination {table} />
+      <RowsPerPage {table} />
+      <div></div>
+      <Pagination {table} />
       {/snippet}
     </Datatable>
   </div>
+
+  <style>
+    thead {
+      background-color: oklch(var(--b1)) !important;
+    }
+  </style>
+  

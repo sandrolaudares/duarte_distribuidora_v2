@@ -28,6 +28,7 @@
   import type { SelectCustomerOrder } from '$lib/server/db/schema'
   import Print from 'lucide-svelte/icons/printer';
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
+  import { formatCurrency } from '$lib/utils'
 
 
   let { data }: { data: PageData } = $props()
@@ -123,7 +124,7 @@
           35,
           ' ',
         ) 
-        const price = `R$${(item.price / 100).toFixed(2)}`
+        const price = `${formatCurrency(item.price)}`
 
         printer.justify(JustifyModes.justifyLeft)
         printer.text(itemText)
@@ -133,12 +134,12 @@
       printEmphasis(printer,'\n----------------------------------------\n\n')
       printer.justify(JustifyModes.justifyRight)
       printer.text(
-        `TOTAL: R$${((order.total - (order.taxa_entrega ?? 0)) / 100).toFixed(2)}\n`,
+        `TOTAL: ${formatCurrency(order.total-(order.taxa_entrega ?? 0))}\n`,
       )
       printer.text(
-        `+ ENTREGA: R$${((order.taxa_entrega ?? 0) / 100).toFixed(2)}\n`,
+        `+ ENTREGA: ${formatCurrency(order.taxa_entrega ?? 0)}\n`,
       )
-      printEmphasis(printer,`= TOTAL A PAGAR: R$${(order.total / 100).toFixed(2)}\n`)
+      printEmphasis(printer,`= TOTAL A PAGAR: ${formatCurrency(order.total)}\n`)
       printer.justify(JustifyModes.justifyLeft)
       printer.text(`Atendente: ${order.created_by?.username}\n`)
       printer.justify(JustifyModes.justifyCenter)
@@ -224,7 +225,10 @@
             <td>
                 {row.created_at ? df.format(row.created_at) : ''}
             </td>
-            <td><b class="text-lg text-success">R${row.total / 100}</b></td>
+            <td><b class="text-lg text-success">{(row.total/100).toLocaleString('pt-BR',{
+              style:'currency',
+              currency:'BRL'
+            })}</b></td>
 
             <td>
               <a href="/admin/orders/{row.id}" class="badge badge-primary">
@@ -245,7 +249,7 @@
           <td></td>
           <td class="text-xl font-bold">
             Total: <span class="text-secondary">
-              R${(data.totalSum / 100).toFixed(2)}
+              {formatCurrency(data.totalSum)}
             </span>
           </td>
           <td></td>

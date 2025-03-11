@@ -30,6 +30,7 @@
   import CustomThFilter from '$lib/components/datatable/CustomThFilter.svelte'
   import DateFilter from '$lib/components/DateFilter.svelte'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
+  import { formatCurrency } from '$lib/utils'
 
   let {
     table,
@@ -171,7 +172,7 @@
               </span>
             </td>
             <td class="p-2 font-bold">
-              R${(conta.valor_conta / 100).toFixed(2)}
+              {formatCurrency(conta.valor_conta)}
             </td>
             <!-- <td class="p-0">
               <span

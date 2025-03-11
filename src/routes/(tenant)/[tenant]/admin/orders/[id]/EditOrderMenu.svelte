@@ -6,6 +6,7 @@
 
   import { Cart } from '$lib/state/cart.svelte'
   import { getCartContext } from './cartContext.svelte'
+  import { formatCurrency } from '$lib/utils'
 
   let {
     products,
@@ -60,7 +61,7 @@
             </div>
             <div class="w-full text-right">
               <span class="block pb-3 text-xl font-bold">
-                R${(item[tipo_preco] / 100).toFixed(2)}
+                {formatCurrency(item[tipo_preco])}
               </span>
               <div class="flex items-center justify-end gap-3 text-center">
                 {#if cartItem?.quantity >= 1}

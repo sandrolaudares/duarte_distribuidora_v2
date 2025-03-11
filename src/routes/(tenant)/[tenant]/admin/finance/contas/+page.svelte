@@ -20,6 +20,7 @@
   import SelectSearch from '$lib/components/selectSearch.svelte'
   import TableConta from './TableConta.svelte'
   import ModalCreate from './ModalCreate.svelte'
+  import { formatCurrency } from '$lib/utils'
 
   let { data }: { data: PageData } = $props()
 
@@ -249,7 +250,7 @@
   >
     <h2 class="text-lg font-semibold text-gray-800">Total das contas:</h2>
     <span class="text-xl font-bold text-success">
-      R${(data.totalSum / 100).toFixed(2)}
+      {formatCurrency(data.totalSum)}
     </span>
   </div>
 </div>

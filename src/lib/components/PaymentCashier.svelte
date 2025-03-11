@@ -2,7 +2,7 @@
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
   import type { RouterOutputs } from '$trpc/router'
   import type { InsertOrderPayment, SelectAddress } from '$lib/server/db/schema'
-  import { icons } from '$lib/utils'
+  import { formatCurrency, icons } from '$lib/utils'
   import { toast } from 'svelte-sonner'
   import CardPayments from './cards/CardPayments.svelte'
   import { trpc } from '$trpc/client'
@@ -159,7 +159,7 @@
 
 <h1 class="mb-2 text-center">
   Valor total do pedido: <span class="font-bold text-success">
-    R${(total_pedido / 100).toFixed(2)}
+    {formatCurrency(total_pedido)}
   </span>
 </h1>
 <div
@@ -223,10 +223,8 @@
             <button class="btn" onclick={() => divideValor(1)}>100%</button>
           </div>
           <p>
-            Valor restante do pedido: R${(
-              (total_pedido - total_paid) /
-              100
-            ).toFixed(2)}
+            Valor restante do pedido: 
+            {formatCurrency(total_pedido - total_paid)}
           </p>
         </label>
       {/if}
@@ -267,7 +265,7 @@
         {#if valor_recebido_dinheiro && (valor_recebido_dinheiro >= total_pedido || valor_recebido_dinheiro >= valor_a_pagar) && troco > 0}
           <h1 class="font-lg">
             Troco do cliente: <span class="font-bold">
-              R${(troco / 100).toFixed(2)}
+              {formatCurrency(troco)}
             </span>
           </h1>
         {/if}
@@ -343,9 +341,10 @@
     <div class="mt-5">
       {#if total_paid < total_pedido && total_paid != 0}
         <p>
-          Foi pago: R${(total_paid / 100).toFixed(2)} mas ainda faltam
+          Foi pago: {formatCurrency(total_paid)} mas ainda faltam
+          
           <span class="text-error">
-            R${((total_pedido - total_paid) / 100).toFixed(2)}
+            {formatCurrency(total_pedido - total_paid)}
           </span>
           para pagar o pedido!
         </p>

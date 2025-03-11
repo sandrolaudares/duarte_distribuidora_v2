@@ -7,7 +7,7 @@
   import { page } from '$app/stores'
   import { trpc } from '$trpc/client'
   import { toast } from 'svelte-sonner'
-  import { icons } from '$lib/utils'
+  import { formatCurrency, icons } from '$lib/utils'
   import { modal } from '$lib/components/modal'
   import ModalSku from '$lib/components/modal/ModalSKU.svelte'
   import { onMount } from 'svelte'
@@ -144,7 +144,7 @@
     <div class=" flex w-full items-center justify-between font-light">
       <span>Preco Custo:</span>
       <span class="font-semibold">
-        R${(costPrice.cost_price / 100).toFixed(2)}
+        {formatCurrency(costPrice.cost_price)}
       </span>
     </div>
   {/if}

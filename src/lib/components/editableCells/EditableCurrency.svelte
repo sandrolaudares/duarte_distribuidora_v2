@@ -1,4 +1,5 @@
 <script lang="ts" >
+  import { formatCurrency } from "$lib/utils"
   import CurrencyInput from "../input/CurrencyInput.svelte"
 
 
@@ -8,6 +9,8 @@
     ) => void
   
     let isEditing = false
+
+    const oldV = value
   
     let inputElement: HTMLInputElement | undefined
     $: if (isEditing) {
@@ -15,6 +18,7 @@
     }
   
     const handleCancel = () => {
+      value = oldV
       isEditing = false
     }
     const handleSubmit = () => {
@@ -30,7 +34,7 @@
       <button
         on:click={() => (isEditing = true)}
       >
-      R${(value/100).toFixed(2)}
+      {formatCurrency(value)}
       </button>
     {:else}
       <form on:submit|preventDefault={handleSubmit}>

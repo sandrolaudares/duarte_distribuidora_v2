@@ -33,6 +33,7 @@ import { geocodeAddress, getDistanceFromLatLonInKm } from '$lib/utils/distance'
 import { env } from '$env/dynamic/private'
 import { getDistribuidoraLatLong } from '../../central/constroller'
 import { DateFormatter } from '@internationalized/date'
+import { formatCurrency } from '$lib/utils'
 
 const df = new DateFormatter('pt-BR', {
   dateStyle: 'medium',
@@ -353,7 +354,7 @@ export const customer = router({
 
         for (const payment of order_info.payment_info) {
           await bugReport(tenantDb).insertLogs({
-            text: `Pagamento de R$${(payment.amount_paid / 100).toFixed(2)} para pedido ${order.id}${payment.troco ? ` com troco de R$${(payment.troco / 100).toFixed(2)}` : ''}`,
+            text: `Pagamento de ${formatCurrency(payment.amount_paid)} para pedido ${order.id}${payment.troco ? ` com troco de ${formatCurrency(payment.troco)}` : ''}`,
             created_by: userId,
             metadata: {
               order_id: order.id,
@@ -525,7 +526,7 @@ export const customer = router({
           }
 
           await bugReport(tenantDb).insertLogs({
-            text: `Pagamento de R$${(payment_info.amount_paid / 100).toFixed(2)} para pedido ${payment_info.order_id}`,
+            text: `Pagamento de ${formatCurrency(payment_info.amount_paid)} para pedido ${payment_info.order_id}`,
             created_by: userId,
             metadata: {
               order_id: payment_info.order_id,
@@ -753,7 +754,7 @@ export const customer = router({
 
       return await tenantDb.transaction(async trx => {
         await bugReport(tenantDb).insertLogs({
-          text: `Pedido ${input.order_id} atualizado, pagamento realizado, valor pago: R$${(input.amount_paid / 100).toFixed(2)}`,
+          text: `Pedido ${input.order_id} atualizado, pagamento realizado, valor pago: ${formatCurrency(input.amount_paid)}`,
           created_by: userID,
           metadata: {
             order_id: input.order_id,

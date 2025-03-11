@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { InsertOrderPayment, SelectOrderPayment } from "$lib/server/db/schema"
+  import { formatCurrency } from "$lib/utils"
   import { DateFormatter } from "@internationalized/date"
 
   export let payment:Omit<InsertOrderPayment,'order_id'>
@@ -20,12 +21,12 @@
   {/if}
   <p class="bg-opacity-60">
     <span class="font-semibold">Quantidade paga:</span>
-    R${(payment.amount_paid / 100).toFixed(2)}
+    {formatCurrency(payment.amount_paid)}
   </p>
   {#if payment.payment_method === 'dinheiro'}
     <p class="bg-opacity-60">
       <span class="font-semibold">Troco:</span>
-      R${payment.troco ? (payment?.troco / 100).toFixed(2) : null}
+      R${payment.troco ? formatCurrency(payment.troco) : null}
     </p>
   {/if}
   <p class="bg-opacity-60">

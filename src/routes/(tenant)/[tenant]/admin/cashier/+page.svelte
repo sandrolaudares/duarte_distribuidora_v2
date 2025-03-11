@@ -7,7 +7,7 @@
   import type { RouterInputs } from '$trpc/router'
 
   import { modal, FormModal } from '$components/modal'
-  import { icons } from '$lib/utils'
+  import { formatCurrency, icons } from '$lib/utils'
   import { toast } from 'svelte-sonner'
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
 
@@ -144,7 +144,8 @@
             >
               {caixa.name}
               <span class="text-end font-bold">
-                Valor no caixa: R${(caixa.currency / 100).toFixed(2)}
+                Valor no caixa:
+                {formatCurrency(caixa.currency)}
               </span>
             </a>
             <button

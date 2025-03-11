@@ -1,6 +1,6 @@
 <script lang="ts">
   // import { getCartContext } from '$lib/stores/cart'
-  import { icons } from '$lib/utils'
+  import { formatCurrency, icons } from '$lib/utils'
   import { getCartContext } from './cartContext.svelte'
 
   const cart = getCartContext()
@@ -28,20 +28,11 @@
         <li class="py-2 font-bold">
           ({item.quantity}x)
           <span class="text-sm text-secondary">
-            R${(
-              item.item[item.meta.is_retail ? 'retail_price' : 'wholesale_price'] /
-              100
-            ).toFixed(2)}
+            {formatCurrency(item.item[item.meta.is_retail ? 'retail_price' : 'wholesale_price'])}
           </span>
           {item.item.name} -
           <span class="text-success">
-            R${(
-              (item.quantity *
-                item.item[
-                  item.meta.is_retail ? 'retail_price' : 'wholesale_price'
-                ]) /
-              100
-            ).toFixed(2)}
+          {formatCurrency(item.quantity * item.item[item.meta.is_retail ? 'retail_price' : 'wholesale_price'])}
           </span>
         </li>
       </div>
@@ -60,12 +51,14 @@
 
 <h2 class="mx-10 flex justify-center text-3xl font-bold">
   Preço total:&nbsp;
-  <span class="text-success">R${(total / 100).toFixed(2)}</span>
+  <span class="text-success">
+    {formatCurrency(total)}
+  </span>
 </h2>
 {#if cart.meta.isDelivery}
   <p class="text-center">
     Taxa entrega: <span class="font-bold text-success">
-      R${(cart.meta.taxaEntrega / 100).toFixed(2)}
+      {formatCurrency(cart.meta.taxaEntrega)}
     </span>
   </p>
 {/if}

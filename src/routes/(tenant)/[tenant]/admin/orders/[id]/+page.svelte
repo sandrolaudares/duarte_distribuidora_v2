@@ -14,6 +14,7 @@
   import { toast } from 'svelte-sonner'
   import { goto, invalidateAll } from '$app/navigation'
   import SenhaAdmin from '$lib/components/SenhaAdmin.svelte'
+  import { formatCurrency } from '$lib/utils'
   let { data }: { data: PageData } = $props()
 
   const order = createCartContext(data.order_details)
@@ -162,17 +163,14 @@
           <dl class="flex items-center justify-between gap-4 pt-2">
             <dt class="text-md text-opacity-90">Subtotal:</dt>
             <dd class="text-lg text-opacity-90">
-              R${(
-                (order_details.total - order_details.taxa_entrega) /
-                100
-              ).toFixed(2)}
+              {formatCurrency(order_details.total - order_details.taxa_entrega)}
             </dd>
           </dl>
 
           <dl class="flex items-center justify-between gap-4 pt-2">
             <dt class="text-sm text-opacity-90">Taxa entrega:</dt>
             <dd class="text-md text-opacity-90">
-              R${(order_details.taxa_entrega / 100).toFixed(2)}
+              {formatCurrency(order_details.taxa_entrega)}
             </dd>
           </dl>
         {/if}
@@ -181,7 +179,7 @@
           <dl class="flex items-center justify-between gap-4 pt-2">
             <dt class="text-lg font-bold text-opacity-90">Total:</dt>
             <dd class="text-xl font-bold text-success">
-              R${(order_details.total / 100).toFixed(2)}
+              {formatCurrency(order_details.total)}
             </dd>
           </dl>
           <hr />
@@ -204,11 +202,7 @@
                   </span>
                   Ainda faltam
                   <span class="text-success">
-                    R${(
-                      (order_details.total -
-                        (order_details.amount_paid - troco)) /
-                      100
-                    ).toFixed(2)}
+                    {formatCurrency(order_details.total -(order_details.amount_paid - troco))}
                   </span>
                   para pagar
                 </h1>
@@ -221,8 +215,8 @@
               </div>
             {/if}
             {#if order_details.amount_paid - troco >= order_details.total}
-              <h1 class="my-2 text-lg font-semibold text-success">
-                &#128079; O pagamento já foi realizado para este pedido!
+              <h1 class="my-2 text-lg font-semibold text-success flex gap-2">
+                <p>&#x2705;</p> O pagamento já foi realizado para este pedido!
               </h1>
             {/if}
           </div>
@@ -295,23 +289,21 @@
               <dl class="flex items-center justify-between gap-4 pt-2">
                 <dt class="text-md text-opacity-90">Subtotal:</dt>
                 <dd class="text-lg text-opacity-90">
-                  R${((cartTotal - order_details.taxa_entrega) / 100).toFixed(
-                    2,
-                  )}
+                  {formatCurrency(cartTotal - order_details.taxa_entrega)}
                 </dd>
               </dl>
 
               <dl class="flex items-center justify-between gap-4 pt-2">
                 <dt class="text-sm text-opacity-90">Taxa entrega:</dt>
                 <dd class="text-md text-opacity-90">
-                  R${(order_details.taxa_entrega / 100).toFixed(2)}
+                  {formatCurrency(order_details.taxa_entrega)}
                 </dd>
               </dl>
             {/if}
             <dl class="flex items-center justify-between gap-4 pt-2">
               <dt class="text-lg font-bold text-opacity-90">Total:</dt>
               <dd class="text-xl font-bold text-success">
-                R${(cartTotal / 100).toFixed(2)}
+                {formatCurrency(cartTotal)}
               </dd>
             </dl>
             <hr />

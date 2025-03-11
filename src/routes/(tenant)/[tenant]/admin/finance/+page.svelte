@@ -32,6 +32,7 @@
   import { invalidateAll } from '$app/navigation'
   import { flip } from 'svelte/animate'
   import { cubicInOut } from 'svelte/easing'
+  import { formatCurrency } from '$lib/utils'
 
   let { data }: { data: PageData } = $props()
 
@@ -238,7 +239,7 @@
                 {/if}
               </b>
             </td>
-            <td><b class="text-xl text-success">R${row.total / 100}</b></td>
+            <td><b class="text-xl text-success">{formatCurrency(row.total)}</b></td>
 
             <td>
               <a href="/admin/orders/{row.id}" class="badge badge-primary">
@@ -257,9 +258,10 @@
 
           <td class="text-xl font-bold">
             Total: <span class="text-secondary">
-              R${sum
-                ? (sum / 100).toFixed(2)
-                : (data.totalSum / 100).toFixed(2)}
+              {sum
+                ? formatCurrency(sum)
+                :formatCurrency(data.totalSum)}
+                
             </span>
           </td>
         </tr>

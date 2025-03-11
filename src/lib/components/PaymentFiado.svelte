@@ -3,7 +3,7 @@
     InsertOrderPayment,
     SelectOrderPayment,
   } from '$lib/server/db/schema'
-  import { icons } from '$lib/utils'
+  import { formatCurrency, icons } from '$lib/utils'
   import type { RouterOutputs } from '$trpc/router'
   import { toast } from 'svelte-sonner'
   import CardPayments from './cards/CardPayments.svelte'
@@ -126,7 +126,7 @@
     </h1> -->
   <h1 class="mb-2 text-center">
     Valor à pagar: <span class="font-bold text-success">
-      R${((total_pedido - amount_paid_order) / 100).toFixed(2)}
+      {formatCurrency(total_pedido - amount_paid_order)}
     </span>
   </h1>
   <div
@@ -198,10 +198,8 @@
               <!--TODO: Fix valor_a_pagar nao atualiza no currency input-->
             </div>
             <p>
-              Valor restante do pedido: R${(
-                (total_pedido - total_paid_newPayments - amount_paid_order) /
-                100
-              ).toFixed(2)}
+              Valor restante do pedido: 
+              {formatCurrency(total_pedido - total_paid_newPayments - amount_paid_order)}
             </p>
           </label>
         {/if}
@@ -233,7 +231,7 @@
           {#if valor_recebido_dinheiro && (valor_recebido_dinheiro >= total_pedido || valor_recebido_dinheiro >= valor_a_pagar) && troco > 0}
             <h1 class="font-lg">
               Troco do cliente: <span class="font-bold">
-                R${(troco / 100).toFixed(2)}
+                {formatCurrency(troco)}
               </span>
             </h1>
           {/if}
@@ -302,16 +300,16 @@
       <div class="mt-5">
         {#if total_paid_newPayments < total_pedido && total_paid_newPayments - amount_paid_order != 0}
           <p>
-            Foi pago: R${(total_paid_newPayments / 100).toFixed(2)} mas ainda faltam
+            Foi pago: {formatCurrency(total_paid_newPayments)} mas ainda faltam
             <span class="text-error">
-              R${((total_pedido - total_paid_newPayments - amount_paid_order) / 100).toFixed(2)}
+              {formatCurrency(total_pedido - total_paid_newPayments - amount_paid_order)}
             </span>
             para pagar o pedido!
           </p>
           <hr class="my-2" />
           <p>
             Deseja que o valor restante de <span class="text-error">
-              R${((total_pedido - total_paid_newPayments - amount_paid_order) / 100).toFixed(2)}
+              {formatCurrency(total_pedido_-total_paid_newPayments-amount_paid_order)}
             </span>
             continue como fiado?
             <button class="text-lg text-accent underline" on:click={save}>

@@ -8,6 +8,7 @@
   import type { RouterOutputs } from '$trpc/router'
   import { toast } from 'svelte-sonner'
   import Loading from '$lib/components/Loading.svelte'
+  import { formatCurrency } from '$lib/utils'
 
   export let caixa_id
 
@@ -37,7 +38,7 @@
         <Loading />
       </div>
     {:else}
-    <p class="text-center mb-3">Quantidade no caixa R${(caixa.currency/100).toFixed(2)}</p>
+    <p class="text-center mb-3">Quantidade no caixa {formatCurrency(caixa.currency)}</p>
       <div class="overflow-x-auto">
         <table class="table table-zebra table-xs">
           <thead>
@@ -53,7 +54,7 @@
               <tr>
                 <td>{transaction.id}</td>
                 <td>{transaction.type}</td>
-                <td>R${(transaction.amount/100).toFixed(2)}</td>
+                <td>{formatCurrency(transaction.amount)}</td>
                 <td>{transaction.created_at}</td>
               </tr>
             {/each}

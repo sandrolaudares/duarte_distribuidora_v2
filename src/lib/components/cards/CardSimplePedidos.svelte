@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { CurrentOrders } from '$lib/server/db/schema/customer/controller'
-  import { getImagePath } from '$lib/utils'
+  import { formatCurrency, getImagePath } from '$lib/utils'
   import type { RouterInputs, RouterOutputs } from '$trpc/router'
   import PaymentFiado from '../PaymentFiado.svelte'
   import SenhaAdmin from '../SenhaAdmin.svelte'
@@ -91,12 +91,12 @@
       <div class="flex flex-col items-start justify-between">
           <div class="flex items-center gap-2">
           {#if order.taxa_entrega}
-            <span>Taxa entrega: <span class="font-bold text-neutral ">R${(order?.taxa_entrega / 100).toFixed(2)}</span> </span>
+            <span>Taxa entrega: <span class="font-bold text-neutral ">{formatCurrency(order?.taxa_entrega)}</span> </span>
           {/if}
           -
           <span class="text-md font-semibold">Valor do pedido:</span>
           <span class="text-lg font-bold text-success">
-            R${(order.total / 100).toFixed(2)}
+            {formatCurrency(order.total)}
           </span>
         </div>
       </div>

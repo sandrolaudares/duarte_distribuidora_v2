@@ -32,7 +32,7 @@
   import { trpc } from '$trpc/client'
   import NoResults from '$lib/components/NoResults.svelte'
   import { goto } from '$app/navigation'
-  import { icons } from '$lib/utils'
+  import { formatCurrency, icons } from '$lib/utils'
   import { pageConfig } from '$lib/config'
   import { DateFormatter } from '@internationalized/date'
 
@@ -165,7 +165,7 @@
                   <td>{row.type}</td>
                   <td>{row.quantity}</td>
                   <td>
-                    R${row.cost_price ? (row.cost_price / 100).toFixed(2) : 0.0}
+                    {row.cost_price ? formatCurrency(row.cost_price) : 'R$ 0.00'}
                   </td>
                 </tr>
               {/each}

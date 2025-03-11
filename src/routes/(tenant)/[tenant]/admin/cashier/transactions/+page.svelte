@@ -22,7 +22,7 @@
   import { trpc } from '$trpc/client'
   import NoResults from '$lib/components/NoResults.svelte'
   import { goto, invalidate } from '$app/navigation'
-  import { getFilterValue } from '$lib/utils'
+  import { formatCurrency, getFilterValue } from '$lib/utils'
   import { DateFormatter } from '@internationalized/date'
   import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
@@ -154,7 +154,7 @@
             </td>
             <!-- <td class="font-semibold">R${row.currency ? (row.currency/100).toFixed(2) : '0.00'}</td> -->
             <td class="font-semibold">
-              {row.total ? 'R$' + (row.total / 100).toFixed(2) : ''}
+              {row.total ? 'R$' + formatCurrency(row.total) : ''}
             </td>
             <td>
               {#if row.order_id}

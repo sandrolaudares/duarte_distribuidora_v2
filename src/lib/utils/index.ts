@@ -64,3 +64,11 @@ export function getFilterValue(filters:SSRFilters,filterName: string) {
     startDate.getDate(),
   )
 }
+
+export function formatCurrency (value:number) {
+  const valueInBRL = value /100
+  return valueInBRL.toLocaleString('pt-BR',{
+    style:'currency',
+    currency:'BRL'
+  })
+}
