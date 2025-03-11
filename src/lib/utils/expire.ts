@@ -13,7 +13,6 @@ export function differenceInDays(expireAt: Date): number {
 
   export function getBgColor(expireAt: Date) {
     const daysDiff = differenceInDays(expireAt)
-    console.log(daysDiff)
 
     if (daysDiff < 0) {
       return 'badge badge-md badge-error text-red-50'

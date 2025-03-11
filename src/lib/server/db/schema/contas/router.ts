@@ -1,7 +1,7 @@
 import { middleware } from '$trpc/middleware'
 import { publicProcedure, router } from '$trpc/t'
 import { z } from 'zod'
-import { insertCategoriaSchema, insertContaSchema } from '.'
+import { categoriaConta, insertCategoriaSchema, insertContaSchema, tipoPagamentoConta } from '.'
 import { contasController } from './controller'
 
 export const contas = router({
@@ -58,4 +58,10 @@ export const contas = router({
     .mutation(async ({ input, ctx: { tenantDb } }) => {
       return await contasController(tenantDb).pagarConta(input).returning()
     }),
+    getCategorias: publicProcedure.query(({ctx:{tenantDb}}) => {
+        return tenantDb!.select().from(categoriaConta)
+      }),
+      getTipoPagamento: publicProcedure.query(({ctx:{tenantDb}}) => {
+        return tenantDb!.select().from(tipoPagamentoConta)
+      }),
 })
