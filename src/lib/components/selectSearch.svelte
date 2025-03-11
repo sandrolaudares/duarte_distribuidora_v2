@@ -12,37 +12,45 @@
   import { tick } from 'svelte'
   import * as Command from '$lib/components/ui/command/index.js'
   import * as Popover from '$lib/components/ui/popover/index.js'
-  import { Button, type ButtonVariant } from '$lib/components/ui/button/index.js'
+  import { Button, type ButtonProps, type ButtonVariant } from '$lib/components/ui/button/index'
   import { cn } from '$lib/utils'
   import Separator from './ui/separator/separator.svelte'
+  import type { HTMLButtonAttributes } from 'svelte/elements'
+  import Loading from './Loading.svelte'
+  import { toast } from 'svelte-sonner'
 
   interface Props {
-    options: T[]
     config: SelectItem<T>
     value: string
     placeholder?: string
     onValueChange?: (value: string) => void
     variant?: ButtonVariant
+    delegateQuery: () => Promise<T[]>
   }
 
   let {
-    options,
     config,
     value = $bindable(),
     placeholder,
     onValueChange,
     variant,
+    delegateQuery
   }: Props = $props()
 
   let open = $state(false)
   //   let value = $state('')
   let triggerRef = $state<HTMLButtonElement>(null!)
 
+  let options: T[] = $state([])
+
+  let isLoading = $state(true)
+
   //   const selectedValue = $derived(options.find(f => f.value === value)?.label)
+  
 
   const selectedValue = $derived.by(() => {
-    const selectedItem = options.find(item => config.value(item) === value)
-    return selectedItem ? config.label(selectedItem) : ''
+    const selectedItem = options.find(item => String(config.value(item)) === value)
+    return selectedItem ? config.label(selectedItem) :  ''
   })
 
   // We want to refocus the trigger button when the user selects
@@ -54,10 +62,23 @@
       triggerRef.focus()
     })
   }
+
+  async function loadOptions() {
+    try {
+      if (options.length === 0) {
+        options = await delegateQuery()
+      }
+    } catch (error: any) {
+      console.error(error.message)
+      toast.error("Erro ao carregar fornecedores")
+    } finally {
+      isLoading = false
+    }
+  }
 </script>
 
-<Popover.Root bind:open>
-  <Popover.Trigger bind:ref={triggerRef}>
+<Popover.Root bind:open onOpenChange={loadOptions}>
+  <Popover.Trigger bind:ref={triggerRef} >
     {#snippet child({ props })}
       <Button
         variant={variant ?? 'select'}
@@ -67,7 +88,6 @@
         aria-expanded={open}
       >
         {selectedValue || `Selecione ${placeholder}...`}
-        <!-- <ChevronsUpDown class="ml-2 size-4 shrink-0 opacity-50" /> -->
       </Button>
     {/snippet}
   </Popover.Trigger>
@@ -78,11 +98,17 @@
           onValueChange(value)
         }
       }}
+    
     >
       <Command.Input placeholder={`Pesquise ${placeholder}...`} />
       <Command.List>
         <Command.Empty>Nenhum encontrado.</Command.Empty>
         <Command.Group>
+          {#if isLoading}
+            <div class="flex items-center justify-center">
+              <Loading />
+            </div>
+          {:else}
           <Command.Item
             value=""
             onSelect={() => {
@@ -106,12 +132,13 @@
               <Check
                 class={cn(
                   'mr-2 size-4',
-                  value !== config.value(option) && 'text-transparent',
+                  value !== String(config.value(option)) && 'text-transparent',
                 )}
               />
               {config.label(option)}
             </Command.Item>
           {/each}
+          {/if}
           
         </Command.Group>
       </Command.List>
