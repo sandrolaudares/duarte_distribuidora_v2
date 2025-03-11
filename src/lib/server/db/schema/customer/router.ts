@@ -663,6 +663,44 @@ export const customer = router({
       )
     }),
 
+    updateMotoboyOrder: publicProcedure
+    .meta({
+      routeName: 'Atualizar Pedido',
+      permission: 'atualizar_pedidos',
+    })
+    .use(middleware.logged)
+    .use(middleware.auth)
+    .input(
+      z.object({
+        order_id: z.number(),
+        data: z.object({
+          motoboy_id: z.string(),
+        }),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { order_id, data } = input
+      const { tenantDb } = ctx
+      const user = ctx.locals.user
+
+      tenantDb.transaction(async(tx)=>{
+        await tx.insert(logsTable).values({
+          text: `${user?.username} atualizou o motoboy do pedido ${order_id}`,
+          created_by: user?.id,
+          metadata: {
+            order_id,
+          },
+          order_id,
+          type: 'SYSTEM',
+          pathname: '',
+          routeName: 'Atualizar Pedido',
+        })
+        
+        return await tx.update(customerOrderTable).set(data).where(eq(customerOrderTable.id, order_id))
+      })
+
+    }),
+
   cancelOrder: publicProcedure
     .meta({
       routeName: 'Deletar Pedido',
