@@ -45,11 +45,11 @@ importers:
         specifier: 'file:'
         version: file:(@sveltejs/adapter-node@5.2.1(@sveltejs/kit@2.19.0(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.22.6)(vite@6.0.7(@types/node@22.2.0)(jiti@1.21.6)(yaml@2.5.0)))(svelte@5.22.6)(vite@6.0.7(@types/node@22.2.0)(jiti@1.21.6)(yaml@2.5.0))))(@trpc/server@10.45.2)(@types/react@18.3.3)(svelte@5.22.6)(tailwindcss@3.4.17)(typescript@5.8.2)(ws@8.18.0)(zod@3.24.2)
       drizzle-orm:
-        specifier: ^0.38.3
-        version: 0.38.3(@libsql/client@0.14.0)(@types/react@18.3.3)
+        specifier: ^0.38.4
+        version: 0.38.4(@libsql/client@0.14.0)(@types/react@18.3.3)
       drizzle-zod:
         specifier: ^0.6.1
-        version: 0.6.1(drizzle-orm@0.38.3(@libsql/client@0.14.0)(@types/react@18.3.3))(zod@3.24.2)
+        version: 0.6.1(drizzle-orm@0.38.4(@libsql/client@0.14.0)(@types/react@18.3.3))(zod@3.24.2)
       esc-pos-printer:
         specifier: ^1.0.11
         version: 1.0.11
@@ -2285,8 +2285,8 @@ packages:
     resolution: {integrity: sha512-HmA/NeewvHywhJ2ENXD3KvOuM/+K2dGLJfxVfIHsGwaqKICJnS+Ke2L6UcSrSrtMJLJaT0Im1Qv4TFXfaZShyw==}
     hasBin: true
 
-  drizzle-orm@0.38.3:
-    resolution: {integrity: sha512-w41Y+PquMpSff/QDRGdItG0/aWca+/J3Sda9PPGkTxBtjWQvgU1jxlFBXdjog5tYvTu58uvi3PwR1NuCx0KeZg==}
+  drizzle-orm@0.38.4:
+    resolution: {integrity: sha512-s7/5BpLKO+WJRHspvpqTydxFob8i1vo2rEx4pY6TGY7QSMuUfWUuzaY0DIpXCkgHOo37BaFC+SJQb99dDUXT3Q==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=4'
@@ -5539,8 +5539,8 @@ snapshots:
       clsx: 2.1.1
       d3-array: 3.2.4
       d3-scale: 4.0.2
-      drizzle-orm: 0.38.3(@libsql/client@0.14.0)(@types/react@18.3.3)
-      drizzle-zod: 0.6.1(drizzle-orm@0.38.3(@libsql/client@0.14.0)(@types/react@18.3.3))(zod@3.24.2)
+      drizzle-orm: 0.38.4(@libsql/client@0.14.0)(@types/react@18.3.3)
+      drizzle-zod: 0.6.1(drizzle-orm@0.38.4(@libsql/client@0.14.0)(@types/react@18.3.3))(zod@3.24.2)
       esc-pos-printer: 1.0.11
       layerchart: 0.60.3(svelte@5.22.6)(typescript@5.8.2)
       nodemailer: 6.9.16
@@ -5624,14 +5624,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.38.3(@libsql/client@0.14.0)(@types/react@18.3.3):
+  drizzle-orm@0.38.4(@libsql/client@0.14.0)(@types/react@18.3.3):
     optionalDependencies:
       '@libsql/client': 0.14.0
       '@types/react': 18.3.3
 
-  drizzle-zod@0.6.1(drizzle-orm@0.38.3(@libsql/client@0.14.0)(@types/react@18.3.3))(zod@3.24.2):
+  drizzle-zod@0.6.1(drizzle-orm@0.38.4(@libsql/client@0.14.0)(@types/react@18.3.3))(zod@3.24.2):
     dependencies:
-      drizzle-orm: 0.38.3(@libsql/client@0.14.0)(@types/react@18.3.3)
+      drizzle-orm: 0.38.4(@libsql/client@0.14.0)(@types/react@18.3.3)
       zod: 3.24.2
 
   eastasianwidth@0.2.0: {}
