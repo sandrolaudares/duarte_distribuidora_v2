@@ -1,30 +1,25 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { navigating } from '$app/stores'
+  import { navigating } from '$app/state'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
-  import { fade, slide, fly } from 'svelte/transition'
   import type { PageData } from './$types'
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import * as Dialog from '$lib/components/ui/dialog/index'
 
   import { TableHandler } from '@vincjo/datatables/server'
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
-  import NoResults from '$lib/components/NoResults.svelte'
   import type {
     SelectConta,
-    SelectSupplier,
-    SelectTipoPagamento,
   } from '$lib/server/db/schema'
   import { toast } from 'svelte-sonner'
   import { invalidate, invalidateAll } from '$app/navigation'
-  import DateFilter from '$lib/components/DateFilter.svelte'
   import * as Select from '$lib/components/ui/select/index'
   import { pageConfig } from '$lib/config'
   import { DateFormatter } from '@internationalized/date'
   import SelectSearch from '$lib/components/selectSearch.svelte'
   import TableConta from './TableConta.svelte'
-  import Separator from '$lib/components/ui/separator/separator.svelte'
+  import ModalCreate from './ModalCreate.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -33,6 +28,14 @@
   const table = new TableHandler(data.rows, {
     rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
+    i18n: {
+      show: 'Mostrar',
+      entries: 'entradas',
+      previous: 'Anterior',
+      next: 'Próximo',
+      noRows: 'Nenhum encontrado',
+      filter: 'Filtrar',
+    },
   })
 
   const df = new DateFormatter('pt-BR', {
@@ -44,7 +47,7 @@
     try {
       console.log(s)
       filters.fromState(s)
-      await $navigating?.complete
+      await navigating?.complete
     } catch (error) {
       console.error(error)
     }
@@ -92,7 +95,7 @@
     const parsedCategoryId = parseValue(selectedCategory, 'Categoria inválida')
 
     try {
-      await trpc($page).contas.insertConta.mutate({
+      await trpc(page).contas.insertConta.mutate({
         valor_conta: newConta.valor_conta,
         expire_at: newConta.expire_at,
         descricao: newConta.descricao,
@@ -118,7 +121,7 @@
   async function createCategoria() {
     isLoading = true
     try {
-      await trpc($page).contas.insertCategoria.mutate({
+      await trpc(page).contas.insertCategoria.mutate({
         nome: nameCat,
       })
       await invalidateAll()
@@ -136,7 +139,7 @@
   async function createTipoPag() {
     isLoading = true
     try {
-      await trpc($page).contas.insertTipoPagamento.mutate({
+      await trpc(page).contas.insertTipoPagamento.mutate({
         nome: nameTipoPag,
       })
       await invalidateAll()
@@ -163,25 +166,14 @@
   )
 
   let selectedCategory: string = $state('')
-
-  const categoryConfig = {
-    value: (item: { id: number; nome: string }) => String(item.id),
-    label: (item: { id: number; nome: string }) => item.nome,
-  }
-
   let selectedSupplier: string = $state('')
-
-  const supplierConfig = {
-    value: (item: SelectSupplier) => String(item.id),
-    label: (item: SelectSupplier) => item.name,
-  }
-
   let selectedPagamento: string = $state('')
 
-  const pagamentoConfig = {
-    value: (item: SelectTipoPagamento) => String(item.id),
-    label: (item: SelectTipoPagamento) => item.nome,
-  }
+  $effect(()=>{
+    if(data.rows){
+      table.rows = data.rows
+    }
+  })
 </script>
 
 <div class="m-2 h-full max-h-[calc(100vh-20vh)]">
@@ -194,117 +186,8 @@
 
   <div class="mb-6 flex justify-between rounded-lg bg-base-200 p-2 shadow">
     <div class="flex gap-2 divide-x">
-      <Dialog.Root>
-        <Dialog.Trigger>
-          <button class="btn btn-sm btn-primary h-full">Criar nova conta</button>
-        </Dialog.Trigger>
-        <Dialog.Content>
-          <Dialog.Header>
-            <Dialog.Title>Nova Conta</Dialog.Title>
-          </Dialog.Header>
-          <div>
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div class="form-control">
-                <label for="titulo" class="label">
-                  <span class="label-text">Título da conta</span>
-                </label>
-                <input
-                  id="titulo"
-                  type="text"
-                  placeholder="Título da conta"
-                  class="input input-bordered w-full"
-                  bind:value={newConta.titulo}
-                  required
-                />
-              </div>
-              <!-- <CurrencyInput bind:value={newConta.valor_conta} /> -->
-              <div class="form-control">
-                <label for="valor" class="label">
-                  <span class="label-text">Valor</span>
-                </label>
-
-                <CurrencyInput bind:value={newConta.valor_conta} />
-              </div>
-              <div class="form-control">
-                <label for="expire_at" class="label">
-                  <span class="label-text">Data de vencimento</span>
-                </label>
-                <input
-                  id="expire_at"
-                  type="date"
-                  class="input input-bordered w-full"
-                  min={df.format(new Date())}
-                  onchange={e => {
-                    const v = (e.target as HTMLInputElement).value
-                    const dateV = new Date(v + 'T00:00:00')
-                    newConta.expire_at = dateV
-                  }}
-                  required
-                />
-              </div>
-              <div class="form-control">
-                <label for="fornecedor" class="label">
-                  <span class="label-text">Fornecedor</span>
-                </label>
-                <SelectSearch
-                  placeholder="o fornecedor"
-                  options={data.fornecedores}
-                  config={supplierConfig}
-                  bind:value={selectedSupplier}
-                />
-              </div>
-            </div>
-            <div class="form-control">
-              <label for="descricao" class="label">
-                <span class="label-text">Observações</span>
-              </label>
-              <textarea
-                id="descricao"
-                class="textarea textarea-bordered h-24"
-                placeholder="Observações"
-                bind:value={newConta.descricao}
-              ></textarea>
-            </div>
-            <div
-              class="mt-2 grid grid-cols-1 items-center gap-4 md:grid-cols-2"
-            >
-              <div class=" form-control">
-                <SelectSearch
-                  placeholder="categoria"
-                  bind:value={selectedCategory}
-                  options={data.categorias}
-                  config={categoryConfig}
-                />
-              </div>
-              <div class="form-control flex items-center">
-                <label class="label cursor-pointer">
-                  <span class="label-text mr-4">Marcar como pago</span>
-                  <input
-                    type="checkbox"
-                    class="toggle toggle-primary"
-                    bind:checked={newConta.isPaid}
-                  />
-                </label>
-              </div>
-            </div>
-            <div class="mt-2">
-              <SelectSearch
-                placeholder="tipo de pagamento"
-                bind:value={selectedPagamento}
-                options={data.tipoPagamentoConta}
-                config={pagamentoConfig}
-              />
-            </div>
-            <button
-              class="btn btn-primary mt-2 w-full"
-              onclick={createConta}
-              disabled={isLoading}
-            >
-              Criar conta
-            </button>
-          </div>
-        </Dialog.Content>
-      </Dialog.Root>
+      
+      <ModalCreate />
 
       <div class="inline-block w-0.5 self-stretch bg-base-100"></div>
       <input

@@ -1,32 +1,45 @@
 <script lang="ts">
-
   import { fade, slide, fly } from 'svelte/transition'
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   import {
     type TableHandler,
     Datatable,
     ThSort,
     ThFilter,
-    Pagination,
     RowsPerPage,
     Th,
     Search,
     type State,
+    Pagination,
   } from '@vincjo/datatables/server'
   import NoResults from '$lib/components/NoResults.svelte'
-  import type { SelectConta, SelectSupplier } from '$lib/server/db/schema'
+  import type {
+    SelectCategoria,
+    SelectConta,
+    SelectSupplier,
+  } from '$lib/server/db/schema'
   import { toast } from 'svelte-sonner'
   import { invalidate, invalidateAll } from '$app/navigation'
   import { DateFormatter } from '@internationalized/date'
   import type { PageData } from './$types'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
   import { differenceInDays, getBgColor } from '$lib/utils/expire'
+  import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
+  import CustomThFilter from '$lib/components/datatable/CustomThFilter.svelte'
+  import DateFilter from '$lib/components/DateFilter.svelte'
+  import { SSRFilters } from '$lib/components/datatable/filter.svelte'
 
-    let { table }:{table: TableHandler<PageData['rows'][0]>}= $props()
+  let {
+    table,
+  }: {
+    table: TableHandler<PageData['rows'][0]>
+  } = $props()
 
-    const df = new DateFormatter('pt-BR', {
+  const filters = new SSRFilters()
+
+  const df = new DateFormatter('pt-BR', {
     dateStyle: 'medium',
   })
 
@@ -35,9 +48,9 @@
   async function pagar(id: number) {
     isLoading = true
     try {
-      await trpc($page).contas.pagarConta.mutate(id)
-      table.invalidate()
+      await trpc(page).contas.pagarConta.mutate(id)
       toast.success('Sucesso ao pagar conta')
+      invalidateAll()
     } catch (error: any) {
       toast.error(error.message)
     } finally {
@@ -45,14 +58,16 @@
       // window.location.reload()
     }
   }
+
+  let selectedCat: string = $state('')
 </script>
 
-<div class="h-full max-h-[68vh] p-0 m-0">
-  <Datatable {table} >
+<div class="m-0 h-full max-h-[70vh] p-0">
+  <Datatable {table}>
     {#if table.isLoading}
       <LoadingBackground />
     {/if}
-    <table class="w-full table table-xs">
+    <table class="table table-xs w-full">
       <thead class="bgg">
         <tr class="text-left">
           <Th>Titulo</Th>
@@ -68,27 +83,38 @@
           <!-- <Th></Th> -->
         </tr>
         <tr>
-          <th class="max-w-40 p-0">
-            <ThFilter {table} field="titulo" />
-          </th>
+          <!-- <ThFilter {table} field="titulo" /> -->
+          <ThFilter {table} field="titulo" />
           <Th />
-          <th class="max-w-40 p-0">
-            <ThFilter {table} field="supName" />
-          </th>
-          <!-- <ThFilter {table} field="catName" /> -->
-          <Th />
-          <!-- <Th /> -->
+          <!-- <CustomThFilter {table} field="supName" /> -->
+            <SelectFilter
+            {table}
+              filterKey="supName"
+              placeholder="o fornecedor"
+              delegateQuery={trpc(page).stock.getSupplier.query}
+              config={{ value: c => c.id, label: c => c.name }}
+              bind:selectedValue={selectedCat}
+            />
+            <SelectFilter
+            {table}
+              filterKey="catName"
+              placeholder="a categoria"
+              delegateQuery={trpc(page).contas.getCategorias.query}
+              config={{ value: c => c.id, label: c => c.nome }}
+              bind:selectedValue={selectedCat}
+            />
           <Th />
           <Th>
-            <!-- <DateFilter
-            onchange={(start, end) => {
-              if (start != null && end != null) {
-                let startDate = start.toString()
-                let endDate = end.toString()
-                filters.update({ startDate, endDate })
-              }
-            }}
-          /> -->
+            <DateFilter
+              onChange={(startDate, endDate) => {
+                if (!startDate || !endDate) return
+
+                filters.update({
+                  startDate: String(startDate),
+                  endDate: String(endDate),
+                })
+              }}
+            />
           </Th>
           <Th />
           <Th />
@@ -98,39 +124,55 @@
       </thead>
 
       <tbody>
-        {#each table.rows as conta}
+        {#each table.rows as conta (conta.id)}
           <tr
             transition:fade|local
             class="border-t border-gray-200 transition-colors hover:bg-gray-50"
             class:opacity-50={conta.isPaid}
           >
-            <td>{conta.titulo}</td>
-            <td class="p-2 {conta.descricao ? '' : 'text-error'}">
-              {conta.descricao ? conta.descricao : 'Não possui'}
+            <td>
+              <span class="tooltip tooltip-right" data-tip={conta.titulo}>
+                <p class="max-w-[140px] truncate">
+                  {conta.titulo}
+                </p>
+              </span>
+            </td>
+            <td class="{conta.descricao ? '' : 'text-error'}">
+              <span class="tooltip tooltip-right" data-tip={conta.descricao}>
+                <p class="max-w-[140px] truncate">
+                  {conta.descricao ? conta.descricao : 'Não possui'}
+                </p>
+              </span>
             </td>
             <td>{conta.supName}</td>
             <td>{conta.catName ?? 'Não cadastrado'}</td>
             <!-- <td>{df.format(conta.expire_at!)}</td> -->
-            <td>{conta.pagName ?? "Não cadastrado"}</td>
+            <td>{conta.pagName ?? 'Não cadastrado'}</td>
             <td>
-              {conta.paid_at
-                ? df.format(conta.paid_at)
-                : 'Ainda não foi paga'}
-            </td> 
-            <td> <b class="{conta.expire_at && !conta.isPaid ? getBgColor(conta.expire_at): ''} text-center">
-              {#if conta.expire_at}
-                {#if differenceInDays(conta.expire_at) < 0 && !conta.isPaid}
-                  VENCIDO!
-                {:else if differenceInDays(conta.expire_at) === 0 && !conta.isPaid}
-                  Vence hoje!
-                {:else if !conta.isPaid}
-                  {differenceInDays(conta.expire_at) + ' dias'}
-                {:else}
-                  ----
+              {conta.paid_at ? df.format(conta.paid_at) : 'Ainda não foi paga'}
+            </td>
+            <td>
+              <span
+                class=" text-sm {conta.expire_at && !conta.isPaid
+                  ? getBgColor(conta.expire_at)
+                  : ''} text-center"
+              >
+                {#if conta.expire_at}
+                  {#if differenceInDays(conta.expire_at) < 0 && !conta.isPaid}
+                    VENCIDO!
+                  {:else if differenceInDays(conta.expire_at) === 0 && !conta.isPaid}
+                    Vence hoje!
+                  {:else if !conta.isPaid}
+                    {differenceInDays(conta.expire_at) + ' dias'}
+                  {:else}
+                    ----
+                  {/if}
                 {/if}
-              {/if}
-            </b></td>
-            <td class="p-2 font-bold">R${(conta.valor_conta / 100).toFixed(2)}</td>
+              </span>
+            </td>
+            <td class="p-2 font-bold">
+              R${(conta.valor_conta / 100).toFixed(2)}
+            </td>
             <!-- <td class="p-0">
               <span
                 class="badge text-xs"
@@ -166,12 +208,16 @@
       <Pagination {table} />
     {/snippet}
   </Datatable>
-
 </div>
 
-  <style>
-    .bgg {
-      background-color: oklch(var(--b1)) !important;
-    }
-  </style>
-  
+<style>
+  .bgg {
+    background-color: oklch(var(--b1)) !important;
+  }
+
+  td {
+    max-width: 150px;
+    padding: 3px 10px !important;
+    margin: 0 !important; 
+  }
+</style>
