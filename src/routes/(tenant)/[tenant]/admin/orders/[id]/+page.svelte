@@ -3,7 +3,7 @@
   import CardPayments from '$lib/components/cards/CardPayments.svelte'
   import PaymentFiado from '$lib/components/PaymentFiado.svelte'
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { Pencil, Plus, Trash2 } from 'lucide-svelte'
   import * as Tooltip from '$lib/components/ui/tooltip/index'
 
@@ -62,7 +62,7 @@
 
         console.log(cartTotal)
 
-        await trpc($page).customer.updateOrder.mutate({
+        await trpc(page).customer.updateOrder.mutate({
           order_id: order_details.id,
           data: { total: cartTotal },
           items: toAdd,
@@ -82,7 +82,7 @@
 
   async function handleDeleteOrder() {
     try {
-      await trpc($page).customer.cancelOrder.mutate(order_details.id)
+      await trpc(page).customer.cancelOrder.mutate(order_details.id)
       toast.success('Pedido cancelado com sucesso!')
       goto('/admin/orders')
     } catch (error) {

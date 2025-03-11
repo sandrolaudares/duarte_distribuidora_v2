@@ -5,7 +5,7 @@
   // import { getCartContext } from '$lib/stores/cart'
   import { icons } from '$lib/utils/icons'
   import type { RouterOutputs } from '$trpc/router'
-  import ModalMotoboy from './ModalMotoboy.svelte'
+  import ModalMotoboy from '$lib/components/cashierComponents/ModalMotoboy.svelte'
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
   import { toast } from 'svelte-sonner'
