@@ -213,16 +213,14 @@ npm run db:check
 - No componente DateFilter ao filtrar apenas um dia a data de inicio e de fim são iguais, data de inicio devia pegar o dia a partir das 00:00 e data de fim no mesmo dia até 23:59
 - Total nas transações do caixa
 - Impressora
-- Verificar tela de criar distribuidora, quando da erro o form exportado na page não muda
 - Adicionar horario funcionamento na distribuidora
 - Add image to tenant
 - Refactor change epire date no fiado
-- colocar o loading que ta no customer em todas tables
 - Fix a ordenação nas tables
 - Filter table page conta
 - Editar contas
-- Fix myprofile
 - Lembrar de feixar caia diariamente
+- Active na table dos users
 
 
 ## NAO TAO URGENTE
