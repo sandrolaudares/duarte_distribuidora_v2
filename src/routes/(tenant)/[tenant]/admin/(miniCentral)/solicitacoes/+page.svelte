@@ -249,7 +249,7 @@
                       }}
                     >
                       <button
-                        class="badge link badge-error bg-opacity-30"
+                        class="badge badge-error text-white"
                         disabled={isLoading}
                       >
                         {isLoading ? 'Tirando...' : 'Cancelar'}
