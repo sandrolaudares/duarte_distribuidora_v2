@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { navigating } from '$app/stores'
+  import { navigating } from '$app/state'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import { modal, FormModal } from '$lib/components/modal'
   import DateFilter from '$lib/components/DateFilter.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import * as Tooltip from '$lib/components/ui/tooltip/index'
 
   import {
@@ -55,7 +55,7 @@
     try {
       console.log(s)
       filters.fromState(s)
-      await $navigating?.complete
+      await navigating?.complete
     } catch (error) {
       console.error(error)
     }
@@ -77,7 +77,9 @@
   let selectedUser: string = $state('')
 
   let logTypeEnum = ['LOG', 'SYSTEM', 'ERROR', 'CAIXA']
-
+  const delegateQuery = () => {
+  return Promise.resolve(logTypeEnum);
+};
 </script>
 
 <main class="mx-4 h-full max-h-[calc(100vh-10vh)]">
@@ -106,25 +108,23 @@
         </tr>
         <tr>
           <Th />
-          <Th>
             <SelectFilter  
+            {table}
             filterKey="user_name"
             placeholder="o usuario"
-            options={data.users}
+            delegateQuery={trpc(page).auth.getUsers.query}
             config={{ value: c => c.username, label: c => c.username }}
             bind:selectedValue={selectedUser}/>
-          </Th>
           <ThFilter {table} field="text" />
           <Th />
           <Th />
-          <Th >
-            <SelectFilter  
+            <SelectFilter 
+            {table}
             filterKey="type"
+            delegateQuery={delegateQuery}
             placeholder="o tipo"
-            options={logTypeEnum}
             config={{ value: c => c, label: c => c }}
             bind:selectedValue={selectedType}/>
-          </Th>
           <Th />
           <Th />
           <Th />

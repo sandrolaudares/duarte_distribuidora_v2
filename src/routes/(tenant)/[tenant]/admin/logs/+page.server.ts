@@ -61,7 +61,6 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
       ),
     )
 
-  const users = await tenantDb!.select().from(schema.userTable)
   if (sortId && sortOrder) {
     query = withOrderBy(
       query,
@@ -77,7 +76,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     .select({ count: count() })
     .from(schema.logsTable)
 
-  return { rows: rows ?? [], count: total[0].count, users }
+  return { rows: rows ?? [], count: total[0].count }
   // } catch (err) {
   //   return error(404, err.message ?? "unknow error")
   //   console.error(err)
