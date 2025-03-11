@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { navigating } from '$app/stores'
+  import { navigating } from '$app/state'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import { modal, FormModal } from '$lib/components/modal'
   import DateFilter from '$lib/components/DateFilter.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   import {
     TableHandler,
@@ -52,7 +52,7 @@
     try {
       console.log(s)
       filters.fromState(s)
-      await $navigating?.complete
+      await navigating?.complete
     } catch (error) {
       console.error(error)
     }
@@ -102,15 +102,14 @@
           <Th />
           <ThFilter {table} field="username" />
           <!-- <ThFilter {table} field="cashier" /> -->
-          <Th>
             <SelectFilter
+            {table}
               filterKey="cashier"
+              delegateQuery={trpc(page).distribuidora.getCaixas.query}
               bind:selectedValue={cashierFilter}
-              options={data.cashier}
-              config={{ value: c => c.name, label: c => c.name }}
+              config={{ value: c => c.id, label: c => c.name }}
               placeholder={'o caixa'}
             />
-          </Th>
           <Th />
           <Th>
             <DateFilter
