@@ -26,19 +26,29 @@ import { PUBLIC_DOMAIN } from '$env/static/public'
 import { hash } from '../schema/user/password'
 import { getTenantDbClient } from '$lib/server/utils/init-db'
 import { generateId } from '$lib/server/auth/utils'
-import type { SelectSku } from '../schema'
+import {
+  productCategoryTable,
+  productItemTable,
+  productTable,
+  skuTable,
+  type SelectSku,
+} from '../schema'
+import type { TenantDbType } from '../tenant'
 
-export async function createTenant(newTenantInfo: {
-  tenantName: unknown
-  subdomain: unknown
-  name: unknown
-  email: unknown
-  password: unknown
-  phone: unknown
-  address: unknown
-  lat: unknown
-  lon: unknown
-}) {
+export async function createTenant(
+  newTenantInfo: {
+    tenantName: unknown
+    subdomain: unknown
+    name: unknown
+    email: unknown
+    password: unknown
+    phone: unknown
+    address: unknown
+    lat: unknown
+    lon: unknown
+  },
+  existingTenantDb?: TenantDbType,
+) {
   const {
     tenantName,
     subdomain,
@@ -167,13 +177,80 @@ export async function createTenant(newTenantInfo: {
     password_hash: passwordHash,
   })
 
-  console.log('new user:', userData)
-  console.log('new tenant:', companyData)
+  if (!existingTenantDb) {
+    console.log('new user:', userData)
+    console.log('new tenant:', companyData)
+    return {
+      success: true,
+      data: {
+        domain: `https://${subdomain}.${PUBLIC_DOMAIN}`,
+      },
+  
+      message: "Distribuidora criada com sucesso, produtos e categorias não foram sincronizados",
+    }
+  }
+  
+  const resp_sync = await initDistribuidora({
+    existingTenantDb,
+    newTenantDb: tenantDb,
+  })
+
   return {
     success: true,
     data: {
       domain: `https://${subdomain}.${PUBLIC_DOMAIN}`,
     },
+
+    message:resp_sync.message,
+  }
+
+}
+
+async function initDistribuidora({
+  existingTenantDb,
+  newTenantDb,
+}: {
+  existingTenantDb: TenantDbType
+  newTenantDb: TenantDbType
+}) {
+  // TODO: better async handling
+  try {
+    // sync skus
+    const skus = (await existingTenantDb.query.skuTable.findMany()).map(
+      sku => ({
+        ...sku,
+        quantity: 0,
+      }),
+    )
+    await newTenantDb.insert(skuTable).values(skus)
+    // sync categories
+    const categories =
+      await existingTenantDb.query.productCategoryTable.findMany()
+    await newTenantDb.insert(productCategoryTable).values(categories)
+
+    // sync products
+    const products = await existingTenantDb.query.productTable.findMany()
+    await newTenantDb.insert(productTable).values(products)
+
+    // sync product_items
+    const productItems =
+      await existingTenantDb.query.productItemTable.findMany()
+    await newTenantDb.insert(productItemTable).values(productItems)
+
+    return {
+      success: true,
+      message: 'Distribuidora sincronizada',
+    }
+  } catch (error: any) {
+    console.error("Couldn't sync tenant data")
+    console.error(error
+
+    )
+    return {
+      success: false,
+      message: `Erro ao sincronizar: ${error.message ?? "Erro desconhecido"}`,
+      
+    }
   }
 }
 
