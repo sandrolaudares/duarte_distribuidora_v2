@@ -4,7 +4,7 @@
   import PaymentFiado from '$lib/components/PaymentFiado.svelte'
   import { trpc } from '$trpc/client'
   import { page } from '$app/state'
-  import { Pencil, Plus, Trash2 } from 'lucide-svelte'
+  import { CircleAlert, Pencil, Plus, Trash2 } from 'lucide-svelte'
   import * as Tooltip from '$lib/components/ui/tooltip/index'
 
   import { createCartContext } from './cartContext.svelte'
@@ -15,6 +15,7 @@
   import { goto, invalidateAll } from '$app/navigation'
   import SenhaAdmin from '$lib/components/SenhaAdmin.svelte'
   import { formatCurrency } from '$lib/utils'
+  import * as Alert from '$lib/components/ui/alert/index'
   let { data }: { data: PageData } = $props()
 
   const order = createCartContext(data.order_details)
@@ -42,7 +43,10 @@
   let cartTotal = $derived.by(() => {
     return (
       Object.values(order.cart).reduce(
-        (acc, { meta, quantity,item }) => acc + (meta.is_retail ? item.retail_price:item.wholesale_price) * quantity,
+        (acc, { meta, quantity, item }) =>
+          acc +
+          (meta.is_retail ? item.retail_price : item.wholesale_price) *
+            quantity,
         0,
       ) + (order_details.taxa_entrega ?? 0)
     )
@@ -58,7 +62,9 @@
         const toAdd = Object.values(order.cart).map(item => ({
           item_id: item.item.id,
           quantity: item.quantity,
-          price: item.meta.is_retail ? item.item.retail_price : item.item.wholesale_price,
+          price: item.meta.is_retail
+            ? item.item.retail_price
+            : item.item.wholesale_price,
         }))
 
         console.log(cartTotal)
@@ -185,7 +191,7 @@
           <hr />
           <div>
             <h1 class="mb-3 text-lg font-semibold">Pagamentos:</h1>
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
               {#each order_details.payments as payment, i}
                 <CardPayments
                   {payment}
@@ -196,7 +202,7 @@
             </div>
             {#if order_details.amount_paid - troco < order_details.total}
               <div class="mt-5 flex flex-col gap-5">
-                <h1 class="text-center font-bold">
+                <!-- <h1 class="text-center font-bold">
                   O pagamento ainda está pendente <span class="text-error">
                     pendentes!
                   </span>
@@ -205,7 +211,17 @@
                     {formatCurrency(order_details.total -(order_details.amount_paid - troco))}
                   </span>
                   para pagar
-                </h1>
+                </h1> -->
+                <Alert.Root variant="destructive">
+                  <CircleAlert class="size-4" />
+                  <Alert.Title>Pagamento pendente</Alert.Title>
+                  <Alert.Description>
+                    O pagamento ainda está pendente e ainda faltam {formatCurrency(
+                      order_details.total - (order_details.amount_paid - troco),
+                    )}
+                    pendentes!
+                  </Alert.Description>
+                </Alert.Root>
                 <button
                   class="btn btn-primary"
                   onclick={() => isOpenModal?.showModal()}
@@ -215,8 +231,9 @@
               </div>
             {/if}
             {#if order_details.amount_paid - troco >= order_details.total}
-              <h1 class="my-2 text-lg font-semibold text-success flex gap-2">
-                <p>&#x2705;</p> O pagamento já foi realizado para este pedido!
+              <h1 class="my-2 flex gap-2 text-lg font-semibold text-success">
+                <p>&#x2705;</p>
+                 O pagamento já foi realizado para este pedido!
               </h1>
             {/if}
           </div>
@@ -232,7 +249,9 @@
   <dialog class="modal" bind:this={isOpenModal}>
     <div class="modal-box max-w-2xl">
       <PaymentFiado
-        closeFn={() => isOpenModal?.close()}
+        closeFn={async() =>{
+           isOpenModal?.close()
+           }}
         total_pedido={order_details.total}
         order_id={order_details.id}
         {amount_paid_order}
@@ -309,7 +328,11 @@
             <hr />
           </div>
           <div class="flex justify-end">
-            <button class="btn btn-primary mt-4" onclick={handleUpdateOrder} disabled={isLoading}>
+            <button
+              class="btn btn-primary mt-4"
+              onclick={handleUpdateOrder}
+              disabled={isLoading}
+            >
               {#if isLoading}
                 Atualizando pedido...
               {:else}

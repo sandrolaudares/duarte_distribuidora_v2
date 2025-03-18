@@ -755,12 +755,14 @@ export const customer = router({
 
       return await tenantDb.transaction(async trx => {
         await bugReport(tenantDb).insertLogs({
-          text: `Pedido ${input.order_id} atualizado, pagamento realizado, valor pago: ${formatCurrency(input.amount_paid)}`,
+          text: `Pagamento com ${input.payment_method} realizado, valor pago: ${formatCurrency(input.amount_paid)} - Pedido: ${input.order_id}`,
           created_by: userID,
           metadata: {
             order_id: input.order_id,
             // customer_id: input.customer_id,
             cashier_id: input.cachier_id,
+            troco: input.troco,
+            amount_paid: input.amount_paid,
           },
           cashier_id: input.cachier_id,
           order_id: input.order_id,

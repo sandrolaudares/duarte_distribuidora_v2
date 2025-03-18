@@ -13,17 +13,20 @@
   import { page } from '$app/stores'
   import { modal } from './modal'
   import { onMount } from 'svelte'
+  import { CircleAlert } from 'lucide-svelte'
+  import * as Alert from '$lib/components/ui/alert/index'
+  import { Button } from '$lib/components/ui/button/index'
+  import Separator from './ui/separator/separator.svelte'
+  import Loading from './Loading.svelte'
+  import { invalidateAll } from '$app/navigation'
 
   export let order_id: number
-
 
   export let closeFn: undefined | (() => void)
 
   export let total_pedido = 0
 
-  export let amount_paid_order:number
-
-  $:console.log(amount_paid_order)
+  export let amount_paid_order: number
 
   let isLoading = false
 
@@ -49,16 +52,19 @@
 
   let newPayments: InsertOrderPayment[] = []
 
-  $: total_paid_newPayments = newPayments.reduce(
-    (acc, payment) => acc + payment.amount_paid,
-    0,
-  )
+  let total_paid_newPayments = 0
+
+  $: {
+    total_paid_newPayments =
+      newPayments.reduce((acc, payment) => acc + payment.amount_paid, 0) -
+      newPayments.reduce((acc, payment) => acc + (payment.troco ?? 0), 0)
+  }
 
   let valor_a_pagar = total_pedido - total_paid_newPayments - amount_paid_order
 
-  $:{valor_a_pagar = total_pedido - total_paid_newPayments - amount_paid_order}
-  $:console.log(valor_a_pagar)
-
+  $: {
+    valor_a_pagar = total_pedido - total_paid_newPayments - amount_paid_order
+  }
   let valor_recebido_dinheiro = 0
   let troco = 0
 
@@ -198,8 +204,10 @@
               <!--TODO: Fix valor_a_pagar nao atualiza no currency input-->
             </div>
             <p>
-              Valor restante do pedido: 
-              {formatCurrency(total_pedido - total_paid_newPayments - amount_paid_order)}
+              Valor restante do pedido:
+              {formatCurrency(
+                total_pedido - total_paid_newPayments - amount_paid_order,
+              )}
             </p>
           </label>
         {/if}
@@ -298,32 +306,73 @@
     {/if}
     {#if newPayments.length > 0}
       <div class="mt-5">
+        <h3 class="mb-2 text-xl font-medium">Resumo dos pagamentos</h3>
         {#if total_paid_newPayments < total_pedido && total_paid_newPayments - amount_paid_order != 0}
-          <p>
-            Foi pago: {formatCurrency(total_paid_newPayments)} mas ainda faltam
-            <span class="text-error">
-              {formatCurrency(total_pedido - total_paid_newPayments - amount_paid_order)}
-            </span>
-            para pagar o pedido!
-          </p>
-          <hr class="my-2" />
-          <p>
-            Deseja que o valor restante de <span class="text-error">
-              {formatCurrency(total_pedido_-total_paid_newPayments-amount_paid_order)}
-            </span>
-            continue como fiado?
-            <button class="text-lg text-accent underline" on:click={save}>
-              Clique aqui
-            </button>
-          </p>
+          <Alert.Root
+            variant="destructive"
+            class="border-destructive/30 bg-destructive/10"
+          >
+            <CircleAlert class="h-4 w-4" />
+            <Alert.Description class="flex flex-col gap-2">
+              <p>
+                Foi pago: {formatCurrency(total_paid_newPayments)} mas ainda faltam{' '}
+                <span class="font-semibold text-destructive">
+                  {formatCurrency(
+                    total_pedido - total_paid_newPayments - amount_paid_order,
+                  )}
+                </span>
+              </p>
+
+              <div class="flex items-center gap-2">
+                <p>
+                  Deseja que o valor restante {formatCurrency(
+                    total_pedido - total_paid_newPayments - amount_paid_order,
+                  )} seja pago como fiado?
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  class="border-destructive text-destructive hover:bg-destructive/10"
+                  onclick={save}
+                  disabled={isLoading}
+                >
+                {#if isLoading}
+                  <Loading/>
+                {:else}
+                Pagar depois
+                {/if}
+                </Button>
+              </div>
+            </Alert.Description>
+          </Alert.Root>
         {/if}
 
-        <h3 class="mb-2 text-lg font-medium">Pagamentos feitos:</h3>
+        <h3 class="mb-2 mt-4 text-lg font-medium">Pagamentos feitos:</h3>
         {#each newPayments as payment, i}
           <div class="my-3 flex flex-col">
-            <CardPayments {payment} {i} />
+            <CardPayments {payment} {i} created_by='' />
           </div>
         {/each}
+        <Separator class="my-2 bg-gray-200" />
+
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span>Total do pedido</span>
+            <span>{formatCurrency(total_pedido)}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>Total pago</span>
+            <span>{formatCurrency(total_paid_newPayments + amount_paid_order)}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>Restante</span>
+            <span class="text-error">
+              {formatCurrency(
+                total_pedido - total_paid_newPayments - amount_paid_order,
+              )}
+            </span>
+          </div>
+        </div>
       </div>
     {/if}
   </div>

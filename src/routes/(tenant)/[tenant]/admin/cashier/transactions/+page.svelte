@@ -50,7 +50,7 @@
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
     try {
-      console.log(s)
+      // console.log(s)
       filters.fromState(s)
       await navigating?.complete
     } catch (error) {
@@ -59,7 +59,6 @@
     return data.rows
   })
 
-  // $inspect(data.rows)
 
   let cashierFilter = $state(filters.get('cashier') || '')
 </script>
@@ -95,7 +94,7 @@
           <Th>Data</Th>
           <Th>Troco</Th>
           <!-- <Th>Valor</Th> -->
-          <Th>Total</Th>
+          <Th>Valor</Th>
           <Th>Detalhes</Th>
         </tr>
         <tr>
@@ -137,7 +136,7 @@
           <tr>
             <td>{row.id}</td>
             <td>{row.username}</td>
-            <td>{row.cashier}</td>
+            <td>{row.cashier ? row.cashier : 'N/A'}</td>
             <td>{row.text}</td>
             <!-- <td>{row.routeName}</td> -->
             <td>
@@ -154,7 +153,13 @@
             </td>
             <!-- <td class="font-semibold">R${row.currency ? (row.currency/100).toFixed(2) : '0.00'}</td> -->
             <td class="font-semibold">
+              {#if row.metadata.amount_paid}
+                {formatCurrency(row.metadata.amount_paid)}
+                
+              {:else}
+                
               {row.total ? formatCurrency(row.total) : ''}
+              {/if}
             </td>
             <td>
               {#if row.order_id}
