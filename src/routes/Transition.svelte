@@ -24,7 +24,7 @@
       delay: 300,
     }}
     out:fly={{ duration: 300, x: 0, y: -240, easing: cubicIn }}
-    class="h-full overflow-scroll overflow-x-auto"
+    class="h-full overflow-x-auto"
   >
     <slot />
   </div>

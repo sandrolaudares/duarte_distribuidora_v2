@@ -195,6 +195,7 @@
           <Th />
           <Th>
             <DateFilter
+            {filters}
               onChange={(startDate, endDate) => {
                 if (!startDate || !endDate) return
 
@@ -241,7 +242,7 @@
             </td>
           </tr>
         {/each}
-        <tr>
+        <tr class="sticky bottom-0 bg-colorr">
           <td></td>
           <td></td>
           <td></td>
@@ -270,6 +271,9 @@
 
 <style>
   thead {
+    background-color: oklch(var(--b1)) !important;
+  }
+  .bg-colorr {
     background-color: oklch(var(--b1)) !important;
   }
 </style>

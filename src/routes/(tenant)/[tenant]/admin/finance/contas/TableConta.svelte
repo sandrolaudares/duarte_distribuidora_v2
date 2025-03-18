@@ -34,8 +34,10 @@
 
   let {
     table,
+    totalSum
   }: {
     table: TableHandler<PageData['rows'][0]>
+    totalSum:number
   } = $props()
 
   const filters = new SSRFilters()
@@ -63,7 +65,7 @@
   let selectedCat: string = $state('')
 </script>
 
-<div class="m-0 h-full max-h-[70vh] p-0">
+<div class="overflow-hidden h-[76vh]">
   <Datatable {table}>
     {#if table.isLoading}
       <LoadingBackground />
@@ -197,7 +199,25 @@
               </button>
             </td>
           </tr>
+          
         {/each}
+        <tr class="sticky bottom-0 bg-colorr">
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="text-xl font-bold">
+            Total: <span class="text-secondary">
+              {formatCurrency(totalSum)}
+                
+            </span>
+          </td>
+          <td></td>
+
+          <td></td>
+          <td></td>
+        </tr>
       </tbody>
     </table>
     {#if table.rows.length === 0}
@@ -220,5 +240,8 @@
     max-width: 150px;
     padding: 3px 10px !important;
     margin: 0 !important; 
+  }
+  .bg-colorr {
+    background-color: oklch(var(--b1)) !important;
   }
 </style>

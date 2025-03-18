@@ -76,7 +76,7 @@
       Limpar filtros
     </button>
   </div>
-  <Datatable {table} headless>
+  <Datatable {table} >
     <!-- {#snippet header()}
       <Search {table} />
      
@@ -85,7 +85,7 @@
     {#if table.isLoading}
       <LoadingBackground />
     {/if}
-    <table class="table table-zebra rounded-sm border border-none">
+    <table class="table border-none">
       <thead>
         <tr>
           <Th>ID</Th>
@@ -154,7 +154,7 @@
             </td>
             <!-- <td class="font-semibold">R${row.currency ? (row.currency/100).toFixed(2) : '0.00'}</td> -->
             <td class="font-semibold">
-              {row.total ? 'R$' + formatCurrency(row.total) : ''}
+              {row.total ? formatCurrency(row.total) : ''}
             </td>
             <td>
               {#if row.order_id}

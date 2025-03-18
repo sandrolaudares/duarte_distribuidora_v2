@@ -189,7 +189,7 @@
             Transferir
           </button>
         </div>
-        <Datatable {table} headless>
+        <Datatable {table} >
           <table class="table table-zebra rounded ">
             <thead>
               <tr>

@@ -22,7 +22,7 @@ const CART_STORE_KEY = Symbol('cartCaixa')
 export function createCartContext() {
   const store = new Cart<Item, CartProductMeta, CartMeta>()
 
-  console.log($state.snapshot(store.cart))
+  // console.log($state.snapshot(store.cart))
   return setContext(CART_STORE_KEY, store)
 }
 

@@ -202,7 +202,7 @@
         onclick={createCategoria}
         disabled={isLoading || nameCat === ''}
       >
-        Confirmar nova categoria
+        Criar categoria
       </button>
 
       <div class="inline-block w-0.5 self-stretch bg-base-100"></div>
@@ -243,14 +243,14 @@
     </div>
   </div>
 
-  <TableConta {table} />
+  <TableConta {table} totalSum={data.totalSum} />
 
-  <div
+  <!-- <div
     class="my-3 flex items-center justify-between rounded-lg bg-gray-100 p-2 shadow"
   >
     <h2 class="text-lg font-semibold text-gray-800">Total das contas:</h2>
     <span class="text-xl font-bold text-success">
       {formatCurrency(data.totalSum)}
     </span>
-  </div>
+  </div> -->
 </div>
