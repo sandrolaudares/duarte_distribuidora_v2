@@ -8,8 +8,8 @@
   import { toast } from 'svelte-sonner'
   import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
   import EditableCurrency from '$lib/components/editableCells/EditableCurrency.svelte'
-  import EditableTipoPessoa from '$lib/components/editableCells/EditableTipoPessoa.svelte'
   import type { CustomerWaddress } from '$lib/server/db/schema/customer/controller'
+  import EditableBoolean from '$lib/components/editableCells/EditableBoolean.svelte'
 
   let {
     customer,
@@ -128,7 +128,9 @@
             />
           </td>
           <td>
-            <EditableTipoPessoa
+            <EditableBoolean
+            labelTrue={"Pessoa Fisica"}
+            labelFalse={"Pessoa Juridica"}
               value={customer.is_retail}
               onUpdateValue={async newValue => {
                 handleUpdate(newValue, 'is_retail', customer)

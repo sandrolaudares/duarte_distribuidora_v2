@@ -4,6 +4,9 @@
     export let onUpdateValue: (
       newValue: boolean,
     ) => void
+
+    export let labelTrue = ''
+    export let labelFalse = ''
   
     let isEditing = false
   
@@ -30,13 +33,13 @@
         class={value === null ? 'text-error' : ''}
       >
         <!-- {value != null ? value : 'Não cadastrado'} -->
-         {value === true ? 'Pessoa física' : 'Pessoa Juridica'}
+         {value === true ? labelTrue : labelFalse}
       </button>
     {:else}
       <form on:submit|preventDefault={handleSubmit}>
          <select bind:this={inputElement} bind:value>
-            <option value={true}>Pessoa física</option>
-            <option value={false}>Pessoa juridica</option>
+            <option value={true}>{labelTrue}</option>
+            <option value={false}>{labelFalse}</option>
          </select>
         <button type="submit">✅</button>
         <button on:click={handleCancel}>❌</button>

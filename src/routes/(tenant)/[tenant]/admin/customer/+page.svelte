@@ -23,9 +23,9 @@
   import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
   import EditableCurrency from '$lib/components/editableCells/EditableCurrency.svelte'
   import { pageConfig } from '$lib/config'
-  import EditableTipoPessoa from '$lib/components/editableCells/EditableTipoPessoa.svelte'
   import { invalidateAll } from '$app/navigation'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
+  import EditableBoolean from '$lib/components/editableCells/EditableBoolean.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -197,7 +197,9 @@
             </td>
             <td><b>{row.cpf_cnpj}</b></td> -->
             <td>
-                <EditableTipoPessoa
+                <EditableBoolean
+                  labelTrue={"Pessoa Fisica"}
+                  labelFalse={"Pessoa Juridica"}
                   value={row.is_retail}
                   onUpdateValue={async (newValue:boolean) => {
                     handleUpdate(Boolean(newValue), 'is_retail', row)
