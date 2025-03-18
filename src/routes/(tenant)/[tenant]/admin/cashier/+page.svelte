@@ -98,13 +98,13 @@
   let isTaxaChanged = false
 </script>
 
-<main class="container mx-auto">
+<main class="mx-2">
   <div
     class="mb-7 flex flex-col items-center justify-between gap-5 rounded-lg bg-base-200 p-3 lg:flex-row"
   >
     <h1 class="text-center text-4xl font-semibold">Selecione o caixa</h1>
 
-    <div class="flex gap-2">
+    <div class="flex gap-2 lg:flex-row flex-col">
       <div class="flex gap-2">
         <a href="/admin/cashier/transactions" class="btn btn-primary">
           Ver transacões dos caixas

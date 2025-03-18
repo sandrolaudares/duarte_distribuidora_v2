@@ -34,7 +34,7 @@
 <div class="rounded-lg bg-base-200 bg-opacity-80 p-2 shadow-md">
   <div class="flex justify-between">
     <div class="flex items-center gap-3">
-      <span class="font-semibold">
+      <span class="font-semibold text-xs">
         {df.format(order.created_at!)}
       </span>
         {#if order.is_fiado}
@@ -47,7 +47,7 @@
         <p class="text-sm font-semibold text-success">É um pedido delivery!</p>
       {/if} -->
     </div>
-    <div class="badge badge-info bg-opacity-40">
+    <div class="badge badge-info badge-sm bg-opacity-40">
       <a
         href="/admin/orders/{order.id}"
         class="flex items-center gap-2 text-info-content"
@@ -72,30 +72,30 @@
   <div class=" rounded-lg">
     <div class="flex justify-between items-center">
       {#if order.customer}
-        <p class=" text-opacity-70">
+        <p class=" text-opacity-70 text-xs">
           <span class="font-semibold">Cliente:</span>
           {order.customer.name}
         </p>
         {/if}
         {#if order.payments.length === 0}
-            <span class="text-sm text-error">Pagamento ainda pendente</span>
+            <span class="text-xs text-error font-bold">Pagamento ainda pendente</span>
           {/if}
     </div>
       {#if motoboy}
-      <span class="font-semibold">
+      <span class="font-semibold text-xs">
         Motoboy: {motoboy}
       </span>
       {/if}
     <div class="">
       <!-- <p class="text-opacity-60"><span class="font-semibold">Criado em:</span> {order.created_at}</p> -->
       <div class="flex flex-col items-start justify-between">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 text-xs">
           {#if order.taxa_entrega}
             <span>Taxa entrega: <span class="font-bold text-neutral ">{formatCurrency(order?.taxa_entrega)}</span> </span>
           {/if}
           -
-          <span class="text-md font-semibold">Valor do pedido:</span>
-          <span class="text-lg font-bold text-success">
+          <span class="text-xs font-semibold">Valor do pedido:</span>
+          <span class="text-sm font-bold text-success">
             {formatCurrency(order.total)}
           </span>
         </div>
@@ -106,22 +106,22 @@
   <div class=" flex flex-col items-center justify-between gap-4 sm:flex-row">
     <div class="flex w-full gap-2">
       {#if button_recusar}
-        <button on:click={click_refuse} class="badge py-3 badge-error w-full">
+        <button on:click={click_refuse} class="badge py-3 badge-error badge-sm w-full">
           {button_recusar}
         </button>
       {/if}
       {#if order.status === 'CONFIRMED'}
-      <button class=" badge py-3 badge-error" on:click={()=>isOpenModalCancel?.showModal()}>
+      <button class=" badge py-3 badge-error badge-sm" on:click={()=>isOpenModalCancel?.showModal()}>
         Cancelar
       </button>
       {/if}
       {#if button_text && (order.status !== 'ON THE WAY' || order.payments.length !== 0 || order.is_fiado)}
-        <button on:click={click_confirm} class="badge py-3 badge-info w-full">
+        <button on:click={click_confirm} class="badge py-3 badge-info w-full badge-sm">
           {button_text}
         </button>
       {/if}
       {#if order.motoboy_id && !order.is_fiado && order.status === 'ON THE WAY' && order.payments.length === 0}
-         <button class="badge badge-primary py-3 w-full" on:click={() => isOpenModal?.showModal()}>FOI PAGO</button>
+         <button class="badge badge-primary py-3 w-full badge-sm" on:click={() => isOpenModal?.showModal()}>FOI PAGO</button>
       {/if}
     </div>
   </div>
