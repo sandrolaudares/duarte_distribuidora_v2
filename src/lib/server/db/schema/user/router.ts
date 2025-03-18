@@ -258,6 +258,7 @@ export const auth = router({
           username: z.string().optional(),
           email: z.string().optional(),
           role: z.enum(roleEnum).optional(),
+          is_active:z.boolean().optional(),
         }),
       }),
     )

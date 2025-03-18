@@ -26,6 +26,9 @@
   import type { Role } from '$lib/utils/permissions'
   import { pageConfig } from '$lib/config'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
+  import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
+  import EditableBoolean from '$lib/components/editableCells/EditableBoolean.svelte'
+  import { invalidateAll } from '$app/navigation'
 
   let { data }: { data: PageData } = $props()
   let isOpenModal: HTMLDialogElement | null = null
@@ -78,34 +81,59 @@
       toast.error(errors.emailError)
       return
     }
+    isLoading = true
+    table.isLoading = true
     try {
-      isLoading = true
       newMotoboy.role = 'motoboy'
       await trpc($page).auth.insertUser.mutate(newMotoboy)
       newMotoboy.username = ''
       newMotoboy.email = ''
       toast.success('Motoboy inserido com sucesso!')
-      setTimeout(() => {
-        isOpenModal?.close()
-        window.location.reload()
-        isLoading = false
-      }, 1300)
+      isOpenModal?.close()
+      invalidateAll()
     } catch (error: any) {
       toast.error(error.message)
       console.error(error.message)
+    } finally {
+      table.isLoading = false
+      isLoading = false
     }
   }
+
+  async function handleUpdate(value: boolean, row: typeof data.rows[0]) {
+    table.isLoading = true
+    const last_val = row['is_active']
+    try {
+      await trpc($page).auth.updateUser.mutate({
+        userId: row.id,
+        user: { is_active: value },
+      })
+      row['is_active'] = value
+      invalidateAll()
+      toast.success('Atualizado com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao atualizar')
+      row['is_active'] = last_val
+    } finally {
+      table.isLoading = false
+    }
+  }
+
+  $inspect(table.isLoading)
 </script>
 
-<main
-  class=" m-4 flex h-full max-h-[calc(100vh-10vh)] flex-col gap-2"
->
-<div class="flex gap-2 justify-end">
-  <button onclick={() => isOpenModal?.showModal()} class="btn btn-primary">
-    Criar motoboy
-  </button>
-  <button class="btn btn-secondary" onclick={()=>filters.clear('username','email')}>Limpar filtros</button>
-</div>
+<main class=" m-4 flex h-full max-h-[calc(100vh-10vh)] flex-col gap-2">
+  <div class="flex justify-end gap-2">
+    <button onclick={() => isOpenModal?.showModal()} class="btn btn-primary">
+      Criar motoboy
+    </button>
+    <button
+      class="btn btn-secondary"
+      onclick={() => filters.clear('username', 'email')}
+    >
+      Limpar filtros
+    </button>
+  </div>
   <Datatable {table}>
     <!-- {#snippet header()}
       <Search {table} />
@@ -122,7 +150,7 @@
           <ThSort {table} field="email">Email</ThSort>
           <ThSort {table} field="role">Cargo</ThSort>
           <ThSort {table} field="meta">Permissões</ThSort>
-          <ThSort {table} field="emailVerified">Email verificado</ThSort>
+          <ThSort {table} field="emailVerified">Ativo?</ThSort>
         </tr>
         <tr>
           <Th />
@@ -141,10 +169,7 @@
             <td><b>{row.email}</b></td>
             <td>
               <b>
-                <EditRole
-                  userId={row.id}
-                  userRole={row.role}
-                />
+                <EditRole userId={row.id} userRole={row.role} />
                 {#if row.role === 'caixa'}
                   <EditCaixa userId={row.id} userCashier={row} />
                 {/if}
@@ -159,7 +184,18 @@
                 />
               </b>
             </td>
-            <td><span>{row.emailVerified ? '✅' : '❌'}</span></td>
+            <td>
+              <span class:badge-success={row.is_active} class:badge-error={!row.is_active} class="badge">
+                <EditableBoolean
+                  labelTrue="Ativo"
+                  labelFalse="Inátivo"
+                  value={row.is_active}
+                  onUpdateValue={async(newV) => {
+                    await handleUpdate(newV, row)
+                  }}
+                />
+              </span>
+            </td>
           </tr>
         {/each}
       </tbody>
