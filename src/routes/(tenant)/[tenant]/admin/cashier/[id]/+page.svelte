@@ -232,7 +232,7 @@
       bind:tipo_preco
     />
     <div
-      class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-4"
+      class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-3"
     >
       <CaixaColumn />
     </div>
