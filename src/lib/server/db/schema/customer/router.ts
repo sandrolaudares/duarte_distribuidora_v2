@@ -71,6 +71,7 @@ export const customer = router({
           used_credit: z.number().optional(),
           email: z.string().email().optional(),
           is_retail: z.boolean().optional(),
+          cpf_cnpj: z.string().optional(),
         }),
       }),
     )
