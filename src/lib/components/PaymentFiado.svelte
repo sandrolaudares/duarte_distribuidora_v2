@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import type {
     InsertOrderPayment,
     SelectOrderPayment,
@@ -10,7 +12,7 @@
   import CurrencyInput from './input/CurrencyInput.svelte'
   import PaymentCashier from './PaymentCashier.svelte'
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { modal } from './modal'
   import { onMount } from 'svelte'
   import { CircleAlert } from 'lucide-svelte'
@@ -20,22 +22,28 @@
   import Loading from './Loading.svelte'
   import { invalidateAll } from '$app/navigation'
 
-  export let order_id: number
+  interface Props {
+    order_id: number;
+    closeFn: undefined | (() => void);
+    total_pedido?: number;
+    amount_paid_order: number;
+  }
 
-  export let closeFn: undefined | (() => void)
+  let {
+    order_id,
+    closeFn,
+    total_pedido = 0,
+    amount_paid_order
+  }: Props = $props();
 
-  export let total_pedido = 0
-
-  export let amount_paid_order: number
-
-  let isLoading = false
+  let isLoading = $state(false)
 
   async function save() {
     isLoading = true
     try {
       if (newPayments.length >= 1) {
         for (let newPayment of newPayments) {
-          await trpc($page).customer.insertOrderPayment.mutate(newPayment)
+          await trpc(page).customer.insertOrderPayment.mutate(newPayment)
         }
       }
 
@@ -50,32 +58,33 @@
     }
   }
 
-  let newPayments: InsertOrderPayment[] = []
+  let newPayments: InsertOrderPayment[] = $state([])
 
-  let total_paid_newPayments = 0
-
-  $: {
-    total_paid_newPayments =
+  let total_paid_newPayments = $derived.by(() => {
+    return(
       newPayments.reduce((acc, payment) => acc + payment.amount_paid, 0) -
       newPayments.reduce((acc, payment) => acc + (payment.troco ?? 0), 0)
-  }
+    )
+  });
 
-  let valor_a_pagar = total_pedido - total_paid_newPayments - amount_paid_order
+  let valor_a_pagar = $state(0);
 
-  $: {
+  $effect.pre(()=>{
     valor_a_pagar = total_pedido - total_paid_newPayments - amount_paid_order
-  }
-  let valor_recebido_dinheiro = 0
-  let troco = 0
+  })
 
-  $: troco = valor_recebido_dinheiro - valor_a_pagar
+  let valor_recebido_dinheiro = $state(0)
 
-  let metodo_pagamento: InsertOrderPayment['payment_method'] | null
+  let troco = $derived(
+    valor_recebido_dinheiro - valor_a_pagar
+  );
 
-  let isDiferent = false
-  let isPago = false
-  let isDinheiro = false
-  let isFiado = false
+  let metodo_pagamento: InsertOrderPayment['payment_method'] | null = $state(null)
+
+  let isDiferent = $state(false)
+  let isPago = $state(false)
+  let isDinheiro = $state(false)
+  let isFiado = $state(false)
 
   function divideValor(n: number) {
     valor_a_pagar = total_pedido - total_paid_newPayments - amount_paid_order
@@ -148,7 +157,7 @@
         </div>
         <button
           class="btn btn-secondary w-full"
-          on:click={save}
+          onclick={save}
           disabled={isLoading}
         >
           {isLoading
@@ -162,7 +171,7 @@
           <button
             class="btn btn-secondary"
             disabled={newPayments.length > 0}
-            on:click={() => {
+            onclick={() => {
               isDiferent = false
               isPago = false
               isDinheiro = false
@@ -187,20 +196,20 @@
 
             <div>
               <CurrencyInput bind:value={valor_a_pagar} />
-              <!-- <button class="btn mt-2" on:click={() => divideValor(4)}>
+              <button class="btn mt-2" onclick={() => divideValor(4)}>
                 25%
               </button>
-              <button class="btn" on:click={() => divideValor(2)}>50%</button>
-              <button class="btn" on:click={() => divideValor(1.25)}>
+              <button class="btn" onclick={() => divideValor(2)}>50%</button>
+              <button class="btn" onclick={() => divideValor(1.25)}>
                 75%
               </button>
               <button
                 class="btn"
-                on:click={() =>
+                onclick={() =>
                   (valor_a_pagar = total_pedido - total_paid_newPayments - amount_paid_order)}
               >
                 100%
-              </button> -->
+              </button>
               <!--TODO: Fix valor_a_pagar nao atualiza no currency input-->
             </div>
             <p>
@@ -247,7 +256,7 @@
           {#if !isDiferent}
             <button
               class="btn btn-primary"
-              on:click={() => {
+              onclick={() => {
                 isDiferent = !isDiferent
               }}
             >
@@ -268,7 +277,7 @@
           {/if} -->
           <button
             class="btn btn-primary w-full"
-            on:click={() => {
+            onclick={() => {
               isPago = true
               isDinheiro = false
               isFiado = false
@@ -279,7 +288,7 @@
           </button>
           <button
             class="btn btn-primary w-full"
-            on:click={() => {
+            onclick={() => {
               isDinheiro = true
               isPago = false
               isFiado = false
@@ -294,7 +303,7 @@
           <hr />
           <button
             class="btn btn-primary w-full"
-            on:click={addPayment}
+            onclick={addPayment}
             disabled={!(metodo_pagamento === 'dinheiro'
               ? valor_recebido_dinheiro >= valor_a_pagar
               : metodo_pagamento) || metodo_pagamento === null}
