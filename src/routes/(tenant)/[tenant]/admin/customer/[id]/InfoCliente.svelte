@@ -42,57 +42,11 @@
       row[key] = last_val
     }
   }
-  async function handleUpdateAddress(value: unknown, key = '', row: any) {
-    const last_val = row[key]
-    try {
-      await trpc($page).customer.updateAddress.mutate({
-        id: row.id,
-        address: { [key]: value },
-      })
-      row[key] = value
-      toast.success('Atualizado com sucesso!')
-    } catch (error) {
-      toast.error('Erro ao atualizar')
-      row[key] = last_val
-    }
-  }
-
-  async function recalcDistance(address: (typeof customer.adresses)[0]) {
-    isLoading = true
-    try {
-      let distance = await trpc($page).customer.calculateDistance.mutate({
-        cep: address.cep,
-        street: address.street,
-        number: address.number,
-        bairro: address.neighborhood,
-        city: address.city,
-        state: address.state, //select
-        country: 'BR',
-      })
-
-      distance = Math.round(distance)
-      address.distance = distance
-
-      if (distance) {
-        await trpc($page).customer.updateAddress.mutate({
-          id: address.id,
-          address: {
-            distance: distance,
-          },
-        })
-      }
-      toast.success('Distância recalculada com sucesso!')
-    } catch (error) {
-      toast.error('Erro ao recalcular')
-    } finally {
-      isLoading = false
-    }
-  }
 </script>
 
 <div class="mx-4 flex items-center justify-between">
   <h1 class="text-xl font-bold">Informacões do cliente:</h1>
-  <div class="flex gap-2">
+  <!-- <div class="flex gap-2">
     <button
       class="btn btn-error flex gap-2"
       onclick={() => handleDeleteCustomer(customer.id)}
@@ -110,14 +64,14 @@
       Adicionar endereço
       {@html icons.plus()}
     </button>
-  </div>
+  </div> -->
 </div>
-<div class="mt-2 grid grid-cols-2">
+<div class="mt-2">
   <div class="overflow-x-auto">
     <table class="table table-zebra table-xs w-full">
       <thead>
         <tr class="font-bold">
-          <th>Criado em</th>
+          <!-- <th>Criado em</th> -->
           <th>Name</th>
           <th>Email</th>
           <th>Telefone</th>
@@ -128,11 +82,11 @@
       </thead>
       <tbody>
         <tr>
-          <td>
+          <!-- <td>
             {customer.created_at
               ? new Date(customer.created_at).toLocaleDateString()
               : 'N/A'}
-          </td>
+          </td> -->
           <td>
             <EditableCell
               value={customer.name}
@@ -185,109 +139,5 @@
       </tbody>
     </table>
   </div>
-  <div class="overflow-x-auto">
-    <table class="table table-xs w-full">
-      <thead>
-        <tr>
-          <th>CEP</th>
-          <th>Cidade</th>
-          <th>Rua</th>
-          <th>Bairro</th>
-          <th>Numero</th>
-          <th>Complemento</th>
-          <th>UF</th>
-          <th>Distancia</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each customer.adresses as address}
-          <tr>
-            <td>
-              <EditableCell
-                value={address.cep}
-                onUpdateValue={async newValue => {
-                  handleUpdateAddress(newValue, 'cep', address)
-                }}
-              />
-            </td>
-            <td>
-              <EditableCell
-                value={address.city}
-                onUpdateValue={async newValue => {
-                  handleUpdateAddress(newValue, 'city', address)
-                }}
-              />
-            </td>
-            <td>
-              <EditableCell
-                value={address.street}
-                onUpdateValue={async newValue => {
-                  handleUpdateAddress(newValue, 'street', address)
-                }}
-              />
-            </td>
-            <td>
-              <EditableCell
-                value={address.neighborhood}
-                onUpdateValue={async newValue => {
-                  handleUpdateAddress(newValue, 'neighborhood', address)
-                }}
-              />
-            </td>
-            <td>
-              <EditableCell
-                value={address.number}
-                onUpdateValue={async newValue => {
-                  handleUpdateAddress(newValue, 'number', address)
-                }}
-              />
-            </td>
-            <td>
-              <EditableCell
-                value={address.complement}
-                onUpdateValue={async newValue => {
-                  handleUpdateAddress(newValue, 'complement', address)
-                }}
-              />
-            </td>
-            <td>
-              <EditableCell
-                value={address.state}
-                onUpdateValue={async newValue => {
-                  handleUpdateAddress(newValue, 'state', address)
-                }}
-              />
-            </td>
-            <!-- <td>{(address.distance / 1000).toFixed(0)}Km</td> -->
-            <td class="flex items-center">
-              {#if isLoading == true}
-                Calculando
-              {:else}
-                <EditableCell
-                  value={address.distance
-                    ? (address.distance / 1000).toFixed(0)
-                    : 'N/A'}
-                  onUpdateValue={async newValue => {
-                    handleUpdateAddress(Number(newValue), 'distance', address)
-
-                    setTimeout(() => {
-                      window.location.reload()
-                    }, 2000)
-                  }}
-                />{address.distance ? 'km' : ''}
-              {/if}
-            </td>
-            <td>
-              <button
-                class="badge badge-primary badge-xs"
-                onclick={() => recalcDistance(address)}
-              >
-                Recalcular
-              </button>
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-  </div>
+ 
 </div>

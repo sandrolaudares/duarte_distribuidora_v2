@@ -30,96 +30,110 @@
   import PedidoCliente from './PedidoCliente.svelte'
   import { DateFormatter } from '@internationalized/date'
   import { formatCurrency } from '$lib/utils'
+  import CustomThFilter from '$lib/components/datatable/CustomThFilter.svelte'
 
   export let table: TableHandler<PageData['orders'][0]>
 
   export let total = 0
 
-  const df = new DateFormatter('pt-BR', {
-    dateStyle: 'medium',
-  })
+  export let df:DateFormatter
+
 </script>
 
-<div class="mt-10 h-full max-h-[calc(100vh-38vh)]">
-    <Datatable basic {table} >
-      {#snippet header()}{/snippet}
-      <table class="table table-sm">
-        <thead>
-          <tr class="">
-            <ThSort {table} field="id">ID</ThSort>
-            <Th>Status</Th>
-            <Th>Data:</Th>
-            <Th>Observações:</Th>
-            <ThSort {table} field="total">Total do pedido</ThSort>
-            <Th>Detalhes</Th>
-          </tr>
-          <tr>
-            <ThFilter {table} field="id" />
-            <ThFilter {table} field="status" />
+  
+<div class="overflow-hidden h-[80vh]">
+  <Datatable {table} >
+    <table class="table table-xs">
+      <thead>
+        <tr>
+          <!-- <ThSort {table} field="id">ID</ThSort> -->
+          <Th>Status</Th>
+          <Th>Data do pedido:</Th>
+          <Th>Observações:</Th>
+          <ThSort {table} field="total">Total do pedido</ThSort>
+          <Th>Detalhes</Th>
+        </tr>
+        <tr>
+          <!-- <ThFilter {table} field="id" /> -->
+          <!-- <ThFilter {table} field="status" /> -->
+           <Th/>
 
-            <!-- <ThCalendar {table} field="created_at" /> -->
-            <Th>
-              <!-- <DateFilter
-                onchange={(start, end) => {
-                  if (start && end) {
-                    filtered = filteredOrders(start, end)
-                    console.log(filtered)
-                    table.setRows(filtered)
-                  }
-                }}
-              /> -->
-            </Th>
+          <!-- <ThCalendar {table} field="created_at" /> -->
+          <Th>
+            <!-- <DateFilter
+              onchange={(start, end) => {
+                if (start && end) {
+                  filtered = filteredOrders(start, end)
+                  console.log(filtered)
+                  table.setRows(filtered)
+                }
+              }}
+            /> -->
+          </Th>
 
-            <ThFilter {table} field="observation" />
-            <Th />
-            <Th />
-          </tr>
-        </thead>
-        <tbody>
-          {#each table.rows as row (row.id)}
-            <tr>
-              <td>{row.id}</td>
-              <td>{row.status}</td>
-              <td>{row.created_at ? df.format(row.created_at) : 'N/A'}</td>
-              <td class:text-error={!row.observation}>{row.observation ? row.observation : 'N/A'}</td>
-              <td class="text-lg font-semibold">
-                {formatCurrency(row.total)}
-              </td>
-              <td>
-                <a href="/admin/orders/{row.id}" class="badge badge-primary">
-                  Detalhes
-                </a>
-              </td>
-            </tr>
-          {/each}
+          <ThFilter {table} field="observation" />
+          <Th />
+          <Th />
+        </tr>
+      </thead>
+      <tbody>
+        {#each table.rows as row (row.id)}
           <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td class="text-xl font-bold">
-              Total: <span class="text-secondary">
-                {formatCurrency(total)}
-              </span>
+            <!-- <td>{row.id}</td> -->
+            <td>
+              <div
+              class:badge-info={row.status === 'CONFIRMED'}
+              class:badge-error={row.status === 'CANCELED'}
+              class:badge-Accent={row.status === 'PENDING'}
+              class:badge-success={row.status === 'DELIVERED'}
+              class:badge-primary={row.status === 'ON THE WAY'}
+               class="badge badge-sm text-white">
+                {row.status}
+              </div>
+            
             </td>
-            <td></td>
+            <td>{row.created_at ? df.format(row.created_at) : 'N/A'}</td>
+            <td class:text-error={!row.observation}>{row.observation ? row.observation : 'N/A'}</td>
+            <td class="text-md font-semibold">
+              {formatCurrency(row.total)}
+            </td>
+            <td>
+              <a href="/admin/orders/{row.id}" class="badge badge-sm font-bold">
+                Detalhes
+              </a>
+            </td>
           </tr>
-        </tbody>
-      </table>
-      {#if table.rows.length === 0}
-        <NoResults type={'Pedido'} />
-      {/if}
-      {#snippet footer()}
-      <RowsPerPage {table} />
-      <div></div>
-      <Pagination {table} />
-      {/snippet}
-    </Datatable>
-  </div>
+        {/each}
+        <tr class="sticky bottom-0 bg-colorr">
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="text-[16px] font-bold">
+            Total: <span class="text-secondary">
+              {formatCurrency(total)}
+            </span>
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+    {#if table.rows.length === 0}
+    <NoResults type={'Pedido'} />
+    {/if}
+    {#snippet footer()}
+    <RowsPerPage {table} />
+    <div></div>
+    <Pagination {table} />
+    {/snippet}
+  </Datatable>
+</div>
 
   <style>
     thead {
       background-color: oklch(var(--b1)) !important;
     }
+    .bg-colorr {
+    background-color: oklch(var(--b1)) !important;
+  }
   </style>
   
