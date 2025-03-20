@@ -43,12 +43,12 @@ export const load = (async ({ params,url, locals: { tenantDb } }) => {
     throw new Error("SKU not found");
 }
 
-  let query = stock(tenantDb!).getTransactionsFromProduto({sku:skuID}).$dynamic()
+  let query = stock(tenantDb!).getTransactionsFromProduto({sku:skuID}).$dynamic().orderBy(desc(schema.stockTransactionTable.created_at))
 
   if (sortId && sortOrder) {
     query = withOrderBy(
       query,
-      getSQLiteColumn(schema.logsTable, sortId),
+      getSQLiteColumn(schema.stockTransactionTable, sortId),
       sortOrder,
     )
   }
