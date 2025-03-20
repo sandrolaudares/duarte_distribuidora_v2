@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { contasPagarTable } from '$lib/server/db/schema'
 import {
   getSQLiteColumn,
   withOrderBy,
   withPagination,
+  _withs,
+  getDateRangeCondition
 } from '$lib/server/db/utils'
 import type { PageServerLoad } from './$types'
 import * as schema from '$lib/server/db/schema'
@@ -11,7 +14,6 @@ import { stock } from '$lib/server/db/controller'
 import { pageConfig } from '$lib/config'
 import { Monad } from '$lib/utils'
 import { innerJoinOnMany } from '$lib/server/db/utils'
-import type { TenantDbType } from '$lib/server/db/tenant'
 import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 
 export const load = (async ({ url, locals: { tenantDb } }) => {
@@ -23,8 +25,11 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const sortOrder = searchParams.get('sort_direction')
 
   const titulo = searchParams.get('titulo')
+
   const fornecedor = searchParams.get('supName')
-  const categoria = searchParams.get('catId')
+  const fornId = Number(fornecedor)
+
+  const categoria = searchParams.get('catName')
   const catId = Number(categoria)
 
   const dateStart = searchParams.get('startDate')
@@ -43,32 +48,19 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const condicoes = [
     titulo ? like(schema.contasPagarTable.titulo, `%${titulo}%`) : undefined,
     pagos !== undefined ? eq(schema.contasPagarTable.isPaid, pagos) : undefined,
-    dateStart && dateEnd
-      ? and(
-          gte(schema.contasPagarTable.paid_at, new Date(Number(dateStart))),
-          lte(schema.contasPagarTable.paid_at, new Date(Number(dateEnd))),
-        )
-      : undefined,
+    getDateRangeCondition(dateStart, dateEnd,schema.contasPagarTable.paid_at),
   ]
 
-  const fornecedores = await stock(tenantDb!).getSupplier()
-  const categorias = await tenantDb!.select().from(schema.categoriaConta)
-  const tipoPagamentoConta = await tenantDb!
-    .select()
-    .from(schema.tipoPagamentoConta)
-
   try {
-    const cte = tenantDb!.select().from(contasPagarTable).as('cte')
-
-    const _withs = (drizzle: TenantDbType) => drizzle.with(cte)
+    const cte = tenantDb!.select().from(contasPagarTable).as('cteContas')
 
     const _joins = <T extends SQLiteSelect>(qb: T) => {
       return Monad.of(qb)
         .map(query =>
           innerJoinOnMany(query, schema.supplierTable, [
             eq(schema.supplierTable.id, schema.contasPagarTable.fornecedor_id),
-            fornecedor
-              ? like(schema.supplierTable.name, `%${fornecedor}%`)
+            fornId
+              ? eq(schema.supplierTable.id, fornId)
               : undefined,
           ]),
         )
@@ -93,28 +85,22 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         )
     }
 
-    const _countSelectBuilder = (drizzle: TenantDbType) =>
-      _withs(drizzle).select({ count: count() })
+    const _countSelectBuilder = () =>
+      _withs(tenantDb!, cte).select({ count: count() })
 
-    const queryCount = (drizzle: TenantDbType) =>
-      _joins(
-        _countSelectBuilder(drizzle).from(schema.contasPagarTable).$dynamic(),
-      )
+    const queryCount = () =>
+      _joins(_countSelectBuilder().from(schema.contasPagarTable).$dynamic())
 
-    const _tontalSumSelectBuilder = (drizzle: TenantDbType) =>
-      _withs(drizzle).select({
+    const _countSumBuilder = () =>
+      _withs(tenantDb!, cte).select({
         sum: sql<number>`SUM(${schema.contasPagarTable.valor_conta})`,
       })
 
-    const queryTotalSum = (drizzle: TenantDbType) =>
-      _joins(
-        _tontalSumSelectBuilder(drizzle)
-          .from(schema.contasPagarTable)
-          .$dynamic(),
-      )
+    const queryTotalSum = () =>
+      _joins(_countSumBuilder().from(schema.contasPagarTable).$dynamic())
 
-    const _itemsSelectBuilder = (drizzle: TenantDbType) =>
-      _withs(drizzle).select({
+    const _itemsSelectBuilder = () =>
+      _withs(tenantDb!, cte).select({
         titulo: schema.contasPagarTable.titulo,
         id: schema.contasPagarTable.id,
         descricao: schema.contasPagarTable.descricao,
@@ -130,12 +116,10 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         pagName: schema.tipoPagamentoConta.nome,
       })
 
-    const queryItems = (drizzle: TenantDbType) =>
-      _joins(
-        _itemsSelectBuilder(drizzle).from(schema.contasPagarTable).$dynamic(),
-      )
+    const queryItems = () =>
+      _joins(_itemsSelectBuilder().from(schema.contasPagarTable).$dynamic())
 
-    let query = queryItems(tenantDb!).where(and(...condicoes))
+    let query = queryItems().where(and(...condicoes))
 
     if (sortId && sortOrder) {
       query = withOrderBy(
@@ -145,16 +129,13 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
       )
     }
     const rows = await withPagination(query, page, pageSize)
-    const [total] = await queryCount(tenantDb!).where(and(...condicoes))
-    const [totalSum] = await queryTotalSum(tenantDb!).where(and(...condicoes))
+    const [total] = await queryCount()
+    const [totalSum] = await queryTotalSum().where(and(...condicoes))
 
     return {
       rows: rows ?? [],
       count: total.count,
       totalSum: totalSum.sum,
-      fornecedores,
-      categorias,
-      tipoPagamentoConta,
     }
   } catch (error) {
     console.error(error)
@@ -162,9 +143,6 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
       rows: [],
       count: 0,
       totalSum: 0,
-      fornecedores: [],
-      categorias: [],
-      tipoPagamentoConta: [],
     }
   }
 }) satisfies PageServerLoad

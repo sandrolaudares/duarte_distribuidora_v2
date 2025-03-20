@@ -3,7 +3,7 @@
   import { modal, FormModal } from '$modal'
   import type { InsertProductItem } from '$db/schema'
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import ProductItem from './ProductItem.svelte'
   import ImageInput from '$lib/components/input/ImageInput.svelte'
 
@@ -11,12 +11,9 @@
   import { icons } from '$lib/utils'
   import { onMount } from 'svelte'
 
-  export let data: PageData
+  let { data }: {data:PageData} = $props()
 
-
-
-  let produto = data.prod
-
+  let { prod:produto} = $state(data)
   
   function handleAddItem() {
     modal.open(FormModal, {
@@ -58,7 +55,7 @@
       save: async data => {
         console.log(data)
         try {
-          const [resp] = await trpc($page).product.insertProductItem.mutate({
+          const [resp] = await trpc(page).product.insertProductItem.mutate({
             name: data.name,
             quantity: data.quantity,
             wholesale_price: data.wholesale_price,
@@ -80,7 +77,7 @@
 
   async function updateProductImage(image_id: number) {
     try {
-      const [resp] = await trpc($page).product.updateProduct.mutate({
+      const [resp] = await trpc(page).product.updateProduct.mutate({
         id: produto.id,
         prod: { image: image_id },
       })
@@ -94,7 +91,7 @@
 
   async function updateProductInfo() {
     try {
-      const resp = await trpc($page).product.updateProduct.mutate({
+      const resp = await trpc(page).product.updateProduct.mutate({
         id: produto.id,
         prod: {
           name: produto.name,
@@ -114,7 +111,7 @@
   async function handleDeleteProduct(id: number) {
     if(confirm('Deseja deletar produto?') === true) {
       try {
-        await trpc($page).product.deleteProduct.mutate(id)
+        await trpc(page).product.deleteProduct.mutate(id)
   
         toast.success('Item deletado com sucesso!')
         window.history.back()
@@ -127,18 +124,20 @@
     }
   }
 
-  let isChanged = false
+  let isChanged = $state(false)
 </script>
 
 <main class="flex flex-col">
   <div
-    class="card flex md:flex-row gap-3 items-center justify-between bg-surface-200 p-5 m-3"
+    class="rounded-sm flex md:flex-row gap-3 items-center justify-between bg-surface-200 p-3 m-3"
   >
+  <div class="max-w-[130px] max-h-[130px]">
     <ImageInput
       name={produto.name}
       image_id={produto.image}
       save={updateProductImage}
     />
+  </div>
     <div class="flex flex-col gap-3">
       <h2
         class="title-font text-center text-xl font-semibold tracking-widest text-secondary"
@@ -158,7 +157,7 @@
             type="text"
             class="input"
             bind:value={produto.name}
-            onchange={() => (isChanged = true)}
+            oninput={() => (isChanged = true)}
           />
         </div>
         <div class="md:flex-row flex-col flex items-center gap-2">
@@ -168,7 +167,7 @@
             name="description"
             class="input"
             bind:value={produto.description}
-            onchange={() => (isChanged = true)}
+            oninput={() => (isChanged = true)}
           />
         </div>
       </div>
@@ -181,7 +180,7 @@
     <div class="flex flex-col gap-2">
       {#if isChanged}
         <button
-          class="btn btn-info px-5"
+          class="btn btn-info btn-md px-5"
           onclick={updateProductInfo}
           disabled={!isChanged}
         >
@@ -190,21 +189,29 @@
       {/if}
 
         <button
-          class="btn btn-error px-5"
+          class="btn btn-error btn-md px-5"
           onclick={() => handleDeleteProduct(produto.id)}
         >
           {@html icons.trash()} Deletar {produto.name}
         </button>
 
-      <button class="btn btn-primary px-5" onclick={handleAddItem}>
+      <button class="btn btn-primary btn-md px-5" onclick={handleAddItem}>
         {@html icons.plus()} Adicionar item
       </button>
     </div>
   </div>
 
-  <div class="m-3 grid grid-cols-4 justify-center gap-4">
+  <div class="m-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4  cols-5-p justify-center gap-4">
     {#each produto.items as item, i (item.id)}
       <ProductItem {item} />
     {/each}
   </div>
 </main>
+
+<style>
+  @media (min-width: 1746px) {
+    .cols-5-p {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+  </style>
