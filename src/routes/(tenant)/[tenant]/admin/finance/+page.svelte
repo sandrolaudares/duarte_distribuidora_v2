@@ -192,7 +192,7 @@
       </thead>
       <tbody>
         {#each data.rows as row (row.id)}
-          <tr class={table.selected.includes(row.id) ? 'bg-base-200' : ''} animate:flip={{ duration: 900, delay: 100, easing: cubicInOut }}>
+          <tr class={table.selected.includes(row.id) ? 'bg-base-200' : ''} animate:flip={{ duration: 500, easing: cubicInOut }}>
             <td>
               <input
                 type="checkbox"
