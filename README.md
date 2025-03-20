@@ -176,11 +176,10 @@ npm run db:check
 - Editar tipo pessoa em clientes ✅
 - Uma tela tipo um admin dashboard pro estoque, pra poder acessar transferencia,
   etc ✅
-
-## PARCIAL PRONTOS OU APENAS REVISAR/AJUSTAR
-
-- Verificar name filter fiado ✅
-- Editar motoboy pedidos aceitos
+- Active na table dos users ✅
+- Tables ao apagar filtro não limpa os parametros ✅
+- No componente DateFilter ao filtrar apenas um dia a data de inicio e de fim são iguais, data de inicio devia pegar o dia a partir das 00:00 e data de fim no mesmo dia até 23:59 ✅
+- Editar motoboy pedidos aceitos ✅
 - PODER EDITAR INFOS DISTRIBUIDORA NO /TENANT - perfil da distribuidora ✅
 - Contas a pagar, nova tabela (Preciso que inclua nas guias a esquerda contas a
   pagar. Essa guia deve ter a categoria da dívida, fornecedor (já cadastrado em
@@ -196,6 +195,8 @@ npm run db:check
 - Refazer setar cargo ao user, não ta funcionando legal✅
 - Contas cadastrar forma de pagamento✅
 - Colunas na tabela dos logs/Refatorar tela/melhorar ✅
+- Refactor change epire date no fiado ✅
+- Impressora ✅
 
 ## IMPORTANTES
 
@@ -206,21 +207,16 @@ npm run db:check
 - Preco de custo nas transferencias e tela historico transafarencias tipo tela
   fiado com total e valor do preço de custo
 - Parte do cliente fazer pedido 
-- TELA RESUMO DE CADA MOTOBOY ENTREGAS
 - Formatar ENUMs
 - KG como unidade de medida nos produtos
-- Tables ao apagar filtro não limpa os parametros
-- No componente DateFilter ao filtrar apenas um dia a data de inicio e de fim são iguais, data de inicio devia pegar o dia a partir das 00:00 e data de fim no mesmo dia até 23:59
 - Total nas transações do caixa
-- Impressora
 - Adicionar horario funcionamento na distribuidora
 - Add image to tenant
-- Refactor change epire date no fiado
 - Fix a ordenação nas tables
 - Filter table page conta
 - Editar contas
 - Lembrar de feixar caia diariamente
-- Active na table dos users
+- adicionar: animate:flip={{ duration: 500, easing: cubicInOut }} nas tables
 
 
 ## NAO TAO URGENTE
@@ -240,6 +236,7 @@ npm run db:check
 
 # RELATORIOS:
 
+- TELA RESUMO DE CADA MOTOBOY ENTREGAS
 - Vendas por período.
 - Recebimentos por períodos, dia e semana, mês.
 - Cliente inadimplentes.
