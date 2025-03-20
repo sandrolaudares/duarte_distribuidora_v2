@@ -1,14 +1,14 @@
 <script lang="ts">
   import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
-  import type { CustomerWaddress } from '$lib/server/db/schema/customer/controller'
+  import type { CustomerAddresses, CustomerWaddress } from '$lib/server/db/schema/customer/controller'
 
   import { trpc } from '$trpc/client'
   import { page } from '$app/state'
   import { toast } from 'svelte-sonner'
   import Loading from '$lib/components/Loading.svelte'
   let {
-    customer,
-  }: { customer: Exclude<Awaited<ReturnType<CustomerWaddress>>, undefined> } =
+    adresses,
+  }: { adresses: Exclude<Awaited<ReturnType<CustomerAddresses>>, undefined> } =
     $props()
 
   // let isLoading = $state(false)
@@ -29,7 +29,7 @@
 
   let loadingRows: Record<number, boolean> = $state({})
 
-  async function recalcDistance(address: (typeof customer.adresses)[0]) {
+  async function recalcDistance(address: (typeof adresses)[0]) {
     loadingRows[address.id] = true
     try {
       let distance = await trpc(page).customer.calculateDistance.mutate({
@@ -77,7 +77,7 @@
       </tr>
     </thead>
     <tbody>
-      {#each customer.adresses as address}
+      {#each adresses as address}
         <tr>
           <td>
             <EditableCell

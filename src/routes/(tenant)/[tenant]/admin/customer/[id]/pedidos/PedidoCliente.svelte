@@ -11,7 +11,6 @@
   import { page } from '$app/stores'
 
   import { toast } from 'svelte-sonner'
-  import AddressModal from '$lib/components/modal/AddressModal.svelte'
   import CardShowPedidos from '$lib/components/cards/CardShowPedidos.svelte'
   import { onMount } from 'svelte'
   import DateFilter from '$lib/components/DateFilter.svelte'
@@ -26,8 +25,6 @@
   } from '@vincjo/datatables'
   import NoResults from '$lib/components/NoResults.svelte'
   import ThCalendar from './ThCalendar.svelte'
-  import InfoCliente from './InfoCliente.svelte'
-  import PedidoCliente from './PedidoCliente.svelte'
   import { DateFormatter } from '@internationalized/date'
   import { formatCurrency } from '$lib/utils'
   import CustomThFilter from '$lib/components/datatable/CustomThFilter.svelte'
@@ -56,21 +53,21 @@
         <tr>
           <!-- <ThFilter {table} field="id" /> -->
           <!-- <ThFilter {table} field="status" /> -->
-           <Th/>
+           <!-- <Th/> -->
 
-          <!-- <ThCalendar {table} field="created_at" /> -->
-          <Th>
-            <!-- <DateFilter
-              onchange={(start, end) => {
-                if (start && end) {
-                  filtered = filteredOrders(start, end)
-                  console.log(filtered)
+           <Th>
+             <!-- <DateFilter
+             onchange={(start, end) => {
+              if (start && end) {
+                filtered = filteredOrders(start, end)
+                console.log(filtered)
                   table.setRows(filtered)
-                }
-              }}
-            /> -->
-          </Th>
-
+                  }
+                  }}
+                  /> -->
+                </Th>
+          <!-- <ThCalendar {table} field="created_at" /> -->
+                <Th/>
           <ThFilter {table} field="observation" />
           <Th />
           <Th />
