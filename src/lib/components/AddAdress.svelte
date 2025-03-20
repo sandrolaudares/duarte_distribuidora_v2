@@ -3,43 +3,39 @@
   import { icons } from '$lib/utils'
   import { getEnderecoFromCEP } from '$lib/utils/cep'
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { toast } from 'svelte-sonner'
-  import type { SelectCustomer } from '$db/schema'
-  import { createEventDispatcher } from 'svelte';
+  import type { SelectAddress, SelectCustomer } from '$db/schema'
 
-  const dispatch = createEventDispatcher();
-
-  export let formEndereco = {
-    number: '',
-    id: 0,
-    created_at: '',
-    updated_at: '',
-    customer_id: 0,
-    cep: '',
-    street: '',
-    complement: '',
-    neighborhood: '',
-    city: '',
-    state: '',
-    country: '',
+  type Props = {
+    customer_id: SelectCustomer['id']
+    invalidate: (address:SelectAddress) => void | undefined
   }
+  
+  let { customer_id,invalidate }:Props = $props()
 
-  let disabled = false
+  let formEndereco = $state({
+      number: '',
+      id: 0,
+      created_at: '',
+      updated_at: '',
+      customer_id: 0,
+      cep: '',
+      street: '',
+      complement: '',
+      neighborhood: '',
+      city: '',
+      state: '',
+      country: '',
+    })
 
-  export let customer_id: SelectCustomer['id']
-
-  const save = () => {
-    addAddress()
-    // modal.close()
-  }
-
-  let isLoading = false
+  let isLoading = $state(false)
+  let disabled = $state(false)
 
   async function addAddress() {
     isLoading = true
     try {
-      let newAddress = await trpc($page).customer.insertAddress.mutate({
+      let newAddress = await trpc(page).customer.insertAddress.mutate({
         customer_id: customer_id,
         cep: formEndereco.cep,
         street: formEndereco.street,
@@ -47,48 +43,44 @@
         complement: formEndereco.complement,
         neighborhood: formEndereco.neighborhood,
         city: formEndereco.city,
-        state: formEndereco.state, //select
+        state: formEndereco.state,
         country: 'BR',
         distance: 0,
       })
       toast.success('Endereco adicionado com sucesso!')
       
-      if(!newAddress) return
+      if(!newAddress) {
+        throw new Error('Erro ao adicionar endereco')
+      }
       
-      formEndereco.id = newAddress.id
+      invalidate(newAddress)
       
-      console.log(formEndereco);
-      
-      dispatch('addressAdded', {
-        customer_id,
-        newAddress: formEndereco})
-        isLoading=false
-      let distance = await trpc($page).customer.calculateDistance.mutate({ 
+      let distance = await trpc(page).customer.calculateDistance.mutate({ 
         cep: formEndereco.cep,
         street: formEndereco.street,
         number: formEndereco.number,
         bairro: formEndereco.neighborhood,
         city: formEndereco.city,
-        state: formEndereco.state, //select
+        state: formEndereco.state,
         country: 'BR',
       })
 
-      distance = Math.round(distance)
-
-      if(distance && newAddress) {
-        await trpc($page).customer.updateAddress.mutate({
+      
+      if(distance>0 && newAddress) {
+        distance = Math.round(distance)
+        await trpc(page).customer.updateAddress.mutate({
           id:newAddress.id,
           address:{
             distance:distance,
           }
         })
       }
-
-        //   window.location.reload() 
+      invalidate(newAddress)
     } catch (error: any) {
       toast.error(error.message)
       return error.message
-      isLoading=false
+    } finally {
+      isLoading = false
     }
   }
 
@@ -120,8 +112,8 @@
       type="text"
       placeholder="Digite seu CEP"
       class="input input-bordered w-full"
-      on:change={async e => {
-        const value = e.target?.value
+      onchange={async e => {
+        const value = (e.target as HTMLInputElement)?.value
         if (value.length === 8) {
           await handleCep(value)
         }
@@ -211,6 +203,6 @@
 
 <div class="flex w-full justify-end">
   <div class="flex gap-3 w-full">
-    <button class="btn btn-primary w-full"disabled={isLoading} on:click={save}>{isLoading?'Adicionando...':'Salvar novo endereco'}</button>
+    <button class="btn btn-primary w-full"disabled={isLoading} onclick={addAddress}>{isLoading?'Adicionando...':'Salvar novo endereco'}</button>
   </div>
 </div>
