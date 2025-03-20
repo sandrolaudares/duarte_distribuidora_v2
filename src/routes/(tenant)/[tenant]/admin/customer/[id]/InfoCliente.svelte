@@ -1,6 +1,5 @@
 <script lang="ts">
   import { modal, FormModal } from '$components/modal'
-  import AddressModal from '$lib/components/modal/AddressModal.svelte'
   import { icons } from '$lib/utils/icons'
 
   import { trpc } from '$trpc/client'
@@ -46,25 +45,7 @@
 
 <div class="mx-4 flex items-center justify-between">
   <h1 class="text-xl font-bold">Informacões do cliente:</h1>
-  <!-- <div class="flex gap-2">
-    <button
-      class="btn btn-error flex gap-2"
-      onclick={() => handleDeleteCustomer(customer.id)}
-    >
-      Deletar cliente
-      {@html icons.trash()}
-    </button>
-    <button
-      class="btn btn-primary flex gap-2"
-      onclick={() =>
-        modal.open(AddressModal, {
-          customer_id: customer.id,
-        })}
-    >
-      Adicionar endereço
-      {@html icons.plus()}
-    </button>
-  </div> -->
+
 </div>
 <div class="mt-2">
   <div class="overflow-x-auto">

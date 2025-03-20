@@ -225,7 +225,7 @@
                 />
             </td>
             <td>
-              <a href="/admin/customer/{row.id}" class="badge badge-primary">
+              <a href="/admin/customer/{row.id}/enderecos" class="badge badge-primary">
                 Detalhes
               </a>
             </td>
