@@ -146,7 +146,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each table.rows as row (row.sku)}
+        {#each data.rows as row (row.sku)}
           <tr>
             <td>{row.sku}</td>
             <td>

@@ -7,26 +7,37 @@ import {
   withOrderBy,
   getSQLiteColumn,
   getOrderBy,
+  _withs,
 } from '$lib/server/db/utils'
 import { and, eq, getTableColumns, SQL, count, like } from 'drizzle-orm'
 import { pageConfig } from '$lib/config'
 
-export const load = (async ({ url,locals:{tenantDb} }) => {
+export const load = (async ({ url, locals: { tenantDb } }) => {
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
-  const pageSize = Number(searchParams.get('pageSize') ?? pageConfig.rowPages )
+  const pageSize = Number(searchParams.get('pageSize') ?? pageConfig.rowPages)
 
   const name = searchParams.get('name')
-  // const email = searchParams.get('email')
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_order')
 
-  let query = tenantDb!
-    .select()
-    .from(schema.skuTable)
-    .where(name ? like(schema.skuTable.name, `%${name}%`) : undefined)
-    .$dynamic()
+  const cte = tenantDb!.select().from(schema.skuTable).as('cteSkus')
+
+  const skusSelectBuilder = () => _withs(tenantDb!, cte).select()
+
+  const queryFiadoOrders = () =>
+    skusSelectBuilder()
+      .from(schema.skuTable)
+      .$dynamic()
+      .where(name ? like(schema.skuTable.name, `%${name}%`) : undefined)
+
+  const _countSelectBuilder = () =>
+    _withs(tenantDb!, cte).select({ count: count() })
+
+  const queryCount = () => _countSelectBuilder().from(schema.skuTable)
+
+  let query = queryFiadoOrders()
 
   if (sortId && sortOrder) {
     query = withOrderBy(
@@ -36,14 +47,15 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
     )
   }
 
-    //TODO: FIX não aparece todos SKU, ao filtrar sim
-
   try {
-    const rows = await withPagination(query, page, pageSize)
+    const [rows, total] = await Promise.all([
+      withPagination(query, page, pageSize),
+      queryCount(),
+    ])
 
-    const total = await tenantDb!.select({ count: count() }).from(schema.skuTable).where(name ? like(schema.skuTable.name, `${name}%`) : undefined)
+    console.log(rows)
 
-    return { rows: rows ?? [], count: total[0].count }
+    return { rows, count: total[0].count }
   } catch (error) {
     console.error(error)
     return { rows: [], count: 0 }
