@@ -197,6 +197,7 @@ npm run db:check
 - Colunas na tabela dos logs/Refatorar tela/melhorar ✅
 - Refactor change epire date no fiado ✅
 - Impressora ✅
+- Filter table page conta ✅
 
 ## IMPORTANTES
 
@@ -213,10 +214,10 @@ npm run db:check
 - Adicionar horario funcionamento na distribuidora
 - Add image to tenant
 - Fix a ordenação nas tables
-- Filter table page conta
 - Editar contas
 - Lembrar de feixar caia diariamente
 - adicionar: animate:flip={{ duration: 500, easing: cubicInOut }} nas tables
+- Refatorar page entrada de estoque
 
 
 ## NAO TAO URGENTE
