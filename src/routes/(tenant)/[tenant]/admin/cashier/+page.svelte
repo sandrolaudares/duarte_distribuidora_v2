@@ -2,7 +2,7 @@
   import type { PageData } from './$types'
 
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   import type { RouterInputs } from '$trpc/router'
 
@@ -11,10 +11,9 @@
   import { toast } from 'svelte-sonner'
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
 
-  export let data: PageData
+  let { data }: { data:PageData } = $props()
 
-  let cashiers = data
-  // let taxa = data.taxa
+  let { distribuidoras,tenant } = data
 
   function handleAddCachier() {
     modal.open(FormModal, {
@@ -36,7 +35,7 @@
       ],
       save: async toSave => {
         try {
-          await trpc($page).distribuidora.insertCashier.mutate({
+          await trpc(page).distribuidora.insertCashier.mutate({
             name: toSave.name,
             currency: toSave.currency,
           })
@@ -51,7 +50,7 @@
 
   async function handleDeleteCashier(id: number) {
     try {
-      await trpc($page).distribuidora.deleteCashierById.mutate(id)
+      await trpc(page).distribuidora.deleteCashierById.mutate(id)
       toast.success('Caixa deletado com sucesso!')
       window.location.reload()
     } catch (error) {
@@ -67,7 +66,7 @@
 
   async function handleEditNameCashier(id: number, data: string) {
     try {
-      await trpc($page).distribuidora.updateCashier.mutate({
+      await trpc(page).distribuidora.updateCashier.mutate({
         id: id,
         data: {
           name: data,
@@ -79,13 +78,13 @@
     }
   }
 
-  let taxa = 0
+  let taxa = $state(0)
 
-  if(data.tenant?.taxa_por_km) taxa = data.tenant?.taxa_por_km
+  if(tenant?.taxa_por_km) taxa = tenant?.taxa_por_km
 
   async function updateCashierDeliveryFee() {
     try {
-      await trpc($page).distribuidora.updateDistribuidora.mutate({id:data.tenant?.tenantId ?? 0,data:{taxa_por_km:taxa}})
+      await trpc(page).distribuidora.updateDistribuidora.mutate({id:tenant?.tenantId ?? 0,data:{taxa_por_km:taxa}})
       Math.round(taxa)
       console.log(taxa)
       toast.success('Taxa de entrega atualizada!')
@@ -95,7 +94,7 @@
     }
   }
 
-  let isTaxaChanged = false
+  let isTaxaChanged = $state(false)
 </script>
 
 <main class="mx-2">
@@ -113,10 +112,7 @@
 
       <div>
         <div class="flex gap-2">
-          {#if data.tenant}
-          
-          <CurrencyInput bind:value={taxa} onchange={()=>{isTaxaChanged = true}}/>
-          {/if}
+          <CurrencyInput bind:value={taxa} oninput={()=>{isTaxaChanged = true}}/>
           {#if isTaxaChanged}
             <button class="btn btn-primary" onclick={updateCashierDeliveryFee}>
               salvar
@@ -135,7 +131,7 @@
       Adicionar Caixa
     </button>
     <div class="flex flex-col gap-2 text-center lg:mx-96">
-      {#each cashiers.distribuidoras as caixa}
+      {#each distribuidoras as caixa}
         <div class="flex w-full gap-3">
           {#if !editingLink[caixa.id]}
             <a
