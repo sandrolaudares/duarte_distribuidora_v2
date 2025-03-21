@@ -64,7 +64,10 @@
     }
   }
 
+  let isLoading = $state(false)
+
   async function updateProductItemInfo() {
+    isLoading = true
     try {
       const resp = await trpc(page).product.updateProductItem.mutate({
         id: item.id,
@@ -87,6 +90,7 @@
       toast.error(error.message)
     } finally {
       isEditing = false
+      isLoading = false
     }
   }
 
@@ -129,7 +133,12 @@
   })
 </script>
 
-<Card.Root class="w-full overflow-hidden">
+<Card.Root class="w-full overflow-hidden relative">
+  {#if isLoading}
+    <div class="absolute inset-0 bg-base-200 bg-opacity-50 flex items-center justify-center z-10">
+      <div class="spinner-border animate-spin h-8 w-8 border-t-4 border-primary rounded-full"></div>
+    </div>
+  {/if}
   <Card.Header class="pb-0">
     <div class="flex items-center justify-between gap-2">
       <div>
@@ -212,7 +221,7 @@
           {:else}
             <h2 class="text-md text-success">Lembre de salvar</h2>
           {/if}
-          <Button variant="ghost" size="icon" onclick={updateProductItemInfo}>
+          <Button variant="ghost" size="icon" disabled={isLoading} onclick={updateProductItemInfo}>
             <Save class="h-4 w-4" />
           </Button>
         </div>
