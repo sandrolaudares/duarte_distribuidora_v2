@@ -46,9 +46,9 @@
 <SideBar activeTeam={data.tenant!}>
   <ModalContainer />
   {#if !disableTransition}
-    <Transition key={data.transition_key}>
+    <!-- <Transition key={data.transition_key}> -->
       {@render children()}
-    </Transition>
+    <!-- </Transition> -->
   {:else}
     {@render children()}
   {/if}
