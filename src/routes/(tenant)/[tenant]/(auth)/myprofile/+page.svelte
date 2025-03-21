@@ -284,7 +284,7 @@
                 <div class="mt-1 flex items-center gap-3">
                   {#if $user.is_active}
                     {@html checkIcon}
-                    <span class="text-sm">Active</span>
+                    <span class="text-sm">Ativa</span>
                   {:else}
                     {@html errorIcon}
                     <span class="text-sm">Inativo</span>
