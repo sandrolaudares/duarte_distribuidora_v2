@@ -31,6 +31,8 @@
   import DateFilter from '$lib/components/DateFilter.svelte'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import { formatCurrency } from '$lib/utils'
+  import { Trash2 } from 'lucide-svelte'
+  import SenhaAdmin from '$lib/components/SenhaAdmin.svelte'
 
   let {
     table,
@@ -47,6 +49,7 @@
   })
 
   let isLoading = $state(false)
+  let isOpenModalCancel : HTMLDialogElement | null = $state(null)
 
   async function pagar(id: number) {
     isLoading = true
@@ -60,6 +63,25 @@
       isLoading = false
       // window.location.reload()
     }
+  }
+  async function deletar(id:number) {
+    isLoading = true
+    try {
+      await trpc(page).contas.deletarConta.mutate(id)
+      toast.success('Sucesso ao deletar conta')
+      invalidateAll()
+    } catch (error: any) {
+      toast.error(error.message)
+    } finally {
+      isLoading = false
+    }
+  }
+
+  let selectedId:number | null = $state(null)
+
+  function deleteClick(contaId:number) {
+    selectedId = contaId
+    isOpenModalCancel?.showModal()
   }
 
   let selectedCat: string = $state('')
@@ -77,19 +99,16 @@
           <Th>Observações</Th>
           <Th>Fornecedor</Th>
           <Th>Categoria</Th>
-          <!-- <Th>Data vencimento</Th> -->
           <Th>Pago com</Th>
           <Th>Pago em</Th>
           <Th>Vence em</Th>
           <ThSort {table} field="valor_conta">Valor</ThSort>
           <Th></Th>
-          <!-- <Th></Th> -->
+          <Th/>
         </tr>
         <tr>
-          <!-- <ThFilter {table} field="titulo" /> -->
           <ThFilter {table} field="titulo" />
           <Th />
-          <!-- <CustomThFilter {table} field="supName" /> -->
             <SelectFilter
             {table}
               filterKey="supName"
@@ -121,8 +140,8 @@
           </Th>
           <Th />
           <Th />
-          <!-- <Th /> -->
           <Th />
+          <Th/>
         </tr>
       </thead>
 
@@ -149,7 +168,6 @@
             </td>
             <td>{conta.supName}</td>
             <td>{conta.catName ?? 'Não cadastrado'}</td>
-            <!-- <td>{df.format(conta.expire_at!)}</td> -->
             <td>{conta.pagName ?? 'Não cadastrado'}</td>
             <td>
               {conta.paid_at ? df.format(conta.paid_at) : 'Ainda não foi paga'}
@@ -198,6 +216,13 @@
                 {conta.isPaid ? 'PAGO' : 'Pagar'}
               </button>
             </td>
+            <td>
+              {#if !conta.isPaid}
+              <button onclick={()=>deleteClick(conta.id)}>
+                <Trash2 />
+              </button>
+              {/if}
+            </td>
           </tr>
           
         {/each}
@@ -230,6 +255,27 @@
     {/snippet}
   </Datatable>
 </div>
+
+<dialog class="modal" bind:this={isOpenModalCancel}>
+  <div class="modal-box max-w-2xl">
+    <SenhaAdmin
+      reason="Cancelar pedido"
+      onSuccess={() => {
+        isOpenModalCancel?.close()
+        if(selectedId !== null) {
+          deletar(selectedId)
+        } else {
+          toast.error('Erro ao deletar conta')
+        }
+      }}
+    />
+  </div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+
 
 <style>
   .bgg {

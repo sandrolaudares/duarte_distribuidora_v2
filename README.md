@@ -198,6 +198,7 @@ npm run db:check
 - Refactor change epire date no fiado ✅
 - Impressora ✅
 - Filter table page conta ✅
+- Editar contas✅
 
 ## IMPORTANTES
 
@@ -209,12 +210,10 @@ npm run db:check
   fiado com total e valor do preço de custo
 - Parte do cliente fazer pedido 
 - Formatar ENUMs
-- KG como unidade de medida nos produtos
+- KG como unidade de medida nos produtos (provavelmente mudar a table de produtos)
 - Total nas transações do caixa
-- Adicionar horario funcionamento na distribuidora
 - Add image to tenant
 - Fix a ordenação nas tables
-- Editar contas
 - Lembrar de feixar caia diariamente
 - adicionar: animate:flip={{ duration: 500, easing: cubicInOut }} nas tables
 - Refatorar page entrada de estoque

@@ -28,4 +28,7 @@ export const contasController = (db: TenantDbType) => ({
       .set({ isPaid: true, paid_at: new Date() })
       .where(eq(contasPagarTable.id, id))
   },
+  deletarConta: (id:number) => {
+    return db.delete(contasPagarTable).where(eq(contasPagarTable.id, id))
+  }
 })

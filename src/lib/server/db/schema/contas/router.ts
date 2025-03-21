@@ -58,6 +58,22 @@ export const contas = router({
     .mutation(async ({ input, ctx: { tenantDb } }) => {
       return await contasController(tenantDb).pagarConta(input).returning()
     }),
+
+    deletarConta:publicProcedure
+    .meta({
+      routeName: 'Excluir conta',
+      permission: 'editar_clientes',
+      //EDIT PERMISSION
+    })
+    .use(middleware.auth)
+    .use(middleware.logged)
+    .input(
+      z.number()
+    )
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
+      return await contasController(tenantDb).deletarConta(input).returning()
+    }),
+
     getCategorias: publicProcedure.query(({ctx:{tenantDb}}) => {
         return tenantDb!.select().from(categoriaConta)
       }),
