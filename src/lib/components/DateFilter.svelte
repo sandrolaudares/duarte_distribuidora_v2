@@ -90,9 +90,15 @@
     onclick={() => {
       value = range
       if (onChange && range.start && range.end) {
+
+        const startDate = new Date(range.start.toDate(getLocalTimeZone()));
+        const endDate = new Date(range.end.toDate(getLocalTimeZone()));
+
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
         onChange(
-          range.start.toDate(getLocalTimeZone()).getTime(),
-          range.end.toDate(getLocalTimeZone()).getTime(),
+          startDate.getTime(),
+          endDate.getTime(),
         )
       }
     }}
@@ -133,6 +139,10 @@
       <div class="flex">
         {#if !futureDates}
           <div class="flex flex-col gap-2 p-4">
+            {@render btn('Hoje', {
+              start: today('America/Sao_Paulo'),
+              end: today('America/Sao_Paulo'),
+            })}
             {@render btn('Ultima Semana', {
               start: today('America/Sao_Paulo').subtract({ days: 7 }),
               end: today('America/Sao_Paulo'),
