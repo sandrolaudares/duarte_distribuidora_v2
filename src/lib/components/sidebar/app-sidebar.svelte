@@ -10,7 +10,7 @@
   import ShieldMap from 'lucide-svelte/icons/shield-check'
   import Transactions from 'lucide-svelte/icons/arrow-left-right'
 
-  import { ChartArea, BadgeDollarSign, House } from 'lucide-svelte/icons'
+  import { ChartArea, BadgeDollarSign, House, ShoppingCart } from 'lucide-svelte/icons'
   import Settings2 from 'lucide-svelte/icons/settings-2'
   import User from 'lucide-svelte/icons/user'
   import NavMain from '$lib/components/sidebar/nav-main.svelte'
@@ -21,7 +21,7 @@
   import { onMount, type ComponentProps } from 'svelte'
   import { getUserContext } from '$lib/stores/user'
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import type { SelectTenant } from '$lib/server/db/central/schema'
   import { type Role } from '$lib/utils/permissions'
 
@@ -40,6 +40,25 @@
     if (!$user) return { navMain: [], projects: [] };
     const nav = {
       navMain: [
+        {
+          title: 'Área do cliente',
+          url: '/admin',
+          icon: ShoppingCart,
+          isActive: true,
+          allowedRoles: ['customer'] as Role[],
+          items: [
+            {
+              allowedRoles: ['customer'] as Role[],
+              title: 'Cardápio',
+              url: '/customer/products',
+            },
+            {
+              allowedRoles: ['customer'] as Role[],
+              title: 'Carrinho',
+              url: '/customer/carrinho',
+            },
+          ],
+        },
         {
           title: 'Pessoas',
           url: '/admin',
@@ -182,31 +201,17 @@
 
     return nav
   })
-
-  let tenats: SelectTenant[] = $state([])
-
-  onMount(async () => {
-    try {
-      tenats = await trpc($page).distribuidora.getDistribuidoras.query()
-      if (!tenats) {
-        return
-      }
-    } catch (error: any) {
-      console.error(error.message)
-    }
-  })
 </script>
 
 <Sidebar.Root bind:ref {collapsible} {...restProps}>
   <Sidebar.Header>
-    <TeamSwitcher teams={tenats} {activeTeam} />
+    <TeamSwitcher {activeTeam} delegateQuery={trpc(page).distribuidora.getDistribuidoras.query} />
   </Sidebar.Header>
   <Sidebar.Content>
     {#if data.navMain.length && data.projects.length}
       <NavMain items={data.navMain} />
       <NavProjects projects={data.projects} />
-    {/if}
-    {#if !$user}
+    {:else if !$user}
       <Sidebar.Group class="group-data-[collapsible=icon]:hidden">
         <Sidebar.Menu>
           <Sidebar.MenuButton>
