@@ -42,7 +42,7 @@
   } = $props()
 
   const data = $derived.by(() => {
-    if (!$user) return { navMain: [], projects: [] }
+    if (!$user || $user.is_active === false) return { navMain: [], projects: [] }
     const nav = {
       navMain: [
         {
