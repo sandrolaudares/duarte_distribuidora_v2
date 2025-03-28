@@ -68,68 +68,59 @@
   })}
 />
 
-<div class="bg-background flex h-full flex-col items-center justify-center">
-  <div class="mx-auto w-full max-w-md space-y-6">
-    <div class="text-center">
-      <h1 class="text-3xl font-bold">Veiriique seu email</h1>
-      <p class="text-muted-foreground mt-2">
-        Código de 8 digitos
-      </p>
-    </div>
-    <div
-      class="bg-card text-card-foreground rounded-lg border border-primary shadow-sm"
-      data-v0-t="card"
-    >
-      <div class="space-y-4 p-6">
-        <div class="space-y-2">
-          <label
-            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            for="code"
-          >
-            Código de verificação
-          </label>
-          <!-- <input
-            bind:value={code}
-            class="input input-bordered w-full disabled:cursor-not-allowed disabled:opacity-50"
-            id="code"
-            pattern="[0-9]*"
-            inputmode="numeric"
-            maxlength="8"
-            placeholder="12345678"
-            type="text"
-          /> -->
-          <div class="flex items-center justify-center">
+<div class="flex h-full flex-col items-center justify-center bg-base-200">
+  <div class="mx-auto w-full max-w-lg space-y-6">
+    <div class="rounded-lg border bg-base-100 text-card-foreground shadow-sm">
+      <div class="flex flex-col space-y-1.5 p-6">
+        <h3 class="text-2xl font-semibold leading-none tracking-tight">
+          Verifique seu email
+        </h3>
+        <p class="text-sm text-gray-600">
+          Digite o código de verificação enviado para seu email
+        </p>
+      </div>
+      <div class="p-6 pt-0">
+        <div class="grid gap-4">
+          <div class="grid gap-2">
+            <label
+              for="otp"
+              class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Código de verificação
+            </label>
             <OTP bind:value={code} numOfInputs={8} inputClass="" numberOnly />
+            <p class="text-sm text-gray-600">
+              Digite o código de 8 digitos enviado para o seu email.
+            </p>
           </div>
-
-          <button
-            disabled={isLoading}
-            onclick={verifyEmail}
-            class="btn btn-outline w-full"
-          >
-            Verificar email
-          </button>
-
-          <div>
-            {#if canResend}
-              Não recebeu?
-              <button
-                class="link"
-                onclick={resendEmail}
-                disabled={isLoading || !canResend}
-              >
-                Reenviar
-              </button>
-            {:else}
-              Reenviar em {timeLeft} segundos
-            {/if}
-          </div>
-
-          {#if error_message}
-            <p>{error_message}</p>
-          {/if}
         </div>
       </div>
+      <div class="flex items-center p-6 pt-0">
+        <button
+          disabled={isLoading}
+          onclick={verifyEmail}
+          class="btn btn-primary w-full"
+        >
+          Verify Code
+        </button>
+      </div>
+      <div class="p-6 pt-0">
+        {#if canResend}
+          Não recebeu?
+          <button
+            class="link"
+            onclick={resendEmail}
+            disabled={isLoading || !canResend}
+          >
+            Reenviar
+          </button>
+        {:else}
+          Reenviar em {timeLeft} segundos
+        {/if}
+      </div>
+      {#if error_message}
+        <p>{error_message}</p>
+      {/if}
     </div>
   </div>
 </div>
