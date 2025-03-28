@@ -31,6 +31,7 @@ export const roleEnum = [
   'customer',
   'motoboy',
   'caixa',
+  'financeiro',
 ] as const
 
 export const roleLabels: Record<typeof roleEnum[number], string> = {
@@ -39,6 +40,7 @@ export const roleLabels: Record<typeof roleEnum[number], string> = {
   customer: 'Cliente',
   motoboy: 'Motoboy',
   caixa: 'Caixa',
+  financeiro: 'Financeiro',
 }
 
 export type Role = (typeof roleEnum)[number]
