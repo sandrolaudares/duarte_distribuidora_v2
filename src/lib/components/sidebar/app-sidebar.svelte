@@ -10,7 +10,12 @@
   import ShieldMap from 'lucide-svelte/icons/shield-check'
   import Transactions from 'lucide-svelte/icons/arrow-left-right'
 
-  import { ChartArea, BadgeDollarSign, House, ShoppingCart } from 'lucide-svelte/icons'
+  import {
+    ChartArea,
+    BadgeDollarSign,
+    House,
+    ShoppingCart,
+  } from 'lucide-svelte/icons'
   import Settings2 from 'lucide-svelte/icons/settings-2'
   import User from 'lucide-svelte/icons/user'
   import NavMain from '$lib/components/sidebar/nav-main.svelte'
@@ -37,7 +42,7 @@
   } = $props()
 
   const data = $derived.by(() => {
-    if (!$user) return { navMain: [], projects: [] };
+    if (!$user) return { navMain: [], projects: [] }
     const nav = {
       navMain: [
         {
@@ -91,7 +96,7 @@
           allowedRoles: ['admin', 'caixa', 'financeiro'] as Role[],
           items: [
             {
-              allowedRoles: ['admin'] as Role[],
+              allowedRoles: ['admin','financeiro'] as Role[],
               title: 'Todos pedidos',
               url: '/admin/orders/allorders',
             },
@@ -122,19 +127,19 @@
           ],
         },
         {
-          allowedRoles: ['admin'] as Role[],
+          allowedRoles: ['admin', 'financeiro'] as Role[],
           title: 'Financeiro',
           url: '/admin',
           icon: BadgeDollarSign,
           isActive: true,
           items: [
             {
-              allowedRoles: ['admin'] as Role[],
+              allowedRoles: ['admin', 'financeiro'] as Role[],
               title: 'Pedidos fiado',
               url: '/admin/finance',
             },
             {
-              allowedRoles: ['admin'] as Role[],
+              allowedRoles: ['admin', 'financeiro'] as Role[],
               title: 'Contas',
               url: '/admin/finance/contas',
             },
@@ -190,7 +195,11 @@
       }),
     }
 
-    if ($user?.meta.caixa_id) {
+    if (
+      $user &&
+      $user.meta.caixa_id &&
+      ($user.role === 'caixa' || $user.role === 'admin')
+    ) {
       nav.projects.push({
         allowedRoles: ['admin', 'caixa'] as Role[],
         name: 'Ir direto para caixa',
@@ -205,13 +214,24 @@
 
 <Sidebar.Root bind:ref {collapsible} {...restProps}>
   <Sidebar.Header>
-    <TeamSwitcher {activeTeam} delegateQuery={trpc(page).distribuidora.getDistribuidoras.query} />
+    <TeamSwitcher
+      {activeTeam}
+      delegateQuery={trpc(page).distribuidora.getDistribuidoras.query}
+    />
   </Sidebar.Header>
   <Sidebar.Content>
-    {#if data.navMain.length && data.projects.length}
+    {#if data.navMain.length}
       <NavMain items={data.navMain} />
+    {/if}
+    {#if data.projects.length}
       <NavProjects projects={data.projects} />
-    {:else if !$user}
+    {/if}
+    {#if $user && !data.navMain.length && !data.projects.length}
+      <p class="mx-2 mt-4 text-center text-lg text-gray-700">
+        Você não tem permissão para acessar nenhuma rota
+      </p>
+    {/if}
+    {#if !$user}
       <Sidebar.Group class="group-data-[collapsible=icon]:hidden">
         <Sidebar.Menu>
           <Sidebar.MenuButton>
