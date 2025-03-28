@@ -355,7 +355,7 @@ export const customer = router({
 
         for (const payment of order_info.payment_info) {
           await bugReport(tenantDb).insertLogs({
-            text: `Pagamento de ${formatCurrency(payment.amount_paid)} para pedido ${order.id}${payment.troco ? ` com troco de ${formatCurrency(payment.troco)}` : ''}`,
+            text: `Pedido realizado com pagamento de ${formatCurrency(payment.amount_paid)} para pedido ${order.id}${payment.troco ? ` com troco de ${formatCurrency(payment.troco)}` : ''}`,
             created_by: userId,
             metadata: {
               order_id: order.id,
