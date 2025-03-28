@@ -5,6 +5,7 @@
   import { tweened } from 'svelte/motion'
 
   import { getCartContext } from '$lib/stores/cart'
+  import { formatCurrency } from '$lib/utils'
   const cart = getCartContext()
   console.log(cart)
 
@@ -96,7 +97,7 @@
         </div>
         <div class="flex items-center justify-between">
           <span class="title-font text-2xl font-bold">
-            ${$total.toFixed(2)}
+            {formatCurrency($total)}
           </span>
           <div class="flex items-center gap-4">
             <button

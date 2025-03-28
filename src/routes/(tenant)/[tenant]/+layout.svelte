@@ -20,8 +20,6 @@
   import { createCartContext } from './admin/cashier/[id]/cartContext.svelte'
   import { page } from '$app/state'
 
-  // export let data: LayoutData
-
   let { data, children }: { data: LayoutData; children: Snippet } = $props()
 
   const user = createUserContext(data.user)
@@ -30,28 +28,15 @@
     user.set(data.user)
   })
   const cart = createCartContext()
-
-  const noTransitionPaths = [
-    /^\/admin\/customer\/\d+\/enderecos$/,
-    /^\/admin\/customer\/\d+\/pedidos$/,
-  ]
-
-  let disableTransition = $derived(
-    noTransitionPaths.some(pattern => pattern.test(page.url.pathname)),
-  )
 </script>
 
 <!-- <DrawerContainer> -->
 <!-- <NavBar> -->
 <SideBar activeTeam={data.tenant!}>
-  <ModalContainer />
-  {#if !disableTransition}
-    <!-- <Transition key={data.transition_key}> -->
-      {@render children()}
-    <!-- </Transition> -->
-  {:else}
-    {@render children()}
-  {/if}
+<ModalContainer />
+<!-- <Transition key={data.transition_key}> -->
+{@render children()}
+<!-- </Transition> -->
 </SideBar>
 <!-- </NavBar> -->
 <!-- </DrawerContainer> -->
