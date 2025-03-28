@@ -36,7 +36,7 @@
   }
 </script>
 
-<div class="min-h-[93vh] bg-gradient-to-br from-gray-100 to-gray-50">
+<div class="h-full bg-gradient-to-br from-gray-100 to-gray-50">
   <div class="flex">
     <main class="ml-16 flex-1 p-6">
       <div class="mx-auto max-w-5xl rounded-box bg-base-100 p-8 shadow-lg">

@@ -16,7 +16,7 @@
   })}
 />
 
-<main class="flex min-h-[90vh] items-center justify-center bg-base-200">
+<main class="flex h-full items-center justify-center bg-base-200">
   <div class="w-full max-w-sm rounded-lg bg-base-100 p-8 shadow-lg">
     <h1 class="text-center text-2xl font-semibold">Login com senha</h1>
     <form

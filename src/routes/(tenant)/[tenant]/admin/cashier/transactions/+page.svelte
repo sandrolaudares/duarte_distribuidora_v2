@@ -133,7 +133,7 @@
       </thead>
       <tbody>
         {#each data.rows as row (row.id)}
-          <tr>
+          <tr class="{row.text.includes('Fechamento') ? '!bg-error/10' : ''} {row.text.includes('Abertura') ? '!bg-success/10' : ''}">
             <td>{row.id}</td>
             <td>{row.username}</td>
             <td>{row.cashier ? row.cashier : 'N/A'}</td>

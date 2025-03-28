@@ -17,7 +17,7 @@
   })}
 />
 
-<main class="flex min-h-[90vh] items-center justify-center bg-base-200">
+<main class="flex h-full items-center justify-center bg-base-200">
   <div class="w-full max-w-sm rounded-lg p-8 shadow-lg bg-base-100">
     <h1 class="text-center text-2xl font-semibold">Criar conta</h1>
     <form method="post" use:enhance={() => {
