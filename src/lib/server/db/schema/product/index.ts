@@ -66,6 +66,10 @@ export const productItemTable = sqliteTable('product_item', {
     onDelete: 'set null',
   }),
   quantity: integer('quantity').notNull().default(1),
+
+  tipo : text('tipo', ['bebida','comida']).default('bebida').notNull(),
+  unidade: integer('unidade'),
+
   image: integer('image_id').references(() => imageTable.id),
   retail_price: integer('retail_price').notNull(),
   wholesale_price: integer('wholesale_price').notNull(),
