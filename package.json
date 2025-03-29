@@ -1,6 +1,6 @@
 {
-  "name": "deds-template",
-  "version": "0.6.9",
+  "name": "duarte-distribuidora",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "vite dev",
