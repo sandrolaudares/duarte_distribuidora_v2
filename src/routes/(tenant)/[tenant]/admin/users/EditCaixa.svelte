@@ -1,32 +1,41 @@
 <script lang="ts">
-    import { page } from '$app/stores'
-    import Loading from '$lib/components/Loading.svelte'
-    import { modal } from '$lib/components/modal'
-    import type { DatabaseUser, SelectCashier, SelectUser } from '$lib/server/db/schema'
-    import { roleEnum } from '$lib/utils/permissions'
-    import type { Permission, Role } from '$lib/utils/permissions'
-    import { trpc } from '$trpc/client'
+  import { page } from '$app/stores'
+  import Loading from '$lib/components/Loading.svelte'
+  import { modal } from '$lib/components/modal'
+  import type {
+    DatabaseUser,
+    SelectCashier,
+    SelectUser,
+  } from '$lib/server/db/schema'
+  import { trpc } from '$trpc/client'
   import { onMount } from 'svelte'
-    import { toast } from 'svelte-sonner'
-  
-    export let userId: string
-    export let userCashier: SelectUser
-  
-    let dialog: HTMLDialogElement
-    let selectedCashier: SelectCashier['id']
-  
-    let isLoading = false
-  
-    async function handleUpdateCashier() {
+  import { toast } from 'svelte-sonner'
+  import * as Select from '$lib/components/ui/select/index'
+  import { invalidateAll } from '$app/navigation'
+
+  let { userId, userCashier }: { userId: string; userCashier: SelectUser } =
+    $props()
+
+  let selectedCashier: string | undefined = $state(
+    userCashier.meta.caixa_id
+      ? userCashier.meta.caixa_id.toString()
+      : undefined,
+  )
+  let isLoading = $state(false)
+  let caixas: SelectCashier[] = $state([])
+
+  async function handleUpdateCashier() {
+    if (!selectedCashier) return
     try {
       isLoading = true
       await trpc($page).auth.updateUserCashier.mutate({
         userId: userId,
-        meta: { caixa_id: selectedCashier },
+        meta: { caixa_id: Number(selectedCashier) },
       })
-      toast.success('Caixa atribuido!')
+      toast.success('Caixa atribuído!')
+      invalidateAll()
+
       isLoading = false
-      window.location.reload()
     } catch (error: any) {
       isLoading = false
       toast.error('Falha')
@@ -34,7 +43,6 @@
     }
   }
 
-  let caixas: SelectCashier[] = []
   onMount(async () => {
     try {
       caixas = await trpc($page).distribuidora.getCaixas.query()
@@ -42,28 +50,30 @@
       toast.error(error.message)
     }
   })
-  </script>
-  
-  <div class="flex items-center gap-2">
-    <label class="form-control my-3 w-full">
-      <select class="select select-bordered" bind:value={selectedCashier}>
-        <!-- <option disabled selected>Escolha o cargo de {userName}</option> -->
-        <option value={userCashier.meta.caixa_id}>{userCashier.meta.caixa_id}</option>
-        <!--TODO: fix option {userCashier.meta.caixa_id}-->
-        {#each caixas as caixa}
-          {#if caixa.id !== userCashier.meta.caixa_id}
-            <option value={caixa.id}>{caixa.name}</option>
-          {/if}
-        {/each}
-      </select>
-    </label>
-    {#if selectedCashier != userCashier.meta.caixa_id}
+</script>
+
+<div class="mt-1 flex items-center gap-2">
+  <Select.Root type="single" bind:value={selectedCashier}>
+    <Select.Trigger class="w-[180px]">
+      {selectedCashier
+        ? (caixas.find(c => c.id.toString() === selectedCashier)?.name ??
+          'Carregando...')
+        : 'Selecione um caixa'}
+    </Select.Trigger>
+    <Select.Content>
+      {#each caixas as caixa}
+        <Select.Item value={caixa.id.toString()}>{caixa.name}</Select.Item>
+      {/each}
+    </Select.Content>
+  </Select.Root>
+
+  {#if selectedCashier && Number(selectedCashier) !== userCashier.meta.caixa_id}
     <button
       class="btn btn-primary"
-      disabled={(selectedCashier === userCashier.meta.caixa_id) || isLoading}
+      disabled={isLoading}
       onclick={handleUpdateCashier}
     >
       Salvar
     </button>
-    {/if}
-  </div>
+  {/if}
+</div>

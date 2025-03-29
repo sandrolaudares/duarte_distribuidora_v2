@@ -37,6 +37,17 @@ export const product = (db: TenantDbType) => ({
       },
     })
   },
+  getVisibleProducts: (id: SelectProduct['id']) => {
+    return db.query.productTable.findFirst({
+      where: eq(productTable.id, id),
+      with: {
+        items: {
+          where: eq(productItemTable.visible, true),
+        },
+        category: true,
+      },
+    })
+  },
   getProducts: () => {
     return db.select().from(productTable)
   },

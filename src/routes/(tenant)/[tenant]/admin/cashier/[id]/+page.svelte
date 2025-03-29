@@ -44,7 +44,6 @@
     }
     try {
       console.log(cart.meta.enderecoSelecionado)
-      // TODO: add new cases
       const resp = await trpc($page).customer.order.insetPaidOrder.mutate({
         order_info: {
           customer_id: cart.meta.clienteSelecionado?.id,
@@ -191,6 +190,7 @@
       total_pedido: cart.meta.isDelivery ? total + cart.meta.taxaEntrega : total,
       payments: [],
       cashier_id :caixa.id,
+      observacao,
       save: payments => {
         createOrder(payments)
       },
@@ -232,7 +232,7 @@
       bind:tipo_preco
     />
     <div
-      class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-4"
+      class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-3"
     >
       <CaixaColumn />
     </div>
@@ -260,10 +260,10 @@
         >
           <span class="mr-1">PREPARAR PARA ENTREGA</span>
         </button>
-        <button class="btn btn-primary w-full disabled:bg-opacity-50">
+        <!-- <button class="btn btn-primary w-full disabled:bg-opacity-50">
           <span class="mr-1">IMPRIMIR</span>
           {@html icons.print()}
-        </button>
+        </button> -->
         <button
           class="btn btn-primary w-full disabled:bg-opacity-50"
           disabled={Object.values(cart.cart).length === 0}

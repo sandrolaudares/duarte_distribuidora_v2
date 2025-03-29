@@ -14,7 +14,6 @@
   import { createInsertSchema } from 'drizzle-zod'
   import { Item } from '$lib/components/ui/dropdown-menu'
   import ListaProdutos from './ListaProdutos.svelte'
-  import { se } from 'date-fns/locale'
 
   export let data: PageData
 
@@ -70,7 +69,7 @@
   }
 </script>
 
-<div class="container mx-auto max-w-7xl p-4">
+<div class="p-4">
   <h1 class="mb-6 text-center text-3xl font-bold">
     Solicitar estoque para central
   </h1>

@@ -38,7 +38,6 @@ import { cashierTable } from '../distribuidora'
 import { TRPCError } from '@trpc/server'
 import { userTable } from '../user'
 import type { TenantDbType } from '../../tenant'
-import { id } from 'date-fns/locale'
 import { error } from '@sveltejs/kit'
 
 export const customer = (db: TenantDbType) => ({
@@ -63,9 +62,7 @@ export const customer = (db: TenantDbType) => ({
   getCustomerById: async (id: SelectCustomer['id']) => {
     return db.query.customerTable.findFirst({
       where: eq(customerTable.id, id),
-      with: {
-        adresses: true,
-      },
+      
     })
   },
 
@@ -180,6 +177,8 @@ export const customer = (db: TenantDbType) => ({
           },
         },
         transactions: true,
+        created_by: true,
+        motoboy: true,
       },
     })
   },
@@ -529,3 +528,5 @@ export const customer = (db: TenantDbType) => ({
 })
 export type CurrentOrders = ReturnType<typeof customer>['getCurrentOrders']
 export type UpdateOrder = ReturnType<typeof customer>['getOrderByID']
+export type CustomerWaddress = ReturnType<typeof customer>['getCustomerById']
+export type CustomerAddresses = ReturnType<typeof customer>['getCustomerAddress']

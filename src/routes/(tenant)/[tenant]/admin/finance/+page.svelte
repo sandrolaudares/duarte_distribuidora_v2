@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { navigating } from '$app/stores'
+  import { navigating } from '$app/state'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import { modal, FormModal } from '$lib/components/modal'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import {
     TableHandler,
     Datatable,
@@ -18,21 +18,42 @@
   import type { PageData } from './$types'
   import { toast } from 'svelte-sonner'
   import { trpc } from '$trpc/client'
-  import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
   import DateFilter from '$lib/components/DateFilter.svelte'
-  import { format } from 'date-fns'
   import ChangeExpireDate from './ChangeExpireDate.svelte'
-  import { TreeDeciduous } from 'lucide-svelte'
+  import { pageConfig } from '$lib/config'
+  import {
+    DateFormatter,
+    type DateValue,
+    getLocalTimeZone,
+  } from '@internationalized/date'
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
+  import { differenceInDays, getBgColor } from '$lib/utils/expire'
+  import { invalidateAll } from '$app/navigation'
+  import { flip } from 'svelte/animate'
+  import { cubicInOut } from 'svelte/easing'
+  import { formatCurrency } from '$lib/utils'
 
   let { data }: { data: PageData } = $props()
 
   const filters = new SSRFilters()
 
   const table = new TableHandler(data.rows, {
-    rowsPerPage: 100,
+    rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
     selectBy: 'id',
+    i18n: {
+      show: 'Mostrar',
+      entries: 'entradas',
+      previous: 'Anterior',
+      next: 'Próximo',
+      noRows: 'Nenhum encontrado',
+      filter: 'Filtrar',
+    },
+  })
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
   })
 
   table.setPage(Number(filters.get('page')) || 1)
@@ -40,39 +61,12 @@
     try {
       console.log(s)
       filters.fromState(s)
-      await $navigating?.complete
+      await navigating?.complete
     } catch (error) {
       console.error(error)
     }
     return data.rows
   })
-
-  function differenceInDays(expireAt: Date): number {
-    const today = new Date()
-    const expirationDate = new Date(expireAt)
-
-    today.setHours(0, 0, 0, 0)
-    expirationDate.setHours(0, 0, 0, 0)
-
-    const timeDifference = expirationDate.getTime() - today.getTime()
-    const dayDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24))
-
-    return dayDifference
-  }
-
-  function getBgColor(expireAt: Date) {
-    const daysDiff = differenceInDays(expireAt)
-    console.log(daysDiff)
-
-    if (daysDiff < 0) {
-      return 'bg-error text-error-content bg-opacity-50 '
-    } else if (daysDiff <= 4) {
-      return 'bg-warning text-warning-content bg-opacity-50 '
-    } else if (daysDiff <= 7) {
-      return 'table-zebra '
-    }
-    return 'table-zebra '
-  }
 
   function calculateSum() {
     return data.rows
@@ -81,33 +75,36 @@
   }
   let sum = $derived(calculateSum())
 
-  let isLoading = $state(false)
+  let loadingRows: Record<number, boolean> = $state({})
 
   async function handleUpdate(value: Date, key = '', row: any) {
+    loadingRows[row.id] = true
     const last_val = row[key]
+
     try {
-      isLoading = true
-      await trpc($page).customer.updateOrderExpireDate.mutate({
+      await trpc(page).customer.updateOrderExpireDate.mutate({
         order_id: row.id,
         expire_at: value,
       })
       row[key] = value
       toast.success('Atualizado com sucesso!')
-      setTimeout(() => {
-        window.location.reload()
-      }, 500)
+      // table.invalidate()
+      invalidateAll()
+      // table.rows = data.rows
     } catch (error) {
       row[key] = last_val
       toast.error('Erro ao atualizar')
-      isLoading = false
+    } finally {
+      loadingRows[row.id] = false
     }
   }
+
 </script>
 
 <h1 class="my-5 text-center text-2xl font-medium">
   Pedidos com pagamento pendente:
 </h1>
-<main class="container mx-auto h-full max-h-[calc(100vh-24vh)]">
+<main class="mx-4 h-full max-h-[calc(100vh-24vh)]">
   <select
     value="todos"
     onchange={e => {
@@ -123,15 +120,25 @@
     <option value="todos" selected={true}>Todos</option>
     <option value="atrasados">Pagamentos atrasados</option>
   </select>
-  <button class="btn btn-primary" onclick={()=>filters.clear('name','startDate','endDate','startExpireDate','endExpireDate','atrasados')}>Limpar filtros</button>
+  <button
+    class="btn btn-primary"
+    onclick={() =>
+      filters.clear(
+        'name',
+        'startDate',
+        'endDate',
+        'startExpireDate',
+        'endExpireDate',
+        'atrasados',
+      )}
+  >
+    Limpar filtros
+  </button>
   <Datatable {table} headless>
-    <!-- {#snippet header()}
-      <Search {table} />
-     
-    {/snippet} -->
-    <div class="spinner" class:active={table.isLoading}></div>
-    <!-- svelte-ignore component_name_lowercase -->
-    <table class="table border">
+    {#if table.isLoading}
+      <LoadingBackground />
+    {/if}
+    <table class=" table">
       <thead>
         <tr>
           <Th />
@@ -151,26 +158,29 @@
           <ThFilter {table} field="name" />
           <Th>
             <DateFilter
-              onchange={(start, end) => {
-                if (start != null && end != null) {
-                  let startDate = start.toString()
-                  let endDate = end.toString()
-                  filters.update({ startDate, endDate })
-                }
+            {filters}
+              onChange={(startDate, endDate) => {
+                if (!startDate || !endDate) return
+
+                filters.update({
+                  startDate: String(startDate),
+                  endDate: String(endDate),
+                })
               }}
             />
           </Th>
 
           <Th>
             <DateFilter
-              enableFutureDates={true}
-              enablePastDates={true}
-              onchange={(startExpire, endExpire) => {
-                if (startExpire != null && endExpire != null) {
-                  let startExpireDate = startExpire.toString()
-                  let endExpireDate = endExpire.toString()
-                  filters.update({ startExpireDate, endExpireDate })
-                }
+              {filters}
+              futureDates={true}
+              onChange={(startExpireDate, endExpireDate) => {
+                if (!startExpireDate || !endExpireDate) return
+
+                filters.update({
+                  startExpireDate: String(startExpireDate),
+                  endExpireDate: String(endExpireDate),
+                })
               }}
             />
           </Th>
@@ -181,14 +191,8 @@
         </tr>
       </thead>
       <tbody>
-        {#each data.rows as row}
-          <tr
-            class={table.selected.includes(row.id)
-              ? 'bg-base-300'
-              : row.expire_at
-                ? getBgColor(row.expire_at)
-                : ''}
-          >
+        {#each data.rows as row (row.id)}
+          <tr class={table.selected.includes(row.id) ? 'bg-base-200' : ''} animate:flip={{ duration: 500, easing: cubicInOut }}>
             <td>
               <input
                 type="checkbox"
@@ -199,39 +203,43 @@
               />
             </td>
             <td>{row.id}</td>
-            <td><b>{row.name}</b></td>
-            <td><b>{format(row.created_at!, 'dd/MM/yyyy')}</b></td>
+            <td>{row.name}</td>
+            <td>{row.created_at ? df.format(row.created_at) : ''}</td>
             <td>
-              <b>
-                <!-- {row.expire_at
-                  ? format(new Date(row.expire_at), 'dd/MM/yyyy')
-                  : 'Não registrado'} -->
-                {#if isLoading}
-                  Atualizando...
-                {:else}
-                  <ChangeExpireDate
-                    value={row.expire_at!}
-                    onUpdateValue={async (value: Date) => {
-                      handleUpdate(value, 'expire_at', row)
-                    }}
-                  />
-                {/if}
-              </b>
+              {#if loadingRows[row.id] == true}
+                Atualizando...
+              {:else}
+                <ChangeExpireDate
+                  {df}
+                  value={row.expire_at ? new Date(row.expire_at) : new Date()}
+                  onUpdateValue={async value => {
+                    const dateValue = new Date(value)
+                    dateValue.setUTCHours(23, 59, 59, 999)
+
+                    handleUpdate(dateValue, 'expire_at', row)
+                  }}
+                />
+              {/if}
             </td>
             <td>
-              <b>
-                {#if row.expire_at}
-                  {#if differenceInDays(row.expire_at) < 0}
-                    VENCIDO!
-                  {:else if differenceInDays(row.expire_at) === 0}
-                    Vence hoje!
-                  {:else}
-                    {differenceInDays(row.expire_at) + ' dias'}
+              <b
+                class="{row.expire_at ? getBgColor(row.expire_at) : ''} text-center">
+                {#if loadingRows[row.id] == true}
+                  Atualizando...
+                {:else}
+                  {#if row.expire_at}
+                    {#if differenceInDays(row.expire_at) < 0}
+                      VENCIDO!
+                    {:else if differenceInDays(row.expire_at) === 0}
+                      Vence hoje!
+                    {:else}
+                      {differenceInDays(row.expire_at) + ' dias'}
+                    {/if}
                   {/if}
                 {/if}
               </b>
             </td>
-            <td><b class="text-xl text-success">R${row.total / 100}</b></td>
+            <td><b class="text-xl text-success">{formatCurrency(row.total)}</b></td>
 
             <td>
               <a href="/admin/orders/{row.id}" class="badge badge-primary">
@@ -240,7 +248,7 @@
             </td>
           </tr>
         {/each}
-        <tr>
+        <tr class="sticky bottom-0 bg-colorr">
           <td></td>
           <td></td>
           <td></td>
@@ -250,9 +258,10 @@
 
           <td class="text-xl font-bold">
             Total: <span class="text-secondary">
-              R${sum
-                ? (sum / 100).toFixed(2)
-                : (data.totalSum / 100).toFixed(2)}
+              {sum
+                ? formatCurrency(sum)
+                :formatCurrency(data.totalSum)}
+                
             </span>
           </td>
         </tr>
@@ -271,6 +280,9 @@
 
 <style>
   thead {
+    background-color: oklch(var(--b1)) !important;
+  }
+  .bg-colorr {
     background-color: oklch(var(--b1)) !important;
   }
 </style>

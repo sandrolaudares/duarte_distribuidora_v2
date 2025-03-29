@@ -19,18 +19,29 @@
   import type { PageData } from './$types'
   import { toast } from 'svelte-sonner'
   import { trpc } from '$trpc/client'
-  import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
   import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
   import EditableCurrency from '$lib/components/editableCells/EditableCurrency.svelte'
+  import { pageConfig } from '$lib/config'
+  import { invalidateAll } from '$app/navigation'
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
+  import EditableBoolean from '$lib/components/editableCells/EditableBoolean.svelte'
 
   let { data }: { data: PageData } = $props()
 
   const filters = new SSRFilters()
 
   const table = new TableHandler(data.rows, {
-    rowsPerPage: 20,
+    rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
+    i18n: {
+      show: 'Mostrar',
+      entries: 'entradas',
+      previous: 'Anterior',
+      next: 'Próximo',
+      noRows: 'Nenhum encontrado',
+      filter: 'Filtrar',
+    },
   })
 
   table.setPage(Number(filters.get('page')) || 1)
@@ -47,27 +58,22 @@
 
   function add() {
     modal.open(FormModal, {
-      title: 'Create new Customer',
+      title: 'Criar novo cliente',
       fields: [
         {
-          name: 'is_retail',
-          label: 'Pessoa Fisica',
-          type: 'checkbox',
-        },
-        {
-          label: 'Name',
+          label: 'Nome',
           name: 'name',
           type: 'text',
           required: true,
         },
         {
-          label: 'Phone',
-          name: 'phone',
+          label: 'Celular',
+          name: 'cellphone',
           type: 'text',
         },
         {
-          name: 'cellphone',
-          label: 'CellPhone',
+          label: 'Telefone',
+          name: 'phone',
           type: 'text',
         },
         {
@@ -80,15 +86,19 @@
           label: 'CPF/CNPJ',
           type: 'text',
         },
+        {
+          name: 'is_retail',
+          label: 'Pessoa Fisica',
+          type: 'checkbox',
+        },
       ],
       save: async toSave => {
         try {
           const resp = await trpc($page).customer.insertCustomer.mutate(toSave)
 
           if (resp) {
-            toast.success('Cliente criado')
-            // invalidate()
-            window.location.reload()
+            toast.success('Cliente criado com sucesso')
+            invalidateAll()
           }
         } catch (error: any) {
           toast.error(error.message)
@@ -115,37 +125,39 @@
   }
 </script>
 
-<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
-  <section class="container mx-auto mb-4 px-4">
+<main class=" h-full max-h-[calc(100vh-20vh)]">
+  <section class=" mb-4 px-4">
     <div class="mt-2 flex items-center justify-between">
       <h1 class="text-2xl font-semibold">Clientes:</h1>
       <div class="flex gap-2">
-
         <button class="btn btn-primary min-w-96" onclick={add}>
           Criar cliente
         </button>
-      <button class="btn btn-secondary" onclick={()=>filters.clear('name','phone')}>Limpar filtros</button>
+        <button
+          class="btn btn-secondary"
+          onclick={() => filters.clear('name', 'phone')}
+        >
+          Limpar filtros
+        </button>
       </div>
     </div>
   </section>
   <Datatable {table}>
-    <!-- {#snippet header()}
-      <Search {table} />
-     
-    {/snippet} -->
-    <!-- svelte-ignore component_name_lowercase -->
+    {#if table.isLoading}
+      <LoadingBackground />
+    {/if}
     <table class="table table-zebra">
       <thead>
         <tr>
-          <ThSort {table} field="id">ID</ThSort>
-          <ThSort {table} field="name">Nome</ThSort>
-          <!-- <ThSort {table} field="email">Email</ThSort>
+          <Th>ID</Th>
+          <Th>Nome</Th>
+          <!-- <Th"email">Email</Th>
           <Th>CPF/CNPJ</Th> -->
-          <ThSort {table} field="is_retail">Tipo pessoa</ThSort>
+          <Th>Tipo pessoa</Th>
           <!-- <Th>RG/IE</Th> -->
           <Th>Telefone</Th>
           <Th>Créditos usados</Th>
-          <ThSort {table} field="max_credit">Máximo de créditos</ThSort>
+          <Th>Máximo de créditos</Th>
           <Th>Ver detalhes</Th>
         </tr>
         <tr>
@@ -162,18 +174,16 @@
         </tr>
       </thead>
       <tbody>
-        {#each data.rows as row}
+        {#each data.rows as row (row.id)}
           <tr>
             <td>{row.id}</td>
             <td>
-              <b>
                 <EditableCell
                   value={row.name}
                   onUpdateValue={async newValue => {
                     handleUpdate(newValue, 'name', row)
                   }}
                 />
-              </b>
             </td>
             <!-- <td>
               <b>
@@ -187,32 +197,35 @@
             </td>
             <td><b>{row.cpf_cnpj}</b></td> -->
             <td>
-              <b>{row.is_retail ? 'Pessoa física' : 'Pessoa Juridica'}</b>
+                <EditableBoolean
+                  labelTrue={"Pessoa Fisica"}
+                  labelFalse={"Pessoa Juridica"}
+                  value={row.is_retail}
+                  onUpdateValue={async (newValue:boolean) => {
+                    handleUpdate(Boolean(newValue), 'is_retail', row)
+                  }}
+                />
             </td>
             <!-- <td><b>{row.rg_ie}</b></td> -->
             <td>
-              <b>
                 <EditableCell
                   value={row.phone}
                   onUpdateValue={async newValue => {
                     handleUpdate(newValue, 'phone', row)
                   }}
                 />
-              </b>
             </td>
-            <td><b><UsedCredits id={row.id} /></b></td>
+            <td><UsedCredits id={row.id} /></td>
             <td>
-              <b>
                 <EditableCurrency
                   value={row.max_credit}
                   onUpdateValue={async newValue => {
                     handleUpdate(newValue, 'max_credit', row)
                   }}
                 />
-              </b>
             </td>
             <td>
-              <a href="/admin/customer/{row.id}" class="badge badge-primary">
+              <a href="/admin/customer/{row.id}/enderecos" class="badge badge-primary">
                 Detalhes
               </a>
             </td>
@@ -221,7 +234,7 @@
         {/each}
       </tbody>
     </table>
-    {#if table.rows.length === 0}
+    {#if data.rows.length === 0}
       <NoResults />
     {/if}
     {#snippet footer()}

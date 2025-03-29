@@ -99,7 +99,7 @@ const checkPermission = t.middleware(async ({ next, ctx, meta }) => {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
       message:
-        'Entre em contato com o a equipe de desenvolvimento, erro de permissão',
+        'erro de permissão',
     })
   }
   if (user.role !== 'admin') {

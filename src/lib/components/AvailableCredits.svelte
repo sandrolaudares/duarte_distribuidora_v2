@@ -4,6 +4,7 @@
     import { page } from '$app/stores'
     import { resolveHTTPResponse } from '@trpc/server/http'
     import { toast } from 'svelte-sonner'
+  import { formatCurrency } from '$lib/utils'
   
     let value: number | null = 0
     export let id
@@ -31,9 +32,9 @@
     Carregando...
   {:else if value !== null}
 
-  R${((max_credit-value) / 100).toFixed(2)}
+  {formatCurrency(max_credit)}
   {:else}
-  R$0.00
+  R$ 0.00
   {/if}
 </span>
   

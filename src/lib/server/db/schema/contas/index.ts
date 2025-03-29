@@ -15,6 +15,7 @@ export const contasPagarTable = sqliteTable('contas', {
   ...timestamps,
   fornecedor_id: integer('fornecedor_id').references(() => supplierTable.id),
   categoria_id: integer('categoria_id').references(() => categoriaConta.id),
+  pagamento_id: integer('pagamento_id').references(() => tipoPagamentoConta.id),
   descricao: text('descricao'),
   expire_at: integer('expire_at', {
     mode: 'timestamp',
@@ -37,6 +38,10 @@ export const contasPagarRelations = relations(contasPagarTable, ({ one }) => ({
     fields: [contasPagarTable.categoria_id],
     references: [categoriaConta.id],
   }),
+  pagamento: one(tipoPagamentoConta, {
+    fields:[contasPagarTable.pagamento_id],
+    references:[tipoPagamentoConta.id]
+  })
 }))
 
 export const categoriaConta = sqliteTable('categoria', {
@@ -45,11 +50,19 @@ export const categoriaConta = sqliteTable('categoria', {
   //TODO: AFTER CHANGE NAME TO UNIQUE
 })
 
+export const tipoPagamentoConta = sqliteTable('tipo_pagamento', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  nome: text('nome').notNull().unique(),
+})
+
 export type SelectConta = typeof contasPagarTable.$inferSelect
 export type InsertConta = typeof contasPagarTable.$inferInsert
 
 export type SelectCategoria = typeof categoriaConta.$inferSelect
 export type InsertCategoria = typeof categoriaConta.$inferInsert
+
+export type SelectTipoPagamento = typeof tipoPagamentoConta.$inferSelect
+export type insertTipoPagamento = typeof tipoPagamentoConta.$inferInsert
 
 export const insertContaSchema = createInsertSchema(contasPagarTable, {})
 export const insertCategoriaSchema = createInsertSchema(categoriaConta, {})

@@ -28,6 +28,8 @@ export function debounce<T extends (...args: any[]) => void>(
 }
 
 import { PUBLIC_DOMAIN } from '$env/static/public'
+import type { SSRFilters } from '$lib/components/datatable/filter.svelte'
+import { CalendarDate } from '@internationalized/date'
 
 export const subdomainRegex = new RegExp(
   // eslint-disable-next-line no-useless-escape
@@ -48,4 +50,25 @@ export function getDomainAndType(host: string): Domain {
   }
 
   return { domain: host, type: 'customDomain' }
+}
+
+
+export function getFilterValue(filters:SSRFilters,filterName: string) {
+  let startValue = filters.get(filterName)
+  if (!startValue) return undefined
+
+  let startDate = new Date(Number(startValue))
+  return new CalendarDate(
+    startDate.getFullYear(),
+    startDate.getMonth(),
+    startDate.getDate(),
+  )
+}
+
+export function formatCurrency (value:number) {
+  const valueInBRL = value /100
+  return valueInBRL.toLocaleString('pt-BR',{
+    style:'currency',
+    currency:'BRL'
+  })
 }

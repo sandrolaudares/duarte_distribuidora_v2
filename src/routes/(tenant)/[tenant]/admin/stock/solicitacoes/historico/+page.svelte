@@ -16,7 +16,6 @@
 
   import type { PageData } from './$types'
   import NoResults from '$lib/components/NoResults.svelte'
-  import { format } from 'date-fns'
 
   import { toast } from 'svelte-sonner'
 
@@ -25,6 +24,7 @@
   import { goto, invalidate, invalidateAll } from '$app/navigation'
   import Loading from '$lib/components/Loading.svelte'
   import DateFilter from '$lib/components/DateFilter.svelte'
+  import { DateFormatter } from '@internationalized/date'
 
   let { data }: { data: PageData } = $props()
 
@@ -36,6 +36,18 @@
     rowsPerPage: data.size,
     totalRows: data.count,
     selectBy: 'id',
+    i18n: {
+      show: 'Mostrar',
+      entries: 'entradas',
+      previous: 'Anterior',
+      next: 'Próximo',
+      noRows: 'Nenhum encontrado',
+      filter: 'Filtrar',
+    },
+  })
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
   })
 
   table.setPage(Number(filters.get('page')) || 1)
@@ -59,7 +71,7 @@
   </div>
 {/if}
 
-<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+<main class="mx-4 h-full max-h-[calc(100vh-20vh)]">
   <div class="flex items-center justify-between">
     <h1 class="my-5 text-center text-2xl font-medium">
       Historico de transferências:
@@ -81,13 +93,15 @@
           <ThFilter {table} field="sku_name" />
           <Th>
             <DateFilter
-              onchange={(start, end) => {
-                if (start != null && end != null) {
-                  let startDate = start.toString()
-                  let endDate = end.toString()
-                  filters.update({ startDate, endDate })
-                }
-              }}
+            
+            onChange={(startDate, endDate) => {
+              if (!startDate || !endDate) return
+        
+              filters.update({
+                startDate: String(startDate),
+                endDate: String(endDate),
+              })
+            }}
             />
           </Th>
           <Th />
@@ -95,11 +109,11 @@
         </tr>
       </thead>
       <tbody>
-        {#each data.rows as row}
+        {#each data.rows as row (row.id)}
           <tr>
             <td>{row.id}</td>
             <td>{row.sku_name}</td>
-            <td>{format(row.created_at!, 'dd/MM/yyyy')}</td>
+            <td>{df.format(row.created_at!)}</td>
             <td>
               {data.distribuidoras.find(
                 distribuidora => distribuidora.tenantId === row.toTenantId,

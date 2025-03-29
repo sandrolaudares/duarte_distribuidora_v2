@@ -3,7 +3,7 @@
   import Loading from '$lib/components/Loading.svelte'
   import { modal } from '$lib/components/modal'
   import type { DatabaseUser } from '$lib/server/db/schema'
-  import { permissionsEnum } from '$lib/utils/permissions'
+  import { formated_Permissions, permissionsEnum } from '$lib/utils/permissions'
   import type { Permission, Role } from '$lib/utils/permissions'
   import { trpc } from '$trpc/client'
   import { toast } from 'svelte-sonner'
@@ -52,7 +52,7 @@
       </button>
     </form>
     <h3 class="text-lg font-bold">Edite as permissões de {userName}</h3>
-    <h1><strong>Permissões selecionadas do úsuario:</strong> {selectedPermissions.join(', ')}</h1>
+    <h1><strong>Permissões selecionadas do úsuario:</strong> <span class="font-normal">{selectedPermissions.map(p => formated_Permissions[p] || p).join(', ')}</span></h1>
     {#if isLoading}
       <div class="my-10 flex items-center justify-center">
         <Loading />
@@ -62,7 +62,7 @@
         <div class="form-control">
           {#each permissionsEnum as permissao}
             <label class="label cursor-pointer">
-              <span class="label-text">{permissao}</span>
+              <span class="label-text">{formated_Permissions[permissao]}</span>
               <input
                 type="checkbox"
                 class="checkbox"

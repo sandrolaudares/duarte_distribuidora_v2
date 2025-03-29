@@ -18,6 +18,7 @@ import {
   deleteSessionTokenCookie,
   setSessionTokenCookie,
 } from '$lib/server/auth/cookies'
+import { userTable } from '.'
 
 export const auth = router({
   logOut: publicProcedure.query(async ({ ctx }) => {
@@ -257,6 +258,7 @@ export const auth = router({
           username: z.string().optional(),
           email: z.string().optional(),
           role: z.enum(roleEnum).optional(),
+          is_active:z.boolean().optional(),
         }),
       }),
     )
@@ -264,4 +266,7 @@ export const auth = router({
       const { userId, user } = input
       return await userController(tenantDb).updateUser(userId, user)
     }),
+     getUsers: publicProcedure.query(({ctx:{tenantDb}}) => {
+            return tenantDb!.select().from(userTable)
+          }),
 })

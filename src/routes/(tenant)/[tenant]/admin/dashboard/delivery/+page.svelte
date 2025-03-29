@@ -85,7 +85,26 @@
               ],
             },
             options: {
+              plugins : {
+                tooltip : {
+                  usePointStyle: true,
+                  callbacks: {
+                    label: function(context){
+                      return 'R$ ' + (context.raw).toLocaleString('pt-BR')
+                    }
+                  }
+                }
+              },
               indexAxis: 'y',
+              scales: {
+                x : {
+                  ticks: {
+                    callback : function(value) {
+                      return 'R$ ' + value.toLocaleString('pt-BR')
+                    }
+                  }
+                }
+              }
             },
           }}
           height={couriersHighestNumberDeliveries.length * 60}

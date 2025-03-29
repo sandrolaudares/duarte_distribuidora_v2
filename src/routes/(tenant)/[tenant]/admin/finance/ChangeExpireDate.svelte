@@ -1,20 +1,25 @@
 <script lang="ts" generics="Item">
-  import Datepicker from '$lib/components/input/date/datepicker.svelte'
-  import { format } from 'date-fns'
+  import { preventDefault } from 'svelte/legacy';
 
-  // type Item = $$Generic;
+  import { DateFormatter } from '@internationalized/date'
 
-  // export let row
-  // export let column
-  export let value: Date
-  export let onUpdateValue: (newValue: Date) => void
-
-  let isEditing = false
-
-  let inputElement: HTMLInputElement | undefined
-  $: if (isEditing) {
-    inputElement?.focus()
+  interface Props {
+    value: Date;
+    onUpdateValue: (newValue: Date) => void;
+    df: DateFormatter;
   }
+
+  let { value, onUpdateValue,df }: Props = $props();
+
+  let isEditing = $state(false)
+
+  let inputElement: HTMLInputElement | undefined = $state()
+
+  $effect.pre(()=>{
+    if (isEditing) {
+      inputElement?.focus()
+    }
+  })
 
   const handleCancel = () => {
     isEditing = false
@@ -25,32 +30,31 @@
     onUpdateValue(value)
     // }
   }
+
+  const today = new Date().toISOString().split('T')[0]
+  
 </script>
 
 {#if isEditing === true}
-  <form on:submit|preventDefault={handleSubmit}>
+  <form onsubmit={preventDefault(handleSubmit)}>
     <div class="date-filter flex gap-2">
       <input
         type="date"
+        id="expire_at"
+        class="input input-bordered h-3/4 w-full"
         bind:this={inputElement}
-        on:change={e => {
-          const v = (e.target as HTMLInputElement).value
-          console.log(v)
-          const dateV = new Date(v + 'T00:00:00')
-          value = dateV
-        }}
-        value={format(value, 'yyyy-MM-dd')}
-        min={format(new Date(), 'yyyy-MM-dd')}
+        bind:value={value}
+        min={today}
       />
       <button type="submit">✅</button>
-      <button on:click={handleCancel}>❌</button>
+      <button onclick={handleCancel}>❌</button>
     </div>
   </form>
 {:else}
   <button
-    on:click={() => (isEditing = true)}
+    onclick={() => (isEditing = true)}
     class={!value ? 'text-error' : ''}
   >
-    {value ? format(value, 'dd/MM/yyyy') : 'Não cadastrado'}
+    {value ? df.format(value) : 'Não cadastrado'}
   </button>
 {/if}

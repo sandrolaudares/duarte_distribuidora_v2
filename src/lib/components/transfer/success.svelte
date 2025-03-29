@@ -6,12 +6,16 @@
     SelectStockTransference,
     SelectTenant,
   } from '$lib/server/db/central/schema'
-  import { format } from 'date-fns'
+  import { DateFormatter } from '@internationalized/date'
 
   export let transferDetails: SelectStockTransference
 
   export let tenant: SelectTenant
   let showDetails = false
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'long',
+  })
 
   onMount(() => {
     setTimeout(() => {
@@ -47,9 +51,8 @@
           <dt class="font-medium opacity-50">Pedido realizado em:</dt>
           <dd class="">
             {transferDetails.created_at
-              ? format(
-                  new Date(transferDetails.created_at),
-                  'dd/MM/yyyy - hh:m',
+              ? df.format(
+                  new Date(transferDetails.created_at)
                 )
               : ''}
           </dd>

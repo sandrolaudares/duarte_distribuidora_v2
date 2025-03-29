@@ -16,7 +16,6 @@
 
   import type { PageData } from './$types'
   import NoResults from '$lib/components/NoResults.svelte'
-  import { format } from 'date-fns'
 
   import { toast } from 'svelte-sonner'
 
@@ -24,6 +23,8 @@
   import { page } from '$app/stores'
   import { goto, invalidate, invalidateAll } from '$app/navigation'
   import Loading from '$lib/components/Loading.svelte'
+  import { DateFormatter } from '@internationalized/date'
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -35,6 +36,18 @@
     rowsPerPage: data.size,
     totalRows: data.count,
     selectBy: 'id',
+    i18n: {
+      show: 'Mostrar',
+      entries: 'entradas',
+      previous: 'Anterior',
+      next: 'Próximo',
+      noRows: 'Nenhum encontrado',
+      filter: 'Filtrar',
+    },
+  })
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
   })
 
   table.setPage(Number(filters.get('page')) || 1)
@@ -80,7 +93,7 @@
   </div>
 {/if}
 
-<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+<main class="mx-4 h-full max-h-[calc(100vh-20vh)]">
   <div class="flex items-center justify-between">
     <h1 class="my-5 text-center text-2xl font-medium">
       Solicitações de transferencia:
@@ -93,9 +106,12 @@
       Aceitar transferencia
     </button>
   </div>
-  <Datatable {table} headless>
+  <Datatable {table} >
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table table-zebra rounded-none border">
+    {#if table.isLoading}
+      <LoadingBackground />
+    {/if}
+    <table class="table rounded-none">
       <thead>
         <tr>
           <Th></Th>
@@ -121,7 +137,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each data.rows as row}
+        {#each data.rows as row (row.id)}
           <tr class:active={table.selected.includes(row.id)}>
             <td>
               <input
@@ -138,7 +154,7 @@
               )?.name}
             </td>
             <td>{row.quantity}</td>
-            <td>{format(row.created_at!, 'dd/MM/yyyy')}</td>
+            <td>{df.format(row.created_at!)}</td>
           </tr>
         {/each}
       </tbody>

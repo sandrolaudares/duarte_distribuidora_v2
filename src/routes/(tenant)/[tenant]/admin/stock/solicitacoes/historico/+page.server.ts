@@ -12,6 +12,7 @@ import { stockTransference, tenants } from '$lib/server/db/central/schema'
 import { getDistribuidoras } from '$lib/server/db/central/constroller'
 
 import * as schema from '$lib/server/db/schema'
+import { pageConfig } from '$lib/config'
 
 export const load = (async ({ url, locals: { tenantDb, tenantInfo },depends}) => {
   depends('tenant:solicitacoes')
@@ -22,7 +23,7 @@ export const load = (async ({ url, locals: { tenantDb, tenantInfo },depends}) =>
   }
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
-  const size = 15
+  const size = pageConfig.rowPages
   const pageSize = Number(searchParams.get('pageSize') ?? size)
 
   const name = searchParams.get('sku_name')

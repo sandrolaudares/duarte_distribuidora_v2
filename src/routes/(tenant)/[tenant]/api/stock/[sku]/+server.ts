@@ -10,8 +10,9 @@ export const GET: RequestHandler = async ({ locals: { tenantDb }, params }) => {
   try {
     const sku = params.sku
     const skuItem = await stock(tenantDb!).getSKUByID(sku)
+    const lastCost = await stock(tenantDb!).queryLastCostPrice(sku)
     // return new Response(JSON.stringify(skuItem), {status: 200});
-    return json(skuItem)
+    return json({ ...skuItem, lastCost: lastCost?.cost_price })
   } catch (e) {
     console.log(e)
     return error(404, 'Not found')
@@ -56,6 +57,7 @@ export const POST: RequestHandler = async ({
             central_transference_id: data.central_transference_id,
             transference_type: 'IN_TRANSFERENCE',
           },
+          cost_price: data.cost_price_cents,
         })
 
         break
@@ -63,7 +65,7 @@ export const POST: RequestHandler = async ({
         if (skuItem.quantity < data.quantity) {
           return error(400, 'Sem estoque suficiente')
         }
-        if(data.quantity >= 0){
+        if (data.quantity >= 0) {
           return error(400, 'Quantidade inválida')
         }
 
@@ -76,6 +78,7 @@ export const POST: RequestHandler = async ({
             central_transference_id: data.central_transference_id,
             transference_type: 'OUT_TRANSFERENCE',
           },
+          // cost_price: data.cost_price_cents,
         })
         break
 

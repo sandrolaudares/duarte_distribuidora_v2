@@ -10,7 +10,12 @@
   import ShieldMap from 'lucide-svelte/icons/shield-check'
   import Transactions from 'lucide-svelte/icons/arrow-left-right'
 
-import {ChartArea,BadgeDollarSign} from 'lucide-svelte/icons'
+  import {
+    ChartArea,
+    BadgeDollarSign,
+    House,
+    ShoppingCart,
+  } from 'lucide-svelte/icons'
   import Settings2 from 'lucide-svelte/icons/settings-2'
   import User from 'lucide-svelte/icons/user'
   import NavMain from '$lib/components/sidebar/nav-main.svelte'
@@ -21,8 +26,9 @@ import {ChartArea,BadgeDollarSign} from 'lucide-svelte/icons'
   import { onMount, type ComponentProps } from 'svelte'
   import { getUserContext } from '$lib/stores/user'
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import type { SelectTenant } from '$lib/server/db/central/schema'
+  import { type Role } from '$lib/utils/permissions'
 
   const user = getUserContext()
 
@@ -36,70 +42,69 @@ import {ChartArea,BadgeDollarSign} from 'lucide-svelte/icons'
   } = $props()
 
   const data = $derived.by(() => {
+    if (!$user || $user.is_active === false) return { navMain: [], projects: [] }
     const nav = {
       navMain: [
+        {
+          title: 'Área do cliente',
+          url: '/admin',
+          icon: ShoppingCart,
+          isActive: true,
+          allowedRoles: ['customer'] as Role[],
+          items: [
+            {
+              allowedRoles: ['customer'] as Role[],
+              title: 'Cardápio',
+              url: '/customer/products',
+            },
+            {
+              allowedRoles: ['customer'] as Role[],
+              title: 'Carrinho',
+              url: '/customer/carrinho',
+            },
+          ],
+        },
         {
           title: 'Pessoas',
           url: '/admin',
           icon: User,
           isActive: true,
+          allowedRoles: ['admin', 'caixa', 'financeiro'] as Role[],
           items: [
             {
+              allowedRoles: ['admin'] as Role[],
               title: 'Usuários',
               url: '/admin/users',
             },
             {
+              allowedRoles: ['admin', 'caixa', 'financeiro'] as Role[],
               title: 'Clientes',
               url: '/admin/customer',
             },
             {
+              allowedRoles: ['admin', 'caixa'] as Role[],
               title: 'Fornecedores',
               url: '/admin/supplier',
             },
           ],
         },
-      ],
-      projects: [
-        {
-          name: 'Todos caixas',
-          url: '/admin/cashier',
-          icon: HandCoins,
-        },
-      ],
-    }
-
-    if ($user?.meta.caixa_id) {
-      nav.projects.push({
-        name: 'Ir direto para caixa',
-        url: `/admin/cashier/${$user.meta.caixa_id}`,
-        icon: CircleDolar,
-      })
-    }
-
-    if ($user?.role === 'admin') {
-      nav.navMain.push(
         {
           title: 'Pedidos',
           url: '/admin/orders',
           icon: ListOrdered,
           isActive: true,
+          allowedRoles: ['admin', 'caixa', 'financeiro'] as Role[],
           items: [
             {
+              allowedRoles: ['admin','financeiro'] as Role[],
               title: 'Todos pedidos',
               url: '/admin/orders/allorders',
             },
             {
+              allowedRoles: ['admin', 'caixa'] as Role[],
               title: 'Pedidos em aberto',
               url: '/admin/orders',
             },
-              // {
-              //   title: 'Pedidos fiado',
-              //   url: '/admin/finance',
-              // },
-            // {
-            // 	title: "Pedidos delivery",
-            // 	url: "/admin/orders/delivery",
-            // },
           ],
         },
         {
@@ -107,97 +112,124 @@ import {ChartArea,BadgeDollarSign} from 'lucide-svelte/icons'
           url: "/admin/products'",
           icon: beer,
           isActive: true,
+          allowedRoles: ['admin'] as Role[],
           items: [
             {
+              allowedRoles: ['admin'] as Role[],
               title: 'Produtos',
               url: '/admin/products',
             },
             {
+              allowedRoles: ['admin'] as Role[],
               title: 'Estoque',
               url: '/admin/stock',
             },
-            {
-              title: 'Transferir estoque',
-              url: '/admin/stock/transferir',
-            },
-            {
-              title: 'Transferencias',
-              url: '/admin/stock/solicitacoes',
-            },
-            {
-              title: 'Historico transferencias',
-              url: '/admin/stock/solicitacoes/historico',
-            },
           ],
         },
-      )
-      nav.projects.push(
         {
-          name: 'Transações dos caixas',
-          url: '/admin/cashier/transactions',
-          icon: Transactions,
-        },
-        {
-          name: 'Logs',
-          url: '/admin/logs',
-          icon: scroll,
-        },
-        {
-          name: 'Admin',
-          url: '/admin',
-          icon: ShieldMap,
-        },
-        {
-          name: 'Dashboards',
-          url: '/admin/dashboard',
-          icon: ChartArea,
-        },
-      )
-      nav.navMain.push(
-        {
+          allowedRoles: ['admin', 'financeiro'] as Role[],
           title: 'Financeiro',
           url: '/admin',
           icon: BadgeDollarSign,
           isActive: true,
           items: [
             {
+              allowedRoles: ['admin', 'financeiro'] as Role[],
               title: 'Pedidos fiado',
               url: '/admin/finance',
             },
             {
+              allowedRoles: ['admin', 'financeiro'] as Role[],
               title: 'Contas',
               url: '/admin/finance/contas',
             },
           ],
         },
-      )
+      ]
+        .filter(main => main.allowedRoles.includes($user.role))
+        .map(subItem => ({
+          ...subItem,
+          items: subItem.items.filter(item =>
+            item.allowedRoles.includes($user.role),
+          ),
+        })),
+      projects: [
+        {
+          allowedRoles: ['admin'] as Role[],
+          name: 'Todos caixas',
+          url: '/admin/cashier',
+          icon: HandCoins,
+        },
+        {
+          allowedRoles: ['admin'] as Role[],
+          name: 'Transações dos caixas',
+          url: '/admin/cashier/transactions',
+          icon: Transactions,
+        },
+        {
+          allowedRoles: ['admin'] as Role[],
+          name: 'Solicitações para central',
+          url: '/admin/solicitacoes',
+          icon: House,
+        },
+        {
+          allowedRoles: ['admin'] as Role[],
+          name: 'Logs',
+          url: '/admin/logs',
+          icon: scroll,
+        },
+        // {
+        //   allowedRoles: ['admin'] as Role[],
+        //   name: 'Admin',
+        //   url: '/admin',
+        //   icon: ShieldMap,
+        // },
+        {
+          allowedRoles: ['admin'] as Role[],
+          name: 'Dashboards',
+          url: '/admin/dashboard',
+          icon: ChartArea,
+        },
+      ].filter(project => {
+        return project.allowedRoles.includes($user.role)
+      }),
+    }
+
+    if (
+      $user &&
+      $user.meta.caixa_id &&
+      ($user.role === 'caixa' || $user.role === 'admin')
+    ) {
+      nav.projects.push({
+        allowedRoles: ['admin', 'caixa'] as Role[],
+        name: 'Ir direto para caixa',
+        url: `/admin/cashier/${$user.meta.caixa_id}`,
+        icon: CircleDolar,
+      })
     }
 
     return nav
-  })
-
-  let tenats: SelectTenant[] = $state([])
-
-  onMount(async () => {
-    try {
-      tenats = await trpc($page).distribuidora.getDistribuidoras.query()
-      if (!tenats) {
-        return
-      }
-    } catch (error: any) {
-      console.error(error.message)
-    }
   })
 </script>
 
 <Sidebar.Root bind:ref {collapsible} {...restProps}>
   <Sidebar.Header>
-    <TeamSwitcher teams={tenats} {activeTeam} />
+    <TeamSwitcher
+      {activeTeam}
+      delegateQuery={trpc(page).distribuidora.getDistribuidoras.query}
+    />
   </Sidebar.Header>
   <Sidebar.Content>
-    {#if data.navMain && data.projects && $user?.role === 'admin'}
+    {#if data.navMain.length}
       <NavMain items={data.navMain} />
+    {/if}
+    {#if data.projects.length}
       <NavProjects projects={data.projects} />
+    {/if}
+    {#if $user && !data.navMain.length && !data.projects.length}
+      <p class="mx-2 mt-4 text-center text-lg text-gray-700">
+        Você não tem permissão para acessar nenhuma rota
+      </p>
     {/if}
     {#if !$user}
       <Sidebar.Group class="group-data-[collapsible=icon]:hidden">

@@ -85,7 +85,7 @@
 </script>
 
 <input
-	class={`${nostyle ? '' : 'default-input'} ${className}`}
+	class={`${nostyle ? '' : 'input input-bordered w-full'} ${className}`}
 	bind:this={input}
 	on:keydown={keyDownHandler}
 	on:keyup={keyUpHandler}
@@ -96,13 +96,3 @@
 	{value}
 	{placeholder}
 />
-
-<style>
-	.default-input {
-		width: 30px;
-		height: 40px;
-		text-align: center;
-		border: 1px solid black;
-		margin: 0;
-	}
-</style>

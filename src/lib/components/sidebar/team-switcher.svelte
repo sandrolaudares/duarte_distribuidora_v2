@@ -8,22 +8,46 @@
   import type { SelectTenant } from '$lib/server/db/central/schema'
   import { PUBLIC_DOMAIN } from '$env/static/public'
   import { page } from '$app/state'
+  import { dev } from '$app/environment'
+  import { PlusIcon } from 'lucide-svelte'
+  import { getUserContext } from '$lib/stores/user'
+  import { toast } from 'svelte-sonner'
+  import Loading from '../Loading.svelte'
 
-  // This should be `Component` after lucide-svelte updates types
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let {
-    teams,
     activeTeam,
-  }: { teams: SelectTenant[]; activeTeam: SelectTenant } = $props()
+    delegateQuery,
+  }: {
+    activeTeam: SelectTenant
+    delegateQuery: () => Promise<SelectTenant[]>
+  } = $props()
+  
   const sidebar = useSidebar()
+  const user = getUserContext()
 
-  // let activeTeam = $state(teams[0]);
-  //TODO: SELECTED DISTRIBUIDORA
+  let teams: SelectTenant[] = $state([])
+
+  let isLoading = $state(true)
+
+  async function loadOptions() {
+    try {
+      if (teams.length === 0) {
+        teams = await delegateQuery()
+      }
+    } catch (error: any) {
+      console.error(error.message)
+      toast.error('Erro ao carregar distribuidoras')
+    } finally {
+      isLoading = false
+    }
+  }
+
+  const prefix = dev ? 'http' : 'https'
 </script>
 
 <Sidebar.Menu>
   <Sidebar.MenuItem>
-    <DropdownMenu.Root>
+    <DropdownMenu.Root onOpenChange={loadOptions}>
       <DropdownMenu.Trigger>
         {#snippet child({ props })}
           <Sidebar.MenuButton
@@ -41,7 +65,7 @@
               <span class="truncate font-semibold">
                 {activeTeam.name}
               </span>
-              <!-- <span class="truncate text-xs">{activeTeam.name}</span> -->
+              <span class="truncate text-xs">{activeTeam.subdomain}</span>
             </div>
             <ChevronsUpDown class="ml-auto" />
           </Sidebar.MenuButton>
@@ -54,32 +78,58 @@
         sideOffset={4}
       >
         <DropdownMenu.Label class=" text-xs">Distribuidoras</DropdownMenu.Label>
-        {#each teams as team, index}
-          <a href="http://{team.subdomain}.{PUBLIC_DOMAIN.replace('/','')}{page.url.pathname}">
+        {#if isLoading}
+          <div class="flex items-center justify-center">
+            <Loading />
+          </div>
+        {:else}
+          {#each teams.filter(team => team.subdomain != activeTeam.subdomain) as team, index}
+            <a
+              href="{prefix}://{team.subdomain}.{PUBLIC_DOMAIN.replace(
+                '/',
+                '',
+              )}{page.url.pathname}"
+            >
+              <DropdownMenu.Item class="gap-2 p-2">
+                <div
+                  class="flex size-6 items-center justify-center rounded-sm border"
+                >
+                  <!-- <team.logo class="size-4 shrink-0" /> -->
+                  <Beer class="size-4" />
+                </div>
+                {team.name}
+                <DropdownMenu.Shortcut>{index + 1}</DropdownMenu.Shortcut>
+              </DropdownMenu.Item>
+            </a>
+          {/each}
+        {/if}
+        {#if $user && $user.role === 'admin'}
+          <a href="/admin/criarDistribuidora">
             <DropdownMenu.Item class="gap-2 p-2">
               <div
                 class="flex size-6 items-center justify-center rounded-sm border"
               >
                 <!-- <team.logo class="size-4 shrink-0" /> -->
-                <Beer class="size-4" />
+                <PlusIcon class="size-4" />
               </div>
-              {team.name}
-              <DropdownMenu.Shortcut>{index + 1}</DropdownMenu.Shortcut>
+              Criar nova distribuidora
             </DropdownMenu.Item>
           </a>
-        {/each}
+          <DropdownMenu.Separator />
+          <DropdownMenu.Item class="gap-2 p-2">
+            <a class="font-medium text-foreground" href="/tenantprofile">
+              Editar essa distribuidora
+            </a>
+          </DropdownMenu.Item>
+        {/if}
         <DropdownMenu.Separator />
         <DropdownMenu.Item class="gap-2 p-2">
-          <a class="font-medium text-foreground" href="/tenantprofile">
-            Editar essa distribuidora
-          </a>
-        </DropdownMenu.Item>
-        <DropdownMenu.Separator />
-        <DropdownMenu.Item class="gap-2 p-2">
-          <a class="font-medium text-foreground" href="https://{PUBLIC_DOMAIN}">
+          <a
+            class="font-medium text-foreground"
+            href="{prefix}://{PUBLIC_DOMAIN}"
+          >
             Voltar para central
           </a>
-          <!--TODO: Arrumar o link-->
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>

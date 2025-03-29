@@ -26,9 +26,10 @@
       titleCard: 'Total de pedidos',
       textCard: financialSummary.basePeriod[0].total_paid
         ? 'R$ ' +
-          (financialSummary.basePeriod[0].total_paid / 100)
-            .toFixed(2)
+          ((financialSummary.basePeriod[0].total_paid / 100)
+            .toFixed(2))
             .toString()
+
         : '0',
       subTitle: financialSummary.comparedPeriod
         ? 'Periodo comparado: ' +
@@ -174,22 +175,21 @@
         <div class="w-full">
           <div class="divider"></div>
         </div>
-
-        <div class="w-full">
-          {#key topCustomerOrders.basePeriod}
-            <DefaultBarSvChart
-              fnLabel={topCustomerOrders.basePeriod.map(c => c.customer_name)}
-              fnData={topCustomerOrders.basePeriod.map(c => c.total_orders)}
-              height={200}
-              title={'Clientes com maior número de pedidos - Periodo Base'}
-              color={'#F4D002'}
-              tipoPeriodo={'Periodo base'}
-              tipoDadoEixoY={'Quantidade de pedidos'}
-            />
-          {/key}
-        </div>
       </div>
 
+      <div class="w-full">
+        {#key topCustomerOrders.basePeriod}
+          <DefaultBarSvChart
+            fnLabel={topCustomerOrders.basePeriod.map(c => c.customer_name)}
+            fnData={topCustomerOrders.basePeriod.map(c => c.total_orders)}
+            height={200}
+            title={'Clientes com maior número de pedidos - Periodo Base'}
+            color={'#F4D002'}
+            tipoPeriodo={'Periodo base'}
+            tipoDadoEixoY={'Quantidade de pedidos'}
+          />
+        {/key}
+      </div>
       {#if topCustomerOrders.comparedPeriod}
         <div class="w-full">
           {#key topCustomerOrders.comparedPeriod}
@@ -207,6 +207,7 @@
           {/key}
         </div>
       {/if}
+
       <div class="w-full">
         <div class="divider"></div>
       </div>

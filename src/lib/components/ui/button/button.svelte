@@ -12,8 +12,11 @@
 				outline:
 					"border-input bg-background hover:bg-accent hover:text-accent-foreground border",
 				secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-				ghost: "hover:bg-accent hover:text-accent-foreground",
+				ghost: "hover:bg-primary hover:text-primary-foreground",
 				link: "text-primary underline-offset-4 hover:underline",
+				outlinePrimary:
+					" hover:bg-primary hover:text-primary-foreground border",
+				select:"select select-bordered"
 			},
 			size: {
 				default: "h-10 px-4 py-2",

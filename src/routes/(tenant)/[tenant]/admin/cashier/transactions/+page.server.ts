@@ -22,25 +22,28 @@ import {
 } from 'drizzle-orm'
 import { error } from '@sveltejs/kit'
 import { Monad } from '$lib/utils'
+import { pageConfig } from '$lib/config'
 
 export const load = (async ({ url, locals: { tenantDb } }) => {
-  const size = 13
+  const size = pageConfig.rowPages
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
   const pageSize = Number(searchParams.get('pageSize') ?? size)
 
   const username = searchParams.get('username')
   const caixa = searchParams.get('cashier')
+  const caixaId = Number(caixa)
 
   const dateStart = searchParams.get('startDate')
   const dateEnd = searchParams.get('endDate')
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_order')
-
+  
   console.log('username', username)
   console.log('caixa', caixa)
-
+  
+  // try {
   let query = Monad.of(
     tenantDb!
       .select({
@@ -88,7 +91,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     .map(q =>
       innerJoinOnMany(q, schema.cashierTable, [
         eq(schema.logsTable.cashier_id, schema.cashierTable.id),
-        caixa ? like(schema.cashierTable.name, `%${caixa}%`) : undefined,
+        caixa ? eq(schema.cashierTable.id, caixaId) : undefined,
       ]),
     )
     .get()
@@ -102,7 +105,6 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     )
   }
 
-  try {
     const rows = await withPagination(query, page, pageSize)
 
     const total = await tenantDb!
@@ -119,14 +121,11 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     // .catch(e => 0)
     // .then(res => (typeof res === 'number' ? [{ count: res }] : res))
 
-    return { rows: rows ?? [], count: total[0].count, size }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (e: any) {
-    console.error(e)
-    // return error(404, e.message ?? e)
+    return { rows: rows, count: total[0].count, size }
+  // } catch (e: any) {
+  //   console.error(e)
+  //   // return error(404, e.message ?? e)
 
-    return { rows: [], count: 0, size: 0 }
-  }
-
-  return { rows: [], count: 0, size: 0 }
+  //   return { rows: [], count: 0, size: 0,cashier: [] }
+  // }
 }) satisfies PageServerLoad

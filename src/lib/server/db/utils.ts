@@ -12,15 +12,22 @@ import {
   SQL,
   sql,
   type AnyColumn,
+  WithSubquery,
 } from 'drizzle-orm'
 import {
+  SQLiteColumn,
+  SQLiteSelectQueryBuilderBase,
   SQLiteTable,
   getTableConfig,
   integer,
   type SQLiteSelect,
+  type SQLiteSelectQueryBuilder,
+  type SelectedFields,
+  type SubqueryWithSelection,
 } from 'drizzle-orm/sqlite-core'
 
-import { subDays } from 'date-fns'
+import { today } from '@internationalized/date'
+import type { TenantDbType } from './tenant'
 
 // export async function tableHelper<T extends SQLiteSelect>(
 //   qb: T,
@@ -52,6 +59,29 @@ export function withPagination<T extends SQLiteSelect>(
 ) {
   return qb.limit(pageSize).offset((page - 1) * pageSize)
 }
+
+export function _withs<T extends WithSubquery<string, Record<string, unknown>>>(
+  db: TenantDbType,
+  cte: T,
+) {
+  return db.with(cte)
+}
+
+export function _selectBuilder<
+  T extends WithSubquery<string, Record<string, unknown>>,
+>(db: TenantDbType, columns: SelectedFields, cte: T) {
+  return db.with(cte).select(columns)
+}
+
+export const getDateRangeCondition = (startDate: string | null, endDate: string | null, column: SQLiteColumn) => {
+  if (startDate && endDate) {
+    return and(
+      gte(column, new Date(Number(startDate))),
+      lte(column, new Date(Number(endDate)))
+    );
+  }
+  return undefined;
+};
 
 export function getSQLiteColumn<T extends SQLiteTable>(
   table: T,
@@ -134,14 +164,16 @@ export function innerJoinOnMany<T extends SQLiteSelect>(
 export function withinDate<T extends SQLiteSelect>(
   qb: T,
   column: AnyColumn,
-  startDate: Date = subDays(new Date(), 7),
+  startDate = today('America/Sao_Paulo').subtract({ days: 7 }),
   endDate: Date,
 ) {
   return qb.where(and(gte(column, startDate), lte(column, endDate)))
 }
 
 export function withinDate2(
-  startDate: Date = subDays(new Date(), 7),
+  startDate = today('America/Sao_Paulo')
+    .subtract({ days: 7 })
+    .toDate('America/Sao_Paulo'),
   endDate: Date,
 ) {
   return function <T extends SQLiteSelect>(qb: T, column: AnyColumn) {

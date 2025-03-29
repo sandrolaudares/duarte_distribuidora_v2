@@ -7,8 +7,7 @@
   import SvChart from '../SvChart.svelte'
 
   let { data }: { data: PageData } = $props()
-  const { corporateClientsSortedDelayOrder } = $derived(data);
-
+  const { corporateClientsSortedDelayOrder } = $derived(data)
 </script>
 
 <div class="flex flex-col gap-3 lg:flex-row">
@@ -29,26 +28,47 @@
                   {
                     label: 'Divida',
                     barThickness: 30,
-                    data: corporateClientsSortedDelayOrder.map(c => c.totalDebt / 100),
+                    data: corporateClientsSortedDelayOrder.map(
+                      c => c.totalDebt / 100,
+                    ),
                     backgroundColor: ['rgba(255, 0, 0)'],
                     order: 2,
                   },
                   {
                     label: 'Total pago',
                     barThickness: 30,
-                    data: corporateClientsSortedDelayOrder.map(c => c.totalPaid / 100),
+                    data: corporateClientsSortedDelayOrder.map(
+                      c => c.totalPaid / 100,
+                    ),
                     backgroundColor: ['rgba(0, 128, 0)'],
                     order: 1,
                   },
                 ],
               },
               options: {
+                plugins: {
+                  tooltip: {
+                    usePointStyle: true,
+                    callbacks: {
+                      label: function (context) {
+                        return 'R$ ' + context.raw.toLocaleString('pt-BR')
+                      },
+                    },
+                  },
+                },
+                indexAxis: 'y',
                 scales: {
                   y: {
                     stacked: true,
                   },
+                  x: {
+                    ticks: {
+                      callback: function (value) {
+                        return 'R$ ' + value.toLocaleString('pt-BR')
+                      },
+                    },
+                  },
                 },
-                indexAxis: 'y',
               },
             }}
             height={corporateClientsSortedDelayOrder.length * 60}
@@ -62,14 +82,17 @@
             config={{
               type: 'bar',
               data: {
-                labels: corporateClientsSortedDelayOrder.map(c => c.debtorName).slice(0,5),
+                labels: corporateClientsSortedDelayOrder
+                  .map(c => c.debtorName)
+                  .slice(0, 5),
                 datasets: [
                   {
                     label: 'Dívida',
-                    data: corporateClientsSortedDelayOrder.map(c => c.totalDebt / 100).slice(0,5),
+                    data: corporateClientsSortedDelayOrder
+                      .map(c => c.totalDebt / 100)
+                      .slice(0, 5),
                     backgroundColor: ['rgba(234, 203, 22, 1)'],
                     barThickness: 50,
-                    
                   },
                 ],
               },
@@ -87,14 +110,13 @@
     </Card.Header>
     <Card.Content>
       <RecentSales
-        textRecentSale={
-          corporateClientsSortedDelayOrder.map((c) => {
-            return {
-              title : c.debtorName,
-              value : "R$" + (c.totalDebt ? c.totalDebt / 100 : 0).toString(),
-              subTitle : c.totalOrders.toString()
-            }
-          })}
+        textRecentSale={corporateClientsSortedDelayOrder.map(c => {
+          return {
+            title: c.debtorName,
+            value: 'R$' + (c.totalDebt ? c.totalDebt / 100 : 0).toLocaleString('pt-BR'),
+            subTitle: c.totalOrders.toString(),
+          }
+        })}
       />
     </Card.Content>
   </Card.Root>

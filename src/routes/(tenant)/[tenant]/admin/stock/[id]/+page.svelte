@@ -30,11 +30,11 @@
   import type { PageData } from './$types'
   import { toast } from 'svelte-sonner'
   import { trpc } from '$trpc/client'
-  import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
-  import { format } from 'date-fns'
   import { goto } from '$app/navigation'
-  import { icons } from '$lib/utils'
+  import { formatCurrency, icons } from '$lib/utils'
+  import { pageConfig } from '$lib/config'
+  import { DateFormatter } from '@internationalized/date'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -42,8 +42,16 @@
   let estoque = data.sku
 
   const table = new TableHandler(data.rows, {
-    rowsPerPage: 13,
+    rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
+    i18n: {
+      show: 'Mostrar',
+      entries: 'entradas',
+      previous: 'Anterior',
+      next: 'Próximo',
+      noRows: 'Nenhum encontrado',
+      filter: 'Filtrar',
+    },
   })
 
   table.setPage(Number(filters.get('page')) || 1)
@@ -56,6 +64,10 @@
       console.error(error)
     }
     return data.rows
+  })
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
   })
 
   let chartData = $derived.by(() => {
@@ -129,13 +141,13 @@
     </div>
     <div class="mb-5 flex gap-2">
       <div class=" h-[70vh] w-full max-w-[50%] overflow-x-auto">
-        <Datatable {table} headless>
+        <Datatable {table} >
           <!-- {#snippet header()}
           <Search {table} />
          
         {/snippet} -->
           <!-- svelte-ignore component_name_lowercase -->
-          <table class="table table-zebra rounded-sm border">
+          <table class="table table-zebra rounded-sm">
             <thead>
               <tr>
                 <Th>Data</Th>
@@ -145,15 +157,15 @@
               </tr>
             </thead>
             <tbody>
-              {#each data.rows as row}
+              {#each data.rows as row (row.id)}
                 <tr>
                   <td>
-                    {format(new Date(row.created_at || ''), 'dd/MM/yyyy')}
+                    {df.format(new Date(row.created_at || ''))}
                   </td>
                   <td>{row.type}</td>
                   <td>{row.quantity}</td>
                   <td>
-                    R${row.cost_price ? (row.cost_price / 100).toFixed(2) : 0.0}
+                    {row.cost_price ? formatCurrency(row.cost_price) : 'R$ 0,00'}
                   </td>
                 </tr>
               {/each}
@@ -187,7 +199,7 @@
               <Axis placement="left" grid rule />
               <Axis
                 placement="bottom"
-                format={d => format(d, 'dd/MM/yyyy')}
+                format={d => df.format(d)}
                 rule
                 tickLabelProps={{
                   rotate: 290,
@@ -205,7 +217,7 @@
 
             <Tooltip.Root let:data>
               <Tooltip.Header>
-                {format(data.created_at, 'dd/MM/yyy')}
+                {df.format(data.created_at)}
               </Tooltip.Header>
               <Tooltip.List>
                 <Tooltip.Item

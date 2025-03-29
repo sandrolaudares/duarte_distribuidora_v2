@@ -19,16 +19,26 @@
   import type { PageData } from './$types'
   import { toast } from 'svelte-sonner'
   import { trpc } from '$trpc/client'
-  import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
+  import { pageConfig } from '$lib/config'
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
+  import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
 
   let { data }: { data: PageData } = $props()
 
   const filters = new SSRFilters()
 
   const table = new TableHandler(data.rows, {
-    rowsPerPage: 10,
+    rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
+    i18n: {
+      show: 'Mostrar',
+      entries: 'entradas',
+      previous: 'Anterior',
+      next: 'Próximo',
+      noRows: 'Nenhum encontrado',
+      filter: 'Filtrar',
+    },
   })
 
   table.setPage(Number(filters.get('page')) || 1)
@@ -46,10 +56,29 @@
   function add() {
     modal.open(ModalSupplierComplete, {})
   }
+
+  async function handleUpdateSup(value: string, key = '', row: any) {
+    const last_val = row[key]
+    if(!value) {
+      toast.error('Valor inválido')
+      return
+    }
+    try {
+      await trpc($page).stock.updateSupplier.mutate({
+        id: row.id,
+        supplier: { [key]: value },
+      })
+      row[key] = value
+      toast.success('Atualizado com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao atualizar')
+      row[key] = last_val
+    }
+  }
 </script>
 
-<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
-  <section class="container mx-auto mb-4 px-4">
+<main class="h-full max-h-[calc(100vh-20vh)]">
+  <section class="mb-4 px-4">
     <div class="mt-2 flex items-center justify-between">
       <h1 class="text-2xl font-semibold">Fornecedores:</h1>
       <button class="btn btn-primary min-w-96" onclick={add}>
@@ -62,6 +91,9 @@
       <Search {table} />
      
     {/snippet} -->
+    {#if table.isLoading}
+      <LoadingBackground />
+    {/if}
     <table class="table table-zebra">
       <thead>
         <tr>
@@ -81,19 +113,49 @@
           <Th />
           <ThFilter {table} field="telephone_1" />
           <Th />
-          <Th />
         </tr>
       </thead>
       <tbody>
-        {#each table.rows as row}
+        {#each table.rows as row (row.id)}
           <tr>
             <td>{row.id}</td>
-            <td><b>{row.name}</b></td>
-            <td><b>{row.razao_social}</b></td>
-            <td><b>{row.cnpj_cpf}</b></td>
-            <td><b>{row.ie_rg}</b></td>
-            <td><b>{row.telephone_1}</b></td>
-            <td><b>{row.cep}</b></td>
+            <td>
+              <EditableCell
+                value={row.name}
+                onUpdateValue={async (newValue) => {
+                  handleUpdateSup(newValue as string, 'name', row)
+                }}
+              /></td>
+            <td><EditableCell
+              value={row.razao_social}
+              onUpdateValue={async (newValue) => {
+                handleUpdateSup(newValue as string, 'razao_social', row)
+              }}
+            /></td>
+            <td><EditableCell
+              value={row.cnpj_cpf}
+              onUpdateValue={async (newValue) => {
+                handleUpdateSup(newValue as string, 'cnpj_cpf', row)
+              }}
+            /></td>
+            <td><EditableCell
+              value={row.ie_rg}
+              onUpdateValue={async (newValue) => {
+                handleUpdateSup(newValue as string, 'ie_rg', row)
+              }}
+            /></td>
+            <td><EditableCell
+              value={row.telephone_1}
+              onUpdateValue={async (newValue) => {
+                handleUpdateSup(newValue as string, 'telephone_1', row)
+              }}
+            /></td>
+            <td><EditableCell
+              value={row.cep}
+              onUpdateValue={async (newValue) => {
+                handleUpdateSup(newValue as string, 'cep', row)
+              }}
+            /></td>
           </tr>
         {/each}
       </tbody>

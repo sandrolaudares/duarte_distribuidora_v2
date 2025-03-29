@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { CurrentOrders } from '$db/schema/customer/controller.ts'
-  import { getImagePath } from '$lib/utils'
+  import { formatCurrency, getImagePath } from '$lib/utils'
 
   export let click_confirm = () => {}
   export let click_refuse = () => {}
@@ -122,7 +122,7 @@
       <div class="">
         <div class="text-xl flex items-center gap-2">
           <span class="font-semibold text-xl">Valor do pedido:</span>
-          <span class="text-success text-2xl font-bold">R${(order.total / 100).toFixed(2)}</span>
+          <span class="text-success text-2xl font-bold">{formatCurrency(order.total)}</span>
         </div>
       </div>
     </div>

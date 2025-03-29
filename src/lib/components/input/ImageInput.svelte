@@ -49,7 +49,7 @@
 </script>
 
 <div class="image-container object-cover">
-  <img width="130" height="130" src={getImagePath(image_id)} alt="" class="rounded-lg" />
+  <img src={getImagePath(image_id)} alt="" class="rounded-lg" />
 
   <input
     id="file-input"

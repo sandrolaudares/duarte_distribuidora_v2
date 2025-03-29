@@ -28,6 +28,7 @@ import {
 import { createInsertSchema } from 'drizzle-zod'
 import { TRPCError } from '@trpc/server'
 import { verify } from '../user/password'
+import { formatCurrency } from '$lib/utils'
 
 export const distribuidora = router({
   insertCashier: publicProcedure
@@ -60,7 +61,7 @@ export const distribuidora = router({
       z.object({
         id: z.number(),
         data: z.object({
-          taxa_por_km: z.number(),
+          taxa_por_km: z.number().optional(),
           name: z.string().optional(),
           address: z.string().optional(),
           lat: z.number().optional(),
@@ -88,12 +89,12 @@ export const distribuidora = router({
       const { tenantDb, user } = ctx
 
       await bugReport(tenantDb).insertLogs({
-        text: `Abertura de caixa com R$${(data.amount / 100).toFixed(2)}`,
+        text: `Abertura de caixa com ${formatCurrency(data.amount)}`,
         created_by: user?.id,
         metadata: {
           cashier_id: id,
         },
-        cashier_id:id,
+        cashier_id: id,
         type: 'CAIXA',
         pathname: '',
         routeName: 'Abrir caixa',
@@ -117,12 +118,12 @@ export const distribuidora = router({
       const [info] = await distribuidoraController(tenantDb).getCashierById(id)
 
       await bugReport(tenantDb).insertLogs({
-        text: `Fechamento de caixa com R$${(info.currency / 100).toFixed(2)}`,
+        text: `Fechamento de caixa com ${formatCurrency(info.currency)}`,
         created_by: user?.id,
         metadata: {
           cashier_id: id,
         },
-        cashier_id:id,
+        cashier_id: id,
         type: 'CAIXA',
         pathname: '',
         routeName: 'Fechar caixa',
@@ -188,7 +189,11 @@ export const distribuidora = router({
     .mutation(async ({ input, ctx }) => {
       const data = input
       console.log(data)
-      await solicitarTransference(data)
+
+      await solicitarTransference({
+        ...data,
+        meta_data: {},
+      })
     }),
 
   refuseTransference: publicProcedure
@@ -217,6 +222,22 @@ export const distribuidora = router({
   getAdmins: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
     return await distribuidoraController(tenantDb).getAdmins()
   }),
+
+  realizarImpressao: publicProcedure
+    .input(
+      z.object({
+        order_id: z.number(),
+        tenant_id: z.number(),
+      }),
+    )
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
+      const { order_id, tenant_id } = input
+      console.log(input)
+      return await distribuidoraController(tenantDb).imprimirPedido(
+        order_id,
+        tenant_id,
+      )
+    }),
 
   validateAdminPassword: publicProcedure
     .input(
@@ -271,7 +292,10 @@ export const distribuidora = router({
           message: `${adminUser.username} validou ${input.reason}`,
         }
       } else {
-        throw new TRPCError({code:'UNAUTHORIZED',message:`Senha inválida para ${adminUser.username}`})
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: `Senha inválida para ${adminUser.username}`,
+        })
       }
     }),
 })

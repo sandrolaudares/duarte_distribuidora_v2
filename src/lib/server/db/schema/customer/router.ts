@@ -21,6 +21,7 @@ import {
   orderItemTable,
   orderTypeEnum,
   type InsertLogs,
+  logsTable,
 } from '$lib/server/db/schema'
 
 import { distribuidora as distribuidoraController } from '$db/controller'
@@ -31,7 +32,12 @@ import { TRPCError } from '@trpc/server'
 import { geocodeAddress, getDistanceFromLatLonInKm } from '$lib/utils/distance'
 import { env } from '$env/dynamic/private'
 import { getDistribuidoraLatLong } from '../../central/constroller'
-import { format } from 'date-fns'
+import { DateFormatter } from '@internationalized/date'
+import { formatCurrency } from '$lib/utils'
+
+const df = new DateFormatter('pt-BR', {
+  dateStyle: 'medium',
+})
 
 export const customer = router({
   insertCustomer: publicProcedure
@@ -65,6 +71,7 @@ export const customer = router({
           used_credit: z.number().optional(),
           email: z.string().email().optional(),
           is_retail: z.boolean().optional(),
+          cpf_cnpj: z.string().optional(),
         }),
       }),
     )
@@ -348,7 +355,7 @@ export const customer = router({
 
         for (const payment of order_info.payment_info) {
           await bugReport(tenantDb).insertLogs({
-            text: `Pagamento de R$${(payment.amount_paid / 100).toFixed(2)} para pedido ${order.id}${payment.troco ? ` com troco de R$${(payment.troco / 100).toFixed(2)}` : ''}`,
+            text: `Pedido realizado com pagamento de ${formatCurrency(payment.amount_paid)} para pedido ${order.id}${payment.troco ? ` com troco de ${formatCurrency(payment.troco)}` : ''}`,
             created_by: userId,
             metadata: {
               order_id: order.id,
@@ -520,7 +527,7 @@ export const customer = router({
           }
 
           await bugReport(tenantDb).insertLogs({
-            text: `Pagamento de R$${(payment_info.amount_paid / 100).toFixed(2)} para pedido ${payment_info.order_id}`,
+            text: `Pagamento de ${formatCurrency(payment_info.amount_paid)} para pedido ${payment_info.order_id}`,
             created_by: userId,
             metadata: {
               order_id: payment_info.order_id,
@@ -558,22 +565,26 @@ export const customer = router({
       const { order_id, expire_at } = input
       const { tenantDb } = ctx
       const user = ctx.locals.user
-      await bugReport(tenantDb).insertLogs({
-        text: `${user?.username} atualizou a data de vencimento do pedido ${order_id} para ${format(expire_at, 'dd/MM/yyyy')}`,
-        created_by: user?.id,
-        metadata: {
+
+      await tenantDb.transaction(async tx => {
+        await tx.insert(logsTable).values({
+          text: `${user?.username} atualizou a data de vencimento do pedido ${order_id} para ${df.format(expire_at)}`,
+          created_by: user?.id,
+          metadata: {
+            order_id,
+            expire_at,
+          },
           order_id,
-          expire_at,
-        },
-        order_id,
-        type: 'SYSTEM',
-        pathname: '',
-        routeName: 'Atualizar Pedido',
+          type: 'SYSTEM',
+          pathname: '',
+          routeName: 'Atualizar Pedido',
+        })
+
+        return await tx
+          .update(customerOrderTable)
+          .set({ expire_at: expire_at })
+          .where(eq(customerOrderTable.id, order_id))
       })
-      return await customerController(tenantDb).updateOrderExpireDate(
-        order_id,
-        expire_at,
-      )
     }),
 
   updateOrderStatus: publicProcedure
@@ -654,14 +665,53 @@ export const customer = router({
       )
     }),
 
-    cancelOrder : publicProcedure
+    updateMotoboyOrder: publicProcedure
+    .meta({
+      routeName: 'Atualizar Pedido',
+      permission: 'atualizar_pedidos',
+    })
+    .use(middleware.logged)
+    .use(middleware.auth)
+    .input(
+      z.object({
+        order_id: z.number(),
+        data: z.object({
+          motoboy_id: z.string(),
+        }),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { order_id, data } = input
+      const { tenantDb } = ctx
+      const user = ctx.locals.user
+
+      tenantDb.transaction(async(tx)=>{
+        await tx.insert(logsTable).values({
+          text: `${user?.username} atualizou o motoboy do pedido ${order_id}`,
+          created_by: user?.id,
+          metadata: {
+            order_id,
+          },
+          order_id,
+          type: 'SYSTEM',
+          pathname: '',
+          routeName: 'Atualizar Pedido',
+        })
+        
+        return await tx.update(customerOrderTable).set(data).where(eq(customerOrderTable.id, order_id))
+      })
+
+    }),
+
+  cancelOrder: publicProcedure
     .meta({
       routeName: 'Deletar Pedido',
       permission: 'atualizar_pedidos',
     })
     .use(middleware.logged)
     .use(middleware.auth)
-    .input(z.number()).mutation(async ({ input, ctx }) => {
+    .input(z.number())
+    .mutation(async ({ input, ctx }) => {
       const { tenantDb } = ctx
       return await customerController(tenantDb).cancelOrder(input)
     }),
@@ -702,9 +752,29 @@ export const customer = router({
     .mutation(async ({ input, ctx }) => {
       const userID = ctx.locals.user?.id
       const { tenantDb } = ctx
-      return await customerController(tenantDb).insertOrderPayment({
-        ...input,
-        created_by: userID,
+
+      return await tenantDb.transaction(async trx => {
+        await bugReport(tenantDb).insertLogs({
+          text: `Pagamento com ${input.payment_method} realizado, valor pago: ${formatCurrency(input.amount_paid)} - Pedido: ${input.order_id}`,
+          created_by: userID,
+          metadata: {
+            order_id: input.order_id,
+            // customer_id: input.customer_id,
+            cashier_id: input.cachier_id,
+            troco: input.troco,
+            amount_paid: input.amount_paid,
+          },
+          cashier_id: input.cachier_id,
+          order_id: input.order_id,
+          type: 'CAIXA',
+          pathname: '/TODO:ROUTE',
+          routeName: 'Fiado',
+        })
+
+        await customerController(tenantDb).insertOrderPayment({
+          ...input,
+          created_by: userID,
+        })
       })
     }),
 
@@ -781,10 +851,8 @@ export const customer = router({
         lon: location.lon,
       }
 
-      if(location.lat === 0 && location.lon === 0) {
-        throw new Error(
-          'Erro ao geocodificar endereço!',
-        )
+      if (location.lat === 0 && location.lon === 0) {
+        throw new Error('Erro ao geocodificar endereço!')
       }
       const tenantId = ctx.tenantInfo.tenantId
 

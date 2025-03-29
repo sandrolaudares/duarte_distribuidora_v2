@@ -2,6 +2,7 @@
   import { CreditCard, MapPin, Truck, DollarSign } from 'lucide-svelte'
   import CurrencyInput from '../input/CurrencyInput.svelte'
   import type { SelectCustomer } from '$lib/server/db/schema'
+  import { formatCurrency } from '$lib/utils'
 
   export let desvincular: () => void
 
@@ -51,7 +52,7 @@
         <div class="flex items-center space-x-4 text-sm">
           <DollarSign class="h-4 w-4" />
           <span class="font-medium">Taxa de entrega:</span>
-          <span>R${(deliveryFee / 100).toFixed(2)}</span>
+          <span>{formatCurrency(deliveryFee)}</span>
         </div>
         <div class="space-y-2">
           <label for="manual-fee" class="block text-sm font-medium">

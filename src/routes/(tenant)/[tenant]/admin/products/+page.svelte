@@ -45,13 +45,13 @@
         fields: [
           {
             name: 'name',
-            label: 'Name',
+            label: 'Nome',
             type: 'text',
             required: true,
           },
           {
             name: 'description',
-            label: 'Description',
+            label: 'Descrição',
             type: 'text',
           },
         ],
@@ -75,7 +75,7 @@
             return JSON.stringify(error)
           }
         },
-        title: 'Add Product',
+        title: 'Adicionar produto',
       },
     )
   }
@@ -87,7 +87,7 @@
         fields: [
           {
             name: 'name',
-            label: 'Name',
+            label: 'Nome',
             type: 'text',
             required: true,
           },

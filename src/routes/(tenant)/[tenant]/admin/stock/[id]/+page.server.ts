@@ -26,12 +26,13 @@ import {
 import { bugReport, customer, stock } from '$lib/server/db/controller'
 import { gte } from 'drizzle-orm'
 import { error } from '@sveltejs/kit'
+import { pageConfig } from '$lib/config'
 
 export const load = (async ({ params,url, locals: { tenantDb } }) => {
   const skuID = params.id
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
-  const pageSize = Number(searchParams.get('pageSize') ?? 10)
+  const pageSize = Number(searchParams.get('pageSize') ?? pageConfig.rowPages)
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_order')
@@ -42,12 +43,12 @@ export const load = (async ({ params,url, locals: { tenantDb } }) => {
     throw new Error("SKU not found");
 }
 
-  let query = stock(tenantDb!).getTransactionsFromProduto({sku:skuID}).$dynamic()
+  let query = stock(tenantDb!).getTransactionsFromProduto({sku:skuID}).$dynamic().orderBy(desc(schema.stockTransactionTable.created_at))
 
   if (sortId && sortOrder) {
     query = withOrderBy(
       query,
-      getSQLiteColumn(schema.logsTable, sortId),
+      getSQLiteColumn(schema.stockTransactionTable, sortId),
       sortOrder,
     )
   }

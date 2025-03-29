@@ -2,13 +2,9 @@ import type { PageServerLoad } from './$types'
 
 import * as s from '$db/schema'
 import { eq, sql, and, gt, count, desc } from 'drizzle-orm'
-import { subDays } from 'date-fns'
 import { withinDate2 } from '$lib/server/db/utils'
 
-import {
-  getLocalTimeZone,
-  today,
-} from '@internationalized/date'
+import { getLocalTimeZone, today } from '@internationalized/date'
 import { redirect } from '@sveltejs/kit'
 
 export const load = (async ({ locals: { tenantDb: db }, url }) => {
@@ -17,16 +13,24 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
   const sp_start_date = searchParams.get('startDate')
   const sp_end_date = searchParams.get('endDate')
 
-  if(!sp_start_date || !sp_end_date){
-      let start = (today('America/Sao_Paulo').subtract({ days: 7 })).toDate(getLocalTimeZone()).getTime()
-      let end = today('America/Sao_Paulo').toDate(getLocalTimeZone()).getTime()
-      return redirect(303, `/admin/dashboard/delivery?startDate=${start}&endDate=${end}`)
-    }
+  if (!sp_start_date || !sp_end_date) {
+    const start = today('America/Sao_Paulo')
+      .subtract({ days: 7 })
+      .toDate(getLocalTimeZone())
+      .getTime()
+    const end = today('America/Sao_Paulo').toDate(getLocalTimeZone()).getTime()
+    return redirect(
+      303,
+      `/admin/dashboard/delivery?startDate=${start}&endDate=${end}`,
+    )
+  }
 
   const startDate =
     typeof sp_start_date === 'string'
       ? new Date(Number(sp_start_date))
-      : subDays(new Date(), 7)
+      : today('America/Sao_Paulo')
+          .subtract({ days: 7 })
+          .toDate('America/Sao_Paulo')
 
   const endDate =
     typeof sp_end_date === 'string' ? new Date(Number(sp_end_date)) : new Date()
@@ -102,6 +106,22 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     .limit(10)
     .$dynamic()
 
+  const getBestProduct = db!
+    .select({
+      sum: sql<number>`SUM(${s.orderItemTable.quantity})`,
+      name: s.productTable.name,
+      id: s.productTable.id,
+    })
+    .from(s.orderItemTable)
+    .innerJoin(
+      s.productTable,
+      eq(s.orderItemTable.product_id, s.productTable.id),
+    )
+    .groupBy(s.productTable.id)
+    .orderBy(desc(sql<number>`SUM(${s.orderItemTable.quantity})`))
+    .limit(1)
+    .$dynamic()
+
   const withinSearchDate = withinDate2(startDate, endDate)
   const [
     totalDeliveredCompleted,
@@ -109,12 +129,14 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
     totalCancelados,
     motoboyOverview,
     Last10Deliveries,
+    [bestProduct],
   ] = await Promise.all([
     withinSearchDate(getTotalDelivered, s.customerOrderTable.created_at),
     withinSearchDate(getTotalDeliveryFees, s.customerOrderTable.created_at),
     withinSearchDate(getTotalCancelados, s.customerOrderTable.created_at),
     withinSearchDate(getMotoboyOverview, s.customerOrderTable.created_at),
     getLast10Deliveries,
+    withinSearchDate(getBestProduct, s.orderItemTable.created_at)
   ])
   console.log(Last10Deliveries)
   return {
@@ -124,11 +146,11 @@ export const load = (async ({ locals: { tenantDb: db }, url }) => {
 
     cancelingOrders: totalCancelados[0].total,
 
-    bestProduct: 'Brahma Latão',
+    bestProduct: bestProduct?.name ?? "Nenhuma Venda no periodo",
 
     couriersHighestNumberDeliveries: motoboyOverview,
 
-    last10Deliveries : Last10Deliveries,
+    last10Deliveries: Last10Deliveries,
 
     startDate,
     endDate,

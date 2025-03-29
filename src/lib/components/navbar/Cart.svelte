@@ -43,7 +43,6 @@
         <span class="text-lg font-bold">
           {Object.values($cart).length} Items
         </span>
-        <!-- TODO: format price -->
         <span class="text-info">Subtotal: {(subtotal / 100).toFixed(2)}</span>
         <div class="card-actions">
           {#each Object.values($cart) as item}

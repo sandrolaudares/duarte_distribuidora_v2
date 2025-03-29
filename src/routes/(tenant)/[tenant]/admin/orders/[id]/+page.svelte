@@ -1,27 +1,21 @@
 <script lang="ts">
-  import PaymentCashier from '$lib/components/PaymentCashier.svelte'
   import type { PageData } from './$types'
-  import { getImagePath } from '$utils/image'
   import CardPayments from '$lib/components/cards/CardPayments.svelte'
   import PaymentFiado from '$lib/components/PaymentFiado.svelte'
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
-  import { onMount } from 'svelte'
-  import type { SelectOrderPayment } from '$lib/server/db/schema'
-  import { Pencil, Plus, Trash2 } from 'lucide-svelte'
+  import { page } from '$app/state'
+  import { CircleAlert, Pencil, Plus, Trash2 } from 'lucide-svelte'
   import * as Tooltip from '$lib/components/ui/tooltip/index'
-  import CardapioCaixa from '../../cashier/[id]/CardapioCaixa.svelte'
-  import CaixaColumn from '../../cashier/[id]/CaixaColumn.svelte'
 
-  import { Cart } from '$lib/state/cart.svelte'
-  import CashierMenu from './EditOrderMenu.svelte'
   import { createCartContext } from './cartContext.svelte'
   import EditOrderMenu from './EditOrderMenu.svelte'
   import DisplayCart from './DisplayCart.svelte'
   import CustomerDetails from './CustomerDetails.svelte'
   import { toast } from 'svelte-sonner'
-  import { goto } from '$app/navigation'
+  import { goto, invalidateAll } from '$app/navigation'
   import SenhaAdmin from '$lib/components/SenhaAdmin.svelte'
+  import { formatCurrency } from '$lib/utils'
+  import * as Alert from '$lib/components/ui/alert/index'
   let { data }: { data: PageData } = $props()
 
   const order = createCartContext(data.order_details)
@@ -49,32 +43,44 @@
   let cartTotal = $derived.by(() => {
     return (
       Object.values(order.cart).reduce(
-        (acc, { meta, quantity }) => acc + meta.price * quantity,
+        (acc, { meta, quantity, item }) =>
+          acc +
+          (meta.is_retail ? item.retail_price : item.wholesale_price) *
+            quantity,
         0,
       ) + (order_details.taxa_entrega ?? 0)
     )
   })
 
+  let isLoading = $state(false)
+
   async function handleUpdateOrder() {
     const confirmed = confirm('Você tem certeza que deseja atualizar o pedido?')
     if (confirmed) {
+      isLoading = true
       try {
         const toAdd = Object.values(order.cart).map(item => ({
           item_id: item.item.id,
           quantity: item.quantity,
-          price: item.meta.price,
+          price: item.meta.is_retail
+            ? item.item.retail_price
+            : item.item.wholesale_price,
         }))
 
         console.log(cartTotal)
 
-        await trpc($page).customer.updateOrder.mutate({
+        await trpc(page).customer.updateOrder.mutate({
           order_id: order_details.id,
           data: { total: cartTotal },
           items: toAdd,
         })
         toast.success('Pedido atualizado com sucesso!')
+        invalidateAll()
       } catch (error) {
         toast.error('Erro ao atualizar pedido!')
+      } finally {
+        isLoading = false
+        isOpenModalEdit?.close()
       }
     } else {
       toast.error('Pedido não atualizado!')
@@ -83,7 +89,7 @@
 
   async function handleDeleteOrder() {
     try {
-      await trpc($page).customer.cancelOrder.mutate(order_details.id)
+      await trpc(page).customer.cancelOrder.mutate(order_details.id)
       toast.success('Pedido cancelado com sucesso!')
       goto('/admin/orders')
     } catch (error) {
@@ -95,7 +101,7 @@
 
 {#if order_details}
   <section
-    class="container mx-auto flex flex-col-reverse gap-5 pb-3 pt-8 antialiased md:pt-16 lg:flex-row"
+    class="mx-4 flex flex-col-reverse gap-5 pb-3 pt-8 antialiased md:pt-16 lg:flex-row"
   >
     <div
       class=" px-4 {order_details.address ? 'lg:w-2/3' : 'w-full'}  2xl:px-0"
@@ -163,17 +169,14 @@
           <dl class="flex items-center justify-between gap-4 pt-2">
             <dt class="text-md text-opacity-90">Subtotal:</dt>
             <dd class="text-lg text-opacity-90">
-              R${(
-                (order_details.total - order_details.taxa_entrega) /
-                100
-              ).toFixed(2)}
+              {formatCurrency(order_details.total - order_details.taxa_entrega)}
             </dd>
           </dl>
 
           <dl class="flex items-center justify-between gap-4 pt-2">
             <dt class="text-sm text-opacity-90">Taxa entrega:</dt>
             <dd class="text-md text-opacity-90">
-              R${(order_details.taxa_entrega / 100).toFixed(2)}
+              {formatCurrency(order_details.taxa_entrega)}
             </dd>
           </dl>
         {/if}
@@ -182,13 +185,13 @@
           <dl class="flex items-center justify-between gap-4 pt-2">
             <dt class="text-lg font-bold text-opacity-90">Total:</dt>
             <dd class="text-xl font-bold text-success">
-              R${(order_details.total / 100).toFixed(2)}
+              {formatCurrency(order_details.total)}
             </dd>
           </dl>
           <hr />
           <div>
             <h1 class="mb-3 text-lg font-semibold">Pagamentos:</h1>
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
               {#each order_details.payments as payment, i}
                 <CardPayments
                   {payment}
@@ -199,20 +202,26 @@
             </div>
             {#if order_details.amount_paid - troco < order_details.total}
               <div class="mt-5 flex flex-col gap-5">
-                <h1 class="text-center font-bold">
+                <!-- <h1 class="text-center font-bold">
                   O pagamento ainda está pendente <span class="text-error">
                     pendentes!
                   </span>
                   Ainda faltam
                   <span class="text-success">
-                    R${(
-                      (order_details.total -
-                        (order_details.amount_paid - troco)) /
-                      100
-                    ).toFixed(2)}
+                    {formatCurrency(order_details.total -(order_details.amount_paid - troco))}
                   </span>
                   para pagar
-                </h1>
+                </h1> -->
+                <Alert.Root variant="destructive">
+                  <CircleAlert class="size-4" />
+                  <Alert.Title>Pagamento pendente</Alert.Title>
+                  <Alert.Description>
+                    O pagamento ainda está pendente e ainda faltam {formatCurrency(
+                      order_details.total - (order_details.amount_paid - troco),
+                    )}
+                    pendentes!
+                  </Alert.Description>
+                </Alert.Root>
                 <button
                   class="btn btn-primary"
                   onclick={() => isOpenModal?.showModal()}
@@ -222,8 +231,9 @@
               </div>
             {/if}
             {#if order_details.amount_paid - troco >= order_details.total}
-              <h1 class="my-2 text-lg font-semibold text-success">
-                &#128079; O pagamento já foi realizado para este pedido!
+              <h1 class="my-2 flex gap-2 text-lg font-semibold text-success">
+                <p>&#x2705;</p>
+                 O pagamento já foi realizado para este pedido!
               </h1>
             {/if}
           </div>
@@ -239,7 +249,9 @@
   <dialog class="modal" bind:this={isOpenModal}>
     <div class="modal-box max-w-2xl">
       <PaymentFiado
-        closeFn={() => isOpenModal?.close()}
+        closeFn={async() =>{
+           isOpenModal?.close()
+           }}
         total_pedido={order_details.total}
         order_id={order_details.id}
         {amount_paid_order}
@@ -270,8 +282,12 @@
                 <DisplayCart
                   name={item.name}
                   image={item.image ?? 0}
-                  price={cartItem.meta.price}
+                  price={cartItem.meta.is_retail
+                    ? cartItem.item.retail_price
+                    : cartItem.item.wholesale_price}
                   quantity={cartItem.quantity}
+                  bind:is_retail={cartItem.meta.is_retail}
+                  isEditable={true}
                 />
                 <td class="w-12">
                   <button
@@ -292,30 +308,36 @@
               <dl class="flex items-center justify-between gap-4 pt-2">
                 <dt class="text-md text-opacity-90">Subtotal:</dt>
                 <dd class="text-lg text-opacity-90">
-                  R${((cartTotal - order_details.taxa_entrega) / 100).toFixed(
-                    2,
-                  )}
+                  {formatCurrency(cartTotal - order_details.taxa_entrega)}
                 </dd>
               </dl>
 
               <dl class="flex items-center justify-between gap-4 pt-2">
                 <dt class="text-sm text-opacity-90">Taxa entrega:</dt>
                 <dd class="text-md text-opacity-90">
-                  R${(order_details.taxa_entrega / 100).toFixed(2)}
+                  {formatCurrency(order_details.taxa_entrega)}
                 </dd>
               </dl>
             {/if}
             <dl class="flex items-center justify-between gap-4 pt-2">
               <dt class="text-lg font-bold text-opacity-90">Total:</dt>
               <dd class="text-xl font-bold text-success">
-                R${(cartTotal / 100).toFixed(2)}
+                {formatCurrency(cartTotal)}
               </dd>
             </dl>
             <hr />
           </div>
           <div class="flex justify-end">
-            <button class="btn btn-primary mt-4" onclick={handleUpdateOrder}>
-              Atualizar pedido!
+            <button
+              class="btn btn-primary mt-4"
+              onclick={handleUpdateOrder}
+              disabled={isLoading}
+            >
+              {#if isLoading}
+                Atualizando pedido...
+              {:else}
+                Atualizar pedido!
+              {/if}
             </button>
           </div>
         {:else}

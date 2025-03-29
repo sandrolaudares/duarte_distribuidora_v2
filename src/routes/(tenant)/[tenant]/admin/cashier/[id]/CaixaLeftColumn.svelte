@@ -5,7 +5,7 @@
   // import { getCartContext } from '$lib/stores/cart'
   import { icons } from '$lib/utils/icons'
   import type { RouterOutputs } from '$trpc/router'
-  import ModalMotoboy from './ModalMotoboy.svelte'
+  import ModalMotoboy from '$lib/components/cashierComponents/ModalMotoboy.svelte'
   import { trpc } from '$trpc/client'
   import { page } from '$app/stores'
   import { toast } from 'svelte-sonner'
@@ -80,17 +80,8 @@
   async function getDistance() {
     isLoading = true
     try {
-      if (cart.meta.enderecoSelecionado) {
-        distance = await trpc($page).customer.calculateDistance.mutate({
-          number: cart.meta.enderecoSelecionado.number,
-          bairro: cart.meta.enderecoSelecionado?.neighborhood,
-          street: cart.meta.enderecoSelecionado.street,
-          city: cart.meta.enderecoSelecionado?.city,
-          state: cart.meta.enderecoSelecionado.state,
-          cep: cart.meta.enderecoSelecionado.cep,
-          country: cart.meta.enderecoSelecionado.country,
-        })
-
+      if(cart.meta.enderecoSelecionado?.distance != null && cart.meta.enderecoSelecionado?.distance >0) {
+        distance = cart.meta.enderecoSelecionado.distance
         cart.meta.taxaEntrega = (distance / 1000) * (fee / 100)
         cart.meta.taxaEntrega *= 100
         cart.meta.taxaEntrega = Math.round(cart.meta.taxaEntrega / 100) * 100
@@ -98,7 +89,26 @@
         console.log(distance)
         toast.success('Distancia: ' + (distance / 1000).toFixed(2) + 'km')
         isLoading = false
+      } else if (cart.meta.enderecoSelecionado){
+          distance = await trpc($page).customer.calculateDistance.mutate({
+            number: cart.meta.enderecoSelecionado.number,
+            bairro: cart.meta.enderecoSelecionado?.neighborhood,
+            street: cart.meta.enderecoSelecionado.street,
+            city: cart.meta.enderecoSelecionado?.city,
+            state: cart.meta.enderecoSelecionado.state,
+            cep: cart.meta.enderecoSelecionado.cep,
+            country: cart.meta.enderecoSelecionado.country,
+          })
+  
+          cart.meta.taxaEntrega = (distance / 1000) * (fee / 100)
+          cart.meta.taxaEntrega *= 100
+          cart.meta.taxaEntrega = Math.round(cart.meta.taxaEntrega / 100) * 100
+          console.log(cart.meta.taxaEntrega)
+          console.log(distance)
+          toast.success('Distancia: ' + (distance / 1000).toFixed(2) + 'km')
+          isLoading = false
       }
+      
     } catch (error: any) {
       toast.error(error.message)
       isLoading = false

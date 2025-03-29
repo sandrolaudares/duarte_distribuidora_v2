@@ -1,38 +1,49 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import type {
     InsertOrderPayment,
     SelectOrderPayment,
   } from '$lib/server/db/schema'
-  import { icons } from '$lib/utils'
+  import { formatCurrency, icons } from '$lib/utils'
   import type { RouterOutputs } from '$trpc/router'
   import { toast } from 'svelte-sonner'
   import CardPayments from './cards/CardPayments.svelte'
   import CurrencyInput from './input/CurrencyInput.svelte'
   import PaymentCashier from './PaymentCashier.svelte'
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { modal } from './modal'
   import { onMount } from 'svelte'
+  import { CircleAlert } from 'lucide-svelte'
+  import * as Alert from '$lib/components/ui/alert/index'
+  import { Button } from '$lib/components/ui/button/index'
+  import Separator from './ui/separator/separator.svelte'
+  import Loading from './Loading.svelte'
+  import { invalidateAll } from '$app/navigation'
 
-  export let order_id: number
+  interface Props {
+    order_id: number;
+    closeFn: undefined | (() => void);
+    total_pedido?: number;
+    amount_paid_order: number;
+  }
 
+  let {
+    order_id,
+    closeFn,
+    total_pedido = 0,
+    amount_paid_order
+  }: Props = $props();
 
-  export let closeFn: undefined | (() => void)
-
-  export let total_pedido = 0
-
-  export let amount_paid_order:number
-
-  $:console.log(amount_paid_order)
-
-  let isLoading = false
+  let isLoading = $state(false)
 
   async function save() {
     isLoading = true
     try {
       if (newPayments.length >= 1) {
         for (let newPayment of newPayments) {
-          await trpc($page).customer.insertOrderPayment.mutate(newPayment)
+          await trpc(page).customer.insertOrderPayment.mutate(newPayment)
         }
       }
 
@@ -47,29 +58,33 @@
     }
   }
 
-  let newPayments: InsertOrderPayment[] = []
+  let newPayments: InsertOrderPayment[] = $state([])
 
-  $: total_paid_newPayments = newPayments.reduce(
-    (acc, payment) => acc + payment.amount_paid,
-    0,
-  )
+  let total_paid_newPayments = $derived.by(() => {
+    return(
+      newPayments.reduce((acc, payment) => acc + payment.amount_paid, 0) -
+      newPayments.reduce((acc, payment) => acc + (payment.troco ?? 0), 0)
+    )
+  });
 
-  let valor_a_pagar = total_pedido - total_paid_newPayments - amount_paid_order
+  let valor_a_pagar = $state(0);
 
-  $:{valor_a_pagar = total_pedido - total_paid_newPayments - amount_paid_order}
-  $:console.log(valor_a_pagar)
+  $effect.pre(()=>{
+    valor_a_pagar = total_pedido - total_paid_newPayments - amount_paid_order
+  })
 
-  let valor_recebido_dinheiro = 0
-  let troco = 0
+  let valor_recebido_dinheiro = $state(0)
 
-  $: troco = valor_recebido_dinheiro - valor_a_pagar
+  let troco = $derived(
+    valor_recebido_dinheiro - valor_a_pagar
+  );
 
-  let metodo_pagamento: InsertOrderPayment['payment_method'] | null
+  let metodo_pagamento: InsertOrderPayment['payment_method'] | null = $state(null)
 
-  let isDiferent = false
-  let isPago = false
-  let isDinheiro = false
-  let isFiado = false
+  let isDiferent = $state(false)
+  let isPago = $state(false)
+  let isDinheiro = $state(false)
+  let isFiado = $state(false)
 
   function divideValor(n: number) {
     valor_a_pagar = total_pedido - total_paid_newPayments - amount_paid_order
@@ -126,7 +141,7 @@
     </h1> -->
   <h1 class="mb-2 text-center">
     Valor à pagar: <span class="font-bold text-success">
-      R${((total_pedido - amount_paid_order) / 100).toFixed(2)}
+      {formatCurrency(total_pedido - amount_paid_order)}
     </span>
   </h1>
   <div
@@ -142,7 +157,7 @@
         </div>
         <button
           class="btn btn-secondary w-full"
-          on:click={save}
+          onclick={save}
           disabled={isLoading}
         >
           {isLoading
@@ -156,7 +171,7 @@
           <button
             class="btn btn-secondary"
             disabled={newPayments.length > 0}
-            on:click={() => {
+            onclick={() => {
               isDiferent = false
               isPago = false
               isDinheiro = false
@@ -181,27 +196,27 @@
 
             <div>
               <CurrencyInput bind:value={valor_a_pagar} />
-              <!-- <button class="btn mt-2" on:click={() => divideValor(4)}>
+              <button class="btn mt-2" onclick={() => divideValor(4)}>
                 25%
               </button>
-              <button class="btn" on:click={() => divideValor(2)}>50%</button>
-              <button class="btn" on:click={() => divideValor(1.25)}>
+              <button class="btn" onclick={() => divideValor(2)}>50%</button>
+              <button class="btn" onclick={() => divideValor(1.25)}>
                 75%
               </button>
               <button
                 class="btn"
-                on:click={() =>
+                onclick={() =>
                   (valor_a_pagar = total_pedido - total_paid_newPayments - amount_paid_order)}
               >
                 100%
-              </button> -->
+              </button>
               <!--TODO: Fix valor_a_pagar nao atualiza no currency input-->
             </div>
             <p>
-              Valor restante do pedido: R${(
-                (total_pedido - total_paid_newPayments - amount_paid_order) /
-                100
-              ).toFixed(2)}
+              Valor restante do pedido:
+              {formatCurrency(
+                total_pedido - total_paid_newPayments - amount_paid_order,
+              )}
             </p>
           </label>
         {/if}
@@ -233,7 +248,7 @@
           {#if valor_recebido_dinheiro && (valor_recebido_dinheiro >= total_pedido || valor_recebido_dinheiro >= valor_a_pagar) && troco > 0}
             <h1 class="font-lg">
               Troco do cliente: <span class="font-bold">
-                R${(troco / 100).toFixed(2)}
+                {formatCurrency(troco)}
               </span>
             </h1>
           {/if}
@@ -241,7 +256,7 @@
           {#if !isDiferent}
             <button
               class="btn btn-primary"
-              on:click={() => {
+              onclick={() => {
                 isDiferent = !isDiferent
               }}
             >
@@ -262,7 +277,7 @@
           {/if} -->
           <button
             class="btn btn-primary w-full"
-            on:click={() => {
+            onclick={() => {
               isPago = true
               isDinheiro = false
               isFiado = false
@@ -273,7 +288,7 @@
           </button>
           <button
             class="btn btn-primary w-full"
-            on:click={() => {
+            onclick={() => {
               isDinheiro = true
               isPago = false
               isFiado = false
@@ -288,7 +303,7 @@
           <hr />
           <button
             class="btn btn-primary w-full"
-            on:click={addPayment}
+            onclick={addPayment}
             disabled={!(metodo_pagamento === 'dinheiro'
               ? valor_recebido_dinheiro >= valor_a_pagar
               : metodo_pagamento) || metodo_pagamento === null}
@@ -300,32 +315,73 @@
     {/if}
     {#if newPayments.length > 0}
       <div class="mt-5">
+        <h3 class="mb-2 text-xl font-medium">Resumo dos pagamentos</h3>
         {#if total_paid_newPayments < total_pedido && total_paid_newPayments - amount_paid_order != 0}
-          <p>
-            Foi pago: R${(total_paid_newPayments / 100).toFixed(2)} mas ainda faltam
-            <span class="text-error">
-              R${((total_pedido - total_paid_newPayments - amount_paid_order) / 100).toFixed(2)}
-            </span>
-            para pagar o pedido!
-          </p>
-          <hr class="my-2" />
-          <p>
-            Deseja que o valor restante de <span class="text-error">
-              R${((total_pedido - total_paid_newPayments - amount_paid_order) / 100).toFixed(2)}
-            </span>
-            continue como fiado?
-            <button class="text-lg text-accent underline" on:click={save}>
-              Clique aqui
-            </button>
-          </p>
+          <Alert.Root
+            variant="destructive"
+            class="border-destructive/30 bg-destructive/10"
+          >
+            <CircleAlert class="h-4 w-4" />
+            <Alert.Description class="flex flex-col gap-2">
+              <p>
+                Foi pago: {formatCurrency(total_paid_newPayments)} mas ainda faltam{' '}
+                <span class="font-semibold text-destructive">
+                  {formatCurrency(
+                    total_pedido - total_paid_newPayments - amount_paid_order,
+                  )}
+                </span>
+              </p>
+
+              <div class="flex items-center gap-2">
+                <p>
+                  Deseja que o valor restante {formatCurrency(
+                    total_pedido - total_paid_newPayments - amount_paid_order,
+                  )} seja pago como fiado?
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  class="border-destructive text-destructive hover:bg-destructive/10"
+                  onclick={save}
+                  disabled={isLoading}
+                >
+                {#if isLoading}
+                  <Loading/>
+                {:else}
+                Pagar depois
+                {/if}
+                </Button>
+              </div>
+            </Alert.Description>
+          </Alert.Root>
         {/if}
 
-        <h3 class="mb-2 text-lg font-medium">Pagamentos feitos:</h3>
+        <h3 class="mb-2 mt-4 text-lg font-medium">Pagamentos feitos:</h3>
         {#each newPayments as payment, i}
           <div class="my-3 flex flex-col">
-            <CardPayments {payment} {i} />
+            <CardPayments {payment} {i} created_by='' />
           </div>
         {/each}
+        <Separator class="my-2 bg-gray-200" />
+
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span>Total do pedido</span>
+            <span>{formatCurrency(total_pedido)}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>Total pago</span>
+            <span>{formatCurrency(total_paid_newPayments + amount_paid_order)}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>Restante</span>
+            <span class="text-error">
+              {formatCurrency(
+                total_pedido - total_paid_newPayments - amount_paid_order,
+              )}
+            </span>
+          </div>
+        </div>
       </div>
     {/if}
   </div>

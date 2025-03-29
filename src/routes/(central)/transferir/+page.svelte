@@ -27,6 +27,14 @@
   const table = new TableHandler(data.solicitacoes, {
     rowsPerPage: data.solicitacoes.length,
     selectBy: 'id',
+    i18n: {
+      show: 'Mostrar',
+      entries: 'entradas',
+      previous: 'Anterior',
+      next: 'Próximo',
+      noRows: 'Nenhum encontrado',
+      filter: 'Filtrar',
+    },
   })
 
   let isLoading = $state(false)
@@ -208,7 +216,7 @@
               </tr>
             </thead>
             <tbody>
-              {#each table.rows.filter(s => s.toTenantId === distribuidora.tenantId) as row}
+              {#each table.rows.filter(s => s.toTenantId === distribuidora.tenantId) as row (row.id)}
                 <tr class:active={table.selected.includes(row.id)}>
                   <td>
                     <input

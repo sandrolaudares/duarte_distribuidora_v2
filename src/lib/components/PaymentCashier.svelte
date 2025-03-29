@@ -2,11 +2,11 @@
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
   import type { RouterOutputs } from '$trpc/router'
   import type { InsertOrderPayment, SelectAddress } from '$lib/server/db/schema'
-  import { icons } from '$lib/utils'
+  import { formatCurrency, icons } from '$lib/utils'
   import { toast } from 'svelte-sonner'
   import CardPayments from './cards/CardPayments.svelte'
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { modal } from './modal'
   import Loading from './Loading.svelte'
   import { getCartContext } from '../../routes/(tenant)/[tenant]/admin/cashier/[id]/cartContext.svelte'
@@ -20,12 +20,14 @@
     save,
     total_pedido,
     cashier_id,
+    observacao
   }: {
     payments: Omit<InsertOrderPayment, 'order_id'>[]
     nulla: () => void
     save: (payments: Omit<InsertOrderPayment, 'order_id'>[]) => void
     total_pedido: number
     cashier_id: number
+    observacao: string
   } = $props()
 
   let total_paid = $derived.by(() => {
@@ -103,6 +105,7 @@
     isFiado = false
     metodo_pagamento = null
     payments = [...payments]
+    valor_a_pagar = total_pedido - total_paid
   }
 
   async function addOrderFiado() {
@@ -116,7 +119,7 @@
         cart.meta.taxaEntrega = 0
       }
       if (cart.meta.clienteSelecionado) {
-        await trpc($page).customer.order.insertFiado.mutate({
+        await trpc(page).customer.order.insertFiado.mutate({
           order_items: Object.values(cart.cart).map(item => ({
             product_id: item.item.product_id,
             quantity: item.quantity,
@@ -133,13 +136,12 @@
             total: cart.meta.isDelivery
               ? total_pedido - cart.meta.taxaEntrega
               : total_pedido,
-            observation: 'TO DO',
+            observation: observacao,
             motoboy_id: cart.meta.motoboySelecionado?.id,
             type: 'ATACADO',
             taxa_entrega: cart.meta.isDelivery ? cart.meta.taxaEntrega : 0,
             cachier_id: cashier_id,
             //TODO: Type
-            //TODO: Observation
           },
         })
         nulla()
@@ -157,7 +159,7 @@
 
 <h1 class="mb-2 text-center">
   Valor total do pedido: <span class="font-bold text-success">
-    R${(total_pedido / 100).toFixed(2)}
+    {formatCurrency(total_pedido)}
   </span>
 </h1>
 <div
@@ -219,13 +221,10 @@
             <button class="btn" onclick={() => divideValor(2)}>50%</button>
             <button class="btn" onclick={() => divideValor(1.25)}>75%</button>
             <button class="btn" onclick={() => divideValor(1)}>100%</button>
-            <!--TODO: FIx CUrrency input não atualiza valor mesmo se valor_a_pagar muda-->
           </div>
           <p>
-            Valor restante do pedido: R${(
-              (total_pedido - total_paid) /
-              100
-            ).toFixed(2)}
+            Valor restante do pedido: 
+            {formatCurrency(total_pedido - total_paid)}
           </p>
         </label>
       {/if}
@@ -266,7 +265,7 @@
         {#if valor_recebido_dinheiro && (valor_recebido_dinheiro >= total_pedido || valor_recebido_dinheiro >= valor_a_pagar) && troco > 0}
           <h1 class="font-lg">
             Troco do cliente: <span class="font-bold">
-              R${(troco / 100).toFixed(2)}
+              {formatCurrency(troco)}
             </span>
           </h1>
         {/if}
@@ -342,9 +341,10 @@
     <div class="mt-5">
       {#if total_paid < total_pedido && total_paid != 0}
         <p>
-          Foi pago: R${(total_paid / 100).toFixed(2)} mas ainda faltam
+          Foi pago: {formatCurrency(total_paid)} mas ainda faltam
+          
           <span class="text-error">
-            R${((total_pedido - total_paid) / 100).toFixed(2)}
+            {formatCurrency(total_pedido - total_paid)}
           </span>
           para pagar o pedido!
         </p>

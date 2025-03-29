@@ -1,8 +1,8 @@
-<script lang="ts" >
+<script lang="ts" generics="T">
 
-  export let value:unknown
+  export let value:T
   export let onUpdateValue: (
-    newValue: unknown,
+    newValue: T,
   ) => void
 
   let isEditing = false
@@ -12,7 +12,18 @@
     inputElement?.focus()
   }
 
+  const oldV = value
+
+  const getInputWidth = () => {
+    if (typeof value === 'string') {
+      return `${value.length + 1}ch`;
+    }
+    return 'auto';
+  };
+
+
   const handleCancel = () => {
+    value = oldV
     isEditing = false
   }
   const handleSubmit = () => {
@@ -33,9 +44,9 @@
     </button>
   {:else}
     <form on:submit|preventDefault={handleSubmit}>
-      <input bind:this={inputElement} type="text" bind:value class="max-w-28" />
+      <input bind:this={inputElement} type="text" style="width: {getInputWidth()};" bind:value/>
       <button type="submit">✅</button>
-      <button on:click={handleCancel}>❌</button>
+      <button on:click={handleCancel} class="mr-2">❌</button>
     </form>
   {/if}
 </div>
@@ -50,5 +61,11 @@
     padding: 0;
     border: none;
     background: transparent;
+  }
+  input {
+    min-width: 30px;
+    max-width: 250px;
+    border: 1px solid #ccc;
+    font-family: inherit;
   }
 </style>

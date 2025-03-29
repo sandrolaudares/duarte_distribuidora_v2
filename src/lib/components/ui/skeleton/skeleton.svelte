@@ -12,6 +12,6 @@
 
 <div
 	bind:this={ref}
-	class={cn("bg-muted animate-pulse rounded-md", className)}
+	class={cn("bg-base-300 animate-pulse rounded-md", className)}
 	{...restProps}
 ></div>

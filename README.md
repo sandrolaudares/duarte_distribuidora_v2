@@ -163,12 +163,23 @@ npm run db:check
 - REPASSE ESTOQUE ENTRE DISTRIBUIDORAS✅
 - NO CAIXA FAZER ENDEREÇO/MOTOBOY/CLIENTE SELECIONADO VIRAREM STORE ✅
 - PODER EDITAR OS PEDIDOS/CANCELAR PEDIDOS ✅
-
-## PARCIAL PRONTOS OU APENAS REVISAR/AJUSTAR
-
+- 100 rows como padrao nas table✅
 - boolean pra esconder produtos do cardapio ✅
-- Verificar name filter fiado ✅
-- Editar motoboy pedidos aceitos
+- Adicionar campo de distancia na tabela endereço (calcular ao adicionar
+  endereço talvez) acho legal adicionar um butao de recalcular ✅
+- Toggle tipo preço ao editar pedido ✅
+- loading login ✅
+- Alterar join do caixa na tela da transacao do caixa✅
+- TRANSAÇÕES DO CAIXA (TELAS)✅
+- SelectFilter tela de log para tipo e usuario ✅
+- Datefilter tela de log ✅
+- Editar tipo pessoa em clientes ✅
+- Uma tela tipo um admin dashboard pro estoque, pra poder acessar transferencia,
+  etc ✅
+- Active na table dos users ✅
+- Tables ao apagar filtro não limpa os parametros ✅
+- No componente DateFilter ao filtrar apenas um dia a data de inicio e de fim são iguais, data de inicio devia pegar o dia a partir das 00:00 e data de fim no mesmo dia até 23:59 ✅
+- Editar motoboy pedidos aceitos ✅
 - PODER EDITAR INFOS DISTRIBUIDORA NO /TENANT - perfil da distribuidora ✅
 - Contas a pagar, nova tabela (Preciso que inclua nas guias a esquerda contas a
   pagar. Essa guia deve ter a categoria da dívida, fornecedor (já cadastrado em
@@ -181,35 +192,39 @@ npm run db:check
 - Editar nome SKU ✅
 - APLICAR EDITABLECELL NAS TABLES EXISTENTES ✅
 - Limpar filtros✅
+- Refazer setar cargo ao user, não ta funcionando legal✅
+- Contas cadastrar forma de pagamento✅
+- Colunas na tabela dos logs/Refatorar tela/melhorar ✅
+- Refactor change epire date no fiado ✅
+- Impressora ✅
+- Filter table page conta ✅
+- Editar contas✅
 
 ## IMPORTANTES
 
 
 ## FAZER AGORA
 
-- Alterar join do caixa na tela da transacao do caixa
-- TRANSAÇÕES DO CAIXA (TELAS)
 - Unique name table de categoria
-- 100 rows como padrao nas table
 - Preco de custo nas transferencias e tela historico transafarencias tipo tela
   fiado com total e valor do preço de custo
 - Parte do cliente fazer pedido 
-- TELA RESUMO DE CADA MOTOBOY ENTREGAS
-- Toggle tipo preço ao editar pedido
-- loading login
+- Formatar ENUMs
+- KG como unidade de medida nos produtos (provavelmente mudar a table de produtos)
+- Total nas transações do caixa
+- Add image to tenant
+- Fix a ordenação nas tables
+- Lembrar de feixar caia diariamente
+- adicionar: animate:flip={{ duration: 500, easing: cubicInOut }} nas tables
+- Refatorar page entrada de estoque
+
 
 ## NAO TAO URGENTE
 
-- Refazer setar cargo ao user, não ta funcionando legal
 - Permissoes no trpc pra cada func
-- Colunas na tabela dos logs/Refatorar tela/melhorar
 - Excluir sku e setar produto como null pro sku
-- Contas cadastrar forma de pagamento
-
 - Alerta de compra em excesso ex, bloqueio automático caso tenha notas em
   atraso. (Desbloqueio somente com senha de gerente).
-- Adicionar campo de distancia na tabela endereço (calcular ao adicionar
-  endereço talvez) acho legal adicionar um butao de recalcular
 - Responsividade site inteiro
 
 ## DEPOIS
@@ -218,11 +233,10 @@ npm run db:check
   atrasado perde 5 pontos. Esse score atualiza automaticamente toda vez que ele
   efetuar um pagamento. Pra auxiliar na tomada de decisões junto aos clientes pj
   que compram fiado.
-- Uma tela tipo um admin dashboard pro estoque, pra poder acessar transferencia,
-  etc
 
 # RELATORIOS:
 
+- TELA RESUMO DE CADA MOTOBOY ENTREGAS
 - Vendas por período.
 - Recebimentos por períodos, dia e semana, mês.
 - Cliente inadimplentes.

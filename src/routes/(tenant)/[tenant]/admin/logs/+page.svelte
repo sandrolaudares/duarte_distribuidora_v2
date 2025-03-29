@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { navigating } from '$app/stores'
+  import { navigating } from '$app/state'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import { modal, FormModal } from '$lib/components/modal'
   import DateFilter from '$lib/components/DateFilter.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
+  import * as Tooltip from '$lib/components/ui/tooltip/index'
 
   import {
     TableHandler,
@@ -20,17 +21,34 @@
   import type { PageData } from './$types'
   import { toast } from 'svelte-sonner'
   import { trpc } from '$trpc/client'
-  import { tr } from 'date-fns/locale'
   import NoResults from '$lib/components/NoResults.svelte'
-  import { format } from 'date-fns'
   import { goto } from '$app/navigation'
+  import { pageConfig } from '$lib/config'
+  import { DateFormatter } from '@internationalized/date'
+  import { User } from 'lucide-svelte'
+  import SelectSearch from '$lib/components/selectSearch.svelte'
+  import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
+  import { formatCurrency } from '$lib/utils'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
 
   const table = new TableHandler(data.rows, {
-    rowsPerPage: 13,
+    rowsPerPage: pageConfig.rowPages,
     totalRows: data.count,
+    i18n: {
+      show: 'Mostrar',
+      entries: 'entradas',
+      previous: 'Anterior',
+      next: 'Próximo',
+      noRows: 'Nenhum encontrado',
+      filter: 'Filtrar',
+    },
+  })
+
+  const df = new DateFormatter('pt-BR', {
+    dateStyle: 'medium',
   })
 
   table.setPage(Number(filters.get('page')) || 1)
@@ -38,22 +56,44 @@
     try {
       console.log(s)
       filters.fromState(s)
-      await $navigating?.complete
+      await navigating?.complete
     } catch (error) {
       console.error(error)
     }
     return data.rows
   })
+
+  const colorMap:{ [key: string]: string } = {
+    C: 'badge-accent',
+    L: 'badge-info',
+    S: 'badge-primary',
+  }
+
+  function getColor(type: string) {
+    const firstLetter = type.charAt(0).toUpperCase()
+    return colorMap[firstLetter] || 'badge-neutral'
+  }
+
+  let selectedType: string = $state('')
+  let selectedUser: string = $state('')
+
+  let logTypeEnum = ['LOG', 'SYSTEM', 'ERROR', 'CAIXA']
+  const delegateQuery = () => {
+  return Promise.resolve(logTypeEnum);
+};
 </script>
 
-<main class="container mx-auto h-full max-h-[calc(100vh-20vh)]">
+<main class="mx-4 h-full max-h-[calc(100vh-10vh)]">
   <Datatable {table} headless>
     <!-- {#snippet header()}
-      <Search {table} />
-     
-    {/snippet} -->
+        <Search {table} />
+      
+      {/snippet} -->
     <!-- svelte-ignore component_name_lowercase -->
-    <table class="table table-zebra rounded-none border">
+    {#if table.isLoading}
+      <LoadingBackground />
+    {/if}
+    <table class="table table-zebra table-xs rounded-none">
       <thead>
         <tr>
           <ThSort {table} field="id">ID</ThSort>
@@ -69,36 +109,97 @@
         </tr>
         <tr>
           <Th />
-          <ThFilter {table} field="user_name" />
+            <SelectFilter  
+            {table}
+            filterKey="user_name"
+            placeholder="o usuario"
+            delegateQuery={trpc(page).auth.getUsers.query}
+            config={{ value: c => c.username, label: c => c.username }}
+            bind:selectedValue={selectedUser}/>
           <ThFilter {table} field="text" />
           <Th />
           <Th />
+            <SelectFilter 
+            {table}
+            filterKey="type"
+            delegateQuery={delegateQuery}
+            placeholder="o tipo"
+            config={{ value: c => c, label: c => c }}
+            bind:selectedValue={selectedType}/>
           <Th />
           <Th />
           <Th />
-          <Th />
-          <Th />
+          <Th>
+            <DateFilter
+            onChange={(startDate, endDate) => {
+              if (!startDate || !endDate) return
+        
+              filters.update({
+                startDate: String(startDate),
+                endDate: String(endDate),
+              })
+            }}
+            />
+          </Th>
           <!--FINALIZAR ESSA TABLE, FILTRO DE DATA E ETC-->
         </tr>
       </thead>
       <tbody>
-        {#each data.rows as row}
+        {#each data.rows as row (row.id)}
           <tr>
             <td>{row.id}</td>
-            <td>{row.user_name}</td>
+            <td class="flex items-center gap-2">
+              <User class="size-4" />{row.user_name}
+            </td>
             <td>{row.text}</td>
             <td>{row.pathname}</td>
             <td>{row.routeName}</td>
-            <td>{row.type}</td>
+            <td class="badge badge-xs {getColor(row.type)}">{row.type}</td>
             <td>
               {row.currency
-                ? 'R$' + (row.currency / 100).toFixed(2)
-                : 'Não é transação'}
+                ? formatCurrency(row.currency)
+                : 'N/A'}
             </td>
-            <td>{JSON.stringify(row.metadata)}</td>
+            <td>
+              <Tooltip.Provider>
+                <Tooltip.Root>
+                  <Tooltip.Trigger>
+                    <span class="badge badge-info badge-xs">Visualizar</span>
+                  </Tooltip.Trigger>
+                  <Tooltip.Content>
+                    <!-- <pre>{JSON.stringify(row.metadata, null, 2)}</pre> -->
+                     <div>
+                      {#each Object.keys(row.metadata) as key}
+                        <div>
+                          <span>{key}:</span>
+                          <span>{row.metadata[key]}</span>
+                        </div>
+                      {/each}
+                     </div>
+                    {#if row.metadata.order_id}
+                      <a
+                        class="badge badge-neutral badge-sm"
+                        href="/admin/orders/{row.metadata.order_id}"
+                      >
+                        Ver pedido
+                      </a>
+                    {/if}
+                    {#if row.metadata.customer_id}
+                      <a
+                        class="badge badge-neutral badge-sm"
+                        href="/customers/{row.metadata.customer_id}"
+                      >
+                        Ver cliente
+                      </a>
+                    {/if}
+                  </Tooltip.Content>
+                </Tooltip.Root>
+              </Tooltip.Provider>
+            </td>
+
             <td>{row.error ?? 'Não tem'}</td>
             <td>
-              {row.created_at ? format(row.created_at, 'dd/MM/yyyy') : ''}
+              {row.created_at ? df.format(row.created_at) : ''}
             </td>
           </tr>
         {/each}

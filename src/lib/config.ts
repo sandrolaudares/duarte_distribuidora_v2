@@ -34,3 +34,7 @@ export const website = {
     'https://raw.githubusercontent.com/andrebrandao/template/main/src/lib/assets/home/bg-email.jpg',
   emailColor: '#007bff',
 }
+
+export const pageConfig = {
+  rowPages: 100
+}

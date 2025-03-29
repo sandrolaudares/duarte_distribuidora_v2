@@ -27,7 +27,7 @@
           window.location.reload()
         }}
       >
-        Reload Page
+        Recarregar página
       </button>
     </div>
   </div>
