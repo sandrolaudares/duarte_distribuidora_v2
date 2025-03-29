@@ -46,8 +46,7 @@ export const contasPagarRelations = relations(contasPagarTable, ({ one }) => ({
 
 export const categoriaConta = sqliteTable('categoria', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  nome: text('nome').notNull(),
-  //TODO: AFTER CHANGE NAME TO UNIQUE
+  nome: text('nome').notNull().unique(),
 })
 
 export const tipoPagamentoConta = sqliteTable('tipo_pagamento', {

@@ -47,6 +47,10 @@
       label: 'Estoque',
       href: '/admin/dashboard/estoque',
     },
+    {
+      label: 'Analíticos',
+      href: '/admin/dashboard/analitics',
+    }
   ]
 
   
@@ -71,9 +75,11 @@
             </a>
           {/each}
         </Tabs.List>
+        {#if page.url.pathname != '/admin/dashboard/analitics' }
         <div class="flex items-center">
           <DateFilterCompared />
         </div>
+        {/if}
       </div>
       <Tabs.Root class="space-y-4">
         {@render children()}
