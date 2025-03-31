@@ -4,6 +4,14 @@ import { timestamps } from '../utils'
 import type { SelectUser } from '../schema'
 // import { timestamps } from '../utils'
 
+type WorkSchedule = {
+  [key in "segunda" | "terca" | "quarta" | "quinta" | "sexta" | "sabado" | "domingo" | "feriado"]?: {
+    start: number;
+    end: number;
+  };
+};
+
+
 export const tenants = sqliteTable('tenants', {
   // ...timestamps,
   tenantId: integer('tenant_id').primaryKey({ autoIncrement: true }),
@@ -16,6 +24,7 @@ export const tenants = sqliteTable('tenants', {
   lat: real('lat'),
   lng: real('lng'),
   taxa_por_km: integer('taxa_por_km'),
+  funcionamento : text('funcionamento', { mode: 'json' }).$type<WorkSchedule>(),
 })
 
 export type SelectTenant = typeof tenants.$inferSelect
