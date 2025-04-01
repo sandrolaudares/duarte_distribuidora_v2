@@ -4,13 +4,21 @@ import { timestamps } from '../utils'
 import type { SelectUser } from '../schema'
 // import { timestamps } from '../utils'
 
-type WorkSchedule = {
-  [key in "segunda" | "terca" | "quarta" | "quinta" | "sexta" | "sabado" | "domingo" | "feriado"]?: {
-    start: number;
-    end: number;
-  };
-};
+type day = {
+  start: number
+  end: number
+}
 
+export type WorkSchedule = {
+  segunda: day
+  terca: day
+  quarta: day
+  quinta: day
+  sexta: day
+  sabado: day
+  domingo: day
+  feriado: day
+};
 
 export const tenants = sqliteTable('tenants', {
   // ...timestamps,
@@ -24,7 +32,18 @@ export const tenants = sqliteTable('tenants', {
   lat: real('lat'),
   lng: real('lng'),
   taxa_por_km: integer('taxa_por_km'),
-  funcionamento : text('funcionamento', { mode: 'json' }).$type<WorkSchedule>(),
+  funcionamento : text('funcionamento', { mode: 'json' }).$type<WorkSchedule>().$default(()=>{
+    return {
+      segunda: { start: 0, end: 0 },
+      terca: { start: 0, end: 0 },
+      quarta: { start: 0, end: 0 },
+      quinta: { start: 0, end: 0 },
+      sexta: { start: 0, end: 0 },
+      sabado: { start: 0, end: 0 },
+      domingo: { start: 0, end: 0 },
+      feriado: { start: 0, end: 0 },
+    }
+  }),
 })
 
 export type SelectTenant = typeof tenants.$inferSelect
