@@ -67,6 +67,7 @@ export const distribuidora = router({
           lat: z.number().optional(),
           lng: z.number().optional(),
           subdomain: z.string().optional(),
+          phone: z.string().optional(),
           funcionamento : z.object({
             segunda: z.object({
               start: z.number(),
@@ -93,10 +94,6 @@ export const distribuidora = router({
               end: z.number(),
             }),
             domingo: z.object({
-              start: z.number(),
-              end: z.number(),
-            }),
-            feriado: z.object({
               start: z.number(),
               end: z.number(),
             }),

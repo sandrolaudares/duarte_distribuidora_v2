@@ -6,6 +6,7 @@
   import { page } from '$app/state'
   import { toast } from 'svelte-sonner'
   import type { SelectTenant, WorkSchedule } from '$lib/server/db/central/schema'
+  import { secondsToTime, timeToSeconds } from '$lib/utils'
 
   let { data }: { data: PageData } = $props()
 
@@ -26,7 +27,7 @@
   })
 
   const weekdays: (keyof WorkSchedule)[] = [
-    "segunda", "terca", "quarta", "quinta", "sexta", "sabado", "domingo", "feriado"
+    "segunda", "terca", "quarta", "quinta", "sexta", "sabado", "domingo"
   ];
 
   async function updateDistribuidora() {
@@ -38,12 +39,13 @@
         id: data.tenant.tenantId,
         data: {
           name: newDistribuidora.name,
-          address: newDistribuidora.address !== null ? newDistribuidora.address : undefined,
+          address: newDistribuidora.address ?? undefined,
           lat: Number(newDistribuidora.lat),
           lng: Number(newDistribuidora.lng),
-          taxa_por_km: newDistribuidora.taxa_por_km !== null ? newDistribuidora.taxa_por_km : undefined,
+          taxa_por_km: newDistribuidora.taxa_por_km ?? undefined,
           subdomain: newDistribuidora.subdomain,
           funcionamento : schedule ?? undefined,
+          phone: newDistribuidora.phone ?? undefined
         },
       })
       console.log('Response', response)
@@ -54,16 +56,6 @@
     }
   }
 
-  function secondsToTime(seconds: number): string {
-    const hours = Math.floor(seconds / 3600).toString().padStart(2, "0");
-    const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, "0");
-    return `${hours}:${minutes}`;
-  }
-
-  function timeToSeconds(time: string): number {
-    const [hours, minutes] = time.split(":").map(Number);
-    return hours * 3600 + minutes * 60;
-  }
 </script>
 
 <div class="h-full bg-gradient-to-br from-gray-100 to-gray-50">
@@ -115,6 +107,15 @@
               <input
                 type="text"
                 bind:value={newDistribuidora.lat}
+                placeholder="Your First Name"
+                class="input input-bordered w-full"
+              />
+            </label>
+            <label class="block">
+              <span class="">Telefone</span>
+              <input
+                type="text"
+                bind:value={newDistribuidora.phone}
                 placeholder="Your First Name"
                 class="input input-bordered w-full"
               />

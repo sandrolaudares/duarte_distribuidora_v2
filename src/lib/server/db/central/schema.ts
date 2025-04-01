@@ -17,7 +17,6 @@ export type WorkSchedule = {
   sexta: day
   sabado: day
   domingo: day
-  feriado: day
 };
 
 export const tenants = sqliteTable('tenants', {
@@ -41,7 +40,6 @@ export const tenants = sqliteTable('tenants', {
       sexta: { start: 0, end: 0 },
       sabado: { start: 0, end: 0 },
       domingo: { start: 0, end: 0 },
-      feriado: { start: 0, end: 0 },
     }
   }),
 })
