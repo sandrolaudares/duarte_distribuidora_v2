@@ -3,20 +3,38 @@
   import { PUBLIC_DOMAIN } from '$env/static/public'
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { toast } from 'svelte-sonner'
-  import type { SelectTenant } from '$lib/server/db/central/schema'
+  import type { SelectTenant, WorkSchedule } from '$lib/server/db/central/schema'
 
   let { data }: { data: PageData } = $props()
 
-  let newDistribuidora:SelectTenant = data.tenant!
+  let newDistribuidora: SelectTenant = $state(data.tenant!)
+
+  let schedule:SelectTenant['funcionamento'] = $derived.by(()=>{
+    if(newDistribuidora.funcionamento) return newDistribuidora.funcionamento
+    else return {
+      segunda: { start: 0, end: 0 },
+      terca: { start: 0, end: 0 },
+      quarta: { start: 0, end: 0 },
+      quinta: { start: 0, end: 0 },
+      sexta: { start: 0, end: 0 },
+      sabado: { start: 0, end: 0 },
+      domingo: { start: 0, end: 0 },
+      feriado: { start: 0, end: 0 },
+    }
+  })
+
+  const weekdays: (keyof WorkSchedule)[] = [
+    "segunda", "terca", "quarta", "quinta", "sexta", "sabado", "domingo", "feriado"
+  ];
 
   async function updateDistribuidora() {
     if (!data.tenant) {
       throw new Error('Tenant not found')
     }
     try {
-      const response = await trpc($page).distribuidora.updateDistribuidora.mutate({
+      const response = await trpc(page).distribuidora.updateDistribuidora.mutate({
         id: data.tenant.tenantId,
         data: {
           name: newDistribuidora.name,
@@ -25,14 +43,26 @@
           lng: Number(newDistribuidora.lng),
           taxa_por_km: newDistribuidora.taxa_por_km !== null ? newDistribuidora.taxa_por_km : undefined,
           subdomain: newDistribuidora.subdomain,
+          funcionamento : schedule ?? undefined,
         },
       })
-      console.log('Response',response)
+      console.log('Response', response)
       toast.success('Distribuidora atualizada com sucesso')
     } catch (error) {
       console.error('Failed to update distribuidora:', error)
       toast.error('Erro ao atualizar distribuidora')
     }
+  }
+
+  function secondsToTime(seconds: number): string {
+    const hours = Math.floor(seconds / 3600).toString().padStart(2, "0");
+    const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
+  }
+
+  function timeToSeconds(time: string): number {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 3600 + minutes * 60;
   }
 </script>
 
@@ -107,7 +137,7 @@
             <label class="block">
               <span class="">Taxa por kilometro</span>
               <CurrencyInput
-                bind:value={newDistribuidora.taxa_por_km as number}  
+                bind:value={newDistribuidora.taxa_por_km as number}
               />
             </label>
 
@@ -122,6 +152,43 @@
             </label>
           </div>
         </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+          {#each weekdays as day (day)}
+            <div class="border rounded-lg p-4 shadow-sm hover:shadow-md transition duration-200">
+              <h3 class="font-semibold text-lg mb-2 capitalize">{day}</h3>
+                <label class="block mb-2">
+                  <span class="">Abertura</span>
+                  <input
+                    type="time"
+                    value={secondsToTime(schedule[day].start)}
+                    class="input input-bordered w-full"
+                    oninput={(e) => {
+                      if (e.target) {
+                          schedule[day].start = timeToSeconds((e.target as HTMLInputElement).value);
+                      }
+                    }}
+                  />
+                </label>
+              
+                <label class="block">
+                  <span class="">Fechamento</span>
+                  <input
+                    type="time"
+                    value={secondsToTime(schedule[day].end)}
+                    class="input input-bordered w-full"
+                    oninput={(e) => {
+                      if (e.target) {
+                          schedule[day].end = timeToSeconds((e.target as HTMLInputElement).value); 
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+          {/each}
+        </div>
+        
+
         <div class="mt-8">
           {#if data.tenant?.lat && data.tenant?.lng}
             <div class="mt-10">
