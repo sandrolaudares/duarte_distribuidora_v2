@@ -27,20 +27,20 @@ export const formated_Permissions: FormatedPermissions = {
 }
 export const roleEnum = [
   'admin',
-  'employee',
   'customer',
   'motoboy',
   'caixa',
   'financeiro',
+  'gerente'
 ] as const
 
 export const roleLabels: Record<typeof roleEnum[number], string> = {
   admin: 'Administrator',
-  employee: 'Funcionario',
   customer: 'Cliente',
   motoboy: 'Motoboy',
   caixa: 'Caixa',
   financeiro: 'Financeiro',
+  gerente : 'Gerente'
 }
 
 export type Role = (typeof roleEnum)[number]

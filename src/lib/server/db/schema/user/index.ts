@@ -8,7 +8,7 @@ import {
 import { relations } from 'drizzle-orm'
 import { logsTable } from '../bug-report'
 import { customerOrderTable, orderPaymentTable } from '../customer'
-import type { Permission, Role } from '$lib/utils/permissions'
+import { roleEnum, type Permission, type Role } from '$lib/utils/permissions'
 import { timestamps } from '../../utils'
 
 export const userTable = sqliteTable('user', {
@@ -25,7 +25,7 @@ export const userTable = sqliteTable('user', {
   password_hash: text('password_hash'),
 
   role: text('role', {
-    enum: ['admin', 'employee', 'customer', 'motoboy', 'caixa'],
+    enum: roleEnum,
   })
     .notNull()
     .default('customer'),
