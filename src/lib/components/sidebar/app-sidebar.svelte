@@ -69,20 +69,20 @@
           url: '/admin',
           icon: User,
           isActive: true,
-          allowedRoles: ['admin', 'caixa', 'financeiro'] as Role[],
+          allowedRoles: ['admin', 'caixa', 'financeiro','gerente'] as Role[],
           items: [
             {
-              allowedRoles: ['admin'] as Role[],
+              allowedRoles: ['admin','gerente'] as Role[],
               title: 'Usuários',
               url: '/admin/users',
             },
             {
-              allowedRoles: ['admin', 'caixa', 'financeiro'] as Role[],
+              allowedRoles: ['admin', 'caixa', 'financeiro','gerente'] as Role[],
               title: 'Clientes',
               url: '/admin/customer',
             },
             {
-              allowedRoles: ['admin', 'caixa'] as Role[],
+              allowedRoles: ['admin', 'financeiro','gerente'] as Role[],
               title: 'Fornecedores',
               url: '/admin/supplier',
             },
@@ -93,15 +93,15 @@
           url: '/admin/orders',
           icon: ListOrdered,
           isActive: true,
-          allowedRoles: ['admin', 'caixa', 'financeiro'] as Role[],
+          allowedRoles: ['admin', 'caixa', 'financeiro','gerente'] as Role[],
           items: [
             {
-              allowedRoles: ['admin','financeiro'] as Role[],
+              allowedRoles: ['admin','financeiro','gerente','caixa'] as Role[],
               title: 'Todos pedidos',
               url: '/admin/orders/allorders',
             },
             {
-              allowedRoles: ['admin', 'caixa'] as Role[],
+              allowedRoles: ['admin', 'caixa','financeiro','gerente'] as Role[],
               title: 'Pedidos em aberto',
               url: '/admin/orders',
             },
@@ -112,34 +112,34 @@
           url: "/admin/products'",
           icon: beer,
           isActive: true,
-          allowedRoles: ['admin'] as Role[],
+          allowedRoles: ['admin','financeiro','gerente'] as Role[],
           items: [
             {
-              allowedRoles: ['admin'] as Role[],
+              allowedRoles: ['admin','financeiro','gerente'] as Role[],
               title: 'Produtos',
               url: '/admin/products',
             },
             {
-              allowedRoles: ['admin'] as Role[],
+              allowedRoles: ['admin','financeiro','gerente'] as Role[],
               title: 'Estoque',
               url: '/admin/stock',
             },
           ],
         },
         {
-          allowedRoles: ['admin', 'financeiro'] as Role[],
+          allowedRoles: ['admin', 'financeiro','caixa','gerente'] as Role[],
           title: 'Financeiro',
           url: '/admin',
           icon: BadgeDollarSign,
           isActive: true,
           items: [
             {
-              allowedRoles: ['admin', 'financeiro'] as Role[],
+              allowedRoles: ['admin', 'financeiro','caixa','gerente'] as Role[],
               title: 'Pedidos fiado',
               url: '/admin/finance',
             },
             {
-              allowedRoles: ['admin', 'financeiro'] as Role[],
+              allowedRoles: ['admin', 'financeiro','gerente'] as Role[],
               title: 'Contas',
               url: '/admin/finance/contas',
             },
@@ -155,25 +155,25 @@
         })),
       projects: [
         {
-          allowedRoles: ['admin'] as Role[],
+          allowedRoles: ['admin',`gerente`,`financeiro`] as Role[],
           name: 'Todos caixas',
           url: '/admin/cashier',
           icon: HandCoins,
         },
         {
-          allowedRoles: ['admin'] as Role[],
+          allowedRoles: ['admin',`gerente`,`financeiro`] as Role[],
           name: 'Transações dos caixas',
           url: '/admin/cashier/transactions',
           icon: Transactions,
         },
         {
-          allowedRoles: ['admin'] as Role[],
+          allowedRoles: ['admin',`gerente`,`financeiro`] as Role[],
           name: 'Solicitações para central',
           url: '/admin/solicitacoes',
           icon: House,
         },
         {
-          allowedRoles: ['admin'] as Role[],
+          allowedRoles: ['admin',`gerente`,`financeiro`] as Role[],
           name: 'Logs',
           url: '/admin/logs',
           icon: scroll,
@@ -185,7 +185,7 @@
         //   icon: ShieldMap,
         // },
         {
-          allowedRoles: ['admin'] as Role[],
+          allowedRoles: ['admin',`gerente`] as Role[],
           name: 'Dashboards',
           url: '/admin/dashboard',
           icon: ChartArea,
