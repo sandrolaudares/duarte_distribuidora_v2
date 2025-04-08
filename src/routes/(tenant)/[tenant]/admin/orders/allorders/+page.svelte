@@ -64,6 +64,7 @@
   })
 
   async function printOrder(order_id: SelectCustomerOrder['id']) {
+    isLoading = true
     var config = qz.configs.create(usingPrinter,{
       encoding: 'CP850'
     })
@@ -111,17 +112,27 @@
       info.push(`RELATÓRIO GERENCIAL\n\n`)
 
       info.push('\x1B\x61\x00') // Justify left
-      info.push(`${order.customer?.name}\n`)
-      info.push(
-        `${order.customer?.phone ?? ''} - ${order.customer?.cellphone ?? ''}\n`,
-      )
-      info.push(
-        `Endereço de entrega: ${order.address?.street}, ${order.address?.number}, ${order.address?.neighborhood}, ${order.address?.city}\n`,
-      )
-      info.push(`Entregador: ${order.motoboy?.username}\n\n`)
+      if(order.customer) {
+        info.push(`${order.customer.name}\n`)
+        info.push(
+          `${order.customer.phone ?? ''} - ${order.customer.cellphone ?? ''}\n`,
+        )
+      }
+      if(order.address) {
+        info.push(
+          `Endereço de entrega: ${order.address.street}, ${order.address.number}, ${order.address.neighborhood}, ${order.address.city}\n`,
+        )
+      }
+      if(order.motoboy) {
+        info.push(`Entregador: ${order.motoboy.username}\n\n`)
+      }
 
       info.push('\x1B\x61\x01') // Justify center
       info.push(`(Pedido: N.:${order.id})\n`)
+
+      if(order.observation) {
+        info.push(`Observação: ${order.observation}\n\n`)
+      }
 
       info.push('\x1B\x45\x01')
       info.push('----------------------------------------\n')
@@ -157,8 +168,10 @@
       info.push(`= TOTAL A PAGAR: ${formatCurrency(order.total)}\n`)
       info.push('\x1B\x45\x00')
 
-      info.push('\x1B\x61\x00') // Left
-      info.push(`Atendente: ${order.created_by?.username}\n`)
+      if ( order.created_by) {
+        info.push('\x1B\x61\x00') // Left
+        info.push(`Atendente: ${order.created_by.username}\n`)
+      }
 
       info.push('\x1B\x61\x01') // Center
       info.push('----------------------------------------\n')
@@ -171,9 +184,12 @@
       })
 
       toast.success('Pedido impresso com sucesso!')
+      isOpenModal?.close()
     } catch (error) {
       console.log(error)
       toast.error('Erro! Verifique se a impressora está conectada')
+    } finally {
+      isLoading = false
     }
   }
 
@@ -182,6 +198,8 @@
 
   let isOpenModal: HTMLDialogElement | null = $state(null)
   let selectedOrder: number | null = $state(null)
+
+  let isLoading = $state(false)
 
   async function listPrinters() {
     try {
@@ -238,6 +256,7 @@
       </select>
       <button
         class="btn btn-primary"
+        disabled={isLoading}
         onclick={() => {
           if (selectedOrder != null) {
             printOrder(selectedOrder)
