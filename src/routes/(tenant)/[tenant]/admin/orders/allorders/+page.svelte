@@ -243,10 +243,10 @@
     <h2 class="text-lg font-bold">Imprimir pedido</h2>
     <p class="py-4">Selecione a impressora e clique em imprimir</p>
     <div class="flex flex-col gap-4">
-      <select bind:value={usingPrinter} class="select select-bordered w-full">
+      <select bind:value={usingPrinter} class="select select-bordered w-full" onchange={(e) => localStorage.setItem('selectedPrinter', e.target.value)}>
         {#if printers && typeof printers === 'object'}
           {#each printers as printer}
-            <option value={printer}>
+            <option value={printer} selected={printer === usingPrinter}>
               {printer}
             </option>
           {/each}
