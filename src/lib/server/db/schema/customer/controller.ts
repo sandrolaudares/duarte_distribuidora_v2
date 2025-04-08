@@ -27,6 +27,7 @@ import {
   gte,
   inArray,
   isNotNull,
+  like,
   lt,
   ne,
   or,
@@ -62,7 +63,6 @@ export const customer = (db: TenantDbType) => ({
   getCustomerById: async (id: SelectCustomer['id']) => {
     return db.query.customerTable.findFirst({
       where: eq(customerTable.id, id),
-      
     })
   },
 
@@ -136,12 +136,32 @@ export const customer = (db: TenantDbType) => ({
       },
     })
   },
-  getCustomersWithAddress: async () => {
-    return db.query.customerTable.findMany({
+  getCustomersWithAddress: async (limit:number,offset:number,search?:string) => {
+    const where = search
+    ? or(
+        like(customerTable.name, `%${search}%`),
+        like(customerTable.phone, `%${search}%`)
+      )
+    : undefined
+
+    const customers = await db.query.customerTable.findMany({
+      where: where,
       with: {
         adresses: true,
       },
+      limit: limit,
+      offset: offset,
+      orderBy: (customer, { asc }) => [asc(customer.name)],
     })
+
+    const [total] = await db.select({ count: count()}).from(customerTable).where(where)
+
+    console.log(customers)
+
+    return {
+      customers,
+      total: total.count,
+    }
   },
   getCustomers: () => {
     return db.select().from(customerTable)
@@ -529,4 +549,6 @@ export const customer = (db: TenantDbType) => ({
 export type CurrentOrders = ReturnType<typeof customer>['getCurrentOrders']
 export type UpdateOrder = ReturnType<typeof customer>['getOrderByID']
 export type CustomerWaddress = ReturnType<typeof customer>['getCustomerById']
-export type CustomerAddresses = ReturnType<typeof customer>['getCustomerAddress']
+export type CustomerAddresses = ReturnType<
+  typeof customer
+>['getCustomerAddress']

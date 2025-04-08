@@ -141,8 +141,15 @@ export const customer = router({
       }
     }),
 
-  getCustomers: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
-    return await customerController(tenantDb).getCustomersWithAddress()
+  getCustomers: publicProcedure.input(z.object({
+    page: z.number(),
+    pageSize: z.number(),
+    search: z.string().optional(),
+  })).query(async ({ ctx: { tenantDb },input }) => {
+    const offset = (input.page - 1) * input.pageSize
+    const limit = input.pageSize
+
+    return await customerController(tenantDb).getCustomersWithAddress(limit,offset,input.search)
   }),
   order: router({
     insertFiado: publicProcedure
