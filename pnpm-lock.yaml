@@ -50,9 +50,6 @@ importers:
       drizzle-zod:
         specifier: ^0.6.1
         version: 0.6.1(drizzle-orm@0.38.4(@libsql/client@0.14.0)(@types/react@18.3.3))(zod@3.24.2)
-      esc-pos-printer:
-        specifier: ^1.0.11
-        version: 1.0.11
       layerchart:
         specifier: ^0.60.3
         version: 0.60.3(svelte@5.22.6)(typescript@5.8.2)
@@ -62,6 +59,9 @@ importers:
       oslo:
         specifier: ^1.2.1
         version: 1.2.1
+      qz-tray:
+        specifier: ^2.2.4
+        version: 2.2.4
       sharp:
         specifier: ^0.33.5
         version: 0.33.5
@@ -120,6 +120,9 @@ importers:
       '@types/nodemailer':
         specifier: ^6.4.17
         version: 6.4.17
+      '@types/qz-tray':
+        specifier: ^2.2.1
+        version: 2.2.1
       '@types/web-push':
         specifier: ^3.6.4
         version: 3.6.4
@@ -1728,6 +1731,9 @@ packages:
   '@types/prop-types@15.7.12':
     resolution: {integrity: sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==}
 
+  '@types/qz-tray@2.2.1':
+    resolution: {integrity: sha512-wexaDL33NepzhAUIat2siNcHWBXVDcpXMXjeG2oQHB7SByei25Rm5l/hyH4PImdJXKxIGZcE6D505uhVSmNzkA==}
+
   '@types/react@18.3.3':
     resolution: {integrity: sha512-hti/R0pS0q1/xx+TsI73XIqk26eBsISZ2R0wUijXIngRK9R/e7Xw/cXVxQK7R5JjW+SV4zGcn5hXjudkN/pLIw==}
 
@@ -2434,9 +2440,6 @@ packages:
     resolution: {integrity: sha512-+9egpBW8I3CD5XPe0n6BfT5fxLzxrlDzqydF3aviG+9ni1lDC/OvMHcxqEFV0+LANZG5R1bFMWfUrjVsdwxJvA==}
     engines: {node: '>=18'}
     hasBin: true
-
-  esc-pos-printer@1.0.11:
-    resolution: {integrity: sha512-NLMO42cl10ZTGAaI1LFm+pnGrdLBuxFpnL7rANx/xmz8g1uzsSB6XQ+RkPBAz0gnB30+oL2I1ZGVkMZxvw3sAQ==}
 
   escalade@3.1.2:
     resolution: {integrity: sha512-ErCHMCae19vR8vQGe50xIsVomy19rg6gFu3+r3jkEO46suLMWBksvVyoGgQV+jOfl84ZSOSlmv6Gxa89PmTGmA==}
@@ -3242,6 +3245,9 @@ packages:
 
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
+
+  qz-tray@2.2.4:
+    resolution: {integrity: sha512-5beEVkqewsuB//B0p+1guP7w45VU6kILazYa+VePHy5k0U2EzmE8JnZ/06pspgVgeeKIJDKb/Uu4Cu6tGi1cIw==}
 
   read-cache@1.0.0:
     resolution: {integrity: sha512-Owdv/Ft7IjOgm/i0xvNDZ1LrRANRfew4b2prF3OWMQLxLfu3bS8FVhCsrSCMK4lR56Y9ya+AThoTpDCTxCmpRA==}
@@ -4971,6 +4977,8 @@ snapshots:
 
   '@types/prop-types@15.7.12': {}
 
+  '@types/qz-tray@2.2.1': {}
+
   '@types/react@18.3.3':
     dependencies:
       '@types/prop-types': 15.7.12
@@ -5580,10 +5588,10 @@ snapshots:
       d3-scale: 4.0.2
       drizzle-orm: 0.38.4(@libsql/client@0.14.0)(@types/react@18.3.3)
       drizzle-zod: 0.6.1(drizzle-orm@0.38.4(@libsql/client@0.14.0)(@types/react@18.3.3))(zod@3.24.2)
-      esc-pos-printer: 1.0.11
       layerchart: 0.60.3(svelte@5.22.6)(typescript@5.8.2)
       nodemailer: 6.9.16
       oslo: 1.2.1
+      qz-tray: 2.2.4
       sharp: 0.33.5
       superjson: 2.2.2
       svelte-motion: 0.12.2(svelte@5.22.6)
@@ -5772,8 +5780,6 @@ snapshots:
       '@esbuild/win32-arm64': 0.24.2
       '@esbuild/win32-ia32': 0.24.2
       '@esbuild/win32-x64': 0.24.2
-
-  esc-pos-printer@1.0.11: {}
 
   escalade@3.1.2: {}
 
@@ -6520,6 +6526,8 @@ snapshots:
     optional: true
 
   queue-microtask@1.2.3: {}
+
+  qz-tray@2.2.4: {}
 
   read-cache@1.0.0:
     dependencies:
