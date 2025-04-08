@@ -24,12 +24,11 @@
   import { goto } from '$app/navigation'
   import { pageConfig } from '$lib/config'
   import { DateFormatter } from '@internationalized/date'
-  import Printer, { JustifyModes, PrinterModes } from 'esc-pos-printer'
   import type { SelectCustomerOrder } from '$lib/server/db/schema'
-  import Print from 'lucide-svelte/icons/printer';
+  import Print from 'lucide-svelte/icons/printer'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
   import { formatCurrency } from '$lib/utils'
-
+  import qz from 'qz-tray'
 
   let { data }: { data: PageData } = $props()
 
@@ -64,15 +63,13 @@
     return data.rows
   })
 
-  function printEmphasis(printer: Printer,text:string) {
-    printer.setEmphasis(true)
-    printer.text(text)
-    printer.setEmphasis(false)
-  }
-
   async function printOrder(order_id: SelectCustomerOrder['id']) {
+    var config = qz.configs.create(usingPrinter,{
+      encoding: 'CP850'
+    })
+
     toast.info('Imprimindo pedido...')
-    console.log('IMPRIMINDO PEDIDO')
+
     const datt = new Date()
 
     const dataFormatada = datt.toLocaleDateString('pt-BR', {
@@ -80,7 +77,9 @@
       month: '2-digit',
       year: 'numeric',
     })
+
     const horaFormatada = datt.toLocaleTimeString('pt-BR', { hour12: false })
+
     try {
       const order = await trpc($page).customer.getOrderById.query(order_id)
 
@@ -89,71 +88,171 @@
         console.error('Pedido não encontrado')
         return
       }
-      const printer = new Printer()
 
-      const printerList = await printer.getPrinters()
-      printer.setPrinterName(printerList[0])
-      console.log(printerList)
-      printer.selectPrintMode(PrinterModes.MODE_FONT_A)
-      printer.justify(JustifyModes.justifyCenter)
-      printEmphasis(printer,`Duarte distribuidora ${data.tenant?.name}\n\n`)
-      printer.text(`${data.tenant?.address}\n`)
-      printer.text(`${data.tenant?.phone}\n`)
-      printer.text('TODO: CNPJ\n\n')
-      printEmphasis(printer,'----------------------------------------\n\n')
-      printer.text(`IMPRESSO EM: ${dataFormatada} ${horaFormatada}\n\n`)
-      printer.text(`RELATÓRIO GERENCIAL\n\n`)
-      printer.justify(JustifyModes.justifyLeft)
-      printer.text(`${order.customer?.name}\n`)
-      printer.text(
-        `${order.customer?.phone ? order.customer?.phone : ''} - ${order.customer?.cellphone ? order.customer?.cellphone : ''}\n`,
+      const info = []
+
+      info.push('\x1B\x21\x00') // Reset
+      info.push('\x1B\x61\x01') // Justify center
+      // info.push('\x1B' + '\x4D' + '\x31')
+
+      info.push('\x1B\x45\x01') // Bold on
+      info.push(`Duarte distribuidora ${data.tenant?.name}\n\n`)
+      info.push('\x1B\x45\x00') // Bold off
+
+      info.push(`${data.tenant?.address}\n`)
+      info.push(`${data.tenant?.phone}\n`)
+      info.push('TODO: CNPJ\n\n')
+
+      info.push('\x1B\x45\x01')
+      info.push('----------------------------------------\n\n')
+      info.push('\x1B\x45\x00')
+
+      info.push(`IMPRESSO EM: ${dataFormatada} ${horaFormatada}\n\n`)
+      info.push(`RELATÓRIO GERENCIAL\n\n`)
+
+      info.push('\x1B\x61\x00') // Justify left
+      info.push(`${order.customer?.name}\n`)
+      info.push(
+        `${order.customer?.phone ?? ''} - ${order.customer?.cellphone ?? ''}\n`,
       )
-      printer.text(
+      info.push(
         `Endereço de entrega: ${order.address?.street}, ${order.address?.number}, ${order.address?.neighborhood}, ${order.address?.city}\n`,
       )
-      printer.text(`Entregador: ${order.motoboy?.username}\n\n`)
-      printer.justify(JustifyModes.justifyCenter)
-      printer.text(`(Pedido: N.:${order.id})\n`)
-      printer.justify(JustifyModes.justifyCenter)
-      printEmphasis(printer,'----------------------------------------\n')
-      printer.text('ITEM                               PREÇO\n')
-      printEmphasis(printer,'----------------------------------------\n\n')
+      info.push(`Entregador: ${order.motoboy?.username}\n\n`)
+
+      info.push('\x1B\x61\x01') // Justify center
+      info.push(`(Pedido: N.:${order.id})\n`)
+
+      info.push('\x1B\x45\x01')
+      info.push('----------------------------------------\n')
+      info.push('ITEM                               PREÇO\n')
+      info.push('----------------------------------------\n\n')
+      info.push('\x1B\x45\x00')
 
       order.items.forEach(item => {
         const itemText = `${item.quantity}x ${item.product.name}`.padEnd(
-          35,
+          34,
           ' ',
-        ) 
+        )
         const price = `${formatCurrency(item.price)}`
 
-        printer.justify(JustifyModes.justifyLeft)
-        printer.text(itemText)
-        printer.justify(JustifyModes.justifyRight)
-        printer.text(price + '\n')
+        info.push('\x1B\x61\x00') // Left
+        info.push(itemText)
+
+        info.push('\x1B\x61\x02') // Right
+        info.push(price + '\n')
       })
-      printEmphasis(printer,'\n----------------------------------------\n\n')
-      printer.justify(JustifyModes.justifyRight)
-      printer.text(
-        `TOTAL: ${formatCurrency(order.total-(order.taxa_entrega ?? 0))}\n`,
+
+      info.push('\x1B\x45\x01')
+      info.push('\n----------------------------------------\n\n')
+      info.push('\x1B\x45\x00')
+
+      info.push('\x1B\x61\x02') // Right
+      info.push(
+        `TOTAL: ${formatCurrency(order.total - (order.taxa_entrega ?? 0))}\n`,
       )
-      printer.text(
-        `+ ENTREGA: ${formatCurrency(order.taxa_entrega ?? 0)}\n`,
-      )
-      printEmphasis(printer,`= TOTAL A PAGAR: ${formatCurrency(order.total)}\n`)
-      printer.justify(JustifyModes.justifyLeft)
-      printer.text(`Atendente: ${order.created_by?.username}\n`)
-      printer.justify(JustifyModes.justifyCenter)
-      printEmphasis(printer,'----------------------------------------\n')
-      printer.feed(2)
-      printer.cut()
-      printer.close()
-      await printer.print()
+      info.push(`+ ENTREGA: ${formatCurrency(order.taxa_entrega ?? 0)}\n`)
+
+      info.push('\x1B\x45\x01')
+      info.push(`= TOTAL A PAGAR: ${formatCurrency(order.total)}\n`)
+      info.push('\x1B\x45\x00')
+
+      info.push('\x1B\x61\x00') // Left
+      info.push(`Atendente: ${order.created_by?.username}\n`)
+
+      info.push('\x1B\x61\x01') // Center
+      info.push('----------------------------------------\n')
+
+      info.push('\n\n')
+      info.push('\x1D\x56\x01')
+
+      qz.print(config, info).catch(function (e) {
+        console.error(e)
+      })
+
+      toast.success('Pedido impresso com sucesso!')
     } catch (error) {
       console.log(error)
       toast.error('Erro! Verifique se a impressora está conectada')
     }
   }
+
+  let printers: string[] | string | undefined = $state()
+  let usingPrinter = $state('')
+
+  let isOpenModal: HTMLDialogElement | null = $state(null)
+  let selectedOrder: number | null = $state(null)
+
+  async function listPrinters() {
+    try {
+      if (!qz.websocket.isActive()) {
+        await qz.websocket.connect()
+      }
+      printers = await qz.printers.find()
+
+      if (printers.length === 0) {
+        toast.error('Nenhuma impressora encontrada')
+        return
+      }
+
+      if (printers.length === 1) {
+        usingPrinter = printers[0]
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('Erro ao conectar à impressora')
+      return 'error'
+    }
+  }
+
+  async function handleOpenModal(orderId: number) {
+    const resp = await listPrinters()
+    if (resp === 'error') {
+      return
+    }
+    isOpenModal?.showModal()
+    selectedOrder = orderId
+  }
 </script>
+
+<dialog class="modal" bind:this={isOpenModal}>
+  <div class="modal-box max-w-2xl">
+    <form method="dialog">
+      <button class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">
+        ✕
+      </button>
+    </form>
+    <h2 class="text-lg font-bold">Imprimir pedido</h2>
+    <p class="py-4">Selecione a impressora e clique em imprimir</p>
+    <div class="flex flex-col gap-4">
+      <select bind:value={usingPrinter} class="select select-bordered w-full">
+        {#if printers && typeof printers === 'object'}
+          {#each printers as printer}
+            <option value={printer}>
+              {printer}
+            </option>
+          {/each}
+        {:else if printers && printers.length > 0}
+          {usingPrinter}
+        {/if}
+      </select>
+      <button
+        class="btn btn-primary"
+        onclick={() => {
+          if (selectedOrder != null) {
+            printOrder(selectedOrder)
+          }
+        }}
+      >
+        Imprimir
+      </button>
+    </div>
+
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </div>
+</dialog>
 
 <main class="m-4 h-full max-h-[calc(100vh-20vh)]">
   <div class="flex items-center justify-between">
@@ -195,7 +294,7 @@
           <Th />
           <Th>
             <DateFilter
-            {filters}
+              {filters}
               onChange={(startDate, endDate) => {
                 if (!startDate || !endDate) return
 
@@ -217,19 +316,23 @@
           <tr>
             <td>{row.id}</td>
             <td class:text-error={!row.name}>
-                {row.name ? row.name : 'Não vinculado'}
+              {row.name ? row.name : 'Não vinculado'}
             </td>
             <td>{row.created_by}</td>
             <td class:text-error={!row.observation}>
-                {row.observation ? row.observation : 'N/A'}
+              {row.observation ? row.observation : 'N/A'}
             </td>
             <td>
-                {row.created_at ? df.format(row.created_at) : ''}
+              {row.created_at ? df.format(row.created_at) : ''}
             </td>
-            <td><b class="text-lg text-success">{(row.total/100).toLocaleString('pt-BR',{
-              style:'currency',
-              currency:'BRL'
-            })}</b></td>
+            <td>
+              <b class="text-lg text-success">
+                {(row.total / 100).toLocaleString('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                })}
+              </b>
+            </td>
 
             <td>
               <a href="/admin/orders/{row.id}" class="badge badge-primary">
@@ -237,12 +340,11 @@
               </a>
             </td>
             <td>
-              <button onclick={() => printOrder(row.id)}><Print />
-              </button>
+              <button onclick={() => handleOpenModal(row.id)}><Print /></button>
             </td>
           </tr>
         {/each}
-        <tr class="sticky bottom-0 bg-colorr">
+        <tr class="bg-colorr sticky bottom-0">
           <td></td>
           <td></td>
           <td></td>
