@@ -210,7 +210,7 @@
               {formatCurrency(row.amount)}
                 
               {:else}
-              <span>—</span>
+              <span class="text-slate-400">—</span>
               {/if}
             </td>
             <td class="whitespace-nowrap text-sm">
