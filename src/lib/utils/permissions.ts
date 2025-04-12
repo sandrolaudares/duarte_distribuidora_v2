@@ -56,6 +56,7 @@ export const paymentMethodLabel: Record<typeof paymentMethodEnum[number], string
 
 export type Role = (typeof roleEnum)[number]
 export type Permission = (typeof permissionsEnum)[number]
+export type PaymentMethod = (typeof paymentMethodEnum)[number]
 
 export const cashierTransactionEnum = [
   'Abertura',

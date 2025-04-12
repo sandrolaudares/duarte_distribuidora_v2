@@ -243,6 +243,22 @@
             </td>
           </tr>
         {/each}
+        <tr class="sticky bottom-0">
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="text-lg font-bold">
+            <span class="text-secondary">{formatCurrency(data.totalSum)}</span>
+          </td>
+          <td class="text-xl font-bold">
+            <!-- <span class="text-success">{formatCurrency(totalValorTroco)}</span> -->
+          </td>
+          <td></td>
+          <td></td>
+        </tr>
       </tbody>
     </table>
     {#if data.rows.length === 0}

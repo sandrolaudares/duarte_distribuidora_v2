@@ -15,12 +15,16 @@
   import CardapioCaixa from './CardapioCaixa.svelte'
   import CaixaLeftColumn from './CaixaLeftColumn.svelte'
   import { getCartContext } from './cartContext.svelte'
+  import AlertaFechar from './AlertaFechar.svelte'
+  import { goto, invalidate, invalidateAll } from '$app/navigation'
+  import Alert from '$lib/components/modal/base/Alert.svelte'
+  import Loading from '$lib/components/Loading.svelte'
 
   const cart = getCartContext()
 
   let { data }: { data: PageData } = $props()
 
-  let { caixa, user, products } = data
+  let { caixa, user, products } = $state(data)
 
   let filteredProducts = products
 
@@ -50,7 +54,9 @@
           address_id: cart.meta.enderecoSelecionado?.id,
           total: total,
           observation: observacao,
-          motoboy_id: cart.meta.isDelivery ? cart.meta.motoboySelecionado?.id : undefined,
+          motoboy_id: cart.meta.isDelivery
+            ? cart.meta.motoboySelecionado?.id
+            : undefined,
           type: 'ATACADO',
           //TODO: Type
           cashier_id: caixa.id,
@@ -60,7 +66,8 @@
         order_items: Object.values(cart.cart).map(item => ({
           product_id: item.item.id,
           quantity: item.quantity,
-          price: item.item[item.meta.is_retail ? 'retail_price' : 'wholesale_price'],
+          price:
+            item.item[item.meta.is_retail ? 'retail_price' : 'wholesale_price'],
         })),
       })
       if (!resp) {
@@ -78,13 +85,13 @@
 
   function reset() {
     setTimeout(() => {
-        modal.close()
-        cart.meta.clienteSelecionado = null
-        cart.meta.enderecoSelecionado = null
-        cart.meta.motoboySelecionado = null
-        cart.meta.isDelivery = false
-        cart.clear()
-      }, 300)
+      modal.close()
+      cart.meta.clienteSelecionado = null
+      cart.meta.enderecoSelecionado = null
+      cart.meta.motoboySelecionado = null
+      cart.meta.isDelivery = false
+      cart.clear()
+    }, 300)
   }
 
   async function orderWaiting() {
@@ -115,7 +122,8 @@
         order_items: Object.values(cart.cart).map(item => ({
           product_id: item.item.id,
           quantity: item.quantity,
-          price: item.item[item.meta.is_retail ? 'retail_price' : 'wholesale_price'],
+          price:
+            item.item[item.meta.is_retail ? 'retail_price' : 'wholesale_price'],
         })),
       })
       if (!resp) {
@@ -132,51 +140,53 @@
 
   let dinheiro_caixa = $state(0)
 
+  let loadingAbrir = $state(false)
+
   async function handleAbrirCaixa() {
+    loadingAbrir = true
     try {
-      const resp = await trpc($page).distribuidora.abrirCaixa.mutate({
+      await trpc($page).distribuidora.abrirCaixa.mutate({
         id: caixa.id,
         data: {
           amount: dinheiro_caixa,
+          status: caixa.status,
         },
       })
-
-      console.log(resp)
       toast.success('Caixa aberto com sucesso!')
-      window.location.reload()
+      await invalidateAll()
+      caixa = data.caixa
+      user = data.user
     } catch (error: any) {
       toast.error(error.message)
+    } finally {
+      loadingAbrir = false
     }
   }
 
+  let loadingFechar = $state(false)
   async function handleFecharCaixa() {
-    const confirmacao = confirm(
-      'Você está prestes a fechar o caixa. Deseja continuar?',
-    )
-
-    if (!confirmacao) {
-      return
-    }
+    loadingFechar = true
     try {
       const resp = await trpc($page).distribuidora.fecharCaixa.mutate({
         id: caixa.id,
-        // data: {
-        //   amount: dinheiro_caixa,
-        // },
       })
       console.log(resp)
       toast.success('Caixa fechado com sucesso!')
-      window.location.reload()
+      goto(`/admin/cashier`)
     } catch (error: any) {
       toast.error(error.message)
+    } finally {
+      loadingFechar = false
     }
   }
 
   async function seeTransactionsCaixa() {
     modal.open(TransactionsModal, {
-      caixa_id: caixa.id,
+      caixa: caixa,
     })
   }
+
+  let isOpenModalClose: HTMLDialogElement | null = $state(null)
 
   async function pagamentoModal() {
     let total = Object.values(cart.cart).reduce((acc, item) => {
@@ -187,41 +197,48 @@
       )
     }, 0)
     modal.open(PaymentCashier, {
-      total_pedido: cart.meta.isDelivery ? total + cart.meta.taxaEntrega : total,
+      total_pedido: cart.meta.isDelivery
+        ? total + cart.meta.taxaEntrega
+        : total,
       payments: [],
-      cashier_id :caixa.id,
+      cashier_id: caixa.id,
       observacao,
       save: payments => {
         createOrder(payments)
       },
-      nulla:() => {
+      nulla: () => {
         reset()
-      }
+      },
     })
   }
 
+  let entrarMesmoAssim = $state(false)
 </script>
 
-<div class="m-4 flex justify-center gap-3">
-  <!-- <button class="btn btn-primary" onclick={seeTransactionsCaixa}>
-    Ver transacoes do caixa
-  </button> -->
-</div>
-{#if caixa.status === 'Fechado'}
-  <div class="flex justify-center">
+{#if caixa.status === 'Fechado' && user && (user.meta.caixa_id === undefined || entrarMesmoAssim === true)}
+  <div class="flex flex-col items-center justify-center">
+    <h1 class="font-semibold">Abrir o {caixa.name}</h1>
     <label class="form-control w-full max-w-xs gap-2">
       <div class="label justify-center">
         <span class="label-text">Digite o valor no caixa!</span>
       </div>
       <CurrencyInput bind:value={dinheiro_caixa} />
-      <button class="btn btn-primary" onclick={handleAbrirCaixa}>
+      <button
+        class="btn btn-primary"
+        disabled={entrarMesmoAssim || loadingAbrir}
+        onclick={handleAbrirCaixa}
+      >
         Abrir caixa
       </button>
     </label>
   </div>
-{:else}
+{:else if user && (user.meta.caixa_id === caixa.id || (user.role != 'caixa' && entrarMesmoAssim === true))}
+  <AlertaFechar cashier={caixa} tenant={data.tenant!} />
   <div class="mb-3 flex justify-center gap-2">
-    <button class="btn btn-error" onclick={handleFecharCaixa}>
+    <button class="btn btn-primary" onclick={seeTransactionsCaixa}>
+      Ver transacoes do dia
+    </button>
+    <button class="btn btn-error" onclick={() => isOpenModalClose?.showModal()}>
       Fechar caixa
     </button>
   </div>
@@ -255,7 +272,8 @@
       <div class="flex flex-col gap-2">
         <button
           class="btn btn-secondary w-full disabled:bg-opacity-50"
-          disabled={Object.values(cart.cart).length === 0 || !cart.meta.motoboySelecionado}
+          disabled={Object.values(cart.cart).length === 0 ||
+            !cart.meta.motoboySelecionado}
           onclick={orderWaiting}
         >
           <span class="mr-1">PREPARAR PARA ENTREGA</span>
@@ -275,6 +293,20 @@
       </div>
     </div>
   </div>
+{:else if user && user.meta.caixa_id != caixa.id}
+  <div
+    class="container my-auto flex items-center justify-center gap-3 text-center text-xl"
+  >
+    Você já está em um caixa ou o caixa foi aberto por outra pessoa!
+    {#if user.role != 'caixa'}
+      <button
+        class="badge bg-error/10"
+        onclick={() => (entrarMesmoAssim = true)}
+      >
+        Entrar mesmo assim
+      </button>
+    {/if}
+  </div>
 {/if}
 
 <dialog class="modal" bind:this={isOpenModal}>
@@ -284,4 +316,33 @@
   <form method="dialog" class="modal-backdrop">
     <button>close</button>
   </form>
+</dialog>
+
+<dialog class="modal" bind:this={isOpenModalClose}>
+  <div class="modal-box max-w-lg text-center">
+    <h1>Você está prestes a fechar o caixa! Deseja continuar?</h1>
+    <div class=" mt-4 flex justify-center gap-3">
+      <button
+        class="btn"
+        onclick={() => isOpenModalClose?.close()}
+        disabled={loadingFechar}
+      >
+        Cancelar
+      </button>
+      <button
+        class="btn btn-primary"
+        onclick={handleFecharCaixa}
+        disabled={loadingFechar}
+      >
+        {#if loadingFechar}
+          <Loading />
+        {:else}
+          Fechar caixa
+        {/if}
+      </button>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </div>
 </dialog>
