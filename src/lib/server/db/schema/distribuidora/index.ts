@@ -12,6 +12,7 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { customerOrderTable } from '../customer'
 import { userTable } from '../user'
 import { timestamps } from '../../utils'
+import { cashierTransactionEnum } from '$lib/utils/permissions'
 
 export const cashierTable = sqliteTable('caixas', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
@@ -47,7 +48,7 @@ export const cashierTransactionsT = sqliteTable('cashierTransactions', {
     })
     .default(''),
   type: text('type', {
-    enum: ['Abertura', 'Fechamento', 'Pagamento', 'Sangria', 'Deposito'],
+    enum: cashierTransactionEnum,
   }).notNull(),
   amount: integer('amount').notNull(),
   metadata: text('metadata', { mode: 'json' }),
@@ -73,15 +74,5 @@ export const insertCashierSchema = createInsertSchema(cashierTable)
 export type InsertCashier = typeof cashierTable.$inferInsert
 export type SelectCashier = typeof cashierTable.$inferSelect
 
-export const cashierTransactionEnum = [
-  'Entrada',
-  'Saida',
-  'Troco',
-  'PAGAMENTO',
-  "FECHAMENTO",
-  "ABERTURA",
-  "DEPOSITO",
-  "SAQUE",
-] as const
 
 

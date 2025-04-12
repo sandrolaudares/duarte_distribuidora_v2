@@ -8,20 +8,15 @@ import {
   insertSupplierSchema,
   supplierTable,
 } from '$db/schema/stock'
-import {
-  cashierTable,
-  
-  stockTransactionTable,
-} from '$db/schema'
-
+import { cashierTable, cashierTransactionsT, logsTable, stockTransactionTable } from '$db/schema'
 
 import { middleware } from '$trpc/middleware'
 import { TRPCError } from '@trpc/server'
 
-import { eq } from 'drizzle-orm'
+import { and, desc, eq, gte, lte } from 'drizzle-orm'
 
 export const stock = router({
-  getSKUs: publicProcedure.query(({ctx:{tenantDb}}) => {
+  getSKUs: publicProcedure.query(({ ctx: { tenantDb } }) => {
     return stockController(tenantDb).getSKU()
   }),
   insertSKU: publicProcedure
@@ -29,7 +24,7 @@ export const stock = router({
     .use(middleware.auth)
     .use(middleware.logged)
 
-    .mutation(async ({ input, ctx:{tenantDb}}) => {
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
       return stockController(tenantDb).insertSKU(input).returning()
     }),
 
@@ -65,7 +60,7 @@ export const stock = router({
   //     )
   //   }),
 
-  getSupplier: publicProcedure.query(({ctx:{tenantDb}}) => {
+  getSupplier: publicProcedure.query(({ ctx: { tenantDb } }) => {
     return stockController(tenantDb).getSupplier()
   }),
 
@@ -84,7 +79,7 @@ export const stock = router({
     .use(middleware.logged)
     .use(middleware.auth)
     .input(insertSupplierSchema)
-    .mutation(async ({ input, ctx:{tenantDb} }) => {
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
       return stockController(tenantDb).insertSupplier(input).returning()
     }),
 
@@ -104,7 +99,7 @@ export const stock = router({
         }),
       }),
     )
-    .mutation(async ({ input , ctx:{tenantDb}}) => {
+    .mutation(async ({ input, ctx: { tenantDb } }) => {
       const { id, supplier } = input
       return await stockController(tenantDb).updateSupplier(id, supplier)
     }),
@@ -156,35 +151,61 @@ export const stock = router({
         sku: z.string(),
       }),
     )
-    .query(async ({ input,ctx:{tenantDb} }) => {
+    .query(async ({ input, ctx: { tenantDb } }) => {
       return await stockController(tenantDb).queryLastCostPrice(input.sku)
     }),
 
   getRecentTransaoEstoque: publicProcedure
     .input(z.number())
-    .query(async ({ input, ctx:{tenantDb} }) => {
-      return await stockController(tenantDb).getRecentTransactionsCaixa(input)
+    .query(async ({ input, ctx: { tenantDb } }) => {
+      const startOfDay = new Date()
+      startOfDay.setHours(0, 0, 0, 0)
+      const endOfDay = new Date()
+      endOfDay.setHours(23, 59, 59, 999)
+
+      const startTimestamp = startOfDay.getTime()
+      const endTimestamp = endOfDay.getTime()
+
+      const transactions = await tenantDb
+        .select()
+        .from(cashierTransactionsT)
+        .where(
+          and(
+            gte(cashierTransactionsT.created_at, new Date(startTimestamp)),
+            lte(cashierTransactionsT.created_at, new Date(endTimestamp)),
+          ),
+        ).orderBy(desc(cashierTransactionsT.created_at))
+
+      return transactions
     }),
 
-  getAllTransaoCaixa: publicProcedure.query(({ctx:{tenantDb}}) => {
-    return stockController(tenantDb).getAllTransactionsCaixa()
+  getAllTransaoCaixa: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
+    return await tenantDb
+      .select()
+      .from(logsTable)
+      .where(eq(logsTable.type, 'CAIXA'))
+    // return stockController(tenantDb).getAllTransactionsCaixa()
   }),
 
-  deleteItemStock: publicProcedure.input(z.string()).mutation(({ input, ctx:{tenantDb} }) => {
-    return stockController(tenantDb).deleteItemStock(input)
-  }),
+  deleteItemStock: publicProcedure
+    .input(z.string())
+    .mutation(({ input, ctx: { tenantDb } }) => {
+      return stockController(tenantDb).deleteItemStock(input)
+    }),
 
   updateSku: publicProcedure
-  .use(middleware.logged)
-  .use(middleware.auth)
-  .input(z.object({
-    sku: z.string(),
-    data: z.object({
-      name:z.string()
-   }),
-  })).mutation(({ input, ctx:{tenantDb} }) => {
-    const { sku,data }= input
-    return stockController(tenantDb).updateSKU(sku, data)
-  }),
-
+    .use(middleware.logged)
+    .use(middleware.auth)
+    .input(
+      z.object({
+        sku: z.string(),
+        data: z.object({
+          name: z.string(),
+        }),
+      }),
+    )
+    .mutation(({ input, ctx: { tenantDb } }) => {
+      const { sku, data } = input
+      return stockController(tenantDb).updateSKU(sku, data)
+    }),
 })

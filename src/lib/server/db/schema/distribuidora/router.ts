@@ -2,6 +2,7 @@
 import { publicProcedure, router } from '$trpc/t'
 
 import { z } from 'zod'
+import { user as userController } from '$db/controller'
 import {
   bugReport,
   distribuidora as distribuidoraController,
@@ -10,7 +11,10 @@ import {
 } from '$db/controller'
 import {
   insertCashierSchema,
-  cashierTransactionEnum,
+  logsTable,
+  userTable,
+  cashierTable,
+  cashierTransactionsT,
 } from '$lib/server/db/schema'
 
 import { middleware } from '$trpc/middleware'
@@ -29,6 +33,8 @@ import { createInsertSchema } from 'drizzle-zod'
 import { TRPCError } from '@trpc/server'
 import { verify } from '../user/password'
 import { formatCurrency } from '$lib/utils'
+import { eq } from 'drizzle-orm'
+import { cashierTransactionEnum } from '$lib/utils/permissions'
 
 export const distribuidora = router({
   insertCashier: publicProcedure
@@ -68,36 +74,38 @@ export const distribuidora = router({
           lng: z.number().optional(),
           subdomain: z.string().optional(),
           phone: z.string().optional(),
-          funcionamento : z.object({
-            segunda: z.object({
-              start: z.number(),
-              end: z.number(),
-            }),
-            terca: z.object({
-              start: z.number(),
-              end: z.number(),
-            }),
-            quarta: z.object({
-              start: z.number(),
-              end: z.number(),
-            }),
-            quinta: z.object({
-              start: z.number(),
-              end: z.number(),
-            }),
-            sexta: z.object({
-              start: z.number(),
-              end: z.number(),
-            }),
-            sabado: z.object({
-              start: z.number(),
-              end: z.number(),
-            }),
-            domingo: z.object({
-              start: z.number(),
-              end: z.number(),
-            }),
-          }).optional()
+          funcionamento: z
+            .object({
+              segunda: z.object({
+                start: z.number(),
+                end: z.number(),
+              }),
+              terca: z.object({
+                start: z.number(),
+                end: z.number(),
+              }),
+              quarta: z.object({
+                start: z.number(),
+                end: z.number(),
+              }),
+              quinta: z.object({
+                start: z.number(),
+                end: z.number(),
+              }),
+              sexta: z.object({
+                start: z.number(),
+                end: z.number(),
+              }),
+              sabado: z.object({
+                start: z.number(),
+                end: z.number(),
+              }),
+              domingo: z.object({
+                start: z.number(),
+                end: z.number(),
+              }),
+            })
+            .optional(),
         }),
       }),
     )
@@ -112,6 +120,7 @@ export const distribuidora = router({
         id: z.number(),
         data: z.object({
           amount: z.number(),
+          status: z.enum(['Aberto', 'Fechado']),
         }),
       }),
     )
@@ -119,21 +128,44 @@ export const distribuidora = router({
       const { id, data } = input
       const { tenantDb, user } = ctx
 
-      await bugReport(tenantDb).insertLogs({
-        text: `Abertura de caixa com ${formatCurrency(data.amount)}`,
-        created_by: user?.id,
-        metadata: {
-          cashier_id: id,
-        },
-        cashier_id: id,
-        type: 'CAIXA',
-        pathname: '',
-        routeName: 'Abrir caixa',
-        currency: data.amount,
-      })
+      if (data.status !== 'Fechado') {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Caixa já está aberto, recarregue a página',
+        })
+      }
 
-      return await distribuidoraController(tenantDb).updateCashier(id, {
-        status: 'Aberto',
+      if (!user) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Usuário não autenticado',
+        })
+      }
+
+      return tenantDb.transaction(async trx => {
+        await trx.insert(cashierTransactionsT).values({
+          amount: data.amount,
+          type: 'Abertura',
+          metadata: {
+            observacoes: 'Abertura com ' + formatCurrency(data.amount),
+          },
+          cashier_id: id,
+          order_id: null,
+          created_by: user.id,
+        })
+
+        if (user) {
+          await trx
+            .update(userTable)
+            .set({ meta: { caixa_id: id } })
+            .where(eq(userTable.id, user.id))
+        }
+
+        return await trx
+          .update(cashierTable)
+          .set({ status: 'Aberto', currency: data.amount,user_in: user.id })
+          .where(eq(cashierTable.id, id))
+          .returning()
       })
     }),
   fecharCaixa: publicProcedure
@@ -148,22 +180,31 @@ export const distribuidora = router({
 
       const [info] = await distribuidoraController(tenantDb).getCashierById(id)
 
-      await bugReport(tenantDb).insertLogs({
-        text: `Fechamento de caixa com ${formatCurrency(info.currency)}`,
-        created_by: user?.id,
-        metadata: {
-          cashier_id: id,
-        },
-        cashier_id: id,
-        type: 'CAIXA',
-        pathname: '',
-        routeName: 'Fechar caixa',
-        currency: info.currency,
-      })
+      if (!user) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Usuário não autenticado',
+        })
+      }
 
-      return await distribuidoraController(tenantDb).updateCashier(id, {
-        status: 'Fechado',
-        currency: 0,
+      return tenantDb.transaction(async trx => {
+        await trx.insert(cashierTransactionsT).values({
+          amount: info.currency,
+          type: 'Fechamento',
+          cashier_id: id,
+          order_id: null,
+          created_by: user.id,
+        })
+
+        await trx
+          .update(userTable)
+          .set({ meta: { caixa_id: undefined } })
+          .where(eq(userTable.id, user.id))
+
+        return await trx
+          .update(cashierTable)
+          .set({ status: 'Fechado', currency: 0, user_in: null})
+          .where(eq(cashierTable.id, id))
       })
     }),
 
@@ -194,7 +235,9 @@ export const distribuidora = router({
     .input(z.number())
     .query(async ({ input, ctx: { tenantDb } }) => {
       const id = input
-      return await distribuidoraController(tenantDb).getCashierById(id)
+
+      const [caixa] = await distribuidoraController(tenantDb).getCashierById(id)
+      return caixa
     }),
 
   deleteCashierById: publicProcedure

@@ -10,7 +10,7 @@ import {  logsTable } from '../bug-report'
 import { customerOrderTable, orderPaymentTable } from '../customer'
 import { roleEnum, type Permission, type Role } from '$lib/utils/permissions'
 import { timestamps } from '../../utils'
-import { cashierTransactionsT } from '../distribuidora'
+import { cashierTable, cashierTransactionsT } from '../distribuidora'
 
 export const userTable = sqliteTable('user', {
   id: text('id').notNull().primaryKey(),
@@ -36,12 +36,16 @@ export const userTable = sqliteTable('user', {
     .default({}),
 })
 
-export const userRelations = relations(userTable, ({ many }) => ({
+export const userRelations = relations(userTable, ({ many,one }) => ({
   logs: many(logsTable),
   orders_made: many(customerOrderTable, { relationName: 'orders_made' }),
   entregou: many(customerOrderTable, { relationName: 'entregou' }),
   payments_created: many(orderPaymentTable),
-  cashier_transactions: many(cashierTransactionsT)
+  cashier_transactions: many(cashierTransactionsT),
+  cashier_in : one(cashierTable, {
+    fields: [userTable.id],
+    references: [cashierTable.user_in],
+  })
 }))
 
 export type SelectUser = typeof userTable.$inferSelect
