@@ -154,12 +154,12 @@
           ),
         })),
       projects: [
-        {
-          allowedRoles: ['admin',`gerente`,`financeiro`] as Role[],
-          name: 'Todos caixas',
-          url: '/admin/cashier',
-          icon: HandCoins,
-        },
+        // {
+        //   allowedRoles: ['admin',`gerente`,`financeiro`] as Role[],
+        //   name: 'Todos caixas',
+        //   url: '/admin/cashier',
+        //   icon: HandCoins,
+        // },
         {
           allowedRoles: ['admin',`gerente`,`financeiro`] as Role[],
           name: 'Transações dos caixas',
@@ -200,10 +200,19 @@
       $user.meta.caixa_id &&
       ($user.role === 'caixa' || $user.role === 'admin')
     ) {
-      nav.projects.push({
+      nav.projects.unshift({
         allowedRoles: ['admin', 'caixa'] as Role[],
         name: 'Ir direto para caixa',
         url: `/admin/cashier/${$user.meta.caixa_id}`,
+        icon: CircleDolar,
+      })
+    }
+
+    if($user && $user.role !== 'caixa' || (!$user.meta.caixa_id && $user.role === 'caixa')) {
+      nav.projects.unshift({
+        allowedRoles: ['admin', 'caixa'] as Role[],
+        name: 'Caixas',
+        url: `/admin/cashier`,
         icon: CircleDolar,
       })
     }
