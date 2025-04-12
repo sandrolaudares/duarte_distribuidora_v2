@@ -95,7 +95,7 @@
     <button
       class="btn btn-primary"
       onclick={() => {
-        filters.clear('username', 'cashier', 'endDate', 'startDate')
+        filters.clear('username', 'cashier', 'endDate', 'startDate','tipo')
         cashierFilter = ''
       }}
     >
