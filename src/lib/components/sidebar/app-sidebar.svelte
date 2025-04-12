@@ -161,7 +161,7 @@
         //   icon: HandCoins,
         // },
         {
-          allowedRoles: ['admin',`gerente`,`financeiro`] as Role[],
+          allowedRoles: ['admin',`gerente`,`financeiro`,'caixa'] as Role[],
           name: 'Transações dos caixas',
           url: '/admin/cashier/transactions',
           icon: Transactions,

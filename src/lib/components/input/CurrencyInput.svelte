@@ -3,8 +3,9 @@
     value = $bindable(),
     onchange,
     oninput,
-    size = ''
-  }: { value: number; onchange?: () => void,oninput?: () => void,size?:string } = $props()
+    size = '',
+    rawStyle = false
+  }: { value: number; onchange?: () => void,oninput?: () => void,size?:string,rawStyle?:boolean } = $props()
 
   if (!value) {
     value = 0
@@ -38,11 +39,11 @@
   })
 </script>
 
-<label class="input input-bordered flex items-center gap-2 {size}">
+<label class=" {rawStyle ? '' : `input input-bordered flex items-center gap-2 ${size}`} ">
   R$
   <input
     type="tel"
-    class=" w-28"
+    class="{rawStyle ? size :'w-28'} "
     value={amountFormatted}
     bind:this={currencyInput}
     oninput={handleChange}
