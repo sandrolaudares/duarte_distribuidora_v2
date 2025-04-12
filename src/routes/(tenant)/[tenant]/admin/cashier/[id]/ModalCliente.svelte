@@ -223,6 +223,7 @@
           </button>
         </div>
       {/each}
+      {#snippet footer()}
       <div class="flex justify-between mt-4 items-center">
         <button class="btn" onclick={prevPage} disabled={pageW === 1}>
           Anterior
@@ -232,6 +233,7 @@
           Próxima
         </button>
       </div>
+      {/snippet}
     {/if}
   </div>
 </Modal>

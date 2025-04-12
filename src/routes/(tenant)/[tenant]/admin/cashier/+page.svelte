@@ -220,10 +220,12 @@
             </div>
             <p
               class="badge min-w-24 {caixa.status === 'Fechado'
-                ? 'badge-error'
-                : ' badge-success text-white '}"
+                ? 'badge-success text-white '
+                : ' badge-error '}"
             >
-              {caixa.status}
+              {caixa.status === 'Fechado'
+                ? 'Dísponível'
+                : 'Em uso'}
             </p>
           </div>
       {/each}

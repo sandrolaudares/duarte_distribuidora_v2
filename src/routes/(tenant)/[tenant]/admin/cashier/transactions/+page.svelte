@@ -27,6 +27,7 @@
   import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
   import { paymentMethodLabel } from '$lib/utils/permissions'
+  import { User } from 'lucide-svelte'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -101,7 +102,7 @@
       Limpar filtros
     </button>
   </div>
-  <Datatable {table}>
+  <Datatable {table} headless>
     <!-- {#snippet header()}
       <Search {table} />
      
@@ -110,22 +111,31 @@
     {#if table.isLoading}
       <LoadingBackground />
     {/if}
-    <table class="table border-none">
+    <table class="table table-xs">
       <thead>
         <tr class="uppercase">
           <Th>ID</Th>
-          <Th>Usuário</Th>
-          <Th>Caixa</Th>
-          <Th>Data</Th>
           <Th>Tipo</Th>
           <!-- <Th>Valor</Th> -->
           <Th>Metodo de pagamento</Th>
+          <Th>Usuário</Th>
+          <Th>Caixa</Th>
+          <Th>Data</Th>
           <Th>Valor</Th>
           <Th>Troco</Th>
           <Th>Observação</Th>
           <Th>Detalhes</Th>
         </tr>
         <tr>
+          <Th />
+          <SelectFilter
+            {table}
+            filterKey="type"
+            {delegateQuery}
+            placeholder="o tipo"
+            config={{ value: c => c, label: c => c }}
+            bind:selectedValue={selectedType}
+          />
           <Th />
           <ThFilter {table} field="username" />
           <!-- <ThFilter {table} field="cashier" /> -->
@@ -151,15 +161,6 @@
               }}
             />
           </Th>
-          <SelectFilter
-            {table}
-            filterKey="type"
-            {delegateQuery}
-            placeholder="o tipo"
-            config={{ value: c => c, label: c => c }}
-            bind:selectedValue={selectedType}
-          />
-          <Th />
           <Th />
           <Th />
           <Th />
@@ -170,14 +171,8 @@
         {#each data.rows as row (row.id)}
           <tr>
             <td>{row.id}</td>
-            <td>{row.username}</td>
-            <td>{row.cashier}</td>
-            <!-- <td>{row.routeName}</td> -->
-            <td>
-              {row.created_at ? df.format(row.created_at) : ''}
-            </td>
-            <td>
-              <span class="badge badge-sm {getColor(row.type)}">
+            <td class="whitespace-nowrap px-4 py-3 text-sm">
+              <span class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getColor(row.type)}`}>
                 {row.type}
               </span>
             </td>
@@ -202,24 +197,37 @@
                 </div>
               {/if}
             </td>
-            <td class="font-semibold">
-              {formatCurrency(row.amount)}
+            <td> <span class="flex items-center gap-1">
+              <User class="size-4" />{row.username}
+            </span></td>
+            <td>{row.cashier}</td>
+            <!-- <td>{row.routeName}</td> -->
+            <td>
+              {row.created_at ? df.format(row.created_at) : ''}
             </td>
-            <td class="whitespace-nowrap px-4 py-3 text-sm">
+            <td class="font-semibold text-sm">
+              {#if row.amount !==0}
+              {formatCurrency(row.amount)}
+                
+              {:else}
+              <span>—</span>
+              {/if}
+            </td>
+            <td class="whitespace-nowrap text-sm">
               {#if row.metadata?.metodo_pagamento === 'dinheiro'}
                   <span class=" text-success font-bold ">{formatCurrency(row.metadata?.troco)}</span>
                 {:else}
-                  <span>—</span>
+                <span class="text-slate-400">—</span>
                 {/if}
             </td>
-            <td
-              class={row.metadata?.observacoes != null
-                ? 'font-semibold'
-                : 'text-error'}
-            >
-              {row.metadata?.observacoes != null
-                ? row.metadata.observacoes
-                : 'Nenhuma'}
+            <td class="max-w-[100px] truncate text-sm">
+              {#if row.metadata?.observacoes}
+                <span class="font-medium " title={row.metadata.observacoes}>
+                  {row.metadata.observacoes}
+                </span>
+              {:else}
+                <span class="text-slate-400">—</span>
+              {/if}
             </td>
             <td>
               {#if row.order_id}
@@ -229,6 +237,8 @@
                 >
                   Pedido
                 </a>
+                {:else}
+                <span class="text-slate-400">—</span>
               {/if}
             </td>
           </tr>
@@ -249,5 +259,8 @@
 <style>
   thead {
     background-color: oklch(var(--b1)) !important;
+  }
+  tbody td {
+    border-bottom: 1px solid var(--grey-lighten, #eee) !important;
   }
 </style>

@@ -45,18 +45,18 @@
     ></textarea>
   </main>
 
-  <svelte:fragment slot="footer">
+    {#snippet footer()}
     <div class="mt-4 flex w-full justify-between">
       <!-- <a href="/bug_report" class="btn btn-primary" onclick={modal.close}>
         {@html icons.bug()} Ver Bugs Table
       </a> -->
-
+      
       <div class="flex gap-3">
         <button class="btn btn-error" onclick={modal.close}>Cancelar</button>
         <button class="btn btn-success" onclick={save}>Enviar</button>
       </div>
     </div>
-  </svelte:fragment>
+  {/snippet}
 </Modal>
 
 <style>

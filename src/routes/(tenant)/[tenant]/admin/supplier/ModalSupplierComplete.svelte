@@ -155,11 +155,12 @@
       </label>
     {/if}
   </div>
-  <svelte:fragment slot="footer">
-    <div class="mt-4 flex w-full">
-      <button class="btn btn-primary w-full" on:click={createSupplier} disabled={isLoading}>
-        Criar fornecedor
-      </button>
-    </div>
-  </svelte:fragment>
+
+  {#snippet footer()}
+  <div class="mt-4 flex w-full">
+    <button class="btn btn-primary w-full" on:click={createSupplier} disabled={isLoading}>
+      Criar fornecedor
+    </button>
+  </div>
+  {/snippet}
 </Modal>

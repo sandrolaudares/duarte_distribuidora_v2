@@ -1,6 +1,8 @@
 <script lang="ts">
   import { modal } from '$lib/components/modal'
-  export let title = ''
+  import type { Snippet } from 'svelte'
+
+  let { title,children,footer }:{title:string,children:Snippet,footer?:Snippet} = $props()
 </script>
 
 <header class="handle">
@@ -12,7 +14,7 @@
     </button> -->
   <button
     type="button"
-    on:click={() => modal.close()}
+    onclick={() => modal.close()}
     class="btn btn-circle btn-ghost btn-sm absolute right-1"
   >
     ✕
@@ -20,12 +22,14 @@
 </header>
 
 <section>
-  <slot />
+  {@render children()}
 </section>
 
-<footer>
-  <slot name="footer" />
-</footer>
+{#if footer}
+  <footer>
+    {@render footer()}
+  </footer>
+{/if}
 
 <style>
   header {

@@ -10,7 +10,10 @@
   import Loading from '$lib/components/Loading.svelte'
   import { formatCurrency } from '$lib/utils'
   import type { SelectCashier } from '$lib/server/db/schema'
-  import { cashierTransactionEnum, paymentMethodLabel } from '$lib/utils/permissions'
+  import {
+    cashierTransactionEnum,
+    paymentMethodLabel,
+  } from '$lib/utils/permissions'
   import Separator from '$lib/components/ui/separator/separator.svelte'
 
   let { caixa }: { caixa: SelectCashier } = $props()
@@ -56,15 +59,27 @@
     if (activeTab === 'all') {
       filteredTransactions = transactions
     } else {
-      filteredTransactions = transactions.filter(
-        t => t.type === activeTab,
-      )
+      filteredTransactions = transactions.filter(t => t.type === activeTab)
     }
   })
 
   function filterByType(type: string) {
     activeTab = type
   }
+
+  let totalValor = $derived.by(() => {
+    if (!filteredTransactions) return 0
+    return filteredTransactions.reduce((acc, transaction) => {
+      return acc + transaction.amount
+    }, 0)
+  })
+  let totalValorTroco = $derived.by(() => {
+    if (!filteredTransactions) return 0
+    return filteredTransactions.reduce((acc, transaction) => {
+      if (!transaction.metadata?.troco) return acc
+      return acc + transaction.metadata?.troco
+    }, 0)
+  })
 </script>
 
 <Modal title="Ultimas transacões">
@@ -86,7 +101,7 @@
           <h3 class="mb-1 text-sm font-medium text-slate-500">
             Total de Transações
           </h3>
-          <p class="text-2xl font-bold">{transactions.length}</p>
+          <p class="text-2xl font-bold">{filteredTransactions.length}</p>
         </div>
       </div>
 
@@ -107,11 +122,11 @@
         {/each}
       </div>
 
-      <Separator class="bg-gray-300"/>
+      <Separator class="bg-gray-300" />
 
-      <div class="overflow-x-auto">
-        <table class="table table-md">
-          <thead>
+      <div class="overflow-x-auto max-h-[calc(100vh-50vh)] h-full">
+        <table class="table table-md ">
+          <thead class="sticky top-0 bg-base-200">
             <tr class="uppercase">
               <th>ID</th>
               <th>Tipo</th>
@@ -126,7 +141,9 @@
               <tr>
                 <td>{transaction.id}</td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm">
-                  <span class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getColor(transaction.type)}`}>
+                  <span
+                    class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getColor(transaction.type)}`}
+                  >
                     {transaction.type}
                   </span>
                 </td>
@@ -151,13 +168,21 @@
                     </div>
                   {/if}
                 </td>
-                <td>{formatCurrency(transaction.amount)}</td>
+                <td class="text-sm font-semibold">
+                  {#if transaction.amount !== 0}
+                    {formatCurrency(transaction.amount)}
+                  {:else}
+                    <span>—</span>
+                  {/if}
+                </td>
                 <td class="whitespace-nowrap px-4 py-3 text-sm">
                   {#if transaction.metadata?.metodo_pagamento === 'dinheiro'}
-                      <span class=" text-success font-bold ">{formatCurrency(transaction.metadata?.troco)}</span>
-                    {:else}
-                      <span>—</span>
-                    {/if}
+                    <span class=" font-bold text-success">
+                      {formatCurrency(transaction.metadata?.troco)}
+                    </span>
+                  {:else}
+                    <span>—</span>
+                  {/if}
                 </td>
                 <td>
                   {#if transaction.order_id}
@@ -168,11 +193,27 @@
                     >
                       Pedido
                     </a>
+                  {:else}
+                    <span>—</span>
                   {/if}
                 </td>
               </tr>
             {/each}
           </tbody>
+          <tfoot>
+            <tr class="sticky bottom-0 bg-base-200">
+              <td></td>
+              <td></td>
+              <td></td>
+              <td class="text-xl font-bold">
+                <span class="text-secondary">{formatCurrency(totalValor)}</span>
+              </td>
+              <td class="text-xl font-bold">
+                <span class="text-success">{formatCurrency(totalValorTroco)}</span>
+              </td>
+              <td></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
       {#if filteredTransactions.length === 0}
@@ -195,11 +236,6 @@
 </Modal>
 
 <style>
-  :global(.modal-container) {
-    max-width: 95vw;
-    width: 1000px;
-  }
-
   @media (max-width: 640px) {
     table {
       font-size: 0.75rem;
