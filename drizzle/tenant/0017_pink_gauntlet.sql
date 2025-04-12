@@ -1,0 +1,1 @@
+ALTER TABLE `caixas` ADD `user_in` text DEFAULT '' REFERENCES user(id);

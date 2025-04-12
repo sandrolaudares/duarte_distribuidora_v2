@@ -120,6 +120,13 @@
       "when": 1744468934972,
       "tag": "0016_military_zemo",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1744481348398,
+      "tag": "0017_pink_gauntlet",
+      "breakpoints": true
     }
   ]
 }

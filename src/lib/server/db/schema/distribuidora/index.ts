@@ -22,7 +22,19 @@ export const cashierTable = sqliteTable('caixas', {
     .notNull()
     .default('Fechado'),
   currency: integer('currency').notNull().default(0),
+  user_in: text('user_in')
+    .references(() => userTable.id, {
+      onDelete: 'set null',
+    })
+    .default(''),
 })
+
+export const cashierRelations = relations(cashierTable, ({one})=> ({
+  user_in : one(userTable, {
+    fields: [cashierTable.user_in],
+    references: [userTable.id],
+  }),
+}))
 
 export const cashierTransactionsT = sqliteTable('cashierTransactions', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
