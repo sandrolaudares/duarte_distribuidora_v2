@@ -13,6 +13,7 @@ import {
   productItemTable,
   stockTransactionTable,
   cashierTable,
+  cashierTransactionsT,
 } from '$db/schema'
 import { createInsertSchema } from 'drizzle-zod'
 
@@ -182,6 +183,7 @@ export const customerOrderRelations = relations(
       references: [userTable.id],
       relationName: 'orders_made',
     }),
+    cashierTransactions : many(cashierTransactionsT)
   }),
 )
 export type SelectCustomerOrder = typeof customerOrderTable.$inferSelect

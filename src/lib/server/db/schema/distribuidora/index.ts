@@ -24,6 +24,38 @@ export const cashierTable = sqliteTable('caixas', {
   currency: integer('currency').notNull().default(0),
 })
 
+export const cashierTransactionsT = sqliteTable('cashierTransactions', {
+  id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
+  ...timestamps,
+  cashier_id: integer('cashier_id').references(() => cashierTable.id),
+  order_id: integer('order_id').references(() => customerOrderTable.id),
+  created_by: text('created_by')
+    .references(() => userTable.id, {
+      onDelete: 'set null',
+    })
+    .default(''),
+  type: text('type', {
+    enum: ['Abertura', 'Fechamento', 'Pagamento', 'Sangria', 'Deposito'],
+  }).notNull(),
+  amount: integer('amount').notNull(),
+  metadata: text('metadata', { mode: 'json' }),
+})
+
+export const cashierTransactionsRelations = relations(cashierTransactionsT, ({one})=> ({
+  created_by : one(userTable, {
+    fields: [cashierTransactionsT.created_by],
+    references: [userTable.id],
+  }),
+  cashier : one(cashierTable, {
+    fields: [cashierTransactionsT.cashier_id],
+    references: [cashierTable.id],
+  }),
+  order : one(customerOrderTable, {
+    fields: [cashierTransactionsT.order_id],
+    references: [customerOrderTable.id],
+  }),
+}))
+
 
 export const insertCashierSchema = createInsertSchema(cashierTable)
 export type InsertCashier = typeof cashierTable.$inferInsert

@@ -6,10 +6,11 @@ import {
   // customType,
 } from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
-import { logsTable } from '../bug-report'
+import {  logsTable } from '../bug-report'
 import { customerOrderTable, orderPaymentTable } from '../customer'
 import { roleEnum, type Permission, type Role } from '$lib/utils/permissions'
 import { timestamps } from '../../utils'
+import { cashierTransactionsT } from '../distribuidora'
 
 export const userTable = sqliteTable('user', {
   id: text('id').notNull().primaryKey(),
@@ -40,6 +41,7 @@ export const userRelations = relations(userTable, ({ many }) => ({
   orders_made: many(customerOrderTable, { relationName: 'orders_made' }),
   entregou: many(customerOrderTable, { relationName: 'entregou' }),
   payments_created: many(orderPaymentTable),
+  cashier_transactions: many(cashierTransactionsT)
 }))
 
 export type SelectUser = typeof userTable.$inferSelect
