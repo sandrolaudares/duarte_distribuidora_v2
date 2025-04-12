@@ -8,6 +8,8 @@ import {
   getSQLiteColumn,
   getOrderBy,
   innerJoinOnMany,
+  _withs,
+  getDateRangeCondition,
 } from '$lib/server/db/utils'
 import {
   and,
@@ -19,12 +21,15 @@ import {
   desc,
   gte,
   lte,
+  sql,
 } from 'drizzle-orm'
 import { error } from '@sveltejs/kit'
 import { Monad } from '$lib/utils'
 import { pageConfig } from '$lib/config'
+import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
+import { asc } from 'drizzle-orm'
 
-export const load = (async ({ url, locals: { tenantDb } }) => {
+export const load = (async ({ url, locals: { tenantDb, user } }) => {
   const size = pageConfig.rowPages
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
@@ -33,95 +38,124 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const username = searchParams.get('username')
   const caixa = searchParams.get('cashier')
   const caixaId = Number(caixa)
+  const tipo = searchParams.get('type')
 
   const dateStart = searchParams.get('startDate')
   const dateEnd = searchParams.get('endDate')
 
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_order')
-  
+
   console.log('username', username)
   console.log('caixa', caixa)
-  
-  // try {
-  let query = Monad.of(
-    tenantDb!
-      .select({
-        id: schema.logsTable.id,
-        created_at: schema.logsTable.created_at,
-        text: schema.logsTable.text,
-        metadata: schema.logsTable.metadata,
-        error: schema.logsTable.error,
-        type: schema.logsTable.type,
-        pathname: schema.logsTable.pathname,
-        routeName: schema.logsTable.routeName,
-        currency: schema.logsTable.currency,
-        total: schema.customerOrderTable.total,
-        cashier: schema.cashierTable.name,
-        order_id: schema.customerOrderTable.id,
 
-        username: schema.userTable.username,
-      })
-      .from(schema.logsTable)
-      .where(
-        and(
-          eq(schema.logsTable.type, 'CAIXA'),
-
-          dateStart && dateEnd
-            ? and(
-                gte(schema.logsTable.created_at, new Date(Number(dateStart))),
-                lte(schema.logsTable.created_at, new Date(Number(dateEnd))),
-              )
-            : undefined,
-        ),
-      )
-      .leftJoin(
-        schema.customerOrderTable,
-        eq(schema.logsTable.order_id, schema.customerOrderTable.id),
-      )
-
-      .$dynamic(),
+  const queryConditions = and(
+    tipo ? like(schema.cashierTransactionsT.type, `${tipo}%`) : undefined,
+    getDateRangeCondition(
+      dateStart,
+      dateEnd,
+      schema.cashierTransactionsT.created_at,
+    ),
+    user?.role === 'caixa' ? eq(schema.cashierTransactionsT.created_by, user.id) : undefined,
   )
-    .map(q =>
-      innerJoinOnMany(q, schema.userTable, [
-        eq(schema.logsTable.created_by, schema.userTable.id),
-        username ? like(schema.userTable.username, `%${username}%`) : undefined,
-      ]),
+
+  const cte = tenantDb!
+    .select()
+    .from(schema.cashierTransactionsT)
+    .as('cteCashierTransactions')
+
+  const _joins = <T extends SQLiteSelect>(qb: T) => {
+    return Monad.of(qb)
+      .map(query =>
+        innerJoinOnMany(query, schema.userTable, [
+          eq(schema.cashierTransactionsT.created_by, schema.userTable.id),
+          username
+            ? like(schema.userTable.username, `%${username}%`)
+            : undefined,
+        ]),
+      )
+      .map(query =>
+        innerJoinOnMany(query, schema.cashierTable, [
+          eq(schema.cashierTransactionsT.cashier_id, schema.cashierTable.id),
+          caixa ? eq(schema.cashierTable.id, caixaId) : undefined,
+        ]),
+      )
+      .map(query =>
+        innerJoinOnMany(query, schema.customerOrderTable, [
+          eq(
+            schema.cashierTransactionsT.order_id,
+            schema.customerOrderTable.id,
+          ),
+        ]),
+      )
+      .get()
+  }
+
+  const _cashierTransactionsSelectBuilder = () =>
+    _withs(tenantDb!, cte).select({
+      id: schema.cashierTransactionsT.id,
+      created_at: schema.cashierTransactionsT.created_at,
+      metadata: schema.cashierTransactionsT.metadata,
+      type: schema.cashierTransactionsT.type,
+      amount: schema.cashierTransactionsT.amount,
+
+      cashier: schema.cashierTable.name,
+      
+      order_id: schema.customerOrderTable.id,
+
+      username: schema.userTable.username,
+    })
+
+  const queryCashierTransactions = () =>
+    _joins(
+      _cashierTransactionsSelectBuilder()
+        .from(schema.cashierTransactionsT)
+        .$dynamic(),
     )
-    .map(q =>
-      innerJoinOnMany(q, schema.cashierTable, [
-        eq(schema.logsTable.cashier_id, schema.cashierTable.id),
-        caixa ? eq(schema.cashierTable.id, caixaId) : undefined,
-      ]),
-    )
-    .get()
-    .orderBy(desc(schema.logsTable.created_at))
+      .where(queryConditions)
+      .orderBy(desc(schema.cashierTransactionsT.created_at))
+
+  const _countSumBuilder = () =>
+    _withs(tenantDb!, cte).select({
+      totalSum: sql<number>`SUM(${schema.cashierTransactionsT.amount})`,
+    })
+
+  const queryTotalSum = () =>
+    _joins(
+      _countSumBuilder().from(schema.cashierTransactionsT).$dynamic(),
+    ).where(queryConditions)
+
+  const _countSelectBuilder = () =>
+    _withs(tenantDb!, cte).select({ count: count() })
+
+  const queryCount = () =>
+    _joins(_countSelectBuilder().from(schema.cashierTransactionsT).$dynamic())
+
+  // try {
+  let query = queryCashierTransactions()
 
   if (sortId && sortOrder) {
     query = withOrderBy(
       query,
-      getSQLiteColumn(schema.logsTable, sortId),
+      getSQLiteColumn(schema.cashierTransactionsT, sortId),
       sortOrder,
     )
   }
 
-    const rows = await withPagination(query, page, pageSize)
+  const [rows, [total], [totalSumResult]] = await Promise.all([
+    withPagination(query, page, pageSize),
+    queryCount(),
+    queryTotalSum(),
+  ])
 
-    const total = await tenantDb!
-      .select({ count: count() })
-      .from(schema.logsTable)
-      .where(
-        and(
-          eq(schema.logsTable.type, 'CAIXA'),
-          // username
-          //   ? like(schema.userTable.username, `${username}%`)
-          //   : undefined,
-        ),
-      )
-    // .catch(e => 0)
-    // .then(res => (typeof res === 'number' ? [{ count: res }] : res))
+  console.log(rows)
 
-    return { rows: rows, count: total[0].count, size }
+  return {
+    rows,
+    count: total.count,
+    size,
+    totalSum: totalSumResult.totalSum,
+  }
   // } catch (e: any) {
   //   console.error(e)
   //   // return error(404, e.message ?? e)

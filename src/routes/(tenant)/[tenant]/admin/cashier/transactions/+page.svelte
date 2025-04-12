@@ -26,6 +26,7 @@
   import { DateFormatter } from '@internationalized/date'
   import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
+  import { paymentMethodLabel } from '$lib/utils/permissions'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -59,8 +60,33 @@
     return data.rows
   })
 
-
   let cashierFilter = $state(filters.get('cashier') || '')
+
+  const colorMap: { [key: string]: string } = {
+    P: 'badge-primary',
+    A: 'badge-success text-white',
+    F: 'badge-error text-white',
+    S: 'badge-warning',
+    D: 'badge-info',
+  }
+
+  function getColor(type: string) {
+    const firstLetter = type.charAt(0).toUpperCase()
+    return colorMap[firstLetter] || 'badge-neutral'
+  }
+
+  let selectedType: string = $state('')
+
+  let cashierTransactionTypeEnum = [
+    'Abertura',
+    'Fechamento',
+    'Pagamento',
+    'Sangria',
+    'Deposito',
+  ]
+  const delegateQuery = () => {
+    return Promise.resolve(cashierTransactionTypeEnum)
+  }
 </script>
 
 <main class="mx-4 h-full max-h-[calc(100vh-20vh)]">
@@ -75,7 +101,7 @@
       Limpar filtros
     </button>
   </div>
-  <Datatable {table} >
+  <Datatable {table}>
     <!-- {#snippet header()}
       <Search {table} />
      
@@ -86,30 +112,31 @@
     {/if}
     <table class="table border-none">
       <thead>
-        <tr>
+        <tr class="uppercase">
           <Th>ID</Th>
           <Th>Usuário</Th>
           <Th>Caixa</Th>
-          <Th>Logs</Th>
           <Th>Data</Th>
-          <Th>Troco</Th>
+          <Th>Tipo</Th>
           <!-- <Th>Valor</Th> -->
+          <Th>Metodo de pagamento</Th>
           <Th>Valor</Th>
+          <Th>Troco</Th>
+          <Th>Observação</Th>
           <Th>Detalhes</Th>
         </tr>
         <tr>
           <Th />
           <ThFilter {table} field="username" />
           <!-- <ThFilter {table} field="cashier" /> -->
-            <SelectFilter
+          <SelectFilter
             {table}
-              filterKey="cashier"
-              delegateQuery={trpc(page).distribuidora.getCaixas.query}
-              bind:selectedValue={cashierFilter}
-              config={{ value: c => c.id, label: c => c.name }}
-              placeholder={'o caixa'}
-            />
-          <Th />
+            filterKey="cashier"
+            delegateQuery={trpc(page).distribuidora.getCaixas.query}
+            bind:selectedValue={cashierFilter}
+            config={{ value: c => c.id, label: c => c.name }}
+            placeholder={'o caixa'}
+          />
           <Th>
             <DateFilter
               startValue={getFilterValue(filters, 'startDate')}
@@ -124,42 +151,75 @@
               }}
             />
           </Th>
+          <SelectFilter
+            {table}
+            filterKey="type"
+            {delegateQuery}
+            placeholder="o tipo"
+            config={{ value: c => c, label: c => c }}
+            bind:selectedValue={selectedType}
+          />
           <Th />
           <Th />
-          <!-- <Th/> -->
           <Th />
-          <!--FINALIZAR ESSA TABLE, FILTRO DE DATA E ETC-->
+          <Th />
+          <Th />
         </tr>
       </thead>
       <tbody>
         {#each data.rows as row (row.id)}
-          <tr class="{row.text.includes('Fechamento') ? '!bg-error/10' : ''} {row.text.includes('Abertura') ? '!bg-success/10' : ''}">
+          <tr>
             <td>{row.id}</td>
             <td>{row.username}</td>
-            <td>{row.cashier ? row.cashier : 'N/A'}</td>
-            <td>{row.text}</td>
+            <td>{row.cashier}</td>
             <!-- <td>{row.routeName}</td> -->
             <td>
               {row.created_at ? df.format(row.created_at) : ''}
             </td>
+            <td>
+              <span class="badge badge-sm {getColor(row.type)}">
+                {row.type}
+              </span>
+            </td>
+            <td class="whitespace-nowrap px-4 py-3 text-sm">
+              {#if row.metadata?.metodo_pagamento != null}
+                <div class="flex items-center gap-1.5">
+                  <span
+                    class="inline-block h-2 w-2 rounded-full bg-emerald-400"
+                  ></span>
+                  <span class="font-medium text-slate-800">
+                    {paymentMethodLabel[
+                      row.metadata.metodo_pagamento
+                    ]}
+                  </span>
+                </div>
+              {:else}
+                <div class="flex items-center gap-1.5">
+                  <span
+                    class="inline-block h-2 w-2 rounded-full bg-rose-400"
+                  ></span>
+                  <span class="text-error">Nenhum</span>
+                </div>
+              {/if}
+            </td>
+            <td class="font-semibold">
+              {formatCurrency(row.amount)}
+            </td>
+            <td class="whitespace-nowrap px-4 py-3 text-sm">
+              {#if row.metadata?.metodo_pagamento === 'dinheiro'}
+                  <span class=" text-success font-bold ">{formatCurrency(row.metadata?.troco)}</span>
+                {:else}
+                  <span>—</span>
+                {/if}
+            </td>
             <td
-              class={row.metadata?.troco != null
+              class={row.metadata?.observacoes != null
                 ? 'font-semibold'
                 : 'text-error'}
             >
-              {typeof row.metadata?.troco === 'number'
-                ? 'R$' + (row.metadata.troco / 100).toFixed(2)
-                : 'Não tem'}
-            </td>
-            <!-- <td class="font-semibold">R${row.currency ? (row.currency/100).toFixed(2) : '0.00'}</td> -->
-            <td class="font-semibold">
-              {#if row.metadata.amount_paid}
-                {formatCurrency(row.metadata.amount_paid)}
-                
-              {:else}
-                
-              {row.total ? formatCurrency(row.total) : ''}
-              {/if}
+              {row.metadata?.observacoes != null
+                ? row.metadata.observacoes
+                : 'Nenhuma'}
             </td>
             <td>
               {#if row.order_id}
@@ -167,7 +227,7 @@
                   href="/admin/orders/{row.order_id}"
                   class="badge badge-primary"
                 >
-                  Detalhes
+                  Pedido
                 </a>
               {/if}
             </td>
