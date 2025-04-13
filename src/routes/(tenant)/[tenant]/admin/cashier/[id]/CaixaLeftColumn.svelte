@@ -263,8 +263,7 @@
         {/if}
       {/if}
     </div>
-    <a
-      href="/admin/cashier"
+    <button
       class="btn btn-primary w-full disabled:bg-opacity-50"
       onclick={() => {
         cart.clear()
@@ -272,6 +271,6 @@
     >
       <span class="mr-1">CANCELAR</span>
       {@html icons.x()}
-    </a>
+    </button>
   </div>
 </div>
