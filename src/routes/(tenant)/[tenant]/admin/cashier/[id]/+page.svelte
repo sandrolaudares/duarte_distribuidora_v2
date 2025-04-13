@@ -6,7 +6,7 @@
   import { toast } from 'svelte-sonner'
 
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   import { modal } from '$components/modal'
   import CaixaColumn from './CaixaColumn.svelte'
@@ -19,6 +19,8 @@
   import { goto, invalidate, invalidateAll } from '$app/navigation'
   import Alert from '$lib/components/modal/base/Alert.svelte'
   import Loading from '$lib/components/Loading.svelte'
+  import HandleFecharCaixa from './HandleFecharCaixa.svelte'
+  import type { RouterOutputs } from '$trpc/router'
 
   const cart = getCartContext()
 
@@ -34,6 +36,8 @@
 
   let observacao: string = $state('')
 
+  let isPrintOrder = $state(true)
+
   async function createOrder(payments: Omit<InsertOrderPayment, 'order_id'>[]) {
     let total = Object.values(cart.cart).reduce((acc, item) => {
       return (
@@ -48,7 +52,7 @@
     }
     try {
       console.log(cart.meta.enderecoSelecionado)
-      const resp = await trpc($page).customer.order.insetPaidOrder.mutate({
+      const resp = await trpc(page).customer.order.insetPaidOrder.mutate({
         order_info: {
           customer_id: cart.meta.clienteSelecionado?.id,
           address_id: cart.meta.enderecoSelecionado?.id,
@@ -107,7 +111,7 @@
       return
     }
     try {
-      const resp = await trpc($page).customer.order.insertOrderWaiting.mutate({
+      const resp = await trpc(page).customer.order.insertOrderWaiting.mutate({
         order_info: {
           customer_id: cart.meta.clienteSelecionado?.id || 0,
           address_id: cart.meta.enderecoSelecionado?.id || 0,
@@ -145,7 +149,7 @@
   async function handleAbrirCaixa() {
     loadingAbrir = true
     try {
-      await trpc($page).distribuidora.abrirCaixa.mutate({
+      await trpc(page).distribuidora.abrirCaixa.mutate({
         id: caixa.id,
         data: {
           amount: dinheiro_caixa,
@@ -163,30 +167,13 @@
     }
   }
 
-  let loadingFechar = $state(false)
-  async function handleFecharCaixa() {
-    loadingFechar = true
-    try {
-      const resp = await trpc($page).distribuidora.fecharCaixa.mutate({
-        id: caixa.id,
-      })
-      console.log(resp)
-      toast.success('Caixa fechado com sucesso!')
-      goto(`/admin/cashier`)
-    } catch (error: any) {
-      toast.error(error.message)
-    } finally {
-      loadingFechar = false
-    }
-  }
-
-  async function seeTransactionsCaixa() {
-    modal.open(TransactionsModal, {
+  async function closeCashierModal() {
+    modal.open(HandleFecharCaixa, {
       caixa: caixa,
     })
   }
 
-  let isOpenModalClose: HTMLDialogElement | null = $state(null)
+  let isOpenModalTransactions: HTMLDialogElement | null = $state(null)
 
   async function pagamentoModal() {
     let total = Object.values(cart.cart).reduce((acc, item) => {
@@ -213,6 +200,24 @@
   }
 
   let entrarMesmoAssim = $state(false)
+
+  let transactions:
+    | RouterOutputs['stock']['getRecentTransaoEstoque']
+    | undefined = $state()
+
+    let loadingTransactions = $state(true)
+
+  async function loadTransactions() {
+    try {
+      transactions = await trpc(page).stock.getRecentTransaoEstoque.query(
+        caixa.id,
+      )
+    } catch (error: any) {
+      toast.error(error.message)
+    } finally {
+      loadingTransactions = false
+    }
+  }
 </script>
 
 {#if caixa.status === 'Fechado' && user && (user.meta.caixa_id === undefined || entrarMesmoAssim === true)}
@@ -235,10 +240,16 @@
 {:else if user && (user.meta.caixa_id === caixa.id || (user.role != 'caixa' && entrarMesmoAssim === true))}
   <AlertaFechar cashier={caixa} tenant={data.tenant!} />
   <div class="mb-3 flex justify-center gap-2">
-    <button class="btn btn-primary" onclick={seeTransactionsCaixa}>
+    <button
+      class="btn btn-primary"
+      onclick={() =>{
+          loadTransactions()
+          isOpenModalTransactions?.showModal()
+         }}
+    >
       Ver transacoes do dia
     </button>
-    <button class="btn btn-error" onclick={() => isOpenModalClose?.showModal()}>
+    <button class="btn btn-error" onclick={closeCashierModal}>
       Fechar caixa
     </button>
   </div>
@@ -270,6 +281,10 @@
         ></textarea>
       </div>
       <div class="flex flex-col gap-2">
+        <label class="fieldset-label flex items-center justify-center gap-2">
+          Imprimir notinha?
+          <input type="checkbox" class="checkbox" bind:checked={isPrintOrder} />
+        </label>
         <button
           class="btn btn-secondary w-full disabled:bg-opacity-50"
           disabled={Object.values(cart.cart).length === 0 ||
@@ -318,31 +333,16 @@
   </form>
 </dialog>
 
-<dialog class="modal" bind:this={isOpenModalClose}>
-  <div class="modal-box max-w-lg text-center">
-    <h1>Você está prestes a fechar o caixa! Deseja continuar?</h1>
-    <div class=" mt-4 flex justify-center gap-3">
-      <button
-        class="btn"
-        onclick={() => isOpenModalClose?.close()}
-        disabled={loadingFechar}
-      >
-        Cancelar
+<dialog class="modal" bind:this={isOpenModalTransactions}>
+  <div class="modal-box max-w-4xl text-center">
+    <form method="dialog">
+      <button class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">
+        ✕
       </button>
-      <button
-        class="btn btn-primary"
-        onclick={handleFecharCaixa}
-        disabled={loadingFechar}
-      >
-        {#if loadingFechar}
-          <Loading />
-        {:else}
-          Fechar caixa
-        {/if}
-      </button>
-    </div>
-    <form method="dialog" class="modal-backdrop">
-      <button>close</button>
     </form>
+    <TransactionsModal {caixa} {transactions} bind:isLoading={loadingTransactions} />
   </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
 </dialog>
