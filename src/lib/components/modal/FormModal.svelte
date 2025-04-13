@@ -187,15 +187,15 @@
     {/each}
   </div>
 
-
-  {#snippet footer()}
-  <div class="flex justify-end w-full gap-2 mt-3">
-    <button class="btn btn-error" onclick={handleCancel} disabled={isLoading}>
-      Cancelar
-    </button>
-    <button class="btn btn-primary" onclick={handleConfirm} disabled={isLoading}>
-      {!isLoading ? "Salvar" : 'Loading...'}
-    </button>
-  </div>
-  {/snippet}
+  {@render footer()}
 </Modal>
+{#snippet footer()}
+<div class="flex justify-end w-full gap-2 mt-3">
+  <button class="btn btn-error" onclick={handleCancel} disabled={isLoading}>
+    Cancelar
+  </button>
+  <button class="btn btn-primary" onclick={handleConfirm} disabled={isLoading}>
+    {!isLoading ? "Salvar" : 'Loading...'}
+  </button>
+</div>
+{/snippet}

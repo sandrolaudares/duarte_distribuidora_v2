@@ -28,12 +28,13 @@
 
   <Modal {title}>
     <p>{text}</p>
-    {#snippet footer()}
-    {#if onConfirm}
-      <button class="btn" onclick={confirm}>Confirm</button>
-    {/if}
-    <button class="btn" onclick={cancel}>
-      {onCancel ? 'Cancel' : 'Close'}
-    </button>
-    {/snippet}
+    {@render footer()}
   </Modal>
+  {#snippet footer()}
+  {#if onConfirm}
+    <button class="btn" onclick={confirm}>Confirm</button>
+  {/if}
+  <button class="btn" onclick={cancel}>
+    {onCancel ? 'Cancel' : 'Close'}
+  </button>
+  {/snippet}

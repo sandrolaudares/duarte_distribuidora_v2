@@ -155,12 +155,12 @@
       </label>
     {/if}
   </div>
-
-  {#snippet footer()}
-  <div class="mt-4 flex w-full">
-    <button class="btn btn-primary w-full" on:click={createSupplier} disabled={isLoading}>
-      Criar fornecedor
-    </button>
-  </div>
-  {/snippet}
+  {@render footer()}
 </Modal>
+{#snippet footer()}
+<div class="mt-4 flex w-full">
+  <button class="btn btn-primary w-full" on:click={createSupplier} disabled={isLoading}>
+    Criar fornecedor
+  </button>
+</div>
+{/snippet}
