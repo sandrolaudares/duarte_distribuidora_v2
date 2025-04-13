@@ -68,7 +68,20 @@ export async function printOrderReusable(tenant: SelectTenant, order: Order) {
     info.push('\x1B\x45\x00')
 
     order.items.forEach(item => {
-      const left = `${item.quantity}x ${item.product.name}`.padEnd(34, ' ')
+      let length = 33
+      const priceLength = item.price.toString().length
+      if (priceLength >= 7) {
+        length = 29
+      } else if (priceLength >= 6) {
+        length = 30
+      } else if (priceLength >= 5) {
+        length = 31
+      } else if (priceLength >= 4) {
+        length = 32
+      }
+
+      console.log(item.price.toString().length, length)
+      const left = `${item.quantity}x ${item.product.name}`.padEnd(length, ' ')
       const right = formatCurrency(item.price)
       info.push('\x1B\x61\x00')
       info.push(left)
