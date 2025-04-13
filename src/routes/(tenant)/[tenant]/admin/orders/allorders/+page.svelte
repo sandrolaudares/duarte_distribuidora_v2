@@ -162,7 +162,7 @@
         {#if prr.getPrinters() && typeof prr.getPrinters() === 'object'}
           {#each prr.getPrinters() as printer}
             <option value={printer} selected={printer === prr.getPrinter()}>
-              {prr.getPrinter()}
+              {printer}
             </option>
           {/each}
         {:else if prr.getPrinters() && prr.getPrinters().length > 0}
