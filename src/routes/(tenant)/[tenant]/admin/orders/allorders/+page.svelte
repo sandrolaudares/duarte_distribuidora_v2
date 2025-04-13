@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { navigating } from '$app/stores'
+  import { navigating } from '$app/state'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import { modal, FormModal } from '$lib/components/modal'
   import DateFilter from '$lib/components/DateFilter.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   import {
     TableHandler,
@@ -29,10 +29,15 @@
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
   import { formatCurrency } from '$lib/utils'
   import qz from 'qz-tray'
+  import { printOrderReusable } from '$lib/utils/printOrder'
+  import { getPrinterContext } from './printerContext.svelte'
+  import Loading from '$lib/components/Loading.svelte'
 
   let { data }: { data: PageData } = $props()
 
   const filters = new SSRFilters()
+
+  const prr = getPrinterContext()
 
   const table = new TableHandler(data.rows, {
     rowsPerPage: pageConfig.rowPages,
@@ -56,7 +61,7 @@
     console.log(s)
     try {
       filters.fromState(s)
-      await $navigating?.complete
+      await navigating?.complete
     } catch (error) {
       console.log(error)
     }
@@ -65,125 +70,19 @@
 
   async function printOrder(order_id: SelectCustomerOrder['id']) {
     isLoading = true
-    var config = qz.configs.create(usingPrinter,{
-      encoding: 'CP850'
-    })
-
-    toast.info('Imprimindo pedido...')
-
-    const datt = new Date()
-
-    const dataFormatada = datt.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-
-    const horaFormatada = datt.toLocaleTimeString('pt-BR', { hour12: false })
 
     try {
-      const order = await trpc($page).customer.getOrderById.query(order_id)
+      const order = await trpc(page).customer.getOrderById.query(order_id)
 
-      if (order === undefined || order === null) {
-        toast.error('Pedido não encontrado')
-        console.error('Pedido não encontrado')
+      const infoToPrint = await printOrderReusable(data.tenant!, order)
+
+      if (!infoToPrint) {
+        console.error('Erro ao gerar o pedido para impressão')
         return
       }
 
-      const info = []
+      await prr.print(infoToPrint)
 
-      info.push('\x1B\x21\x00') // Reset
-      info.push('\x1B\x61\x01') // Justify center
-      // info.push('\x1B' + '\x4D' + '\x31')
-
-      info.push('\x1B\x45\x01') // Bold on
-      info.push(`Duarte distribuidora ${data.tenant?.name}\n\n`)
-      info.push('\x1B\x45\x00') // Bold off
-
-      info.push(`${data.tenant?.address}\n`)
-      info.push(`${data.tenant?.phone}\n`)
-      info.push('TODO: CNPJ\n\n')
-
-      info.push('\x1B\x45\x01')
-      info.push('----------------------------------------\n\n')
-      info.push('\x1B\x45\x00')
-
-      info.push(`IMPRESSO EM: ${dataFormatada} ${horaFormatada}\n\n`)
-      info.push(`RELATÓRIO GERENCIAL\n\n`)
-
-      info.push('\x1B\x61\x00') // Justify left
-      if(order.customer) {
-        info.push(`${order.customer.name}\n`)
-        info.push(
-          `${order.customer.phone ?? ''} - ${order.customer.cellphone ?? ''}\n`,
-        )
-      }
-      if(order.address) {
-        info.push(
-          `Endereço de entrega: ${order.address.street}, ${order.address.number}, ${order.address.neighborhood}, ${order.address.city}\n`,
-        )
-      }
-      if(order.motoboy) {
-        info.push(`Entregador: ${order.motoboy.username}\n\n`)
-      }
-
-      info.push('\x1B\x61\x01') // Justify center
-      info.push(`(Pedido: N.:${order.id})\n`)
-
-      if(order.observation) {
-        info.push(`Observação: ${order.observation}\n\n`)
-      }
-
-      info.push('\x1B\x45\x01')
-      info.push('----------------------------------------\n')
-      info.push('ITEM                               PREÇO\n')
-      info.push('----------------------------------------\n\n')
-      info.push('\x1B\x45\x00')
-
-      order.items.forEach(item => {
-        const itemText = `${item.quantity}x ${item.product.name}`.padEnd(
-          34,
-          ' ',
-        )
-        const price = `${formatCurrency(item.price)}`
-
-        info.push('\x1B\x61\x00') // Left
-        info.push(itemText)
-
-        info.push('\x1B\x61\x02') // Right
-        info.push(price + '\n')
-      })
-
-      info.push('\x1B\x45\x01')
-      info.push('\n----------------------------------------\n\n')
-      info.push('\x1B\x45\x00')
-
-      info.push('\x1B\x61\x02') // Right
-      info.push(
-        `TOTAL: ${formatCurrency(order.total - (order.taxa_entrega ?? 0))}\n`,
-      )
-      info.push(`+ ENTREGA: ${formatCurrency(order.taxa_entrega ?? 0)}\n`)
-
-      info.push('\x1B\x45\x01')
-      info.push(`= TOTAL A PAGAR: ${formatCurrency(order.total)}\n`)
-      info.push('\x1B\x45\x00')
-
-      if ( order.created_by) {
-        info.push('\x1B\x61\x00') // Left
-        info.push(`Atendente: ${order.created_by.username}\n`)
-      }
-
-      info.push('\x1B\x61\x01') // Center
-      info.push('----------------------------------------\n')
-
-      info.push('\n\n')
-      info.push('\x1D\x56\x01')
-
-      qz.print(config, info).catch(function (e) {
-        console.error(e)
-      })
-
-      toast.success('Pedido impresso com sucesso!')
       isOpenModal?.close()
     } catch (error) {
       console.log(error)
@@ -193,45 +92,41 @@
     }
   }
 
-  let printers: string[] | string | undefined = $state()
-  let usingPrinter = $state('')
-
   let isOpenModal: HTMLDialogElement | null = $state(null)
   let selectedOrder: number | null = $state(null)
 
   let isLoading = $state(false)
 
-  async function listPrinters() {
-    try {
-      if (!qz.websocket.isActive()) {
-        await qz.websocket.connect()
-      }
-      printers = await qz.printers.find()
-
-      if (printers.length === 0) {
-        toast.error('Nenhuma impressora encontrada')
-        return
-      }
-
-      if (printers.length === 1) {
-        usingPrinter = printers[0]
-      }
-    } catch (error) {
-      console.error(error)
-      toast.error('Erro ao conectar à impressora')
-      return 'error'
-    }
-  }
+  let loadingPrinters = $state(false)
 
   async function handleOpenModal(orderId: number) {
-    const resp = await listPrinters()
-    if (resp === 'error') {
-      return
+    loadingPrinters = true
+
+    await prr.connect()
+
+    if (prr.getPrinter() && prr.getPrinters().length === 0) {
+      prr.addPrinter(prr.getPrinter())
+    } else if (!prr.getPrinter()) {
+      await prr.listPrinters()
     }
+
     isOpenModal?.showModal()
     selectedOrder = orderId
+    loadingPrinters = false
   }
+
+  function handleSelectedPrinter(e: Event) {
+    const target = e.target as HTMLSelectElement
+    localStorage.setItem('selectedPrinter', target.value)
+    prr.setPrinter(target.value)
+  }
+
+  $inspect(prr.getPrinter())
 </script>
+
+{#if loadingPrinters}
+  <LoadingBackground />
+{/if}
 
 <dialog class="modal" bind:this={isOpenModal}>
   <div class="modal-box max-w-2xl">
@@ -241,29 +136,53 @@
       </button>
     </form>
     <h2 class="text-lg font-bold">Imprimir pedido</h2>
-    <p class="py-4">Selecione a impressora e clique em imprimir</p>
+    <div class="flex items-center justify-between">
+      <p class="py-4">Selecione a impressora e clique em imprimir</p>
+      <button
+        class="badge badge-primary"
+        onclick={async () => {
+          loadingPrinters = true
+          const newPr = await prr.listPrinters()
+          if (newPr) {
+            prr.setPrinters(newPr)
+          }
+          loadingPrinters = false
+        }}
+      >
+        Procurar impressoras
+      </button>
+    </div>
     <div class="flex flex-col gap-4">
-      <select bind:value={usingPrinter} class="select select-bordered w-full" onchange={(e) => localStorage.setItem('selectedPrinter', e.target.value)}>
-        {#if printers && typeof printers === 'object'}
-          {#each printers as printer}
-            <option value={printer} selected={printer === usingPrinter}>
-              {printer}
+      <select
+        bind:value={prr.printer}
+        class="select select-bordered w-full"
+        onchange={handleSelectedPrinter}
+        disabled={loadingPrinters}
+      >
+        {#if prr.getPrinters() && typeof prr.getPrinters() === 'object'}
+          {#each prr.getPrinters() as printer}
+            <option value={printer} selected={printer === prr.getPrinter()}>
+              {prr.getPrinter()}
             </option>
           {/each}
-        {:else if printers && printers.length > 0}
-          {usingPrinter}
+        {:else if prr.getPrinters() && prr.getPrinters().length > 0}
+          {prr.getPrinter()}
         {/if}
       </select>
       <button
         class="btn btn-primary"
-        disabled={isLoading}
+        disabled={isLoading || loadingPrinters}
         onclick={() => {
           if (selectedOrder != null) {
             printOrder(selectedOrder)
           }
         }}
       >
-        Imprimir
+        {#if isLoading || loadingPrinters}
+          <Loading />
+        {:else}
+          Imprimir
+        {/if}
       </button>
     </div>
 
