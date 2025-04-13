@@ -22,7 +22,7 @@
         easing: cubicInOut,
         baseScale: 0.5,
       }}
-      class="modal-box !max-w-[1000px]"
+      class="modal-box"
     >
       <svelte:component this={$modal.component} {...$modal.props} />
     </article>
