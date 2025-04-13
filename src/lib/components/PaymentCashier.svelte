@@ -45,7 +45,6 @@
   let troco = $derived.by(() => {
     return valor_recebido_dinheiro - valor_a_pagar
   })
-
   // $effect(()=>{
   //   valor_a_pagar = total_pedido - total_paid
   //   troco = valor_recebido_dinheiro - valor_a_pagar
@@ -63,8 +62,7 @@
 
   function divideValor(n: number) {
     valor_a_pagar = total_pedido - total_paid
-    valor_a_pagar = valor_a_pagar / n
-    console.log(valor_a_pagar)
+    valor_a_pagar = Math.round(valor_a_pagar / n)
   }
 
   function addPayment() {
