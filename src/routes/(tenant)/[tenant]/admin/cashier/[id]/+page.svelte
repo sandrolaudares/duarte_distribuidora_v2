@@ -21,8 +21,12 @@
   import Loading from '$lib/components/Loading.svelte'
   import HandleFecharCaixa from './HandleFecharCaixa.svelte'
   import type { RouterOutputs } from '$trpc/router'
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
+  import { getPrinterContext } from '../../orders/allorders/printerContext.svelte'
+  import ModalPrint from '$lib/components/cashierComponents/ModalPrint.svelte'
 
   const cart = getCartContext()
+  const prr = getPrinterContext()
 
   let { data }: { data: PageData } = $props()
 
@@ -77,6 +81,11 @@
       if (!resp) {
         toast.error('Erro ao criar pedido')
         return
+      }
+      selectedOrder = resp.order.id
+      
+      if(isPrintOrder) {
+        await handleOpenModal()
       }
 
       toast.success('Pedido realizado com sucesso!')
@@ -133,6 +142,11 @@
       if (!resp) {
         toast.error('Erro ao criar pedido')
         return
+      }
+
+      selectedOrder = resp.order.id
+      if(isPrintOrder) {
+        await handleOpenModal()
       }
 
       toast.success('Pedido realizado com sucesso!')
@@ -218,7 +232,53 @@
       loadingTransactions = false
     }
   }
+
+  let isOpenModalPrint: HTMLDialogElement | null = $state(null)
+  let loadingPrinters = $state(false)
+  let selectedOrder: number | null = $state(null)
+
+  async function handleOpenModal() {
+    loadingPrinters = true
+
+    await prr.connect()
+
+    if (prr.getPrinter() && prr.getPrinters().length === 0) {
+      prr.addPrinter(prr.getPrinter())
+    } else if (!prr.getPrinter()) {
+      await prr.listPrinters()
+    }
+
+    isOpenModalPrint?.showModal()
+    loadingPrinters = false
+  }
 </script>
+
+{#if loadingPrinters}
+  <LoadingBackground />
+{/if}
+
+<dialog class="modal" bind:this={isOpenModalPrint}>
+  <div class="modal-box max-w-2xl">
+    <form method="dialog">
+      <button class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">
+        ✕
+      </button>
+    </form>
+    
+    <ModalPrint
+      bind:loadingPrinters
+      tenant={data.tenant!}
+      bind:selectedOrder
+      closeModal={() => {
+        isOpenModalPrint?.close()
+      }}
+    />
+
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
 
 {#if caixa.status === 'Fechado' && user && (user.meta.caixa_id === undefined || entrarMesmoAssim === true)}
   <div class="flex flex-col items-center justify-center">

@@ -4,7 +4,7 @@
   import PaymentFiado from '$lib/components/PaymentFiado.svelte'
   import { trpc } from '$trpc/client'
   import { page } from '$app/state'
-  import { CircleAlert, Pencil, Plus, Trash2 } from 'lucide-svelte'
+  import { CircleAlert, Pencil, Plus, Printer, Trash2 } from 'lucide-svelte'
   import * as Tooltip from '$lib/components/ui/tooltip/index'
 
   import { createCartContext } from './cartContext.svelte'
@@ -16,9 +16,14 @@
   import SenhaAdmin from '$lib/components/SenhaAdmin.svelte'
   import { formatCurrency } from '$lib/utils'
   import * as Alert from '$lib/components/ui/alert/index'
+  import ModalPrint from '$lib/components/cashierComponents/ModalPrint.svelte'
+  import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
+  import { getPrinterContext } from '../allorders/printerContext.svelte'
   let { data }: { data: PageData } = $props()
 
   const order = createCartContext(data.order_details)
+
+  const prr = getPrinterContext()
 
   let order_details = data.order_details
 
@@ -97,7 +102,52 @@
       console.log(error)
     }
   }
+
+  let isOpenModalPrint: HTMLDialogElement | null = $state(null)
+  let loadingPrinters = $state(false)
+
+  async function handleOpenModal() {
+    loadingPrinters = true
+
+    await prr.connect()
+
+    if (prr.getPrinter() && prr.getPrinters().length === 0) {
+      prr.addPrinter(prr.getPrinter())
+    } else if (!prr.getPrinter()) {
+      await prr.listPrinters()
+    }
+
+    isOpenModalPrint?.showModal()
+    loadingPrinters = false
+  }
 </script>
+
+{#if loadingPrinters}
+  <LoadingBackground />
+{/if}
+
+<dialog class="modal" bind:this={isOpenModalPrint}>
+  <div class="modal-box max-w-2xl">
+    <form method="dialog">
+      <button class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">
+        ✕
+      </button>
+    </form>
+    
+    <ModalPrint
+      bind:loadingPrinters
+      tenant={data.tenant!}
+      selectedOrder={order_details.id}
+      closeModal={() => {
+        isOpenModalPrint?.close()
+      }}
+    />
+
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
 
 {#if order_details}
   <section
@@ -110,8 +160,8 @@
         <h2 class="text-xl font-semibold text-opacity-90 sm:text-2xl">
           Detalhes do pedido
         </h2>
+        <div class="flex gap-2">
         {#if (order_details.status === 'CONFIRMED' || order_details.status === 'PENDING') && order_details.amount_paid < order_details.total}
-          <div class="flex gap-2">
             <!-- <button class="btn btn-square btn-primary btn-sm" onclick={()=>isOpenModalAdd?.showModal()}>
             <Plus />
           </button> -->
@@ -127,7 +177,7 @@
             >
               <Trash2 />
             </button>
-          </div>
+          
         {:else}
           <Tooltip.Provider>
             <Tooltip.Root>
@@ -142,7 +192,14 @@
               </Tooltip.Content>
             </Tooltip.Root>
           </Tooltip.Provider>
-        {/if}
+          {/if}
+          <button
+              class="btn btn-square btn-success text-white btn-sm"
+              onclick={handleOpenModal}
+            >
+              <Printer />
+            </button>
+        </div>
       </div>
 
       <div class="mt-6 sm:mt-8">

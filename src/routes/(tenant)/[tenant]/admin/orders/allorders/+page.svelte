@@ -32,6 +32,7 @@
   import { printOrderReusable } from '$lib/utils/printOrder'
   import { getPrinterContext } from './printerContext.svelte'
   import Loading from '$lib/components/Loading.svelte'
+  import ModalPrint from '$lib/components/cashierComponents/ModalPrint.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -68,30 +69,6 @@
     return data.rows
   })
 
-  async function printOrder(order_id: SelectCustomerOrder['id']) {
-    isLoading = true
-
-    try {
-      const order = await trpc(page).customer.getOrderById.query(order_id)
-
-      const infoToPrint = await printOrderReusable(data.tenant!, order)
-
-      if (!infoToPrint) {
-        console.error('Erro ao gerar o pedido para impressão')
-        return
-      }
-
-      await prr.print(infoToPrint)
-
-      isOpenModal?.close()
-    } catch (error) {
-      console.log(error)
-      toast.error('Erro! Verifique se a impressora está conectada')
-    } finally {
-      isLoading = false
-    }
-  }
-
   let isOpenModal: HTMLDialogElement | null = $state(null)
   let selectedOrder: number | null = $state(null)
 
@@ -115,13 +92,6 @@
     loadingPrinters = false
   }
 
-  function handleSelectedPrinter(e: Event) {
-    const target = e.target as HTMLSelectElement
-    localStorage.setItem('selectedPrinter', target.value)
-    prr.setPrinter(target.value)
-  }
-
-  $inspect(prr.getPrinter())
 </script>
 
 {#if loadingPrinters}
@@ -135,61 +105,18 @@
         ✕
       </button>
     </form>
-    <h2 class="text-lg font-bold">Imprimir pedido</h2>
-    <div class="flex items-center justify-between">
-      <p class="py-4">Selecione a impressora e clique em imprimir</p>
-      <button
-        class="badge badge-primary"
-        onclick={async () => {
-          loadingPrinters = true
-          const newPr = await prr.listPrinters()
-          if (newPr) {
-            prr.setPrinters(newPr)
-          }
-          loadingPrinters = false
-        }}
-      >
-        Procurar impressoras
-      </button>
-    </div>
-    <div class="flex flex-col gap-4">
-      <select
-        bind:value={prr.printer}
-        class="select select-bordered w-full"
-        onchange={handleSelectedPrinter}
-        disabled={loadingPrinters}
-      >
-        {#if prr.getPrinters() && typeof prr.getPrinters() === 'object'}
-          {#each prr.getPrinters() as printer}
-            <option value={printer} selected={printer === prr.getPrinter()}>
-              {printer}
-            </option>
-          {/each}
-        {:else if prr.getPrinters() && prr.getPrinters().length > 0}
-          {prr.getPrinter()}
-        {/if}
-      </select>
-      <button
-        class="btn btn-primary"
-        disabled={isLoading || loadingPrinters}
-        onclick={() => {
-          if (selectedOrder != null) {
-            printOrder(selectedOrder)
-          }
-        }}
-      >
-        {#if isLoading || loadingPrinters}
-          <Loading />
-        {:else}
-          Imprimir
-        {/if}
-      </button>
-    </div>
-
-    <form method="dialog" class="modal-backdrop">
-      <button>close</button>
-    </form>
+    <ModalPrint
+      bind:loadingPrinters
+      tenant={data.tenant!}
+      bind:selectedOrder
+      closeModal={() => {
+        isOpenModal?.close()
+      }}
+    />
   </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
 </dialog>
 
 <main class="m-4 h-full max-h-[calc(100vh-20vh)]">
