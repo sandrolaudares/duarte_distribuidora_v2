@@ -38,7 +38,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const type = searchParams.get('type')
 
   const sortId = searchParams.get('sort_id')
-  const sortOrder = searchParams.get('sort_order')
+  const sortOrder = searchParams.get('sort_direction')
 
   const dateStart = searchParams.get('startDate')
   const dateEnd = searchParams.get('endDate')

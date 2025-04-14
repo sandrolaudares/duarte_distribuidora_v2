@@ -21,7 +21,7 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
   const telephone_1 = searchParams.get('telephone_1')
 
   const sortId = searchParams.get('sort_id')
-  const sortOrder = searchParams.get('sort_order')
+  const sortOrder = searchParams.get('sort_direction')
 
   let query = tenantDb!
     .select()

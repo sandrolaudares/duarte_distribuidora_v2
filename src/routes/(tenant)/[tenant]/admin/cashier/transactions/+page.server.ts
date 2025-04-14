@@ -44,7 +44,7 @@ export const load = (async ({ url, locals: { tenantDb, user } }) => {
   const dateEnd = searchParams.get('endDate')
 
   const sortId = searchParams.get('sort_id')
-  const sortOrder = searchParams.get('sort_order')
+  const sortOrder = searchParams.get('sort_direction')
 
   console.log('username', username)
   console.log('caixa', caixa)

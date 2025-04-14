@@ -22,7 +22,7 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
   const cpf_cnpj= searchParams.get('cpf_cnpj')
 
   const sortId = searchParams.get('sort_id')
-  const sortOrder = searchParams.get('sort_order')
+  const sortOrder = searchParams.get('sort_direction')
 
   let query = tenantDb!
     .select()

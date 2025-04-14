@@ -121,7 +121,7 @@
           <Th>Usuário</Th>
           <Th>Caixa</Th>
           <Th>Data</Th>
-          <Th>Valor</Th>
+          <ThSort {table} field="amount">Valor</ThSort>
           <Th>Troco</Th>
           <Th>Observação</Th>
           <Th>Detalhes</Th>
@@ -243,7 +243,7 @@
             </td>
           </tr>
         {/each}
-        <tr class="sticky bottom-0">
+        <tr class="sticky bottom-0 bg-base-100 border-t">
           <td></td>
           <td></td>
           <td></td>

@@ -20,7 +20,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const name = searchParams.get('name')
 
   const sortId = searchParams.get('sort_id')
-  const sortOrder = searchParams.get('sort_order')
+  const sortOrder = searchParams.get('sort_direction')
 
   const cte = tenantDb!.select().from(schema.skuTable).as('cteSkus')
 
