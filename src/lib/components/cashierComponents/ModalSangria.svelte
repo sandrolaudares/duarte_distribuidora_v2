@@ -40,8 +40,8 @@
       })
       toast.success('Sucesso ao realizar transação!')
       handleInvalidate?.()
-    } catch (error:unknown) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Ocorreu um erro desconhecido')
     } finally {
       isLoading = false
       modal.close()
