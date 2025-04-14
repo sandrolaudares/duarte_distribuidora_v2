@@ -164,7 +164,7 @@ export const distribuidora = router({
 
         return await trx
           .update(cashierTable)
-          .set({ status: 'Aberto', currency: data.amount,user_in: user.id })
+          .set({ status: 'Aberto', currency: data.amount, user_in: user.id })
           .where(eq(cashierTable.id, id))
           .returning()
       })
@@ -204,7 +204,7 @@ export const distribuidora = router({
 
         return await trx
           .update(cashierTable)
-          .set({ status: 'Fechado', currency: 0, user_in: null})
+          .set({ status: 'Fechado', currency: 0, user_in: null })
           .where(eq(cashierTable.id, id))
       })
     }),
@@ -212,24 +212,61 @@ export const distribuidora = router({
   inserirTransacao: publicProcedure
     .input(
       z.object({
-        id: z.number(),
-        data: z.object({
-          amount: z.number(),
-          type: z.enum(cashierTransactionEnum),
-        }),
+        caixa_id: z.number(),
+        amount: z.number(),
+        type: z.enum(cashierTransactionEnum),
+        motivo: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { id, data } = input
       const { user, tenantDb } = ctx
-      // await distribuidoraController(tenantDb).insertCashierTransaction({
-      //   cachier_id: id,
-      //   meta_data: {
-      //     user,
-      //   },
-      //   type: data.type,
-      //   amount: data.amount,
-      // })
+
+      if (!user) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Usuário não autenticado',
+        })
+      }
+
+      return tenantDb.transaction(async trx => {
+        await trx.insert(cashierTransactionsT).values({
+          amount: input.amount,
+          type: input.type,
+          metadata: {
+            observacoes: input.motivo,
+          },
+          cashier_id: input.caixa_id,
+          order_id: null,
+          created_by: user.id,
+        })
+
+        const [caixa] = await trx
+          .select({ currency: cashierTable.currency })
+          .from(cashierTable)
+          .where(eq(cashierTable.id, input.caixa_id))
+          .limit(1)
+
+        let novoValor = 0
+
+        if (input.type === 'Deposito') {
+          novoValor = caixa.currency + input.amount
+        } else {
+          if (caixa.currency < input.amount) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'Valor maior que o saldo do caixa',
+            })
+          } else {
+            novoValor = caixa.currency - input.amount
+          }
+        }
+
+        return await trx
+          .update(cashierTable)
+          .set({ currency: novoValor })
+          .where(eq(cashierTable.id, input.caixa_id))
+          .returning()
+      })
     }),
 
   getCashierById: publicProcedure
