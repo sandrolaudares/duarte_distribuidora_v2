@@ -12,7 +12,6 @@ import {
   insertCustomerSchema,
   insertAddressSchema,
   customerTable,
-  paymentMethodEnum,
   paymentStatusEnum,
   insertOrderPaymentSchema,
   orderPaymentTable,
@@ -358,9 +357,9 @@ export const customer = router({
           await tenantDb.insert(cashierTransactionsT).values({
             amount: payment.amount_paid,
             type: 'Pagamento',
+            metodo_pagamento: payment.payment_method,
             metadata: {
-              metodo_pagamento: payment.payment_method,
-              troco: payment.troco ? payment.troco : null,
+              troco: payment.troco ? payment.troco : undefined,
             },
             cashier_id: order_info.cashier_id,
             order_id: order.id,
@@ -523,9 +522,9 @@ export const customer = router({
           await tenantDb.insert(cashierTransactionsT).values({
             amount: payment_info.amount_paid,
             type: 'Pagamento',
+            metodo_pagamento: payment_info.payment_method,
             metadata: {
-              metodo_pagamento: payment_info.payment_method,
-              troco: payment_info.troco ? payment_info.troco : null,
+              troco: payment_info.troco ? payment_info.troco : undefined,
             },
             cashier_id: ctx.locals.user ? ctx.locals.user?.meta.caixa_id : null,
             order_id: payment_info.order_id,
@@ -751,9 +750,9 @@ export const customer = router({
         await trx.insert(cashierTransactionsT).values({
           amount: input.amount_paid,
           type: 'Pagamento',
+          metodo_pagamento: input.payment_method,
           metadata: {
-            metodo_pagamento: input.payment_method,
-            troco: input.troco ? input.troco : null,
+            troco: input.troco ? input.troco : undefined,
           },
           cashier_id: input.cachier_id,
           order_id: input.order_id,

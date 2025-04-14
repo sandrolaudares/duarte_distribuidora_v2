@@ -127,6 +127,13 @@
       "when": 1744481348398,
       "tag": "0017_pink_gauntlet",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1744661647247,
+      "tag": "0018_magenta_silk_fever",
+      "breakpoints": true
     }
   ]
 }

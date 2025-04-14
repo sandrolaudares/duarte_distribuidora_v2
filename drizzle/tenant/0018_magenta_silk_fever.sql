@@ -1,0 +1,1 @@
+ALTER TABLE `cashierTransactions` ADD `metodo_pagamento` text;

@@ -19,6 +19,7 @@ import { createInsertSchema } from 'drizzle-zod'
 
 import { product } from '$db/controller'
 import { timestamps } from '../../utils'
+import { paymentMethodEnum } from '$lib/utils/permissions'
 
 export const customerTable = sqliteTable('cliente', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -87,13 +88,6 @@ export const addressRelations = relations(addressTable, ({ one, many }) => ({
 export const insertAddressSchema = createInsertSchema(addressTable)
 export type SelectAddress = typeof addressTable.$inferSelect
 export type InsertAddress = typeof addressTable.$inferInsert
-
-export const paymentMethodEnum = [
-  'credit_card',
-  'debit_card',
-  'pix',
-  'dinheiro',
-] as const
 
 export const paymentStatusEnum = [
   'PENDING',
