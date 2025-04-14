@@ -24,6 +24,7 @@
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
   import { getPrinterContext } from '../../orders/allorders/printerContext.svelte'
   import ModalPrint from '$lib/components/cashierComponents/ModalPrint.svelte'
+  import ModalSangria from '$lib/components/cashierComponents/ModalSangria.svelte'
 
   const cart = getCartContext()
   const prr = getPrinterContext()
@@ -83,8 +84,8 @@
         return
       }
       selectedOrder = resp.order.id
-      
-      if(isPrintOrder) {
+
+      if (isPrintOrder) {
         await handleOpenModal()
       }
 
@@ -145,7 +146,7 @@
       }
 
       selectedOrder = resp.order.id
-      if(isPrintOrder) {
+      if (isPrintOrder) {
         await handleOpenModal()
       }
 
@@ -187,6 +188,16 @@
     })
   }
 
+  async function handleModalSangria() {
+    modal.open(ModalSangria,{
+      caixa_id:caixa.id,
+      handleInvalidate: async () => {
+        await invalidateAll()
+        caixa = data.caixa
+      },
+    })
+  }
+
   let isOpenModalTransactions: HTMLDialogElement | null = $state(null)
 
   async function pagamentoModal() {
@@ -219,7 +230,7 @@
     | RouterOutputs['stock']['getRecentTransaoEstoque']
     | undefined = $state()
 
-    let loadingTransactions = $state(true)
+  let loadingTransactions = $state(true)
 
   async function loadTransactions() {
     try {
@@ -302,12 +313,15 @@
   <div class="mb-3 flex justify-center gap-2">
     <button
       class="btn btn-primary"
-      onclick={() =>{
-          loadTransactions()
-          isOpenModalTransactions?.showModal()
-         }}
+      onclick={() => {
+        loadTransactions()
+        isOpenModalTransactions?.showModal()
+      }}
     >
       Ver transacoes do dia
+    </button>
+    <button class="btn btn-secondary" onclick={handleModalSangria}>
+      Retirar dinheiro (Sangria/retirada)
     </button>
     <button class="btn btn-error" onclick={closeCashierModal}>
       Fechar caixa
@@ -400,7 +414,11 @@
         ✕
       </button>
     </form>
-    <TransactionsModal {caixa} {transactions} bind:isLoading={loadingTransactions} />
+    <TransactionsModal
+      {caixa}
+      {transactions}
+      bind:isLoading={loadingTransactions}
+    />
   </div>
   <form method="dialog" class="modal-backdrop">
     <button>close</button>
