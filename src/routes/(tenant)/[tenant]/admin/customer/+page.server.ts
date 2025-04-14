@@ -8,7 +8,7 @@ import {
   getSQLiteColumn,
   getOrderBy,
 } from '$lib/server/db/utils'
-import { and, eq, getTableColumns, SQL, count, like } from 'drizzle-orm'
+import { and, eq, getTableColumns, SQL, count, like, desc } from 'drizzle-orm'
 import { pageConfig } from '$lib/config'
 
 export const load = (async ({ url,locals:{tenantDb} }) => {
@@ -36,6 +36,7 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
       )
 
     )
+    .orderBy(desc(schema.customerTable.id))
     .$dynamic()
 
   if (sortId && sortOrder) {

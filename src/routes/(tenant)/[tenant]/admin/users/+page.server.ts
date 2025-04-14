@@ -8,8 +8,9 @@ import {
   getSQLiteColumn,
   getOrderBy,
 } from '$lib/server/db/utils'
-import { and, eq, getTableColumns, SQL, count, like } from 'drizzle-orm'
+import { and, eq, getTableColumns, SQL, count, like, asc } from 'drizzle-orm'
 import { pageConfig } from '$lib/config'
+import { desc } from 'drizzle-orm'
 
 export const load = (async ({ url,locals:{tenantDb} }) => {
   const { searchParams } = url
@@ -31,6 +32,7 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
         email ? like(schema.userTable.email, `${email}%`) : undefined,
       ),
     )
+    .orderBy(asc(schema.userTable.created_at))
     .$dynamic()
 
   if (sortId && sortOrder) {
