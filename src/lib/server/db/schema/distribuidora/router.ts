@@ -74,6 +74,7 @@ export const distribuidora = router({
           lng: z.number().optional(),
           subdomain: z.string().optional(),
           phone: z.string().optional(),
+          // image: z.number().optional(),
           funcionamento: z
             .object({
               segunda: z.object({

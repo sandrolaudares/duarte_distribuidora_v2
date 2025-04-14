@@ -1,7 +1,7 @@
 import type { Theme } from '$lib'
 import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { timestamps } from '../utils'
-import { imageTable, type SelectUser } from '../schema'
+import type { SelectUser } from '../schema'
 // import { timestamps } from '../utils'
 
 type day = {
@@ -42,7 +42,6 @@ export const tenants = sqliteTable('tenants', {
       domingo: { start: 0, end: 0 },
     }
   }),
-  image: integer('image_id').references(() => imageTable.id)
 })
 
 export type SelectTenant = typeof tenants.$inferSelect

@@ -7,6 +7,7 @@
   import { toast } from 'svelte-sonner'
   import type { SelectTenant, WorkSchedule } from '$lib/server/db/central/schema'
   import { secondsToTime, timeToSeconds } from '$lib/utils'
+  import ImageInput from '$lib/components/input/ImageInput.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -45,7 +46,8 @@
           taxa_por_km: newDistribuidora.taxa_por_km ?? undefined,
           subdomain: newDistribuidora.subdomain,
           funcionamento : schedule ?? undefined,
-          phone: newDistribuidora.phone ?? undefined
+          phone: newDistribuidora.phone ?? undefined,
+          // image: newDistribuidora.image ?? undefined,
         },
       })
       console.log('Response', response)
@@ -187,6 +189,13 @@
                 </label>
               </div>
           {/each}
+          <!-- <ImageInput
+              image_id={newDistribuidora.image}
+              name={newDistribuidora.name}
+              save={(image_id) => {
+                newDistribuidora.image = image_id
+              }}
+            /> -->
         </div>
         
 

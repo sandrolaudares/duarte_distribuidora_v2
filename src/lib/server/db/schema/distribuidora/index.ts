@@ -38,9 +38,9 @@ export const cashierRelations = relations(cashierTable, ({one})=> ({
 }))
 
 type Meta = {
-  metodo_pagamento: PaymentMethod
-  troco: number
-  observacoes: string
+  metodo_pagamento?: PaymentMethod
+  troco?: number
+  observacoes?: string
 }
 
 export const cashierTransactionsT = sqliteTable('cashierTransactions', {
