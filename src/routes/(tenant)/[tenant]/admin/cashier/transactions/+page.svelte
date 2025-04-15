@@ -201,7 +201,14 @@
             <td> <span class="flex items-center gap-1">
               <User class="size-4" />{row.username}
             </span></td>
-            <td>{row.cashier}</td>
+            <td>
+              {#if row.cashier}
+                 {row.cashier}
+              {:else}
+              <span class="text-slate-400">—</span>
+              {/if}
+            
+            </td>
             <!-- <td>{row.routeName}</td> -->
             <td>
               {row.created_at ? df.format(row.created_at) : ''}

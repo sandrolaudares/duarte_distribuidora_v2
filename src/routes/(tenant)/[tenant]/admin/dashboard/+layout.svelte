@@ -57,7 +57,7 @@
 
   let checkbox = $state(false)
 
-  let { data, children }: { data: LayoutData; children: Snippet } = $props()
+  let { children }: {children:Snippet} = $props()
 
 </script>
 
