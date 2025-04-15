@@ -6,6 +6,12 @@
   import { RecentSales } from '$lib/components/dashboard/admin'
   import TopRevenueSvChart from './TopRevenueSvChart.svelte'
   import DefaultBarSvChart from './DefaultBarSvChart.svelte'
+  import {
+    ChartCandlestick,
+    CircleDollarSign,
+    Logs,
+  } from 'lucide-svelte'
+  import { formatCurrency } from '$lib/utils'
 
   let { data }: { data: PageData } = $props()
 
@@ -25,34 +31,24 @@
     {
       titleCard: 'Total de pedidos',
       textCard: financialSummary.basePeriod[0].total_paid
-        ? 'R$ ' +
-          ((financialSummary.basePeriod[0].total_paid / 100)
-            .toFixed(2))
-            .toString()
-
+        ? formatCurrency(financialSummary.basePeriod[0].total_paid)
         : '0',
       subTitle: financialSummary.comparedPeriod
         ? 'Periodo comparado: ' +
-          (financialSummary.comparedPeriod[0].total_paid / 100)
-            .toFixed(2)
-            .toString()
+          formatCurrency(financialSummary.comparedPeriod[0].total_paid)
         : '',
+      icon: CircleDollarSign,
     },
     {
       titleCard: 'Valor médio do pedido',
-      textCard:
-        'R$ ' +
-        (AvgOrderValue.basePeriod
-          ? (AvgOrderValue.basePeriod[0].average_order_value / 100)
-              .toFixed(2)
-              .toString()
-          : ''),
+      textCard: AvgOrderValue.basePeriod
+        ? formatCurrency(AvgOrderValue.basePeriod[0].average_order_value)
+        : '',
       subTitle: AvgOrderValue.comparedPeriod
         ? 'Periodo comparado: ' +
-          (AvgOrderValue.comparedPeriod[0].average_order_value / 100)
-            .toFixed(2)
-            .toString()
+          formatCurrency(AvgOrderValue.comparedPeriod[0].average_order_value)
         : '',
+      icon: ChartCandlestick,
     },
     {
       titleCard: 'Total de pedidos',
@@ -61,6 +57,7 @@
         ? 'Periodo comparado: ' +
           quantOrders.comparedPeriod[0].total_orders.toString()
         : '',
+      icon: Logs,
     },
   ])
 </script>
