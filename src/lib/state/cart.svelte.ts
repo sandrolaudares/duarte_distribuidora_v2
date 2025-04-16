@@ -64,5 +64,10 @@ export class Cart<Item extends { id: string | number }, ProductMeta, CartMeta> {
 
   clear() {
     this.cart = {}
+    this.meta = {} as CartMeta
+  }
+
+  clearMeta() {
+    this.meta = {} as CartMeta
   }
 }
