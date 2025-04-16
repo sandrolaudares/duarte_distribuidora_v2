@@ -92,6 +92,8 @@
       toast.success('Pedido realizado com sucesso!')
 
       reset()
+      await invalidateAll()
+      caixa = data.caixa
     } catch (error: any) {
       toast.error(error.message)
     }
@@ -189,8 +191,8 @@
   }
 
   async function handleModalSangria() {
-    modal.open(ModalSangria,{
-      caixa_id:caixa.id,
+    modal.open(ModalSangria, {
+      caixa_id: caixa.id,
       handleInvalidate: async () => {
         await invalidateAll()
         caixa = data.caixa
@@ -275,7 +277,7 @@
         ✕
       </button>
     </form>
-    
+
     <ModalPrint
       bind:loadingPrinters
       tenant={data.tenant!}
@@ -284,7 +286,6 @@
         isOpenModalPrint?.close()
       }}
     />
-
   </div>
   <form method="dialog" class="modal-backdrop">
     <button>close</button>
@@ -327,19 +328,19 @@
       Fechar caixa
     </button>
   </div>
-  <div class="mt-15 m-4 flex flex-col justify-center gap-4 md:flex-row">
+  <div class="mt-15 m-4 flex flex-col justify-center gap-4 lg:flex-row">
     <CaixaLeftColumn
       {user}
       fee={data.tenant?.taxa_por_km ?? 0}
       bind:tipo_preco
     />
     <div
-      class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-3"
+      class="col-auto rounded-lg border-4 border-secondary border-opacity-50 p-3 lg:w-1/3"
     >
       <CaixaColumn />
     </div>
 
-    <div class="col-auto flex h-auto flex-col justify-between gap-2 md:w-96">
+    <div class="col-auto flex h-auto flex-col justify-between gap-2">
       <div>
         <button
           class="btn btn-primary w-full"

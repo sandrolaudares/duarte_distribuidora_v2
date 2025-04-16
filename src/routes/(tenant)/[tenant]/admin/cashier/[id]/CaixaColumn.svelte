@@ -16,7 +16,7 @@
   })
 </script>
 
-<ul class="mb-4 max-h-[50vh] overflow-scroll text-center text-lg">
+<ul class="mb-4 max-h-[60vh] overflow-scroll text-center text-lg">
   {#each Object.values(cart.cart) as item}
     <div class="flex items-center justify-between">
       <div class="flex">
