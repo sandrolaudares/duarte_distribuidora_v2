@@ -15,9 +15,9 @@ import type {
   SelectProductItem,
 } from '$db/schema'
 // import { getRowCount } from '$db/utils'
-import type { TenantDbType } from '../../tenant'
+import type { TenantDbType, Transaction } from '../../tenant'
 
-export const product = (db: TenantDbType) => ({
+export const product = (db: TenantDbType | Transaction) => ({
   // Product
   insertProduct: (data: InsertProduct) => {
     return db.insert(productTable).values(data)

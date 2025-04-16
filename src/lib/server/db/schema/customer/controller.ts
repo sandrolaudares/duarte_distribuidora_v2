@@ -34,14 +34,18 @@ import {
   sql,
 } from 'drizzle-orm'
 
-import { stock, bugReport } from '$db/controller'
+import {
+  stock,
+  bugReport,
+  customer as customerController,
+} from '$db/controller'
 import { cashierTable } from '../distribuidora'
 import { TRPCError } from '@trpc/server'
 import { userTable } from '../user'
-import type { TenantDbType } from '../../tenant'
+import type { TenantDbType, Transaction } from '../../tenant'
 import { error } from '@sveltejs/kit'
 
-export const customer = (db: TenantDbType) => ({
+export const customer = (db: TenantDbType | Transaction) => ({
   tables: {
     customerTable,
     addressTable,
@@ -118,6 +122,51 @@ export const customer = (db: TenantDbType) => ({
         ),
       )
   },
+
+  validateFiadoTransaction: async (
+    customer_id: number,
+    total: number,
+  ) => {
+
+    const [{ count: pendingOrders }] = await customerController(
+      db,
+    ).countCustomerExpiredFiadoTransactions(customer_id)
+
+    const customer = await customerController(db).getCustomerById(
+      customer_id,
+    )
+
+    if (!customer) {
+      return {
+        message: 'Cliente não encontrado',
+        success: false,
+      }
+    }
+
+    if (pendingOrders > 0) {
+      return {
+        message: 'Cliente possui pedidos fiados pendentes e expirados',
+        success: false,
+      }
+    }
+
+    const used_credit =
+      await customerController(db).getCustomerUsedCredit(customer_id)
+
+    const credit = used_credit?.used_credit ?? 0
+
+    if (customer?.max_credit < credit + total) {
+      return {
+        message: 'Cliente não possui crédito suficiente para esta compra',
+        success: false,
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Nenhuma pendencia encontrada',
+    }
+  },
   getPendingFiadoTransactions: async () => {
     return db.query.customerOrderTable.findMany({
       where: t => and(gt(t.total, t.amount_paid), eq(t.is_fiado, true)),
@@ -136,13 +185,17 @@ export const customer = (db: TenantDbType) => ({
       },
     })
   },
-  getCustomersWithAddress: async (limit:number,offset:number,search?:string) => {
+  getCustomersWithAddress: async (
+    limit: number,
+    offset: number,
+    search?: string,
+  ) => {
     const where = search
-    ? or(
-        like(customerTable.name, `%${search}%`),
-        like(customerTable.phone, `%${search}%`)
-      )
-    : undefined
+      ? or(
+          like(customerTable.name, `%${search}%`),
+          like(customerTable.phone, `%${search}%`),
+        )
+      : undefined
 
     const customers = await db.query.customerTable.findMany({
       where: where,
@@ -154,7 +207,10 @@ export const customer = (db: TenantDbType) => ({
       orderBy: (customer, { asc }) => [asc(customer.name)],
     })
 
-    const [total] = await db.select({ count: count()}).from(customerTable).where(where)
+    const [total] = await db
+      .select({ count: count() })
+      .from(customerTable)
+      .where(where)
 
     console.log(customers)
 

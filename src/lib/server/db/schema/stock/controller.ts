@@ -17,9 +17,9 @@ import type {
 
 import { and, desc, eq, gt, ne, sql } from 'drizzle-orm'
 import { LibsqlError } from '@libsql/client'
-import type { TenantDbType } from '../../tenant'
+import type { TenantDbType, Transaction } from '../../tenant'
 
-export const stock = (db: TenantDbType) => ({
+export const stock = (db: TenantDbType | Transaction) => ({
   insertSKU(data: InsertSku) {
     return db.insert(skuTable).values(data)
   },

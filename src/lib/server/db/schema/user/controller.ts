@@ -16,14 +16,14 @@ import {
 import { TimeSpan, createDate, isWithinExpirationDate } from 'oslo'
 import { generateRandomString, alphabet, sha256 } from 'oslo/crypto'
 import { encodeHex } from 'oslo/encoding'
-import type { TenantDbType } from '../../tenant'
+import type { TenantDbType, Transaction } from '../../tenant'
 import { generateId } from '$lib/server/auth/utils'
 
 export function isValidEmail(email: string): boolean {
   return /.+@.+/.test(email)
 }
 
-export const user = (db: TenantDbType) => ({
+export const user = (db: TenantDbType | Transaction) => ({
   getUserByUsername: function (username: string) {
     return db
       .select()
