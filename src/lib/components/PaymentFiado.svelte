@@ -230,7 +230,7 @@
             class="select select-bordered w-full"
             bind:value={metodo_pagamento}
           >
-            <option value="" disabled selected>Qual foi o metodo?</option>
+            <option disabled selected={true}>Qual foi o metodo?</option>
             <option value="credit_card">Cartão de crédito</option>
             <option value="debit_card">Cartão de debito</option>
             <option value="pix">Pix</option>

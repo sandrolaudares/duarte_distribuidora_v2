@@ -10,6 +10,7 @@
 
   let password = $state('')
   let isLoading = $state(false)
+  let errorMessage = $state('')
   async function validateAdmin() {
     isLoading = true
     try {
@@ -21,11 +22,11 @@
       if (resp?.success) {
         toast.success(resp?.message)
         onSuccess()
-        console.log('ue1')
       }
       console.log(resp.message)
     } catch (error: any) {
       toast.error(error.message)
+      errorMessage = error.message
     } finally {
       isLoading = false
     }
@@ -59,6 +60,9 @@
         class="input input-bordered w-full"
         placeholder="****"
       />
+        {#if errorMessage}
+          <span class="text-sm text-error">{errorMessage}</span>
+        {/if}
       <button
         onclick={validateAdmin}
         disabled={!selectedAdminId || !password || isLoading}
