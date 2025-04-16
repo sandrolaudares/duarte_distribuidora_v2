@@ -15,7 +15,7 @@
   import * as Popover from '$lib/components/ui/popover/index.js'
 
   import * as Select from '$lib/components/ui/select/index.js'
-  import Button from './ui/button/button.svelte'
+  import Button, { type ButtonVariant } from './ui/button/button.svelte'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import Separator from './ui/separator/separator.svelte'
 
@@ -26,6 +26,7 @@
     title?: string
     futureDates?: boolean
     filters?: SSRFilters
+    variant?: ButtonVariant
   }
 
   let {
@@ -35,6 +36,7 @@
     title,
     futureDates,
     filters = $bindable(),
+    variant = "ghost"
   }: Props = $props()
 
   const df = new DateFormatter('pt-BR', {
@@ -111,7 +113,7 @@
   <Popover.Root>
     <Popover.Trigger
       class={cn(
-        buttonVariants({ variant: 'ghost' }),
+        buttonVariants({ variant: variant }),
         !value && 'text-muted-foreground',
       )}
     >
