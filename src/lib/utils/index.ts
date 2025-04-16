@@ -72,3 +72,14 @@ export function formatCurrency (value:number) {
     currency:'BRL'
   })
 }
+
+export function secondsToTime(seconds: number): string {
+  const hours = Math.floor(seconds / 3600).toString().padStart(2, "0");
+  const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, "0");
+  return `${hours}:${minutes}`;
+}
+
+export function timeToSeconds(time: string): number {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 3600 + minutes * 60;
+}

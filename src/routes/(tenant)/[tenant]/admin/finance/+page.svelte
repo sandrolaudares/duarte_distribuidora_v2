@@ -264,6 +264,7 @@
                 
             </span>
           </td>
+          <td></td>
         </tr>
       </tbody>
     </table>
@@ -284,5 +285,9 @@
   }
   .bg-colorr {
     background-color: oklch(var(--b1)) !important;
+  }
+
+  tbody td {
+    border-bottom: 1px solid var(--grey-lighten, #eee) !important;
   }
 </style>

@@ -1,3 +1,5 @@
+import type { paymentMethodEnum } from "$lib/server/db/schema"
+
 export const permissionsEnum = [
   'receber_fiado',
   'editar_produtos',
@@ -27,21 +29,41 @@ export const formated_Permissions: FormatedPermissions = {
 }
 export const roleEnum = [
   'admin',
-  'employee',
   'customer',
   'motoboy',
   'caixa',
   'financeiro',
+  'gerente'
 ] as const
 
 export const roleLabels: Record<typeof roleEnum[number], string> = {
   admin: 'Administrator',
-  employee: 'Funcionario',
   customer: 'Cliente',
   motoboy: 'Motoboy',
   caixa: 'Caixa',
   financeiro: 'Financeiro',
+  gerente : 'Gerente'
 }
+
+export const paymentMethodLabel: Record<typeof paymentMethodEnum[number], string> = {
+  credit_card: 'Cartão de crédito',
+  debit_card: 'Cartão de débito',
+  pix: 'Pix',
+  dinheiro: 'Dinheiro',
+}
+
+
 
 export type Role = (typeof roleEnum)[number]
 export type Permission = (typeof permissionsEnum)[number]
+export type PaymentMethod = (typeof paymentMethodEnum)[number]
+
+export const cashierTransactionEnum = [
+  'Abertura',
+  'Fechamento',
+  'Pagamento',
+  'Sangria',
+  "Deposito",
+] as const
+
+export type CashierTransactionType = (typeof cashierTransactionEnum)[number]

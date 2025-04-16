@@ -166,11 +166,10 @@
             disabled={field.disabled}
           ></textarea>
         {:else if field.type === 'component' && field.component}
-          <svelte:component
-            this={field.component.ref}
+          <field.component.ref
             bind:value={field.value}
             {...field.component.props}
-          />
+            />
         {/if}
 
         {#if field.annotation && !erros?.[field.name]}
@@ -188,14 +187,15 @@
     {/each}
   </div>
 
-  <svelte:fragment slot="footer">
-    <div class="flex justify-end w-full gap-2 mt-3">
-      <button class="btn btn-error" onclick={handleCancel} disabled={isLoading}>
-        Cancelar
-      </button>
-      <button class="btn btn-primary" onclick={handleConfirm} disabled={isLoading}>
-        {!isLoading ? "Salvar" : 'Loading...'}
-      </button>
-    </div>
-  </svelte:fragment>
+  {@render footer()}
 </Modal>
+{#snippet footer()}
+<div class="flex justify-end w-full gap-2 mt-3">
+  <button class="btn btn-error" onclick={handleCancel} disabled={isLoading}>
+    Cancelar
+  </button>
+  <button class="btn btn-primary" onclick={handleConfirm} disabled={isLoading}>
+    {!isLoading ? "Salvar" : 'Loading...'}
+  </button>
+</div>
+{/snippet}

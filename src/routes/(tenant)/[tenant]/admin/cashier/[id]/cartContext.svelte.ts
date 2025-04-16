@@ -10,9 +10,9 @@ type CartProductMeta = {
   is_retail: boolean
 }
 type CartMeta = {
-  clienteSelecionado: RouterOutputs['customer']['getCustomers'][0] | null,
+  clienteSelecionado: RouterOutputs['customer']['getCustomers']['customers'][0] | null,
   motoboySelecionado: RouterOutputs['auth']['getMotoboys'][0] | null,
-  enderecoSelecionado: RouterOutputs['customer']['getCustomers'][0]['adresses'][0] | null,
+  enderecoSelecionado: RouterOutputs['customer']['getCustomers']['customers'][0]['adresses'][0] | null,
   isDelivery : boolean,
   taxaEntrega: number,
 }

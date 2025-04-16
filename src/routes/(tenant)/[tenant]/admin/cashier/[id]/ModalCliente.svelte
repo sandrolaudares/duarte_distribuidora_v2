@@ -10,46 +10,76 @@
   import ModalEndereco from './ModalEndereco.svelte'
   import Loading from '$lib/components/Loading.svelte'
   import { toast } from 'svelte-sonner'
+  import { debounce } from '$lib/utils'
+  
+  let { selectedClient } : {selectedClient: (client: Clientes[0]) => void} = $props()
 
-  type Clientes = RouterOutputs['customer']['getCustomers']
+  type Clientes = Awaited<RouterOutputs['customer']['getCustomers']['customers']>
 
-  let isLoading = true
+  let isLoading = $state(true)
 
-  let clientes: Clientes = []
-  let filteredClientes = clientes
+  let clientes: Clientes = $state([])
 
-  let newCliente = {
+  let newCliente = $state({
     name: '',
     phone: '',
     is_retail: true,
-  }
-  let errors = {
+  })
+  let errors = $state({
     nameError: '',
     phoneError: ''
-  }
-  onMount(async () => {
+  })
+
+  let total = $state(0)
+  let pageW = $state(1)
+  let pageSize = 10
+
+  async function loadClientes() {
+    isLoading = true
     try {
-      clientes = await trpc($page).customer.getCustomers.query()
-      console.log(clientes)
-      filteredClientes = clientes
+      const res = await trpc($page).customer.getCustomers.query({
+        page:pageW,
+        pageSize,
+        search: searchTerm.trim() || undefined
+      })
+      clientes = res.customers
+      total = res.total
     } catch (error: any) {
       console.error(error.message)
       toast.error(error.message)
+    } finally  {
+      isLoading = false
     }
+  }
 
-    isLoading = false
+  function handleSearchInput(event: Event) {
+    const target = event.target as HTMLInputElement
+    searchTerm = target.value
+    pageW = 1
+    debouncedSet()
+  }
+
+  function nextPage() {
+    if (pageW * pageSize < total) {
+      pageW++
+      loadClientes()
+    }
+  }
+
+  function prevPage() {
+    if (pageW > 1) {
+      pageW--
+      loadClientes()
+    }
+  }
+  
+  onMount(async () => { 
+    loadClientes()
   })
 
-  export let selectedClient: (client: Clientes[0]) => void
-  let searchTerm = ''
+  const debouncedSet = debounce(loadClientes, 500)
 
-  const searchClientes = () => {
-    return (filteredClientes = clientes.filter(cliente => {
-      let nome = cliente.name.toLowerCase()
-      let telefone = cliente.phone?.toLowerCase()
-      return (nome.includes(searchTerm.toLowerCase()) || telefone?.includes(searchTerm.toLowerCase()))
-    }))
-  }
+  let searchTerm = $state('')
 
   async function handleInsertCliente() {
     if(newCliente.name.length <3){
@@ -66,8 +96,7 @@
       newCliente.name = ''
       newCliente.phone = ''
       toast.success('Cliente inserido com sucesso!')
-      filteredClientes = await trpc($page).customer.getCustomers.query()
-      clientes = filteredClientes
+      loadClientes()
       isLoading = false
     } catch (error: any) {
       toast.error(error.message)
@@ -107,7 +136,7 @@
           bind:value={newCliente.phone}
         />
       </label>
-      <button class="btn btn-primary" on:click={handleInsertCliente}>
+      <button class="btn btn-primary" onclick={handleInsertCliente}>
         Adicionar
       </button>
     </div>
@@ -129,8 +158,7 @@
         type="text"
         class="grow"
         placeholder="Telefone ou nome do cliente"
-        bind:value={searchTerm}
-        on:input={searchClientes}
+        oninput={handleSearchInput}
       />
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -150,9 +178,8 @@
       <div class="flex items-center justify-center">
         <Loading />
       </div>
-    {/if}
 
-    {#if searchTerm && filteredClientes.length === 0}
+    {:else if searchTerm && clientes.length === 0}
     <div class="mt-6 flex min-h-40 items-center rounded-lg text-center">
       <div class="mx-auto flex w-full max-w-sm flex-col px-4">
         <div class="mx-auto rounded-full bg-base-200 p-3">
@@ -179,7 +206,7 @@
       </div>
     </div>
     {:else}
-      {#each filteredClientes as cliente}
+      {#each clientes as cliente}
         <div class="flex items-center justify-between">
           <div>
             <p class="font-bold">{cliente.name}</p>
@@ -188,7 +215,7 @@
 
           <button
             class="btn btn-primary"
-            on:click={() => {
+            onclick={() => {
               selectedClient(cliente)
             }}
           >
@@ -196,6 +223,18 @@
           </button>
         </div>
       {/each}
-    {/if}
+      {@render footer()}
+      {/if}
+    </div>
+  </Modal>
+  {#snippet footer()}
+  <div class="flex justify-between mt-4 items-center">
+    <button class="btn" onclick={prevPage} disabled={pageW === 1}>
+      Anterior
+    </button>
+    <span>Página {pageW} de {Math.ceil(total / pageSize)}</span>
+    <button class="btn" onclick={nextPage} disabled={pageW * pageSize >= total}>
+      Próxima
+    </button>
   </div>
-</Modal>
+  {/snippet}

@@ -19,13 +19,19 @@
   import SideBar from '$lib/components/sidebar/SideBar.svelte'
   import { createCartContext } from './admin/cashier/[id]/cartContext.svelte'
   import { page } from '$app/state'
+  import { createPrinterContext } from './admin/orders/allorders/printerContext.svelte'
 
   let { data, children }: { data: LayoutData; children: Snippet } = $props()
 
   const user = createUserContext(data.user)
+  const prr = createPrinterContext()
 
   $effect.pre(() => {
     user.set(data.user)
+
+    if(localStorage.getItem('selectedPrinter') !==null) {
+      prr.setPrinter(localStorage.getItem('selectedPrinter') ?? '')
+    }
   })
   const cart = createCartContext()
 </script>

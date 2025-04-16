@@ -84,7 +84,7 @@
 </script>
 
 <main class="mx-4 h-full max-h-[calc(100vh-10vh)]">
-  <Datatable {table} headless>
+  <Datatable {table} >
     <!-- {#snippet header()}
         <Search {table} />
       
@@ -93,7 +93,7 @@
     {#if table.isLoading}
       <LoadingBackground />
     {/if}
-    <table class="table table-zebra table-xs rounded-none">
+    <table class="table table-xs rounded-none">
       <thead>
         <tr>
           <ThSort {table} field="id">ID</ThSort>
@@ -148,13 +148,20 @@
         {#each data.rows as row (row.id)}
           <tr>
             <td>{row.id}</td>
-            <td class="flex items-center gap-2">
-              <User class="size-4" />{row.user_name}
+            <td >
+              <span class="flex items-center gap-2">
+
+                <User class="size-4" />{row.user_name}
+              </span>
             </td>
             <td>{row.text}</td>
             <td>{row.pathname}</td>
             <td>{row.routeName}</td>
-            <td class="badge badge-xs {getColor(row.type)}">{row.type}</td>
+            <td >
+              <span class="badge badge-xs {getColor(row.type)}">
+                {row.type}
+              </span>
+              </td>
             <td>
               {row.currency
                 ? formatCurrency(row.currency)
@@ -219,5 +226,8 @@
 <style>
   thead {
     background-color: oklch(var(--b1)) !important;
+  }
+  tbody td {
+    border-bottom: 1px solid var(--grey-lighten, #eee) !important;
   }
 </style>

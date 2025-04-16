@@ -35,7 +35,7 @@ export const load = (async ({ params,url, locals: { tenantDb } }) => {
   const pageSize = Number(searchParams.get('pageSize') ?? pageConfig.rowPages)
 
   const sortId = searchParams.get('sort_id')
-  const sortOrder = searchParams.get('sort_order')
+  const sortOrder = searchParams.get('sort_direction')
 
   const sku = await stock(tenantDb!).getSKUByID(skuID)
 

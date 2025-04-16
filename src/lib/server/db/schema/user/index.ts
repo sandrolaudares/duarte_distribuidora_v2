@@ -6,10 +6,11 @@ import {
   // customType,
 } from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
-import { logsTable } from '../bug-report'
+import {  logsTable } from '../bug-report'
 import { customerOrderTable, orderPaymentTable } from '../customer'
-import type { Permission, Role } from '$lib/utils/permissions'
+import { roleEnum, type Permission, type Role } from '$lib/utils/permissions'
 import { timestamps } from '../../utils'
+import { cashierTable, cashierTransactionsT } from '../distribuidora'
 
 export const userTable = sqliteTable('user', {
   id: text('id').notNull().primaryKey(),
@@ -25,7 +26,7 @@ export const userTable = sqliteTable('user', {
   password_hash: text('password_hash'),
 
   role: text('role', {
-    enum: ['admin', 'employee', 'customer', 'motoboy', 'caixa'],
+    enum: roleEnum,
   })
     .notNull()
     .default('customer'),
@@ -35,11 +36,16 @@ export const userTable = sqliteTable('user', {
     .default({}),
 })
 
-export const userRelations = relations(userTable, ({ many }) => ({
+export const userRelations = relations(userTable, ({ many,one }) => ({
   logs: many(logsTable),
   orders_made: many(customerOrderTable, { relationName: 'orders_made' }),
   entregou: many(customerOrderTable, { relationName: 'entregou' }),
   payments_created: many(orderPaymentTable),
+  cashier_transactions: many(cashierTransactionsT),
+  cashier_in : one(cashierTable, {
+    fields: [userTable.id],
+    references: [cashierTable.user_in],
+  })
 }))
 
 export type SelectUser = typeof userTable.$inferSelect

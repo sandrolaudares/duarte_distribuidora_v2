@@ -70,7 +70,7 @@
       }
     } catch (error: any) {
       console.error(error.message)
-      toast.error("Erro ao carregar fornecedores")
+      toast.error("Erro ao carregar opções")
     } finally {
       isLoading = false
     }

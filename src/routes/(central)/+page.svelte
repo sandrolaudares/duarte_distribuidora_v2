@@ -46,7 +46,7 @@
       </div>
     </section>
   </div>
-  <div class=" h-full bg-gray-100 px-2 pt-8 lg:px-8">
+  <div class=" min-h-full  bg-gray-100 px-2 pt-8 lg:px-8">
     {#if data.tenants.length > 0}
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <DisplayTenants tenants={data.tenants} />

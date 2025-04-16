@@ -10,10 +10,13 @@
   import { formatCurrency, icons } from '$lib/utils'
   import { toast } from 'svelte-sonner'
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
+  import { getUserContext } from '$lib/stores/user'
 
-  let { data }: { data:PageData } = $props()
+  let { data }: { data: PageData } = $props()
 
-  let { distribuidoras,tenant } = data
+  let { distribuidoras, tenant } = data
+
+  const user = getUserContext()
 
   function handleAddCachier() {
     modal.open(FormModal, {
@@ -58,7 +61,7 @@
     }
   }
 
-  let editingLink: { [key: number]: boolean } = {}
+  let editingLink: { [key: number]: boolean } = $state({})
 
   function editLink(id: number) {
     editingLink[id] = !editingLink[id]
@@ -80,11 +83,14 @@
 
   let taxa = $state(0)
 
-  if(tenant?.taxa_por_km) taxa = tenant?.taxa_por_km
+  if (tenant?.taxa_por_km) taxa = tenant?.taxa_por_km
 
   async function updateCashierDeliveryFee() {
     try {
-      await trpc(page).distribuidora.updateDistribuidora.mutate({id:tenant?.tenantId ?? 0,data:{taxa_por_km:taxa}})
+      await trpc(page).distribuidora.updateDistribuidora.mutate({
+        id: tenant?.tenantId ?? 0,
+        data: { taxa_por_km: taxa },
+      })
       Math.round(taxa)
       console.log(taxa)
       toast.success('Taxa de entrega atualizada!')
@@ -99,89 +105,129 @@
 
 <main class="mx-2">
   <div
-    class="mb-7 flex flex-col items-center justify-between gap-5 rounded-lg bg-base-200 p-3 lg:flex-row"
+    class="mb-7 flex flex-col items-center justify-end gap-5lg:flex-row"
   >
-    <h1 class="text-center text-4xl font-semibold">Selecione o caixa</h1>
+    <!-- <h1 class="text-center text-4xl font-semibold">Selecione o caixa</h1> -->
 
-    <div class="flex gap-2 lg:flex-row flex-col">
+    <div class="flex flex-col gap-2 lg:flex-row w-full justify-center">
       <div class="flex gap-2">
         <a href="/admin/cashier/transactions" class="btn btn-primary">
           Ver transacões dos caixas
         </a>
       </div>
-
-      <div>
-        <div class="flex gap-2">
-          <CurrencyInput bind:value={taxa} oninput={()=>{isTaxaChanged = true}}/>
+      {#if $user && $user.role !== 'caixa'}
+      <div class="flex gap-2 items-center">
+        <div class="flex gap-2 input input-bordered rounded-xl items-center justify-between">
+          <div class="label">
+            <span class="label-text">Valor entrega por quilometro:</span>
+          </div>
+            <CurrencyInput
+              bind:value={taxa}
+              oninput={() => {
+                isTaxaChanged = true
+              }}
+              rawStyle={true}
+              size="max-w-14"
+            />
+          </div>
           {#if isTaxaChanged}
             <button class="btn btn-primary" onclick={updateCashierDeliveryFee}>
               salvar
             </button>
           {/if}
-        </div>
 
-        <div class="label">
-          <span class="label-text">Valor entrega por quilometro</span>
-        </div>
       </div>
+      {/if}
+
     </div>
   </div>
   <div class="flex flex-col justify-center gap-3">
-    <button class="btn btn-outline mx-auto" onclick={handleAddCachier}>
-      Adicionar Caixa
-    </button>
-    <div class="flex flex-col gap-2 text-center lg:mx-96">
+    {#if $user && $user.role !== 'caixa'}
+      <button class="btn btn-outline mx-auto" onclick={handleAddCachier}>
+        Adicionar Caixa
+      </button>
+    {/if}
+    <div class="flex flex-col gap-2 text-center">
       {#each distribuidoras as caixa}
-        <div class="flex w-full gap-3">
-          {#if !editingLink[caixa.id]}
-            <a
-              href="/admin/cashier/{caixa.id}"
-              class="btn btn-primary flex w-full justify-between p-3"
+          <div class="flex items-center gap-3  container mx-auto max-w-2xl">
+            <div class="flex w-full justify-center gap-3">
+              {#if !editingLink[caixa.id]}
+                <a
+                  href="/admin/cashier/{caixa.id}"
+                  class="btn btn-primary flex flex-1 justify-between p-2 items-center"
+                >
+                  <span class="flex flex-col text-start">
+                    {caixa.name}
+                    {#if caixa.user_in && caixa.status === 'Aberto'}
+                      <p class="flex justify-start text-center font-normal text-xs">
+                        Nesse caixa: {caixa.user_in}
+                      </p>
+                    {/if}
+                  </span>
+                  <span class="text-center font-bold">
+                    Valor no caixa:
+                    {formatCurrency(caixa.currency)}
+                  </span>
+                </a>
+                {#if $user && $user.role !== 'caixa'}
+                  <button
+                    class="btn btn-circle btn-primary"
+                    onclick={() => editLink(caixa.id)}
+                  >
+                    {@html icons.edit()}
+                  </button>
+                  <button
+                    class="btn btn-circle"
+                    onclick={() => {
+                      if (
+                        confirm(
+                          'Tem certeza que gostaria de excluir o caixa?',
+                        ) === true
+                      ) {
+                        handleDeleteCashier(caixa.id)
+                      } else {
+                        toast.info('Ação cancelada!')
+                      }
+                    }}
+                  >
+                    {@html icons.trash()}
+                  </button>
+                {/if}
+              {:else if $user && $user.role !== 'caixa'}
+                <input
+                  type="text"
+                  bind:value={caixa.name}
+                  class="input input-primary flex w-full justify-between p-3"
+                />
+                <button
+                  class="btn btn-circle btn-primary"
+                  onclick={() => {
+                    editLink(caixa.id)
+                    handleEditNameCashier(caixa.id, caixa.name)
+                  }}
+                >
+                  {@html icons.save()}
+                </button>
+                <button
+                  class="btn btn-circle"
+                  onclick={() => {
+                    editLink(caixa.id)
+                  }}
+                >
+                  {@html icons.x()}
+                </button>
+              {/if}
+            </div>
+            <p
+              class="badge min-w-24 {caixa.status === 'Fechado'
+                ? 'badge-success text-white '
+                : ' badge-error '}"
             >
-              {caixa.name}
-              <span class="text-end font-bold">
-                Valor no caixa:
-                {formatCurrency(caixa.currency)}
-              </span>
-            </a>
-            <button
-              class="btn btn-circle btn-primary"
-              onclick={() => editLink(caixa.id)}
-            >
-              {@html icons.edit()}
-            </button>
-            <button
-              class="btn btn-circle"
-              onclick={() => {
-                if (
-                  confirm('Tem certeza que gostaria de excluir o caixa?') ===
-                  true
-                ) {
-                  handleDeleteCashier(caixa.id)
-                } else {
-                  toast.info('Ação cancelada!')
-                }
-              }}
-            >
-              {@html icons.trash()}
-            </button>
-          {:else}
-            <input
-              type="text"
-              bind:value={caixa.name}
-              class="input input-primary flex w-full justify-between p-3"
-            />
-            <button
-              class="btn btn-circle btn-primary"
-              onclick={() => {
-                editLink(caixa.id)
-                handleEditNameCashier(caixa.id, caixa.name)
-              }}
-            >
-              {@html icons.save()}
-            </button>
-          {/if}
-        </div>
+              {caixa.status === 'Fechado'
+                ? 'Dísponível'
+                : 'Em uso'}
+            </p>
+          </div>
       {/each}
     </div>
   </div>

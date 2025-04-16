@@ -205,10 +205,10 @@ npm run db:check
 
 ## FAZER AGORA
 
-- Unique name table de categoria
 - Preco de custo nas transferencias e tela historico transafarencias tipo tela
   fiado com total e valor do preço de custo
 - Parte do cliente fazer pedido 
+
 - Formatar ENUMs
 - KG como unidade de medida nos produtos (provavelmente mudar a table de produtos)
 - Total nas transações do caixa
@@ -217,6 +217,22 @@ npm run db:check
 - Lembrar de feixar caia diariamente
 - adicionar: animate:flip={{ duration: 500, easing: cubicInOut }} nas tables
 - Refatorar page entrada de estoque
+- Mudar server do fiado (confuso)
+- Horario de funcionamento das distribuidoras
+- Ordem alfabetica dos cliente na tela do caixa
+- Checkbox imprimir ou nao na hora de fazer o pedido
+- Detalhes do pedido imprimir 
+- Adicionar mascara de telefone no cliente tela caixa
+- Tela do caixa puxar apenas alguns clientes ou nenhum e só filtrar quando digitar
+- Admin - gerente - caixa - motoboy/entregador (modificar nomeclatura) - financeiro
+- Quantidade em caixa e retirar dinheiro do caixa
+- Financeiro abrir caixa e escolher um caixa para a pessoa no dia
+- Na hora do caixa abrir, apenas na hora de abrir o caixa escolher qual caixa ele vai trabalhar
+- Caixa apenas acessa transacoes do caixa dele
+- Transacao do caixa apenas de pagamento (Resumo do dia)
+- Tirar dinheiro do caixa para despesas dia a dia
+- Dashboard do caixa vendas do dia (mudar outro lugar da que ja esta)
+- Username na hora de criar conta avisar erros
 
 
 ## NAO TAO URGENTE

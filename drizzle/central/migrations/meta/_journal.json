@@ -8,6 +8,13 @@
       "when": 1731004827683,
       "tag": "0000_outstanding_young_avengers",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1743462396843,
+      "tag": "0001_safe_rogue",
+      "breakpoints": true
     }
   ]
 }

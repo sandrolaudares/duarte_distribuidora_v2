@@ -9,8 +9,8 @@
   }
 
   const {
-    title = 'Alert!!!!',
-    text = 'Are you sure?!?',
+    title = 'Alerta!!!!',
+    text = 'Tem certeza?!?',
     onCancel,
     onConfirm,
   }: Props = $props()
@@ -26,14 +26,15 @@
   }
 </script>
 
-<Modal {title}>
-  <p>{text}</p>
-  <svelte:fragment slot="footer">
-    {#if onConfirm}
-      <button class="btn" onclick={confirm}>Confirm</button>
-    {/if}
-    <button class="btn" onclick={cancel}>
-      {onCancel ? 'Cancel' : 'Close'}
-    </button>
-  </svelte:fragment>
-</Modal>
+  <Modal {title}>
+    <p>{text}</p>
+    {@render footer()}
+  </Modal>
+  {#snippet footer()}
+  {#if onConfirm}
+    <button class="btn" onclick={confirm}>Confirm</button>
+  {/if}
+  <button class="btn" onclick={cancel}>
+    {onCancel ? 'Cancel' : 'Close'}
+  </button>
+  {/snippet}

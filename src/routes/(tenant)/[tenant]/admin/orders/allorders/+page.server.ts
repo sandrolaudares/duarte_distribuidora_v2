@@ -8,6 +8,8 @@ import {
   getSQLiteColumn,
   getOrderBy,
   innerJoinOnMany,
+  _withs,
+  getDateRangeCondition,
 } from '$lib/server/db/utils'
 import {
   and,
@@ -28,6 +30,7 @@ import { customer } from '$lib/server/db/controller'
 import { gte } from 'drizzle-orm'
 import { Monad } from '$lib/utils'
 import { pageConfig } from '$lib/config'
+import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 
 export const load = (async ({ url, locals: { tenantDb } }) => {
   const { searchParams } = url
@@ -38,69 +41,87 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const cashier = searchParams.get('created_by')
 
   const sortId = searchParams.get('sort_id')
-  const sortOrder = searchParams.get('sort_order')
+  const sortOrder = searchParams.get('sort_direction')
 
   const dateStart = searchParams.get('startDate')
   const dateEnd = searchParams.get('endDate')
 
-  let query = Monad.of(
-    tenantDb!
-      .select({
-        //Order:
-        id: schema.customerOrderTable.id,
-        created_at: schema.customerOrderTable.created_at,
-        updated_at: schema.customerOrderTable.updated_at,
-        is_fiado: schema.customerOrderTable.is_fiado,
-        observation: schema.customerOrderTable.observation,
-        amount_paid: schema.customerOrderTable.amount_paid,
-        total: schema.customerOrderTable.total,
-        status: schema.customerOrderTable.status,
-        type: schema.customerOrderTable.type,
-        expire_at: schema.customerOrderTable.expire_at,
-
-        //customer:
-        name: schema.customerTable.name,
-        email: schema.customerTable.email,
-        cellphone: schema.customerTable.cellphone,
-
-        //cashier
-        // cashier: schema.cashierTable.name,
-        created_by: schema.userTable.username,
-      })
-      .from(schema.customerOrderTable)
-      .$dynamic()
-      .where(
-        and(
-          dateStart && dateEnd
-            ? and(
-                gte(
-                  schema.customerOrderTable.created_at,
-                  new Date(Number(dateStart)),
-                ),
-                lte(
-                  schema.customerOrderTable.created_at,
-                  new Date(Number(dateEnd)),
-                ),
-              )
-            : undefined,
-        ),
-      ),
+  const queryConditions = and(
+    getDateRangeCondition(
+      dateStart,
+      dateEnd,
+      schema.customerOrderTable.created_at,
+    ),
   )
-    .map(q =>
-      innerJoinOnMany(q, schema.customerTable, [
-        eq(schema.customerTable.id, schema.customerOrderTable.customer_id),
-        name ? like(schema.customerTable.name, `${name}%`) : undefined,
-      ]),
-    )
-    .map(q =>
-      innerJoinOnMany(q, schema.userTable, [
-        eq(schema.userTable.id, schema.customerOrderTable.created_by),
-        cashier ? like(schema.userTable.username, `%${cashier}%`) : undefined,
-      ]),
-    )
-    .get()
 
-  console.log(query.toSQL())
+  const cte = tenantDb!
+    .select()
+    .from(schema.customerOrderTable)
+    .as('cteAllOrders')
+
+  const _joins = <T extends SQLiteSelect>(qb: T) => {
+    return Monad.of(qb)
+      .map(q =>
+        innerJoinOnMany(q, schema.customerTable, [
+          eq(schema.customerTable.id, schema.customerOrderTable.customer_id),
+          name ? like(schema.customerTable.name, `${name}%`) : undefined,
+        ]),
+      )
+      .map(q =>
+        innerJoinOnMany(q, schema.userTable, [
+          eq(schema.userTable.id, schema.customerOrderTable.created_by),
+          cashier ? like(schema.userTable.username, `%${cashier}%`) : undefined,
+        ]),
+      )
+      .get()
+  }
+
+  const _customerOrders = () =>
+    _withs(tenantDb!, cte).select({
+      //Order:
+      id: schema.customerOrderTable.id,
+      created_at: schema.customerOrderTable.created_at,
+      updated_at: schema.customerOrderTable.updated_at,
+      is_fiado: schema.customerOrderTable.is_fiado,
+      observation: schema.customerOrderTable.observation,
+      amount_paid: schema.customerOrderTable.amount_paid,
+      total: schema.customerOrderTable.total,
+      status: schema.customerOrderTable.status,
+      type: schema.customerOrderTable.type,
+      expire_at: schema.customerOrderTable.expire_at,
+
+      //customer:
+      name: schema.customerTable.name,
+      email: schema.customerTable.email,
+      cellphone: schema.customerTable.cellphone,
+
+      //cashier
+      // cashier: schema.cashierTable.name,
+      created_by: schema.userTable.username,
+    })
+
+  const queryAllOrders = () =>
+    _joins(_customerOrders().from(schema.customerOrderTable).$dynamic())
+      .where(queryConditions)
+      .orderBy(desc(schema.customerOrderTable.created_at))
+
+  const _countSumBuilder = () =>
+    _withs(tenantDb!, cte).select({
+      totalSum: sql<number>`SUM(${schema.customerOrderTable.total})`,
+    })
+
+  const queryTotalSum = () =>
+    _joins(_countSumBuilder().from(schema.customerOrderTable).$dynamic()).where(
+      queryConditions,
+    )
+
+  const _countSelectBuilder = () =>
+    _withs(tenantDb!, cte).select({ count: count() })
+
+  const queryCount = () =>
+    _joins(_countSelectBuilder().from(schema.customerOrderTable).$dynamic())
+
+  let query = queryAllOrders()
 
   if (sortId && sortOrder) {
     query = withOrderBy(
@@ -111,43 +132,15 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   }
 
   try {
-    const rows = await withPagination(query, page, pageSize)
+    const [rows, [total], [totalSumResult]] = await Promise.all([
+      withPagination(query, page, pageSize),
+      queryCount(),
+      queryTotalSum(),
+    ])
 
-    const total = await tenantDb!
-      .select({ count: count() })
-      .from(schema.customerOrderTable)
+    const totalSum = totalSumResult.totalSum
 
-    const totalSumResult = await tenantDb!
-      .select({
-        totalSum: sql<number>`SUM(${schema.customerOrderTable.total})`,
-      })
-      .from(schema.customerOrderTable)
-      .leftJoin(
-        schema.customerTable,
-        eq(schema.customerTable.id, schema.customerOrderTable.customer_id),
-      )
-      .where(
-        and(
-          name ? like(schema.customerTable.name, `%${name}%`) : undefined,
-          dateStart && dateEnd
-            ? and(
-                gte(
-                  schema.customerOrderTable.created_at,
-                  new Date(Number(dateStart)),
-                ),
-                lte(
-                  schema.customerOrderTable.created_at,
-                  new Date(Number(dateEnd)),
-                ),
-              )
-            : undefined,
-          // cashier ? like(schema.cashierTable.name, `%${cashier}%`) : undefined,
-        ),
-      )
-
-    const totalSum = totalSumResult[0]?.totalSum ?? 0
-
-    return { rows: rows ?? [], count: total[0].count, totalSum }
+    return { rows: rows ?? [], count: total.count, totalSum }
   } catch (error) {
     console.error(error)
     return { rows: [], count: 0, totalSum: 0 }

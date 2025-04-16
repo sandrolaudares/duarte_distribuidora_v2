@@ -32,7 +32,7 @@ export const load = (async ({ url, locals: { tenantDb, tenantInfo },depends}) =>
   const dateEnd = searchParams.get('endDate')
 
   const sortId = searchParams.get('sort_id')
-  const sortOrder = searchParams.get('sort_order')
+  const sortOrder = searchParams.get('sort_direction')
 
   const condicoes = [
     name

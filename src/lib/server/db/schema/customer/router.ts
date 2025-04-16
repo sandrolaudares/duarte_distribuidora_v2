@@ -22,6 +22,7 @@ import {
   orderTypeEnum,
   type InsertLogs,
   logsTable,
+  cashierTransactionsT,
 } from '$lib/server/db/schema'
 
 import { distribuidora as distribuidoraController } from '$db/controller'
@@ -141,9 +142,24 @@ export const customer = router({
       }
     }),
 
-  getCustomers: publicProcedure.query(async ({ ctx: { tenantDb } }) => {
-    return await customerController(tenantDb).getCustomersWithAddress()
-  }),
+  getCustomers: publicProcedure
+    .input(
+      z.object({
+        page: z.number(),
+        pageSize: z.number(),
+        search: z.string().optional(),
+      }),
+    )
+    .query(async ({ ctx: { tenantDb }, input }) => {
+      const offset = (input.page - 1) * input.pageSize
+      const limit = input.pageSize
+
+      return await customerController(tenantDb).getCustomersWithAddress(
+        limit,
+        offset,
+        input.search,
+      )
+    }),
   order: router({
     insertFiado: publicProcedure
       .meta({
@@ -252,21 +268,6 @@ export const customer = router({
           customerController(tenantDb).updateStockOnOrder(order.id)
         }
 
-        await bugReport(tenantDb).insertLogs({
-          text: `Pedido fiado`,
-          created_by: userId,
-          metadata: {
-            order_id: order.id,
-            customer_id: order_info.customer_id,
-            cashier_id: order_info.cachier_id,
-          },
-          cashier_id: order_info.cachier_id,
-          order_id: order.id,
-          type: 'CAIXA',
-          pathname: '/TODO:ROUTE',
-          routeName: 'Fiado',
-        })
-
         return {
           order,
           order_items: order_items_db,
@@ -354,23 +355,16 @@ export const customer = router({
           .returning()
 
         for (const payment of order_info.payment_info) {
-          await bugReport(tenantDb).insertLogs({
-            text: `Pedido realizado com pagamento de ${formatCurrency(payment.amount_paid)} para pedido ${order.id}${payment.troco ? ` com troco de ${formatCurrency(payment.troco)}` : ''}`,
-            created_by: userId,
+          await tenantDb.insert(cashierTransactionsT).values({
+            amount: payment.amount_paid,
+            type: 'Pagamento',
             metadata: {
-              order_id: order.id,
-              payment_id: payment.id,
-              customer_id: order_info.customer_id,
-              amount_paid: payment.amount_paid,
-              troco: payment.troco,
-              cashier_id: order_info.cashier_id,
+              metodo_pagamento: payment.payment_method,
+              troco: payment.troco ? payment.troco : null,
             },
             cashier_id: order_info.cashier_id,
             order_id: order.id,
-            type: 'CAIXA',
-            pathname: '',
-            routeName: 'Inserir pedido pago',
-            currency: payment.amount_paid,
+            created_by: userId,
           })
         }
 
@@ -526,20 +520,16 @@ export const customer = router({
             created_by: userId,
           }
 
-          await bugReport(tenantDb).insertLogs({
-            text: `Pagamento de ${formatCurrency(payment_info.amount_paid)} para pedido ${payment_info.order_id}`,
-            created_by: userId,
+          await tenantDb.insert(cashierTransactionsT).values({
+            amount: payment_info.amount_paid,
+            type: 'Pagamento',
             metadata: {
-              order_id: payment_info.order_id,
-              payment_id: payment_info.id,
-              amount: payment_info.amount_paid,
+              metodo_pagamento: payment_info.payment_method,
+              troco: payment_info.troco ? payment_info.troco : null,
             },
-            cashier_id: ctx.locals.user?.meta.caixa_id,
+            cashier_id: ctx.locals.user ? ctx.locals.user?.meta.caixa_id : null,
             order_id: payment_info.order_id,
-            type: 'CAIXA',
-            pathname: '/TODO:ROUTE',
-            routeName: 'Pagamento',
-            currency: payment_info.amount_paid,
+            created_by: userId,
           })
           return await customerController(tenantDb).insertOrderPayment(
             payment_info,
@@ -665,7 +655,7 @@ export const customer = router({
       )
     }),
 
-    updateMotoboyOrder: publicProcedure
+  updateMotoboyOrder: publicProcedure
     .meta({
       routeName: 'Atualizar Pedido',
       permission: 'atualizar_pedidos',
@@ -685,7 +675,7 @@ export const customer = router({
       const { tenantDb } = ctx
       const user = ctx.locals.user
 
-      tenantDb.transaction(async(tx)=>{
+      tenantDb.transaction(async tx => {
         await tx.insert(logsTable).values({
           text: `${user?.username} atualizou o motoboy do pedido ${order_id}`,
           created_by: user?.id,
@@ -697,10 +687,12 @@ export const customer = router({
           pathname: '',
           routeName: 'Atualizar Pedido',
         })
-        
-        return await tx.update(customerOrderTable).set(data).where(eq(customerOrderTable.id, order_id))
-      })
 
+        return await tx
+          .update(customerOrderTable)
+          .set(data)
+          .where(eq(customerOrderTable.id, order_id))
+      })
     }),
 
   cancelOrder: publicProcedure
@@ -752,23 +744,20 @@ export const customer = router({
     .mutation(async ({ input, ctx }) => {
       const userID = ctx.locals.user?.id
       const { tenantDb } = ctx
+      
 
       return await tenantDb.transaction(async trx => {
-        await bugReport(tenantDb).insertLogs({
-          text: `Pagamento com ${input.payment_method} realizado, valor pago: ${formatCurrency(input.amount_paid)} - Pedido: ${input.order_id}`,
-          created_by: userID,
+
+        await trx.insert(cashierTransactionsT).values({
+          amount: input.amount_paid,
+          type: 'Pagamento',
           metadata: {
-            order_id: input.order_id,
-            // customer_id: input.customer_id,
-            cashier_id: input.cachier_id,
-            troco: input.troco,
-            amount_paid: input.amount_paid,
+            metodo_pagamento: input.payment_method,
+            troco: input.troco ? input.troco : null,
           },
           cashier_id: input.cachier_id,
           order_id: input.order_id,
-          type: 'CAIXA',
-          pathname: '/TODO:ROUTE',
-          routeName: 'Fiado',
+          created_by: userID,
         })
 
         await customerController(tenantDb).insertOrderPayment({

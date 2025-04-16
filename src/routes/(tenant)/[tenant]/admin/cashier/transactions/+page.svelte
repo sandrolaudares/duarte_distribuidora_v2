@@ -26,6 +26,8 @@
   import { DateFormatter } from '@internationalized/date'
   import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
+  import { paymentMethodLabel } from '$lib/utils/permissions'
+  import { User } from 'lucide-svelte'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -59,8 +61,33 @@
     return data.rows
   })
 
-
   let cashierFilter = $state(filters.get('cashier') || '')
+
+  const colorMap: { [key: string]: string } = {
+    P: 'badge-primary',
+    A: 'badge-success text-white',
+    F: 'badge-error text-white',
+    S: 'badge-warning',
+    D: 'badge-info',
+  }
+
+  function getColor(type: string) {
+    const firstLetter = type.charAt(0).toUpperCase()
+    return colorMap[firstLetter] || 'badge-neutral'
+  }
+
+  let selectedType: string = $state('')
+
+  let cashierTransactionTypeEnum = [
+    'Abertura',
+    'Fechamento',
+    'Pagamento',
+    'Sangria',
+    'Deposito',
+  ]
+  const delegateQuery = () => {
+    return Promise.resolve(cashierTransactionTypeEnum)
+  }
 </script>
 
 <main class="mx-4 h-full max-h-[calc(100vh-20vh)]">
@@ -68,14 +95,14 @@
     <button
       class="btn btn-primary"
       onclick={() => {
-        filters.clear('username', 'cashier', 'endDate', 'startDate')
+        filters.clear('username', 'cashier', 'endDate', 'startDate','tipo')
         cashierFilter = ''
       }}
     >
       Limpar filtros
     </button>
   </div>
-  <Datatable {table} >
+  <Datatable {table} headless>
     <!-- {#snippet header()}
       <Search {table} />
      
@@ -84,32 +111,42 @@
     {#if table.isLoading}
       <LoadingBackground />
     {/if}
-    <table class="table border-none">
+    <table class="table table-xs">
       <thead>
-        <tr>
+        <tr class="uppercase">
           <Th>ID</Th>
+          <Th>Tipo</Th>
+          <!-- <Th>Valor</Th> -->
+          <Th>Metodo de pagamento</Th>
           <Th>Usuário</Th>
           <Th>Caixa</Th>
-          <Th>Logs</Th>
           <Th>Data</Th>
+          <ThSort {table} field="amount">Valor</ThSort>
           <Th>Troco</Th>
-          <!-- <Th>Valor</Th> -->
-          <Th>Valor</Th>
+          <Th>Observação</Th>
           <Th>Detalhes</Th>
         </tr>
         <tr>
           <Th />
+          <SelectFilter
+            {table}
+            filterKey="type"
+            {delegateQuery}
+            placeholder="o tipo"
+            config={{ value: c => c, label: c => c }}
+            bind:selectedValue={selectedType}
+          />
+          <Th />
           <ThFilter {table} field="username" />
           <!-- <ThFilter {table} field="cashier" /> -->
-            <SelectFilter
+          <SelectFilter
             {table}
-              filterKey="cashier"
-              delegateQuery={trpc(page).distribuidora.getCaixas.query}
-              bind:selectedValue={cashierFilter}
-              config={{ value: c => c.id, label: c => c.name }}
-              placeholder={'o caixa'}
-            />
-          <Th />
+            filterKey="cashier"
+            delegateQuery={trpc(page).distribuidora.getCaixas.query}
+            bind:selectedValue={cashierFilter}
+            config={{ value: c => c.id, label: c => c.name }}
+            placeholder={'o caixa'}
+          />
           <Th>
             <DateFilter
               startValue={getFilterValue(filters, 'startDate')}
@@ -126,39 +163,70 @@
           </Th>
           <Th />
           <Th />
-          <!-- <Th/> -->
           <Th />
-          <!--FINALIZAR ESSA TABLE, FILTRO DE DATA E ETC-->
+          <Th />
         </tr>
       </thead>
       <tbody>
         {#each data.rows as row (row.id)}
-          <tr class="{row.text.includes('Fechamento') ? '!bg-error/10' : ''} {row.text.includes('Abertura') ? '!bg-success/10' : ''}">
+          <tr>
             <td>{row.id}</td>
-            <td>{row.username}</td>
-            <td>{row.cashier ? row.cashier : 'N/A'}</td>
-            <td>{row.text}</td>
+            <td class="whitespace-nowrap px-4 py-3 text-sm">
+              <span class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getColor(row.type)}`}>
+                {row.type}
+              </span>
+            </td>
+            <td class="whitespace-nowrap px-4 py-3 text-sm">
+              {#if row.metadata?.metodo_pagamento != null}
+                <div class="flex items-center gap-1.5">
+                  <span
+                    class="inline-block h-2 w-2 rounded-full bg-emerald-400"
+                  ></span>
+                  <span class="font-medium text-slate-800">
+                    {paymentMethodLabel[
+                      row.metadata.metodo_pagamento
+                    ]}
+                  </span>
+                </div>
+              {:else}
+                <div class="flex items-center gap-1.5">
+                  <span
+                    class="inline-block h-2 w-2 rounded-full bg-rose-400"
+                  ></span>
+                  <span class="text-error">Nenhum</span>
+                </div>
+              {/if}
+            </td>
+            <td> <span class="flex items-center gap-1">
+              <User class="size-4" />{row.username}
+            </span></td>
+            <td>{row.cashier}</td>
             <!-- <td>{row.routeName}</td> -->
             <td>
               {row.created_at ? df.format(row.created_at) : ''}
             </td>
-            <td
-              class={row.metadata?.troco != null
-                ? 'font-semibold'
-                : 'text-error'}
-            >
-              {typeof row.metadata?.troco === 'number'
-                ? 'R$' + (row.metadata.troco / 100).toFixed(2)
-                : 'Não tem'}
-            </td>
-            <!-- <td class="font-semibold">R${row.currency ? (row.currency/100).toFixed(2) : '0.00'}</td> -->
-            <td class="font-semibold">
-              {#if row.metadata.amount_paid}
-                {formatCurrency(row.metadata.amount_paid)}
+            <td class="font-semibold text-sm">
+              {#if row.amount !==0}
+              {formatCurrency(row.amount)}
                 
               {:else}
-                
-              {row.total ? formatCurrency(row.total) : ''}
+              <span class="text-slate-400">—</span>
+              {/if}
+            </td>
+            <td class="whitespace-nowrap text-sm">
+              {#if row.metadata?.metodo_pagamento === 'dinheiro'}
+                  <span class=" text-success font-bold ">{formatCurrency(row.metadata?.troco)}</span>
+                {:else}
+                <span class="text-slate-400">—</span>
+                {/if}
+            </td>
+            <td class="max-w-[100px] truncate text-sm">
+              {#if row.metadata?.observacoes}
+                <span class="font-medium " title={row.metadata.observacoes}>
+                  {row.metadata.observacoes}
+                </span>
+              {:else}
+                <span class="text-slate-400">—</span>
               {/if}
             </td>
             <td>
@@ -167,12 +235,30 @@
                   href="/admin/orders/{row.order_id}"
                   class="badge badge-primary"
                 >
-                  Detalhes
+                  Pedido
                 </a>
+                {:else}
+                <span class="text-slate-400">—</span>
               {/if}
             </td>
           </tr>
         {/each}
+        <tr class="sticky bottom-0 bg-base-100 border-t">
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="text-lg font-bold">
+            <span class="text-secondary">{formatCurrency(data.totalSum)}</span>
+          </td>
+          <td class="text-xl font-bold">
+            <!-- <span class="text-success">{formatCurrency(totalValorTroco)}</span> -->
+          </td>
+          <td></td>
+          <td></td>
+        </tr>
       </tbody>
     </table>
     {#if data.rows.length === 0}
@@ -189,5 +275,8 @@
 <style>
   thead {
     background-color: oklch(var(--b1)) !important;
+  }
+  tbody td {
+    border-bottom: 1px solid var(--grey-lighten, #eee) !important;
   }
 </style>

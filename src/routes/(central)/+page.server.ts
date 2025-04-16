@@ -11,6 +11,7 @@ export const load = (async () => {
       phone: true,
       lat: true,
       lng: true,
+      funcionamento: true,
     },
   })
   return {

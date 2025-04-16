@@ -4,6 +4,7 @@
     SelectOrderPayment,
   } from '$lib/server/db/schema'
   import { formatCurrency } from '$lib/utils'
+  import { paymentMethodLabel } from '$lib/utils/permissions'
   import { DateFormatter } from '@internationalized/date'
 
   type Props = {
@@ -37,7 +38,7 @@
   <div class="flex items-center justify-between">
     <div>
       Metódo de pagamento:
-      <span class="capitalize">{payment.payment_method}</span>
+      <span class="capitalize">{paymentMethodLabel[payment.payment_method]}</span>
     </div>
     {#if payment.payment_method === 'dinheiro'}
       <p class="text-md bg-opacity-60">

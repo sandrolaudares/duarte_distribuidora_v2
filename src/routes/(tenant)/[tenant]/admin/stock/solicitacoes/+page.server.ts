@@ -27,7 +27,7 @@ export const load = (async ({ url, locals: { tenantDb, tenantInfo },depends}) =>
   const name = searchParams.get('sku_name')
 
   const sortId = searchParams.get('sort_id')
-  const sortOrder = searchParams.get('sort_order')
+  const sortOrder = searchParams.get('sort_direction')
 
   const condicoes = [
     name

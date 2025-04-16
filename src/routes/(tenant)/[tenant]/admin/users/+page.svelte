@@ -170,9 +170,9 @@
             <td>
               <b>
                 <EditRole userId={row.id} userRole={row.role} />
-                {#if row.role === 'caixa'}
+                <!-- {#if row.role === 'caixa'}
                   <EditCaixa userId={row.id} userCashier={row} />
-                {/if}
+                {/if} -->
               </b>
             </td>
             <td>

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { navigating } from '$app/stores'
+  import { navigating } from '$app/state'
   import { SSRFilters } from '$lib/components/datatable/filter.svelte'
   import { modal, FormModal } from '$lib/components/modal'
   import DateFilter from '$lib/components/DateFilter.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   import {
     TableHandler,
@@ -24,16 +24,21 @@
   import { goto } from '$app/navigation'
   import { pageConfig } from '$lib/config'
   import { DateFormatter } from '@internationalized/date'
-  import Printer, { JustifyModes, PrinterModes } from 'esc-pos-printer'
   import type { SelectCustomerOrder } from '$lib/server/db/schema'
-  import Print from 'lucide-svelte/icons/printer';
+  import Print from 'lucide-svelte/icons/printer'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
   import { formatCurrency } from '$lib/utils'
-
+  import qz from 'qz-tray'
+  import { printOrderReusable } from '$lib/utils/printOrder'
+  import { getPrinterContext } from './printerContext.svelte'
+  import Loading from '$lib/components/Loading.svelte'
+  import ModalPrint from '$lib/components/cashierComponents/ModalPrint.svelte'
 
   let { data }: { data: PageData } = $props()
 
   const filters = new SSRFilters()
+
+  const prr = getPrinterContext()
 
   const table = new TableHandler(data.rows, {
     rowsPerPage: pageConfig.rowPages,
@@ -57,103 +62,62 @@
     console.log(s)
     try {
       filters.fromState(s)
-      await $navigating?.complete
+      await navigating?.complete
     } catch (error) {
       console.log(error)
     }
     return data.rows
   })
 
-  function printEmphasis(printer: Printer,text:string) {
-    printer.setEmphasis(true)
-    printer.text(text)
-    printer.setEmphasis(false)
-  }
+  let isOpenModal: HTMLDialogElement | null = $state(null)
+  let selectedOrder: number | null = $state(null)
 
-  async function printOrder(order_id: SelectCustomerOrder['id']) {
-    toast.info('Imprimindo pedido...')
-    console.log('IMPRIMINDO PEDIDO')
-    const datt = new Date()
+  let isLoading = $state(false)
 
-    const dataFormatada = datt.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-    const horaFormatada = datt.toLocaleTimeString('pt-BR', { hour12: false })
-    try {
-      const order = await trpc($page).customer.getOrderById.query(order_id)
+  let loadingPrinters = $state(false)
 
-      if (order === undefined || order === null) {
-        toast.error('Pedido não encontrado')
-        console.error('Pedido não encontrado')
-        return
-      }
-      const printer = new Printer()
+  async function handleOpenModal(orderId: number) {
+    loadingPrinters = true
 
-      const printerList = await printer.getPrinters()
-      printer.setPrinterName(printerList[0])
-      console.log(printerList)
-      printer.selectPrintMode(PrinterModes.MODE_FONT_A)
-      printer.justify(JustifyModes.justifyCenter)
-      printEmphasis(printer,`Duarte distribuidora ${data.tenant?.name}\n\n`)
-      printer.text(`${data.tenant?.address}\n`)
-      printer.text(`${data.tenant?.phone}\n`)
-      printer.text('TODO: CNPJ\n\n')
-      printEmphasis(printer,'----------------------------------------\n\n')
-      printer.text(`IMPRESSO EM: ${dataFormatada} ${horaFormatada}\n\n`)
-      printer.text(`RELATÓRIO GERENCIAL\n\n`)
-      printer.justify(JustifyModes.justifyLeft)
-      printer.text(`${order.customer?.name}\n`)
-      printer.text(
-        `${order.customer?.phone ? order.customer?.phone : ''} - ${order.customer?.cellphone ? order.customer?.cellphone : ''}\n`,
-      )
-      printer.text(
-        `Endereço de entrega: ${order.address?.street}, ${order.address?.number}, ${order.address?.neighborhood}, ${order.address?.city}\n`,
-      )
-      printer.text(`Entregador: ${order.motoboy?.username}\n\n`)
-      printer.justify(JustifyModes.justifyCenter)
-      printer.text(`(Pedido: N.:${order.id})\n`)
-      printer.justify(JustifyModes.justifyCenter)
-      printEmphasis(printer,'----------------------------------------\n')
-      printer.text('ITEM                               PREÇO\n')
-      printEmphasis(printer,'----------------------------------------\n\n')
+    await prr.connect()
 
-      order.items.forEach(item => {
-        const itemText = `${item.quantity}x ${item.product.name}`.padEnd(
-          35,
-          ' ',
-        ) 
-        const price = `${formatCurrency(item.price)}`
-
-        printer.justify(JustifyModes.justifyLeft)
-        printer.text(itemText)
-        printer.justify(JustifyModes.justifyRight)
-        printer.text(price + '\n')
-      })
-      printEmphasis(printer,'\n----------------------------------------\n\n')
-      printer.justify(JustifyModes.justifyRight)
-      printer.text(
-        `TOTAL: ${formatCurrency(order.total-(order.taxa_entrega ?? 0))}\n`,
-      )
-      printer.text(
-        `+ ENTREGA: ${formatCurrency(order.taxa_entrega ?? 0)}\n`,
-      )
-      printEmphasis(printer,`= TOTAL A PAGAR: ${formatCurrency(order.total)}\n`)
-      printer.justify(JustifyModes.justifyLeft)
-      printer.text(`Atendente: ${order.created_by?.username}\n`)
-      printer.justify(JustifyModes.justifyCenter)
-      printEmphasis(printer,'----------------------------------------\n')
-      printer.feed(2)
-      printer.cut()
-      printer.close()
-      await printer.print()
-    } catch (error) {
-      console.log(error)
-      toast.error('Erro! Verifique se a impressora está conectada')
+    if (prr.getPrinter() && prr.getPrinters().length === 0) {
+      prr.addPrinter(prr.getPrinter())
+    } else if (!prr.getPrinter()) {
+      await prr.listPrinters()
     }
+
+    isOpenModal?.showModal()
+    selectedOrder = orderId
+    loadingPrinters = false
   }
+
 </script>
+
+{#if loadingPrinters}
+  <LoadingBackground />
+{/if}
+
+<dialog class="modal" bind:this={isOpenModal}>
+  <div class="modal-box max-w-2xl">
+    <form method="dialog">
+      <button class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">
+        ✕
+      </button>
+    </form>
+    <ModalPrint
+      bind:loadingPrinters
+      tenant={data.tenant!}
+      bind:selectedOrder
+      closeModal={() => {
+        isOpenModal?.close()
+      }}
+    />
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
 
 <main class="m-4 h-full max-h-[calc(100vh-20vh)]">
   <div class="flex items-center justify-between">
@@ -195,7 +159,7 @@
           <Th />
           <Th>
             <DateFilter
-            {filters}
+              {filters}
               onChange={(startDate, endDate) => {
                 if (!startDate || !endDate) return
 
@@ -217,19 +181,23 @@
           <tr>
             <td>{row.id}</td>
             <td class:text-error={!row.name}>
-                {row.name ? row.name : 'Não vinculado'}
+              {row.name ? row.name : 'Não vinculado'}
             </td>
             <td>{row.created_by}</td>
             <td class:text-error={!row.observation}>
-                {row.observation ? row.observation : 'N/A'}
+              {row.observation ? row.observation : 'N/A'}
             </td>
             <td>
-                {row.created_at ? df.format(row.created_at) : ''}
+              {row.created_at ? df.format(row.created_at) : ''}
             </td>
-            <td><b class="text-lg text-success">{(row.total/100).toLocaleString('pt-BR',{
-              style:'currency',
-              currency:'BRL'
-            })}</b></td>
+            <td>
+              <b class="text-lg text-success">
+                {(row.total / 100).toLocaleString('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                })}
+              </b>
+            </td>
 
             <td>
               <a href="/admin/orders/{row.id}" class="badge badge-primary">
@@ -237,12 +205,11 @@
               </a>
             </td>
             <td>
-              <button onclick={() => printOrder(row.id)}><Print />
-              </button>
+              <button onclick={() => handleOpenModal(row.id)}><Print /></button>
             </td>
           </tr>
         {/each}
-        <tr class="sticky bottom-0 bg-colorr">
+        <tr class="bg-colorr sticky bottom-0">
           <td></td>
           <td></td>
           <td></td>
