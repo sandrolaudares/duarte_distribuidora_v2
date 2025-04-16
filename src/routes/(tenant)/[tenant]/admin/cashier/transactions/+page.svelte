@@ -26,7 +26,7 @@
   import { DateFormatter } from '@internationalized/date'
   import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
-  import { paymentMethodLabel } from '$lib/utils/permissions'
+  import { cashierTransactionEnum, paymentMethodEnum, paymentMethodLabel } from '$lib/utils/permissions'
   import { User } from 'lucide-svelte'
 
   let { data }: { data: PageData } = $props()
@@ -78,15 +78,8 @@
 
   let selectedType: string = $state('')
 
-  let cashierTransactionTypeEnum = [
-    'Abertura',
-    'Fechamento',
-    'Pagamento',
-    'Sangria',
-    'Deposito',
-  ]
   const delegateQuery = () => {
-    return Promise.resolve(cashierTransactionTypeEnum)
+    return Promise.resolve(Array.from(cashierTransactionEnum))
   }
 </script>
 
@@ -136,7 +129,15 @@
             config={{ value: c => c, label: c => c }}
             bind:selectedValue={selectedType}
           />
-          <Th />
+          <!-- <Th /> -->
+          <SelectFilter
+            {table}
+            filterKey="metodo_pagamento"
+            delegateQuery={()=>Promise.resolve(Array.from(paymentMethodEnum))}
+            placeholder="o metodo"
+            config={{ value: c => c, label: c => paymentMethodLabel[c] }}
+            bind:selectedValue={selectedType}
+          />
           <ThFilter {table} field="username" />
           <!-- <ThFilter {table} field="cashier" /> -->
           <SelectFilter
@@ -177,14 +178,14 @@
               </span>
             </td>
             <td class="whitespace-nowrap px-4 py-3 text-sm">
-              {#if row.metadata?.metodo_pagamento != null}
+              {#if row.metodo_pagamento !== null}
                 <div class="flex items-center gap-1.5">
                   <span
                     class="inline-block h-2 w-2 rounded-full bg-emerald-400"
                   ></span>
                   <span class="font-medium text-slate-800">
                     {paymentMethodLabel[
-                      row.metadata.metodo_pagamento
+                      row.metodo_pagamento
                     ]}
                   </span>
                 </div>
@@ -200,7 +201,14 @@
             <td> <span class="flex items-center gap-1">
               <User class="size-4" />{row.username}
             </span></td>
-            <td>{row.cashier}</td>
+            <td>
+              {#if row.cashier}
+                 {row.cashier}
+              {:else}
+              <span class="text-slate-400">—</span>
+              {/if}
+            
+            </td>
             <!-- <td>{row.routeName}</td> -->
             <td>
               {row.created_at ? df.format(row.created_at) : ''}
@@ -214,8 +222,8 @@
               {/if}
             </td>
             <td class="whitespace-nowrap text-sm">
-              {#if row.metadata?.metodo_pagamento === 'dinheiro'}
-                  <span class=" text-success font-bold ">{formatCurrency(row.metadata?.troco)}</span>
+              {#if row.metodo_pagamento === 'dinheiro'}
+                  <span class=" text-success font-bold ">{formatCurrency(row.metadata?.troco ?? 0)}</span>
                 {:else}
                 <span class="text-slate-400">—</span>
                 {/if}

@@ -57,13 +57,13 @@
 
   let checkbox = $state(false)
 
-  let { data, children }: { data: LayoutData; children: Snippet } = $props()
+  let { children }: {children:Snippet} = $props()
 
 </script>
 
 <div class="flex-col md:flex">
-  <div class="flex-1 space-y-4 p-8 pt-6">
-    <h2 class="text-3xl font-bold tracking-tight">Dashboard distribuidoras</h2>
+  <div class="flex-1  p-3">
+    <!-- <h2 class="text-3xl font-bold tracking-tight">Dashboard distribuidoras</h2> -->
     <Tabs.Root value={page.url.pathname} class="w-full space-y-4">
       <div class="flex items-center justify-between">
         <Tabs.List>

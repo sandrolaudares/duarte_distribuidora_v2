@@ -40,7 +40,7 @@
     bottom: 0;
     right: 0;
     background: rgba(0, 0, 0, 0.4);
-    z-index: 9999;
+    z-index: 50;
   }
 
   article {

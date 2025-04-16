@@ -6,9 +6,9 @@ import {
   type InsertCategoria,
   type InsertConta,
 } from '.'
-import type { TenantDbType } from '../../tenant'
+import type { TenantDbType, Transaction } from '../../tenant'
 
-export const contasController = (db: TenantDbType) => ({
+export const contasController = (db: TenantDbType | Transaction) => ({
   tables: {
     contasPagarTable,
     categoriaConta,

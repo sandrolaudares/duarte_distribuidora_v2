@@ -12,7 +12,7 @@ import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { customerOrderTable } from '../customer'
 import { userTable } from '../user'
 import { timestamps } from '../../utils'
-import { cashierTransactionEnum, type PaymentMethod } from '$lib/utils/permissions'
+import { cashierTransactionEnum, paymentMethodEnum, type PaymentMethod } from '$lib/utils/permissions'
 
 export const cashierTable = sqliteTable('caixas', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
@@ -38,9 +38,8 @@ export const cashierRelations = relations(cashierTable, ({one})=> ({
 }))
 
 type Meta = {
-  metodo_pagamento: PaymentMethod
-  troco: number
-  observacoes: string
+  troco?: number
+  observacoes?: string
 }
 
 export const cashierTransactionsT = sqliteTable('cashierTransactions', {
@@ -57,6 +56,7 @@ export const cashierTransactionsT = sqliteTable('cashierTransactions', {
     enum: cashierTransactionEnum,
   }).notNull(),
   amount: integer('amount').notNull(),
+  metodo_pagamento: text('metodo_pagamento', {enum: paymentMethodEnum}),
   metadata: text('metadata', { mode: 'json' }).$type<Meta>(),
 })
 

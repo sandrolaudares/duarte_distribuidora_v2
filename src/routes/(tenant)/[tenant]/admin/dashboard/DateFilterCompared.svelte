@@ -29,33 +29,37 @@
   }
 </script>
 
-{#if page.url.pathname.startsWith('/admin/dashboard/vendas')}
+<div class="flex gap-2">
+  {#if page.url.pathname.startsWith('/admin/dashboard/vendas')}
+    <DateFilter
+    variant="outlinePrimary"
+      title="Comparar"
+      startValue={getFilterValue('compareStartDate')}
+      endValue={getFilterValue('compareEndDate')}
+      bind:filters
+      onChange={(startDate, endDate) => {
+        if (!startDate || !endDate) return
+  
+        filters.update({
+          compareStartDate: String(startDate),
+          compareEndDate: String(endDate),
+        })
+      }}
+    />
+  {/if}
   <DateFilter
-    title="Comparar"
-    startValue={getFilterValue('compareStartDate')}
-    endValue={getFilterValue('compareEndDate')}
+  variant="outlinePrimary"
+    title="Base"
+    startValue={getFilterValue('startDate')}
+    endValue={getFilterValue('endDate')}
     bind:filters
     onChange={(startDate, endDate) => {
       if (!startDate || !endDate) return
-
+  
       filters.update({
-        compareStartDate: String(startDate),
-        compareEndDate: String(endDate),
+        startDate: String(startDate),
+        endDate: String(endDate),
       })
     }}
   />
-{/if}
-<DateFilter
-  title="Base"
-  startValue={getFilterValue('startDate')}
-  endValue={getFilterValue('endDate')}
-  bind:filters
-  onChange={(startDate, endDate) => {
-    if (!startDate || !endDate) return
-
-    filters.update({
-      startDate: String(startDate),
-      endDate: String(endDate),
-    })
-  }}
-/>
+</div>

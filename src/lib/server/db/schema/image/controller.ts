@@ -3,9 +3,9 @@ import { eq } from 'drizzle-orm'
 import { type InsertImage, imageTable, type SelectImage } from '.'
 
 import sharp from 'sharp'
-import type { TenantDbType } from '../../tenant'
+import type { TenantDbType, Transaction } from '../../tenant'
 
-export const image = (db: TenantDbType) => ({
+export const image = (db: TenantDbType |Transaction) => ({
   insertImage: async function insertImage(img: {
     buff: Buffer
     name: string

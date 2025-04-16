@@ -145,12 +145,12 @@
     <table class="table table-zebra">
       <thead>
         <tr>
-          <ThSort {table} field="id">ID</ThSort>
+          <Th>ID</Th>
           <ThSort {table} field="username">Nome</ThSort>
           <ThSort {table} field="email">Email</ThSort>
           <ThSort {table} field="role">Cargo</ThSort>
-          <ThSort {table} field="meta">Permissões</ThSort>
-          <ThSort {table} field="emailVerified">Ativo?</ThSort>
+          <Th>Permissões</Th>
+          <Th>Ativo?</Th>
         </tr>
         <tr>
           <Th />
@@ -164,7 +164,11 @@
       <tbody>
         {#each data.rows as row (row.id)}
           <tr>
-            <td>{row.id}</td>
+            <td class="max-w-[100px] truncate text-sm">
+              <span>
+                {row.id}
+              </span>
+            </td>
             <td><b>{row.username}</b></td>
             <td><b>{row.email}</b></td>
             <td>

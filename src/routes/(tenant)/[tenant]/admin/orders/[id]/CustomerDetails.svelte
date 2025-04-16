@@ -99,7 +99,7 @@
           {:else}
             <Tooltip.Provider>
               <Tooltip.Root>
-                <Tooltip.Trigger class="btn btn-sm">
+                <Tooltip.Trigger class="btn btn-sm text-opacity-50">
                   Trocar motoboy
                 </Tooltip.Trigger>
                 <Tooltip.Content>

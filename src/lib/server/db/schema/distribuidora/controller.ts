@@ -19,11 +19,11 @@ import type {
 } from '$db/schema'
 
 import { eq, sql } from 'drizzle-orm'
-import type { TenantDbType } from '../../tenant'
+import type { TenantDbType, Transaction } from '../../tenant'
 import { centralDb } from '$db/central'
 import { tenants, type SelectTenant } from '../../central/schema'
 
-export const distribuidora = (db: TenantDbType) => ({
+export const distribuidora = (db: TenantDbType | Transaction) => ({
   insertCashier: function insertCashier(data: InsertCashier) {
     return db.insert(cashierTable).values(data)
   },

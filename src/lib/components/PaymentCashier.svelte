@@ -11,6 +11,9 @@
   import Loading from './Loading.svelte'
   import { getCartContext } from '../../routes/(tenant)/[tenant]/admin/cashier/[id]/cartContext.svelte'
   import { onMount } from 'svelte'
+  import SenhaAdmin from './SenhaAdmin.svelte'
+  import { paymentMethodEnum, paymentMethodLabel } from '$lib/utils/permissions'
+  import SelectSearch from './selectSearch.svelte'
 
   const cart = getCartContext()
 
@@ -20,7 +23,7 @@
     save,
     total_pedido,
     cashier_id,
-    observacao
+    observacao,
   }: {
     payments: Omit<InsertOrderPayment, 'order_id'>[]
     nulla: () => void
@@ -45,20 +48,15 @@
   let troco = $derived.by(() => {
     return valor_recebido_dinheiro - valor_a_pagar
   })
-  // $effect(()=>{
-  //   valor_a_pagar = total_pedido - total_paid
-  //   troco = valor_recebido_dinheiro - valor_a_pagar
-  // })
 
-  let metodo_pagamento: InsertOrderPayment['payment_method'] | null =
-    $state(null)
+  let metodo_pagamento: InsertOrderPayment['payment_method'] | '' =
+    $state('')
 
   let isDiferent = $state(false)
   let isPago = $state(false)
   let isDinheiro = $state(false)
   let isFiado = $state(false)
   let isLoading = $state(false)
-  // export let isChecked = false
 
   function divideValor(n: number) {
     valor_a_pagar = total_pedido - total_paid
@@ -66,7 +64,7 @@
   }
 
   function addPayment() {
-    if (metodo_pagamento === null) {
+    if (!metodo_pagamento) {
       toast.error('Nenhum metodo de pagamento selecionado!')
       return
     }
@@ -101,59 +99,114 @@
     isPago = false
     isDiferent = true
     isFiado = false
-    metodo_pagamento = null
+    metodo_pagamento = ''
     payments = [...payments]
     valor_a_pagar = total_pedido - total_paid
+  }
+
+  let isOpenModalSenha: HTMLDialogElement | null = $state(null)
+
+  async function validaPedido() {
+    if (cart.meta.clienteSelecionado) {
+      try {
+        const isValid = await trpc(page).customer.order.verifyCredits.mutate({
+          customer_id: cart.meta.clienteSelecionado.id,
+          total: total_pedido,
+        })
+
+        if (isValid.success === false) {
+          toast.error(isValid.message)
+          isOpenModalSenha?.showModal()
+        } else {
+          addOrderFiado()
+        }
+      } catch (error) {
+        console.error(error)
+        toast.error('Erro desconhecido ao validar o pedido!')
+      }
+    }
   }
 
   async function addOrderFiado() {
     try {
       isLoading = true
+
       if (cart.meta.isDelivery && !cart.meta.motoboySelecionado) {
         toast.error('Selecione um motoboy para pedidos delivery')
         return
       }
+
       if (!cart.meta.isDelivery) {
         cart.meta.taxaEntrega = 0
       }
-      if (cart.meta.clienteSelecionado) {
-        await trpc(page).customer.order.insertFiado.mutate({
-          order_items: Object.values(cart.cart).map(item => ({
-            product_id: item.item.product_id,
-            quantity: item.quantity,
-            price:
-              item.item[
-                item.meta.is_retail ? 'retail_price' : 'wholesale_price'
-              ],
-          })),
-          order_info: {
-            customer_id: cart.meta.clienteSelecionado.id,
-            address_id: cart.meta.enderecoSelecionado
-              ? cart.meta.enderecoSelecionado.id
-              : undefined,
-            total: cart.meta.isDelivery
-              ? total_pedido - cart.meta.taxaEntrega
-              : total_pedido,
-            observation: observacao,
-            motoboy_id: cart.meta.motoboySelecionado?.id,
-            type: 'ATACADO',
-            taxa_entrega: cart.meta.isDelivery ? cart.meta.taxaEntrega : 0,
-            cachier_id: cashier_id,
-            //TODO: Type
-          },
-        })
-        nulla()
-        toast.success('Pedido fiado realizado com sucesso!')
-        modal.close()
+
+      const cliente = cart.meta.clienteSelecionado
+      if (!cliente) return
+
+      const orderItems = Object.values(cart.cart).map(item => ({
+        product_id: item.item.product_id,
+        quantity: item.quantity,
+        price:
+          item.item[item.meta.is_retail ? 'retail_price' : 'wholesale_price'],
+      }))
+
+      const orderInfo = {
+        customer_id: cliente.id,
+        address_id: cart.meta.enderecoSelecionado?.id,
+        total: cart.meta.isDelivery
+          ? total_pedido - cart.meta.taxaEntrega
+          : total_pedido,
+        observation: observacao,
+        motoboy_id: cart.meta.motoboySelecionado?.id,
+        type: 'ATACADO' as 'DELIVERY' | 'NO LOCAL' | 'RETIRAR' | 'ATACADO',
+        taxa_entrega: cart.meta.isDelivery ? cart.meta.taxaEntrega : 0,
+        cachier_id: cashier_id,
+        // TODO: adicionar tipo para order_info
       }
-      isLoading = false
+
+      await trpc(page).customer.order.insertFiado.mutate({
+        order_items: orderItems,
+        order_info: orderInfo,
+      })
+
+      nulla()
+      toast.success('Pedido fiado realizado com sucesso!')
+      modal.close()
     } catch (error: any) {
-      isLoading = false
       toast.error(error.message)
       console.error(error.message)
+    } finally {
+      isLoading = false
     }
   }
 </script>
+
+<dialog class="modal" bind:this={isOpenModalSenha}>
+  <div class="modal-box max-w-2xl">
+    <form method="dialog">
+      <button class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">
+        ✕
+      </button>
+    </form>
+    <h1 class="text-sm">
+      <span class="text-error">ATENÇÃO!</span>
+      O cliente não tem credito suficiente para realizar este pedido fiado! Se quiser
+      fazer o pedido mesmo assim chame um administrador
+    </h1>
+    <br />
+    <SenhaAdmin
+      reason="Cancelar pedido"
+      onSuccess={() => {
+        addOrderFiado()
+        isOpenModalSenha?.close()
+      }}
+    />
+  </div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
 
 <h1 class="mb-2 text-center">
   Valor total do pedido: <span class="font-bold text-success">
@@ -194,7 +247,7 @@
             isPago = false
             isDinheiro = false
             isFiado = false
-            metodo_pagamento = null
+            metodo_pagamento = ''
             valor_recebido_dinheiro = 0
             valor_a_pagar = total_pedido
           }}
@@ -221,7 +274,7 @@
             <button class="btn" onclick={() => divideValor(1)}>100%</button>
           </div>
           <p>
-            Valor restante do pedido: 
+            Valor restante do pedido:
             {formatCurrency(total_pedido - total_paid)}
           </p>
         </label>
@@ -232,24 +285,8 @@
             Selecione o metodo utilizado para pagar:
           </span>
         </div>
-        <select
-          class="select select-bordered w-full"
-          bind:value={metodo_pagamento}
-        >
-          <option value="" disabled selected>Qual foi o metodo?</option>
-          <option value="credit_card">Cartão de crédito</option>
-          <option value="debit_card">Cartão de debito</option>
-          <option value="pix">Pix</option>
-        </select>
-        <hr class="w-full bg-base-300" />
-        <!-- <div class="flex justify-center gap-2">
-          Deseja finalizar este pedido?
-          <input
-            type="checkbox"
-            class="checkbox-primary checkbox"
-            on:change={() => (isChecked = !isChecked)}
-          />
-        </div> -->
+        <SelectSearch bind:value={metodo_pagamento} config={{ value: v=>v, label: v=>paymentMethodLabel[v]}} placeholder="metodo" delegateQuery={()=>Promise.resolve(Array.from(paymentMethodEnum).filter(v=>!['dinheiro'].includes(v)))}/>
+        <!-- <hr class="w-full bg-base-300" /> -->
       {:else if isDinheiro}
         <div class="flex w-full items-center justify-center gap-4">
           <label class="form-control w-full gap-2">
@@ -276,7 +313,7 @@
               isFiado = false
               isDinheiro = false
               isPago = false
-              metodo_pagamento = null
+              metodo_pagamento = ''
             }}
           >
             PAGAMENTO PARCIAL
@@ -288,7 +325,7 @@
             class="btn btn-primary w-full"
             onclick={() => {
               isFiado = true
-              addOrderFiado()
+              validaPedido()
               // nulla()
             }}
             disabled={isFiado}
@@ -340,7 +377,7 @@
       {#if total_paid < total_pedido && total_paid != 0}
         <p>
           Foi pago: {formatCurrency(total_paid)} mas ainda faltam
-          
+
           <span class="text-error">
             {formatCurrency(total_pedido - total_paid)}
           </span>

@@ -7,9 +7,9 @@ import {
   logsTable,
   type InsertLogs,
 } from '$db/schema'
-import type { TenantDbType } from '../../tenant'
+import type { TenantDbType, Transaction } from '../../tenant'
 
-export const bugReport = (db: TenantDbType) => ({
+export const bugReport = (db: TenantDbType | Transaction) => ({
   insertBugReport(report: InsertBugReport) {
     return db
       .insert(bugReportTable)

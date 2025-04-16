@@ -39,6 +39,7 @@ export const load = (async ({ url, locals: { tenantDb, user } }) => {
   const caixa = searchParams.get('cashier')
   const caixaId = Number(caixa)
   const tipo = searchParams.get('type')
+  const metodo_pagamento = searchParams.get('metodo_pagamento')
 
   const dateStart = searchParams.get('startDate')
   const dateEnd = searchParams.get('endDate')
@@ -57,6 +58,7 @@ export const load = (async ({ url, locals: { tenantDb, user } }) => {
       schema.cashierTransactionsT.created_at,
     ),
     user?.role === 'caixa' ? eq(schema.cashierTransactionsT.created_by, user.id) : undefined,
+    metodo_pagamento ? eq(schema.cashierTransactionsT.metodo_pagamento, metodo_pagamento as 'credit_card' | 'debit_card' | 'pix' | 'dinheiro') : undefined,
   )
 
   const cte = tenantDb!
@@ -98,6 +100,7 @@ export const load = (async ({ url, locals: { tenantDb, user } }) => {
       metadata: schema.cashierTransactionsT.metadata,
       type: schema.cashierTransactionsT.type,
       amount: schema.cashierTransactionsT.amount,
+      metodo_pagamento: schema.cashierTransactionsT.metodo_pagamento,
 
       cashier: schema.cashierTable.name,
       

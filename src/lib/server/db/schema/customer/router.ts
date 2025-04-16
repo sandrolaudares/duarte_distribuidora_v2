@@ -12,7 +12,6 @@ import {
   insertCustomerSchema,
   insertAddressSchema,
   customerTable,
-  paymentMethodEnum,
   paymentStatusEnum,
   insertOrderPaymentSchema,
   orderPaymentTable,
@@ -161,7 +160,27 @@ export const customer = router({
       )
     }),
   order: router({
-    insertFiado: publicProcedure
+    verifyCredits: publicProcedure
+      .meta({
+        routeName: 'Verificar creditos',
+        permission: 'receber_fiado',
+      })
+      .use(middleware.auth)
+      .use(middleware.checkPermission)
+      .use(middleware.logged)
+      .input(
+        z.object({
+          customer_id: z.number(),
+          total: z.number(),
+        }),
+      )
+      .mutation(async ({ input, ctx: { tenantDb, locals } }) => {
+        const { customer_id,total } = input
+
+        return await customerController(tenantDb).validateFiadoTransaction(customer_id,total)
+      }),
+
+      insertFiado: publicProcedure
       .meta({
         routeName: 'Adicionar Pedido Fiado',
         permission: 'receber_fiado',
@@ -193,86 +212,45 @@ export const customer = router({
       .mutation(async ({ input, ctx: { tenantDb, locals } }) => {
         const userId = locals.user?.id
         const { order_items, order_info } = input
-        const customer = await customerController(tenantDb).getCustomerById(
-          order_info.customer_id,
-        )
-        if (!customer) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'Cliente não encontrado',
-          })
-        }
+        
+        return tenantDb.transaction(async trx => {
+          const [order] = await trx
+            .insert(customerOrderTable)
+            .values({
+              status: order_info.motoboy_id ? 'CONFIRMED' : 'DELIVERED',
+              is_fiado: true,
+              type: order_info.type,
+              total: order_info.total + (order_info.taxa_entrega ?? 0),
+              amount_paid: 0,
+              motoboy_id: order_info.motoboy_id,
+              customer_id: order_info.customer_id,
+              address_id: order_info.address_id,
+              cachier_id: order_info.cachier_id,
+              observation: order_info.observation,
+              taxa_entrega: order_info.taxa_entrega,
+              created_by: userId,
+            })
+            .returning()
 
-        const [{ count: pendingOrders }] = await customerController(
-          tenantDb,
-        ).countCustomerExpiredFiadoTransactions(customer.id)
+          const items = order_items.map(item => ({
+            ...item,
+            order_id: order.id,
+          }))
 
-        if (pendingOrders > 0) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'Cliente possui pedidos fiados pendentes e expirados',
-          })
-        }
+          const order_items_db = await trx
+            .insert(orderItemTable)
+            .values(items)
+            .returning()
 
-        const used_credit = await customerController(
-          tenantDb,
-        ).getCustomerUsedCredit(order_info.customer_id)
+          if (!order.motoboy_id) {
+            customerController(trx).updateStockOnOrder(order.id)
+          }
 
-        const credit = used_credit?.used_credit ?? 0
-
-        if (customer?.max_credit < credit + order_info.total) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'Cliente não possui crédito suficiente para esta compra',
-          })
-        }
-
-        const [order] = await tenantDb
-          .insert(customerOrderTable)
-          .values({
-            status: order_info.motoboy_id ? 'CONFIRMED' : 'DELIVERED',
-            is_fiado: true,
-            type: order_info.type,
-            total: order_info.total + (order_info.taxa_entrega ?? 0),
-            amount_paid: 0,
-            motoboy_id: order_info.motoboy_id,
-            customer_id: order_info.customer_id,
-            address_id: order_info.address_id,
-            cachier_id: order_info.cachier_id,
-            observation: order_info.observation,
-            taxa_entrega: order_info.taxa_entrega,
-            created_by: userId,
-          })
-          .returning()
-
-        const items = order_items.map(item => ({
-          ...item,
-          order_id: order.id,
-        }))
-
-        const order_items_db = await tenantDb
-          .insert(orderItemTable)
-          .values(items)
-          .returning()
-
-        // const fiado_transaction = await db
-        //   .insert(fiadoTransactionTable)
-        //   .values({
-        //     order_id: order.id,
-        //     amount: order_info.total,
-        //     customer_id: order_info.customer_id,
-        //   })
-        //   .returning()
-
-        if (!order.motoboy_id) {
-          customerController(tenantDb).updateStockOnOrder(order.id)
-        }
-
-        return {
-          order,
-          order_items: order_items_db,
-          // fiado_transaction,
-        }
+          return {
+            order,
+            order_items: order_items_db,
+          }
+        })
       }),
     insetPaidOrder: publicProcedure
       .use(middleware.logged)
@@ -327,69 +305,81 @@ export const customer = router({
           })
         }
 
-        const [order] = await tenantDb
-          .insert(customerOrderTable)
-          .values({
-            amount_paid: total_paid,
-            is_fiado: false,
-            type: order_info.type,
-            motoboy_id: order_info.motoboy_id,
-            status: order_info.motoboy_id ? 'CONFIRMED' : 'DELIVERED',
-            total: order_info.total + (order_info.taxa_entrega ?? 0),
-            customer_id: order_info.customer_id,
-            address_id: order_info.address_id,
-            cachier_id: order_info.cashier_id,
-            observation: order_info.observation,
-            created_by: userId,
-            taxa_entrega: order_info.taxa_entrega,
-          })
-          .returning()
+        return tenantDb.transaction(async trx => {
+          const [order] = await trx
+            .insert(customerOrderTable)
+            .values({
+              amount_paid: total_paid,
+              is_fiado: false,
+              type: order_info.type,
+              motoboy_id: order_info.motoboy_id,
+              status: order_info.motoboy_id ? 'CONFIRMED' : 'DELIVERED',
+              total: order_info.total + (order_info.taxa_entrega ?? 0),
+              customer_id: order_info.customer_id,
+              address_id: order_info.address_id,
+              cachier_id: order_info.cashier_id,
+              observation: order_info.observation,
+              created_by: userId,
+              taxa_entrega: order_info.taxa_entrega,
+            })
+            .returning()
 
-        const items = order_items.map(item => ({
-          ...item,
-          order_id: order.id,
-        }))
-        const order_items_db = await tenantDb
-          .insert(orderItemTable)
-          .values(items)
-          .returning()
-
-        for (const payment of order_info.payment_info) {
-          await tenantDb.insert(cashierTransactionsT).values({
-            amount: payment.amount_paid,
-            type: 'Pagamento',
-            metadata: {
-              metodo_pagamento: payment.payment_method,
-              troco: payment.troco ? payment.troco : null,
-            },
-            cashier_id: order_info.cashier_id,
+          const items = order_items.map(item => ({
+            ...item,
             order_id: order.id,
+          }))
+          const order_items_db = await trx
+            .insert(orderItemTable)
+            .values(items)
+            .returning()
+
+          for (const payment of order_info.payment_info) {
+            await trx.insert(cashierTransactionsT).values({
+              amount: payment.amount_paid,
+              type: 'Pagamento',
+              metodo_pagamento: payment.payment_method,
+              metadata: {
+                troco: payment.troco ? payment.troco : undefined,
+              },
+              cashier_id: order_info.cashier_id,
+              order_id: order.id,
+              created_by: userId,
+            })
+          }
+
+          if (!order.motoboy_id) {
+            customerController(trx).updateStockOnOrder(order.id)
+          }
+          //TODO: se necessario inserir outro log só pro troco
+
+          const payments = order_info.payment_info.map(payment => ({
+            ...payment,
+            cachier_id: order_info.cashier_id,
             created_by: userId,
-          })
-        }
+            order_id: order.id,
+          }))
 
-        if (!order.motoboy_id) {
-          customerController(tenantDb).updateStockOnOrder(order.id)
-        }
-        //TODO: se necessario inserir outro log só pro troco
+          const payments_db = await trx
+            .insert(orderPaymentTable)
+            .values(payments)
+            .returning()
 
-        const payments = order_info.payment_info.map(payment => ({
-          ...payment,
-          cachier_id: order_info.cashier_id,
-          created_by: userId,
-          order_id: order.id,
-        }))
+          const [caixa] = await distribuidoraController(trx).getCashierById(
+            order_info.cashier_id,
+          )
 
-        const payments_db = await tenantDb
-          .insert(orderPaymentTable)
-          .values(payments)
-          .returning()
+          if (caixa) {
+            await distribuidoraController(trx).updateCashier(caixa.id, {
+              currency: caixa.currency + total_paid,
+            })
+          }
 
-        return {
-          order,
-          order_items: order_items_db,
-          payments: payments_db,
-        }
+          return {
+            order,
+            order_items: order_items_db,
+            payments: payments_db,
+          }
+        })
       }),
     insertOrderWaiting: publicProcedure
       .use(middleware.auth)
@@ -434,54 +424,57 @@ export const customer = router({
             message: 'Sem motoboy selecionado',
           })
         }
-        const [order] = await tenantDb
-          .insert(customerOrderTable)
-          .values({
-            status: 'CONFIRMED',
-            is_fiado: false,
-            type: order_info.type,
-            total: order_info.total + (order_info.taxa_entrega ?? 0),
-            amount_paid: 0,
-            motoboy_id: order_info.motoboy_id,
-            customer_id: order_info.customer_id,
-            address_id: order_info.address_id,
-            cachier_id: order_info.cachier_id,
-            observation: order_info.observation,
-            taxa_entrega: order_info.taxa_entrega,
-            created_by: userId,
-          })
-          .returning()
 
-        const items = order_items.map(item => ({
-          ...item,
-          order_id: order.id,
-        }))
+        return tenantDb.transaction(async trx => {
+          const [order] = await trx
+            .insert(customerOrderTable)
+            .values({
+              status: 'CONFIRMED',
+              is_fiado: false,
+              type: order_info.type,
+              total: order_info.total + (order_info.taxa_entrega ?? 0),
+              amount_paid: 0,
+              motoboy_id: order_info.motoboy_id,
+              customer_id: order_info.customer_id,
+              address_id: order_info.address_id,
+              cachier_id: order_info.cachier_id,
+              observation: order_info.observation,
+              taxa_entrega: order_info.taxa_entrega,
+              created_by: userId,
+            })
+            .returning()
 
-        await bugReport(tenantDb).insertLogs({
-          text: `Pedido delivery, EM ESPERA`,
-          created_by: userId,
-          metadata: {
+          const items = order_items.map(item => ({
+            ...item,
             order_id: order.id,
-            customer_id: order_info.customer_id,
+          }))
+
+          await bugReport(trx).insertLogs({
+            text: `Pedido delivery, EM ESPERA`,
+            created_by: userId,
+            metadata: {
+              order_id: order.id,
+              customer_id: order_info.customer_id,
+              cashier_id: order_info.cachier_id,
+            },
             cashier_id: order_info.cachier_id,
-          },
-          cashier_id: order_info.cachier_id,
-          order_id: order.id,
-          type: 'CAIXA',
-          pathname: '/TODO:ROUTE',
-          routeName: 'Fiado',
+            order_id: order.id,
+            type: 'CAIXA',
+            pathname: '/TODO:ROUTE',
+            routeName: 'Fiado',
+          })
+
+          const order_items_db = await trx
+            .insert(orderItemTable)
+            .values(items)
+            .returning()
+
+          return {
+            order,
+            order_items: order_items_db,
+            // fiado_transaction,
+          }
         })
-
-        const order_items_db = await tenantDb
-          .insert(orderItemTable)
-          .values(items)
-          .returning()
-
-        return {
-          order,
-          order_items: order_items_db,
-          // fiado_transaction,
-        }
       }),
     payments: router({
       getPendingFiadoTransactions: publicProcedure
@@ -498,42 +491,6 @@ export const customer = router({
         .input(z.number())
         .query(async ({ input, ctx: { tenantDb } }) => {
           return await customerController(tenantDb).getOrderPayments(input)
-        }),
-      insertPayment: publicProcedure
-        .meta({
-          routeName: 'Receber Pagamento',
-          permission: 'receber_fiado',
-        })
-        .use(middleware.logged)
-        .use(middleware.auth)
-        .input(
-          z.object({
-            payment_info: insertOrderPaymentSchema.omit({ created_by: true }),
-          }),
-        )
-        .mutation(async ({ input, ctx }) => {
-          const { payment_info } = input
-          const { tenantDb } = ctx
-          const userId = ctx.locals.user?.id
-          const newPayment = {
-            ...payment_info,
-            created_by: userId,
-          }
-
-          await tenantDb.insert(cashierTransactionsT).values({
-            amount: payment_info.amount_paid,
-            type: 'Pagamento',
-            metadata: {
-              metodo_pagamento: payment_info.payment_method,
-              troco: payment_info.troco ? payment_info.troco : null,
-            },
-            cashier_id: ctx.locals.user ? ctx.locals.user?.meta.caixa_id : null,
-            order_id: payment_info.order_id,
-            created_by: userId,
-          })
-          return await customerController(tenantDb).insertOrderPayment(
-            payment_info,
-          )
         }),
     }),
   }),
@@ -602,22 +559,22 @@ export const customer = router({
       const { order_id, status } = input
       const { tenantDb } = ctx
       const user = ctx.locals.user
-      await bugReport(tenantDb).insertLogs({
-        text: `${user?.username} atualizou o status do pedido ${order_id} para ${status}`,
-        created_by: user?.id,
-        metadata: {
+
+      return tenantDb.transaction(async tx => {
+        await bugReport(tx).insertLogs({
+          text: `${user?.username} atualizou o status do pedido ${order_id} para ${status}`,
+          created_by: user?.id,
+          metadata: {
+            order_id,
+            status,
+          },
           order_id,
-          status,
-        },
-        order_id,
-        type: 'SYSTEM',
-        pathname: '',
-        routeName: 'Atualizar Pedido',
+          type: 'SYSTEM',
+          pathname: '',
+          routeName: 'Atualizar Pedido',
+        })
+        return await customerController(tx).updateOrderStatus(order_id, status)
       })
-      return await customerController(tenantDb).updateOrderStatus(
-        order_id,
-        status,
-      )
     }),
 
   updateOrder: publicProcedure
@@ -744,23 +701,33 @@ export const customer = router({
     .mutation(async ({ input, ctx }) => {
       const userID = ctx.locals.user?.id
       const { tenantDb } = ctx
-      
 
       return await tenantDb.transaction(async trx => {
-
         await trx.insert(cashierTransactionsT).values({
           amount: input.amount_paid,
           type: 'Pagamento',
+          metodo_pagamento: input.payment_method,
           metadata: {
-            metodo_pagamento: input.payment_method,
-            troco: input.troco ? input.troco : null,
+            troco: input.troco ? input.troco : undefined,
           },
           cashier_id: input.cachier_id,
           order_id: input.order_id,
           created_by: userID,
         })
 
-        await customerController(tenantDb).insertOrderPayment({
+        if (input.cachier_id) {
+          const [caixa] = await distribuidoraController(trx).getCashierById(
+            input.cachier_id,
+          )
+
+          if (caixa) {
+            await distribuidoraController(trx).updateCashier(caixa.id, {
+              currency: caixa.currency + input.amount_paid,
+            })
+          }
+        }
+
+        await customerController(trx).insertOrderPayment({
           ...input,
           created_by: userID,
         })

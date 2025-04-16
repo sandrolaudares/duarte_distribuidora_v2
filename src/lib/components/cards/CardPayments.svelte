@@ -9,7 +9,7 @@
 
   type Props = {
     payment: Omit<InsertOrderPayment, 'order_id'>
-    created_by: string | undefined
+    created_by?: string
     i: number
   }
 

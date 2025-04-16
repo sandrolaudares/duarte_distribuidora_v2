@@ -1,0 +1,1 @@
+ALTER TABLE `tenants` ADD `image_id` integer REFERENCES image(id);

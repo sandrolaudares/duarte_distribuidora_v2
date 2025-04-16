@@ -80,7 +80,10 @@
   async function getDistance() {
     isLoading = true
     try {
-      if(cart.meta.enderecoSelecionado?.distance != null && cart.meta.enderecoSelecionado?.distance >0) {
+      if (
+        cart.meta.enderecoSelecionado?.distance != null &&
+        cart.meta.enderecoSelecionado?.distance > 0
+      ) {
         distance = cart.meta.enderecoSelecionado.distance
         cart.meta.taxaEntrega = (distance / 1000) * (fee / 100)
         cart.meta.taxaEntrega *= 100
@@ -89,26 +92,25 @@
         console.log(distance)
         toast.success('Distancia: ' + (distance / 1000).toFixed(2) + 'km')
         isLoading = false
-      } else if (cart.meta.enderecoSelecionado){
-          distance = await trpc($page).customer.calculateDistance.mutate({
-            number: cart.meta.enderecoSelecionado.number,
-            bairro: cart.meta.enderecoSelecionado?.neighborhood,
-            street: cart.meta.enderecoSelecionado.street,
-            city: cart.meta.enderecoSelecionado?.city,
-            state: cart.meta.enderecoSelecionado.state,
-            cep: cart.meta.enderecoSelecionado.cep,
-            country: cart.meta.enderecoSelecionado.country,
-          })
-  
-          cart.meta.taxaEntrega = (distance / 1000) * (fee / 100)
-          cart.meta.taxaEntrega *= 100
-          cart.meta.taxaEntrega = Math.round(cart.meta.taxaEntrega / 100) * 100
-          console.log(cart.meta.taxaEntrega)
-          console.log(distance)
-          toast.success('Distancia: ' + (distance / 1000).toFixed(2) + 'km')
-          isLoading = false
+      } else if (cart.meta.enderecoSelecionado) {
+        distance = await trpc($page).customer.calculateDistance.mutate({
+          number: cart.meta.enderecoSelecionado.number,
+          bairro: cart.meta.enderecoSelecionado?.neighborhood,
+          street: cart.meta.enderecoSelecionado.street,
+          city: cart.meta.enderecoSelecionado?.city,
+          state: cart.meta.enderecoSelecionado.state,
+          cep: cart.meta.enderecoSelecionado.cep,
+          country: cart.meta.enderecoSelecionado.country,
+        })
+
+        cart.meta.taxaEntrega = (distance / 1000) * (fee / 100)
+        cart.meta.taxaEntrega *= 100
+        cart.meta.taxaEntrega = Math.round(cart.meta.taxaEntrega / 100) * 100
+        console.log(cart.meta.taxaEntrega)
+        console.log(distance)
+        toast.success('Distancia: ' + (distance / 1000).toFixed(2) + 'km')
+        isLoading = false
       }
-      
     } catch (error: any) {
       toast.error(error.message)
       isLoading = false
@@ -120,20 +122,8 @@
       cart.meta.isDelivery = true
     }
   })
-  const formattedAddress = cart.meta.enderecoSelecionado
-    ? [
-        cart.meta.enderecoSelecionado.cep
-          ? `${cart.meta.enderecoSelecionado.cep}`
-          : '',
-        cart.meta.enderecoSelecionado.city,
-        cart.meta.enderecoSelecionado.neighborhood,
-        cart.meta.enderecoSelecionado.street,
-        cart.meta.enderecoSelecionado.number,
-        cart.meta.enderecoSelecionado.state,
-      ]
-        .filter(Boolean)
-        .join(', ')
-    : null
+
+  $inspect(cart.meta)
 </script>
 
 <div class="flex h-auto flex-col-reverse justify-between md:flex-col">
@@ -149,7 +139,6 @@
     Criado por: <span class="font-bold text-success">{user?.email}</span>
   </p>
   <div>
-    <!-- <h1 class="text-center mt-2">Selecione o tipo de preco</h1> -->
     <div class="mt-2 flex w-full flex-col lg:flex-row">
       <div class="grid flex-grow place-items-center">
         <button
@@ -176,7 +165,6 @@
             Object.values(cart.cart).forEach(cartItem => {
               cartItem.meta.is_retail = false
             })
-            console.log(cart)
           }}
           disabled={tipo_preco === 'wholesale_price' ||
             Object.values(cart.cart).length >= 1}
@@ -186,28 +174,15 @@
       </div>
     </div>
   </div>
-  <!-- <div
-    class="mt-3 hidden w-full rounded-lg px-3 py-1 text-center font-bold md:block {caixa.status ===
-    'Aberto'
-      ? 'bg-success'
-      : 'bg-error'}"
-  >
-    {caixa.status === 'Aberto' ? 'Em aberto' : 'Fechado'}
-  </div> -->
   <div class="mt-2 flex flex-col-reverse gap-2 md:flex-col">
-    <div class="">
+    <div class="flex justify-center">
       {#if cart.meta.clienteSelecionado}
         <CustomerInfo
-          customer={cart.meta.clienteSelecionado}
-          address={formattedAddress}
           {distance}
-          bind:deliveryFee={cart.meta.taxaEntrega}
           {isLoading}
           desvincular={() => {
-            cart.meta.clienteSelecionado = null
-            cart.meta.enderecoSelecionado = null
+            cart.clearMeta()
             distance = 0
-            cart.meta.taxaEntrega = 0
           }}
         >
           <AvailableCredits

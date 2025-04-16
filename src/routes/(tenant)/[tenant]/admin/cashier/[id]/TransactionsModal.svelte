@@ -135,14 +135,14 @@
                 </span>
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-sm">
-                {#if transaction.metadata?.metodo_pagamento != null}
+                {#if transaction.metodo_pagamento !== null}
                   <div class="flex items-center gap-1.5">
                     <span
                       class="inline-block h-2 w-2 rounded-full bg-emerald-400"
                     ></span>
                     <span class="font-medium text-slate-800">
                       {paymentMethodLabel[
-                        transaction.metadata.metodo_pagamento
+                        transaction.metodo_pagamento
                       ]}
                     </span>
                   </div>
@@ -163,9 +163,9 @@
                 {/if}
               </td>
               <td class="whitespace-nowrap px-4 py-3 text-sm">
-                {#if transaction.metadata?.metodo_pagamento === 'dinheiro'}
+                {#if transaction.metodo_pagamento === 'dinheiro'}
                   <span class=" font-bold text-success">
-                    {formatCurrency(transaction.metadata?.troco)}
+                    {formatCurrency(transaction.metadata?.troco ?? 0)}
                   </span>
                 {:else}
                   <span>—</span>
