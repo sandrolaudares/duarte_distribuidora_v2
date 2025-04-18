@@ -171,6 +171,7 @@ export const stock = router({
         .from(cashierTransactionsT)
         .where(
           and(
+            eq(cashierTransactionsT.cashier_id, input),
             gte(cashierTransactionsT.created_at, new Date(startTimestamp)),
             lte(cashierTransactionsT.created_at, new Date(endTimestamp)),
           ),
