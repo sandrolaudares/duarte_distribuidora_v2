@@ -4,6 +4,7 @@ import { toast } from 'svelte-sonner'
 export class PrintingOrder {
   printer: string = $state('')
   printers: string[] | string = $state([])
+  copiesNum:number = $state(1)
 
   constructor() {
     this.setPrinter('')
@@ -50,6 +51,7 @@ export class PrintingOrder {
 
     const config = qz.configs.create(this.printer, {
       encoding: 'CP850',
+      copies: this.copiesNum,
     })
 
     try {
