@@ -185,9 +185,15 @@
   }
 
   async function closeCashierModal() {
-    modal.open(HandleFecharCaixa, {
-      caixa: caixa,
-    })
+    await loadTransactions()
+    if(transactions) {
+      modal.open(HandleFecharCaixa, {
+        caixa: caixa,
+        transactions: transactions
+      })
+    } else {
+
+    }
   }
 
   async function handleModalSangria() {
@@ -225,8 +231,6 @@
       },
     })
   }
-
-  let entrarMesmoAssim = $state(false)
 
   let transactions:
     | RouterOutputs['stock']['getRecentTransaoEstoque']
@@ -292,7 +296,7 @@
   </form>
 </dialog>
 
-{#if caixa.status === 'Fechado' && user && (user.meta.caixa_id === undefined || entrarMesmoAssim === true)}
+{#if caixa.status === 'Fechado' && user && user.meta.caixa_id === undefined}
   <div class="flex flex-col items-center justify-center">
     <h1 class="font-semibold">Abrir o {caixa.name}</h1>
     <label class="form-control w-full max-w-xs gap-2">
@@ -302,14 +306,14 @@
       <CurrencyInput bind:value={dinheiro_caixa} />
       <button
         class="btn btn-primary"
-        disabled={entrarMesmoAssim || loadingAbrir}
+        disabled={loadingAbrir}
         onclick={handleAbrirCaixa}
       >
         Abrir caixa
       </button>
     </label>
   </div>
-{:else if user && (user.meta.caixa_id === caixa.id || (user.role != 'caixa' && entrarMesmoAssim === true))}
+{:else if user && (user.meta.caixa_id === caixa.id || user.role != 'caixa')}
   <AlertaFechar cashier={caixa} tenant={data.tenant!} />
   <div class="mb-3 flex justify-center gap-2">
     <button
@@ -388,14 +392,6 @@
     class="container my-auto flex items-center justify-center gap-3 text-center text-xl"
   >
     Você já está em um caixa ou o caixa foi aberto por outra pessoa!
-    {#if user.role != 'caixa'}
-      <button
-        class="badge bg-error/10"
-        onclick={() => (entrarMesmoAssim = true)}
-      >
-        Entrar mesmo assim
-      </button>
-    {/if}
   </div>
 {/if}
 
