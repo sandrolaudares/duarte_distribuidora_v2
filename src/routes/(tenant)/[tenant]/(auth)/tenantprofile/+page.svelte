@@ -8,10 +8,29 @@
   import type { SelectTenant, WorkSchedule } from '$lib/server/db/central/schema'
   import { secondsToTime, timeToSeconds } from '$lib/utils'
   import ImageInput from '$lib/components/input/ImageInput.svelte'
+  import { MapLibre, Marker, Popup } from 'svelte-maplibre-gl';
+  import { MapPinHouse } from 'lucide-svelte'
+  import Loading from '$lib/components/Loading.svelte'
 
   let { data }: { data: PageData } = $props()
 
   let newDistribuidora: SelectTenant = $state(data.tenant!)
+
+  let lnglat = $state({ lng: newDistribuidora.lng ?? 0, lat: newDistribuidora.lat ?? 0 });
+  let lngLatText = $derived(`(${lnglat.lat.toFixed(4)}, ${lnglat.lng.toFixed(4)})`);
+  let offset = $state(24);
+
+  let offsets: maplibregl.Offset = $derived({
+    top: [0, offset],
+    bottom: [0, -offset],
+    left: [offset + 12, 0],
+    right: [-offset - 12, 0],
+    center: [0, 0],
+    'top-left': [offset, offset],
+    'top-right': [-offset, offset],
+    'bottom-left': [offset, -offset],
+    'bottom-right': [-offset, -offset]
+  });
 
   let schedule:SelectTenant['funcionamento'] = $derived.by(()=>{
     if(newDistribuidora.funcionamento) return newDistribuidora.funcionamento
@@ -31,7 +50,10 @@
     "segunda", "terca", "quarta", "quinta", "sexta", "sabado", "domingo"
   ];
 
+  let isLoading = $state(false)
+
   async function updateDistribuidora() {
+    isLoading = true
     if (!data.tenant) {
       throw new Error('Tenant not found')
     }
@@ -41,8 +63,8 @@
         data: {
           name: newDistribuidora.name,
           address: newDistribuidora.address ?? undefined,
-          lat: Number(newDistribuidora.lat),
-          lng: Number(newDistribuidora.lng),
+          lat: lnglat.lat ?? undefined,
+          lng: lnglat.lng ?? undefined,
           taxa_por_km: newDistribuidora.taxa_por_km ?? undefined,
           subdomain: newDistribuidora.subdomain,
           funcionamento : schedule ?? undefined,
@@ -55,6 +77,8 @@
     } catch (error) {
       console.error('Failed to update distribuidora:', error)
       toast.error('Erro ao atualizar distribuidora')
+    } finally {
+      isLoading = false
     }
   }
 
@@ -77,8 +101,13 @@
             <button
               class="btn btn-primary min-w-44"
               onclick={updateDistribuidora}
+              disabled={isLoading}
             >
+            {#if isLoading}
+              <Loading/>
+            {:else}
               Salvar
+            {/if}
             </button>
           </div>
         </header>
@@ -104,15 +133,7 @@
               />
             </label>
 
-            <label class="block">
-              <span class="">Latitude</span>
-              <input
-                type="text"
-                bind:value={newDistribuidora.lat}
-                placeholder="Your First Name"
-                class="input input-bordered w-full"
-              />
-            </label>
+            
             <label class="block">
               <span class="">Telefone</span>
               <input
@@ -144,15 +165,7 @@
               />
             </label>
 
-            <label class="block">
-              <span class="">Longitude</span>
-              <input
-                type="text"
-                bind:value={newDistribuidora.lng}
-                placeholder="Your First Name"
-                class="input input-bordered w-full"
-              />
-            </label>
+           
           </div>
         </div>
 
@@ -200,22 +213,51 @@
         
 
         <div class="mt-8">
+          <div class="flex gap-2">
+            <label class="block w-full">
+              <span class="">Latitude</span>
+              <input
+                bind:value={lnglat.lat}
+                placeholder="Your First Name"
+                class="input input-bordered w-full"
+              />
+            </label>
+            <label class="block w-full">
+              <span class="">Longitude</span>
+              <input
+                bind:value={lnglat.lng}
+                placeholder="Your First Name"
+                class="input input-bordered w-full"
+              />
+            </label>
+          </div>
           {#if data.tenant?.lat && data.tenant?.lng}
-            <div class="mt-10">
+            <div class="mt-4">
               <h2 class="mb-4 text-2xl font-semibold">Localização</h2>
-              <div class="aspect-w-16 aspect-h-9">
-                <iframe
-                  title="Tenant Location"
-                  width="100%"
-                  height="290"
-                  frameborder="0"
-                  scrolling="no"
-                  marginheight="0"
-                  marginwidth="0"
-                  class="rounded-md shadow"
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${data.tenant?.lng},${data.tenant?.lat},${data.tenant?.lng},${data.tenant?.lat}&layer=mapnik&marker=${data.tenant?.lat},${data.tenant?.lng}`}
-                ></iframe>
-              </div>
+              
+              <MapLibre
+                style="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
+                class="h-[40vh] min-h-[300px] rounded-box"
+                zoom={16}
+                center={[ data.tenant.lng!,  data.tenant.lat!]}
+                maxPitch={85}
+                attributionControl={false}
+              >
+              
+              <Marker bind:lnglat draggable>
+                {#snippet content()}
+                <div class="text-center leading-none">
+                  <div class="text-3xl flex justify-center items-center text-success">
+                    <MapPinHouse />
+                  </div>
+                  <div class="font-bold text-black drop-shadow-xs">{newDistribuidora.name}</div>
+                </div>
+                {/snippet}
+                <Popup class="text-black" offset={offsets} open={true} closeButton={false}>
+                  <span class="text-lg">{lngLatText}</span>
+                </Popup>
+              </Marker>
+            </MapLibre>
             </div>
           {/if}
         </div>
