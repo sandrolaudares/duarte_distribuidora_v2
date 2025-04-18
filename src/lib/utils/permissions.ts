@@ -66,8 +66,8 @@ export const cashierTransactionEnum = [
   'Fechamento',
   'Pagamento',
   'Sangria',
+  "Despesas",
   "Deposito",
-  "Retirada"
 ] as const
 
 export type CashierTransactionType = (typeof cashierTransactionEnum)[number]

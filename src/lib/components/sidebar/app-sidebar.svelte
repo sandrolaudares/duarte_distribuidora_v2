@@ -154,12 +154,6 @@
           ),
         })),
       projects: [
-        // {
-        //   allowedRoles: ['admin',`gerente`,`financeiro`] as Role[],
-        //   name: 'Todos caixas',
-        //   url: '/admin/cashier',
-        //   icon: HandCoins,
-        // },
         {
           allowedRoles: ['admin',`gerente`,`financeiro`,'caixa'] as Role[],
           name: 'Transações dos caixas',
