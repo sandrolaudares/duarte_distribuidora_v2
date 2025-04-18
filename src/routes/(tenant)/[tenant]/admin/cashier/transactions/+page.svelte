@@ -28,6 +28,7 @@
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
   import { cashierTransactionEnum, paymentMethodEnum, paymentMethodLabel } from '$lib/utils/permissions'
   import { User } from 'lucide-svelte'
+  import { getColor, printTable } from '../transactionsUtils'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -63,28 +64,18 @@
 
   let cashierFilter = $state(filters.get('cashier') || '')
 
-  const colorMap: { [key: string]: string } = {
-    P: 'badge-primary',
-    A: 'badge-success text-white',
-    F: 'badge-error text-white',
-    S: 'badge-warning',
-    D: 'badge-info',
-  }
-
-  function getColor(type: string) {
-    const firstLetter = type.charAt(0).toUpperCase()
-    return colorMap[firstLetter] || 'badge-neutral'
-  }
-
   let selectedType: string = $state('')
 
   const delegateQuery = () => {
     return Promise.resolve(Array.from(cashierTransactionEnum))
   }
+
+  let tableRef: HTMLTableElement | undefined = $state(undefined)
 </script>
 
 <main class="mx-4 h-full max-h-[calc(100vh-20vh)]">
-  <div class="mb-2 flex justify-end">
+  <div class="mb-2 flex justify-end gap-2">
+    <button onclick={()=>printTable(tableRef)} class="btn btn-secondary">Imprimir</button>
     <button
       class="btn btn-primary"
       onclick={() => {
@@ -104,7 +95,7 @@
     {#if table.isLoading}
       <LoadingBackground />
     {/if}
-    <table class="table table-xs">
+    <table class="table table-xs sizeee" bind:this={tableRef}>
       <thead>
         <tr class="uppercase">
           <Th>ID</Th>
@@ -199,7 +190,7 @@
               {/if}
             </td>
             <td> <span class="flex items-center gap-1">
-              <User class="size-4" />{row.username}
+              <User class="size-4 hddd" />{row.username}
             </span></td>
             <td>
               {#if row.cashier}
@@ -257,7 +248,7 @@
           <td></td>
           <td></td>
           <td></td>
-          <td></td>
+          <td>Valor apenas de entradas:</td>
           <td class="text-lg font-bold">
             <span class="text-secondary">{formatCurrency(data.totalSum)}</span>
           </td>
