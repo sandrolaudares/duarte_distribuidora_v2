@@ -6,6 +6,7 @@
   import { page } from '$app/state'
   import { toast } from 'svelte-sonner'
   import type { SelectAddress, SelectCustomer } from '$db/schema'
+  import Separator from './ui/separator/separator.svelte'
 
   type Props = {
     customer_id: SelectCustomer['id']
@@ -53,7 +54,7 @@
         throw new Error('Erro ao adicionar endereco')
       }
       
-      invalidate(newAddress)
+      // invalidate(newAddress)
       
       let distance = await trpc(page).customer.calculateDistance.mutate({ 
         cep: formEndereco.cep,
@@ -85,6 +86,7 @@
   }
 
   async function handleCep(cep: string) {
+    disabled = true
     const responseapi = await getEnderecoFromCEP(cep)
     if (responseapi.bairro) {
       formEndereco.neighborhood = responseapi.bairro
@@ -99,7 +101,7 @@
       formEndereco.city = responseapi.localidade
     }
     console.log(responseapi)
-    disabled = true
+    disabled = false
   }
 </script>
 
@@ -123,6 +125,7 @@
         console.log(value)
       }}
       bind:value={formEndereco.cep}
+      disabled={disabled || isLoading}
     />
   </label>
 
@@ -135,6 +138,7 @@
       placeholder="Digite seu Bairro"
       class="input input-bordered w-full"
       bind:value={formEndereco.neighborhood}
+      disabled={disabled || isLoading}
     />
   </label>
 
@@ -147,6 +151,7 @@
       placeholder="Digite sua Cidade"
       class="input input-bordered w-full"
       bind:value={formEndereco.city}
+      disabled={disabled || isLoading}
     />
   </label>
 
@@ -159,6 +164,7 @@
       placeholder="Digite sua Cidade"
       class="input input-bordered w-full"
       bind:value={formEndereco.street}
+      disabled={disabled || isLoading}
     />
   </label>
 
@@ -171,6 +177,7 @@
       placeholder="Digite seu Estado"
       class="input input-bordered w-full"
       bind:value={formEndereco.state}
+      disabled={disabled || isLoading}
     />
   </label>
 
@@ -199,7 +206,7 @@
   </label>
 </main>
 
-<hr>
+<Separator class="my-4"/>
 
 <div class="flex w-full justify-end">
   <div class="flex gap-3 w-full">
