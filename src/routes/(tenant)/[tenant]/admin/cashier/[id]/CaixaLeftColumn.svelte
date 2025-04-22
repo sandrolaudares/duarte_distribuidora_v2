@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ModalEndereco from './ModalEndereco.svelte'
+  import ModalEndereco from '$lib/components/cashierComponents/ModalEndereco.svelte'
   import ModalCliente from './ModalCliente.svelte'
   import { modal } from '$lib/components/modal'
   // import { getCartContext } from '$lib/stores/cart'
@@ -186,7 +186,7 @@
           }}
         >
           <AvailableCredits
-            id={cart.meta.clienteSelecionado.id}
+            customer={cart.meta.clienteSelecionado}
             max_credit={cart.meta.clienteSelecionado.max_credit}
           />
         </CustomerInfo>
