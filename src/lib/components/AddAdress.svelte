@@ -54,7 +54,7 @@
         throw new Error('Erro ao adicionar endereco')
       }
       
-      // invalidate(newAddress)
+      invalidate(newAddress)
       
       let distance = await trpc(page).customer.calculateDistance.mutate({ 
         cep: formEndereco.cep,
@@ -76,7 +76,7 @@
           }
         })
       }
-      invalidate(newAddress)
+      // invalidate(newAddress)
     } catch (error: any) {
       toast.error(error.message)
       return error.message
