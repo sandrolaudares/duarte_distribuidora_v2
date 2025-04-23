@@ -10,7 +10,7 @@
 
   let { caixa_id,handleInvalidate }: { caixa_id: number,handleInvalidate?:()=>void } = $props()
 
-  let selectedType: 'Sangria' | 'Deposito' | 'Retirada' | '' = $state('')
+  let selectedType: 'Sangria' | 'Deposito' | 'Despesas' | '' = $state('')
   let qntRetirada = $state(0)
   let motivo = $state('')
   let isLoading = $state(false)
@@ -28,7 +28,7 @@
   async function handleInsertTransaction() {
     isLoading = true
     if (!selectedType) {
-      toast.error('Selecione o tipo de retirada/depósito')
+      toast.error('Selecione o tipo de despesa/depósito')
       return
     }
     try {

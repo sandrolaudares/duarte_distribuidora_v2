@@ -17,7 +17,7 @@
   import PreLoadingIndicator from '../../PreLoadingIndicator.svelte'
   import { navigating } from '$app/stores'
   import SideBar from '$lib/components/sidebar/SideBar.svelte'
-  import { createCartContext } from './admin/cashier/[id]/cartContext.svelte'
+  import { createCartContext } from '$lib/state/contextCashier/cartContext.svelte'
   import { page } from '$app/state'
   import { createPrinterContext } from './admin/orders/allorders/printerContext.svelte'
 
@@ -25,6 +25,7 @@
 
   const user = createUserContext(data.user)
   const prr = createPrinterContext()
+  const cart = createCartContext()
 
   $effect.pre(() => {
     user.set(data.user)
@@ -33,7 +34,24 @@
       prr.setPrinter(localStorage.getItem('selectedPrinter') ?? '')
     }
   })
-  const cart = createCartContext()
+
+  // onMount(() => {
+  //   function handleKeydown(e: KeyboardEvent) {
+  //     if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
+  //       e.preventDefault();
+  //       window.location.href = `/admin/cashier/${$user?.meta.caixa_id}`;
+  //     }
+  //     if (e.key === "b" && (e.metaKey || e.ctrlKey)) {
+  //       e.preventDefault();
+  //       window.location.href = `/`;
+  //     }
+  //   }
+ 
+  //   document.addEventListener("keydown", handleKeydown);
+  //   return () => {
+  //     document.removeEventListener("keydown", handleKeydown);
+  //   };
+  // });
 </script>
 
 <!-- <DrawerContainer> -->

@@ -1,23 +1,36 @@
 <script lang="ts">
     import { trpc } from '$trpc/client'
     import { onMount } from 'svelte'
-    import { page } from '$app/stores'
+    import { page } from '$app/state'
     import { resolveHTTPResponse } from '@trpc/server/http'
     import { toast } from 'svelte-sonner'
-  import { formatCurrency } from '$lib/utils'
+    import { formatCurrency } from '$lib/utils'
+    import type { SelectCustomer } from '$lib/server/db/schema'
   
-    let value: number | null = 0
-    export let id
-    export let max_credit = 0
-    let isLoading = false
+  type Props = {
+    customer:SelectCustomer
+    max_credit:number
+    getValue?: (value:number | null) => void
+  }
+  
+  let {
+    customer,
+    max_credit,
+    getValue
+  }: Props = $props()
+  
+  let value: number | null = $state(0)
+  let isLoading = $state(false)
+
     onMount(async () => {
       isLoading = true
       try {
-        const resp = await trpc($page).customer.getCustomerUsedCredits.query(id)
+        const resp = await trpc(page).customer.getCustomerUsedCredits.query(customer.id)
         console.log(resp)
         if (resp) {
-          value = resp.used_credit
+          value = customer.max_credit - resp.used_credit
         }
+        getValue?.(value)
         isLoading = false
       } catch (error: any) {
         console.error(error.message)

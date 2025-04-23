@@ -1,7 +1,7 @@
 <script lang="ts">
   // import { getCartContext } from '$lib/stores/cart'
   import { formatCurrency, icons } from '$lib/utils'
-  import { getCartContext } from './cartContext.svelte'
+  import { getCartContext } from '$lib/state/contextCashier/cartContext.svelte'
 
   const cart = getCartContext()
 

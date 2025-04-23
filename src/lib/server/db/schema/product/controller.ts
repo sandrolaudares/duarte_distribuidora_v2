@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { eq, isNotNull } from 'drizzle-orm'
+import { and, eq, isNotNull } from 'drizzle-orm'
 
 import {
   productTable,
@@ -138,16 +138,22 @@ export const product = (db: TenantDbType | Transaction) => ({
     })
   },
 
-  queryCategorysWithProductItems: () => {
-    return db.query.productCategoryTable.findMany({
-      with: {
-        products: {
-          with: {
-            items: true,
+  queryCategorysWithProductItems: async () => {
+    return await db.query.productCategoryTable
+      .findMany({
+        with: {
+          products: {
+            with: {
+              items: true,
+            },
           },
         },
-      },
-    })
+      })
+      .then(payload =>
+        payload.filter(product =>
+          product.products.some(product => product.items.length > 0),
+        ),
+      )
   },
   querySkus: () => {
     return db.query.skuTable.findMany()

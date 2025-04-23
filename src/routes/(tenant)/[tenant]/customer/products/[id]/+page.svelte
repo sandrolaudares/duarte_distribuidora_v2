@@ -2,17 +2,17 @@
   import { getImagePath } from '$lib/utils/image'
   import type { PageData } from './$types'
   import { icons } from '$lib/utils/icons'
-  import { tweened } from 'svelte/motion'
+  import { Tween } from 'svelte/motion'
 
-  import { getCartContext } from '$lib/stores/cart'
   import { formatCurrency } from '$lib/utils'
+  import { getCartContext } from '$lib/state/contextCustomerOrder/cartContext'
+  import { toast } from 'svelte-sonner'
   const cart = getCartContext()
-  console.log(cart)
 
-  export let data: PageData
+  let { data }: { data: PageData } = $props()
   const { produto } = data
 
-  let quantity = 1
+  let quantity = $state(1)
   function increment() {
     quantity += 1
   }
@@ -21,25 +21,26 @@
     quantity -= 1
   }
 
-  let activeItemIndex = 0
+  let activeItemIndex = $state(0)
 
-  let total = tweened(
-    (produto.items[activeItemIndex].retail_price ?? 0) * quantity,
-    {
-      duration: 300,
-    },
-  )
-  $: $total = (produto.items[activeItemIndex].retail_price ?? 0) * quantity
+
+  let total = new Tween(produto.items[0].retail_price ?? 0, {
+    duration: 300,
+  })
+
+  $effect(() => {
+    if(total) {
+      total.set((produto.items[activeItemIndex].retail_price ?? 0) * quantity)
+    }
+  })
 
   function addToCart() {
-    console.log(cart)
-
-    cart.addItem({
-      item: produto.items[activeItemIndex],
-      quantity: quantity ?? 1,
-    })
+    cart.addItem(produto.items[activeItemIndex],undefined,quantity)
+    toast.success(quantity +'x - '+ produto.items[activeItemIndex].name + ' adicionado ao carrinho')
     quantity = 1
   }
+
+  $inspect(quantity)
 </script>
 
 <section class="body-font overflow-hidden">
@@ -68,9 +69,11 @@
             Details
           </button>
         </div> -->
-        <p class="mb-4 leading-relaxed">
-          Descrição: {produto.description}
-        </p>
+        {#if produto.description}
+          <p class="mb-4 leading-relaxed">
+            Descrição: {produto.description}
+          </p>
+        {/if}
 
         <div class="flex flex-wrap gap-3 border-t border-gray-200 py-2">
           {#each produto.items as variant, i (variant)}
@@ -97,10 +100,10 @@
         </div>
         <div class="flex items-center justify-between">
           <span class="title-font text-2xl font-bold">
-            {formatCurrency($total)}
+            {formatCurrency(total.current)}
           </span>
           <div class="flex items-center gap-4">
-            <button
+            <!-- <button
               class="inline-flex h-10 w-10 items-center justify-center rounded-full border-0 bg-gray-200 p-0"
             >
               <svg
@@ -115,7 +118,7 @@
                   d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"
                 ></path>
               </svg>
-            </button>
+            </button> -->
             <button class="btn btn-primary flex" onclick={addToCart}>
               Adicionar ao carrinho
             </button>

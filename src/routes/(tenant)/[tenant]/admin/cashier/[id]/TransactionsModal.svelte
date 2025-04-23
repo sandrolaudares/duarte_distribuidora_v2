@@ -15,6 +15,8 @@
     paymentMethodLabel,
   } from '$lib/utils/permissions'
   import Separator from '$lib/components/ui/separator/separator.svelte'
+  import { cssPrintTable, getColor } from '../transactionsUtils'
+  import TableTransactions from '$lib/components/cashierComponents/TableTransactions.svelte'
 
   let {
     caixa,
@@ -26,18 +28,6 @@
     isLoading: boolean
   } = $props()
 
-  const colorMap: { [key: string]: string } = {
-    P: 'badge-primary',
-    A: 'badge-success text-white',
-    F: 'badge-error text-white',
-    S: 'badge-warning',
-    D: 'badge-info',
-  }
-
-  function getColor(type: string) {
-    const firstLetter = type.charAt(0).toUpperCase()
-    return colorMap[firstLetter] || 'badge-neutral'
-  }
   let filteredTransactions = $state(transactions)
   let activeTab = $state('all')
 
@@ -55,21 +45,10 @@
     activeTab = type
   }
 
-  let totalValor = $derived.by(() => {
-    if (!filteredTransactions) return 0
-    return filteredTransactions.reduce((acc, transaction) => {
-      return acc + transaction.amount
-    }, 0)
-  })
-  let totalValorTroco = $derived.by(() => {
-    if (!filteredTransactions) return 0
-    return filteredTransactions.reduce((acc, transaction) => {
-      if (!transaction.metadata?.troco) return acc
-      return acc + transaction.metadata?.troco
-    }, 0)
-  })
+  let componentRef: HTMLTableElement | undefined = $state(undefined)
 </script>
 
+<!-- <button onclick={()=>{componentRef?.printTable()}} class="btn btn-primary mb-2">Imprimir resumo do dia!</button> -->
 <div class="p-1">
   {#if isLoading || !transactions || !filteredTransactions}
     <div class="flex h-64 items-center justify-center">
@@ -112,98 +91,7 @@
     <Separator class="bg-gray-300" />
 
     <div class="h-full max-h-[calc(100vh-50vh)] overflow-x-auto">
-      <table class="table table-md">
-        <thead class="sticky top-0 bg-base-200">
-          <tr class="uppercase">
-            <th>ID</th>
-            <th>Tipo</th>
-            <th>Metodo de pagamento</th>
-            <th>Valor</th>
-            <th>Troco</th>
-            <th>Pedido</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each filteredTransactions as transaction}
-            <tr>
-              <td>{transaction.id}</td>
-              <td class="whitespace-nowrap px-4 py-3 text-sm">
-                <span
-                  class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getColor(transaction.type)}`}
-                >
-                  {transaction.type}
-                </span>
-              </td>
-              <td class="whitespace-nowrap px-4 py-3 text-sm">
-                {#if transaction.metodo_pagamento !== null}
-                  <div class="flex items-center gap-1.5">
-                    <span
-                      class="inline-block h-2 w-2 rounded-full bg-emerald-400"
-                    ></span>
-                    <span class="font-medium text-slate-800">
-                      {paymentMethodLabel[
-                        transaction.metodo_pagamento
-                      ]}
-                    </span>
-                  </div>
-                {:else}
-                  <div class="flex items-center gap-1.5">
-                    <span
-                      class="inline-block h-2 w-2 rounded-full bg-rose-400"
-                    ></span>
-                    <span class="text-error">Nenhum</span>
-                  </div>
-                {/if}
-              </td>
-              <td class="text-sm font-semibold">
-                {#if transaction.amount !== 0}
-                  {formatCurrency(transaction.amount)}
-                {:else}
-                  <span>—</span>
-                {/if}
-              </td>
-              <td class="whitespace-nowrap px-4 py-3 text-sm">
-                {#if transaction.metodo_pagamento === 'dinheiro'}
-                  <span class=" font-bold text-success">
-                    {formatCurrency(transaction.metadata?.troco ?? 0)}
-                  </span>
-                {:else}
-                  <span>—</span>
-                {/if}
-              </td>
-              <td>
-                {#if transaction.order_id}
-                  <a
-                    href="/admin/orders/{transaction.order_id}"
-                    onclick={() => modal.close()}
-                    class="badge badge-primary"
-                  >
-                    Pedido
-                  </a>
-                {:else}
-                  <span>—</span>
-                {/if}
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-        <tfoot>
-          <tr class="sticky bottom-0 bg-base-200">
-            <td></td>
-            <td></td>
-            <td></td>
-            <td class="text-xl font-bold">
-              <span class="text-secondary">{formatCurrency(totalValor)}</span>
-            </td>
-            <td class="text-xl font-bold">
-              <span class="text-success">
-                {formatCurrency(totalValorTroco)}
-              </span>
-            </td>
-            <td></td>
-          </tr>
-        </tfoot>
-      </table>
+      <TableTransactions transactions={filteredTransactions} bind:tableRef={componentRef}/>
     </div>
     {#if filteredTransactions.length === 0}
       <div
@@ -222,17 +110,3 @@
     {/if}
   {/if}
 </div>
-
-<style>
-  @media (max-width: 640px) {
-    table {
-      font-size: 0.75rem;
-    }
-
-    th,
-    td {
-      padding-left: 0.5rem;
-      padding-right: 0.5rem;
-    }
-  }
-</style>

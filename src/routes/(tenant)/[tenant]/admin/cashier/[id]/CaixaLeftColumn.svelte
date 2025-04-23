@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ModalEndereco from './ModalEndereco.svelte'
+  import ModalEndereco from '$lib/components/cashierComponents/ModalEndereco.svelte'
   import ModalCliente from './ModalCliente.svelte'
   import { modal } from '$lib/components/modal'
   // import { getCartContext } from '$lib/stores/cart'
@@ -15,8 +15,9 @@
   import UsedCredits from '$lib/components/UsedCredits.svelte'
   import AvailableCredits from '$lib/components/AvailableCredits.svelte'
   import CustomerInfo from '$lib/components/cards/CustomerInfo.svelte'
-  import { getCartContext } from './cartContext.svelte'
+  import { getCartContext } from '$lib/state/contextCashier/cartContext.svelte'
   import type { SelectUser } from '$lib/server/db/schema'
+  import { getDistance } from '$lib/utils/distance'
 
   // export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
 
@@ -43,10 +44,14 @@
         modal.open(ModalEndereco, {
           addresses: client.adresses,
           customer_id: cart.meta.clienteSelecionado.id,
-          selectedAddress: address => {
+          selectedAddress: async (address) => {
             cart.meta.enderecoSelecionado = address
             console.log(address)
-            getDistance()
+            try {
+              cart.meta.taxaEntrega = await getDistance(cart.meta.enderecoSelecionado,fee)
+            } catch (error: any) {
+              toast.error(error.message)
+            }
           },
         })
         if (cart.meta.clienteSelecionado.is_retail) {
@@ -76,46 +81,6 @@
   let distance = $state(0)
 
   let isLoading = $state(false)
-
-  async function getDistance() {
-    isLoading = true
-    try {
-      if (
-        cart.meta.enderecoSelecionado?.distance != null &&
-        cart.meta.enderecoSelecionado?.distance > 0
-      ) {
-        distance = cart.meta.enderecoSelecionado.distance
-        cart.meta.taxaEntrega = (distance / 1000) * (fee / 100)
-        cart.meta.taxaEntrega *= 100
-        cart.meta.taxaEntrega = Math.round(cart.meta.taxaEntrega / 100) * 100
-        console.log(cart.meta.taxaEntrega)
-        console.log(distance)
-        toast.success('Distancia: ' + (distance / 1000).toFixed(2) + 'km')
-        isLoading = false
-      } else if (cart.meta.enderecoSelecionado) {
-        distance = await trpc($page).customer.calculateDistance.mutate({
-          number: cart.meta.enderecoSelecionado.number,
-          bairro: cart.meta.enderecoSelecionado?.neighborhood,
-          street: cart.meta.enderecoSelecionado.street,
-          city: cart.meta.enderecoSelecionado?.city,
-          state: cart.meta.enderecoSelecionado.state,
-          cep: cart.meta.enderecoSelecionado.cep,
-          country: cart.meta.enderecoSelecionado.country,
-        })
-
-        cart.meta.taxaEntrega = (distance / 1000) * (fee / 100)
-        cart.meta.taxaEntrega *= 100
-        cart.meta.taxaEntrega = Math.round(cart.meta.taxaEntrega / 100) * 100
-        console.log(cart.meta.taxaEntrega)
-        console.log(distance)
-        toast.success('Distancia: ' + (distance / 1000).toFixed(2) + 'km')
-        isLoading = false
-      }
-    } catch (error: any) {
-      toast.error(error.message)
-      isLoading = false
-    }
-  }
 
   $effect(() => {
     if (cart.meta.enderecoSelecionado) {
@@ -186,7 +151,7 @@
           }}
         >
           <AvailableCredits
-            id={cart.meta.clienteSelecionado.id}
+            customer={cart.meta.clienteSelecionado}
             max_credit={cart.meta.clienteSelecionado.max_credit}
           />
         </CustomerInfo>

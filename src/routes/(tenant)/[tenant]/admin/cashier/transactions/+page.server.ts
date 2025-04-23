@@ -120,7 +120,16 @@ export const load = (async ({ url, locals: { tenantDb, user } }) => {
 
   const _countSumBuilder = () =>
     _withs(tenantDb!, cte).select({
-      totalSum: sql<number>`SUM(${schema.cashierTransactionsT.amount})`,
+      totalSum: sql<number>`SUM(
+        CASE
+          WHEN ${schema.cashierTransactionsT.type} = 'Fechamento' THEN 0
+          WHEN ${schema.cashierTransactionsT.type} IN ('Sangria', 'Retirada') THEN -${schema.cashierTransactionsT.amount}
+          WHEN ${schema.cashierTransactionsT.metodo_pagamento} = 'dinheiro'
+            AND ${schema.cashierTransactionsT.metadata} ->> 'troco' IS NOT NULL
+            THEN ${schema.cashierTransactionsT.amount} - CAST(${schema.cashierTransactionsT.metadata} ->> 'troco' AS numeric)
+          ELSE ${schema.cashierTransactionsT.amount}
+        END
+      ) AS totalSum`,
     })
 
   const queryTotalSum = () =>

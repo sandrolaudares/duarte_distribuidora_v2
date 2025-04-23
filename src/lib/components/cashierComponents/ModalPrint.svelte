@@ -81,22 +81,40 @@
   </button>
 </div>
 <div class="flex flex-col gap-4">
-  <select
-    bind:value={prr.printer}
-    class="select select-bordered w-full"
-    onchange={handleSelectedPrinter}
-    disabled={loadingPrinters}
-  >
-    {#if prr.getPrinters() && typeof prr.getPrinters() === 'object'}
-      {#each prr.getPrinters() as printer}
-        <option value={printer} selected={printer === prr.getPrinter()}>
-          {printer}
-        </option>
-      {/each}
-    {:else if prr.getPrinters() && prr.getPrinters().length > 0}
-      {prr.getPrinter()}
-    {/if}
-  </select>
+  <div class="flex items-end gap-2">
+    <label class="form-control w-full">
+      <div class="label">
+        <span class="label-text">Impressoras:</span>
+      </div>
+      <select
+        bind:value={prr.printer}
+        class="select select-bordered w-full"
+        onchange={handleSelectedPrinter}
+        disabled={loadingPrinters}
+      >
+        {#if prr.printers && typeof prr.printers === 'object'}
+          {#each prr.printers as printer}
+            <option value={printer} selected={printer === prr.printer}>
+              {printer}
+            </option>
+          {/each}
+        {:else if prr.printers && prr.printers.length > 0}
+          {prr.printer}
+        {/if}
+      </select>
+    </label>
+    <label class="form-control w-32">
+      <div class="label">
+        <span class="label-text">Nº Cópias</span>
+      </div>
+      <input
+        type="number"
+        class="input input-bordered w-full"
+        min="1"
+        bind:value={prr.copiesNum}
+      />
+    </label>
+  </div>
   <button
     class="btn btn-primary"
     disabled={isLoading || loadingPrinters}

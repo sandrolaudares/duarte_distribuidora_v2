@@ -7,7 +7,7 @@
   import { page } from '$app/stores'
 
   import type { RouterOutputs } from '$trpc/router'
-  import ModalEndereco from './ModalEndereco.svelte'
+  import ModalEndereco from '$lib/components/cashierComponents/ModalEndereco.svelte'
   import Loading from '$lib/components/Loading.svelte'
   import { toast } from 'svelte-sonner'
   import { debounce } from '$lib/utils'

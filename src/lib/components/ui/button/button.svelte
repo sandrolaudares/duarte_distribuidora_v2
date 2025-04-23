@@ -15,7 +15,7 @@
 				ghost: "hover:bg-primary hover:text-primary-foreground",
 				link: "text-primary underline-offset-4 hover:underline",
 				outlinePrimary:
-					" hover:bg-primary hover:text-primary-foreground border",
+					" hover:bg-primary hover:text-primary-foreground border hover:border-primary",
 				select:"select select-bordered"
 			},
 			size: {
@@ -23,6 +23,7 @@
 				sm: "h-9 rounded-md px-3",
 				lg: "h-11 rounded-md px-8",
 				icon: "h-10 w-10",
+				bigicon : "h-16 w-16",
 			},
 		},
 		defaultVariants: {

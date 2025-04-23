@@ -19,8 +19,7 @@
     criarEndereco=false
   }
 
-  let criarEndereco = false
-  $:console.log(criarEndereco)
+  export let criarEndereco = false
 </script>
 
 <Modal title="Enderecos">

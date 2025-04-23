@@ -1,4 +1,4 @@
-export class Cart<Item extends { id: string | number }, ProductMeta, CartMeta> {
+export class Cart<Item extends { id: string | number,retail_price?:number }, ProductMeta, CartMeta extends { taxaEntrega?:number }> {
   cart: Record<
     string | number,
     {
@@ -24,15 +24,21 @@ export class Cart<Item extends { id: string | number }, ProductMeta, CartMeta> {
     this.meta = meta || ({} as CartMeta)
   }
 
-  addItem(p: Item, meta?: ProductMeta) {
+  addItem(p: Item, meta?: ProductMeta,quantity?:number) {
+    let qnt = 1
+
+    if(quantity) {
+      qnt = quantity
+    }
+
     if (this.cart[p.id]) {
-      this.cart[p.id].quantity += 1
+      this.cart[p.id].quantity += qnt
       return
     }
 
     this.cart[p.id] = {
       item: p,
-      quantity: 1,
+      quantity: qnt,
       meta: meta || ({} as ProductMeta),
     }
   }
@@ -70,4 +76,16 @@ export class Cart<Item extends { id: string | number }, ProductMeta, CartMeta> {
   clearMeta() {
     this.meta = {} as CartMeta
   }
+
+  getTotal() {
+    const itemsTotal = Object.values(this.cart).reduce((acc, { item, quantity }) => {
+      const price = item.retail_price ?? 0
+      return acc + price * quantity
+    }, 0)
+    const fee = this.meta.taxaEntrega || 0
+  
+    return itemsTotal + fee
+  }
+
 }
+

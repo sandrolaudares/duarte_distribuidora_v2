@@ -17,7 +17,7 @@
     <div class="flex items-center">
       <div class="space-y-1">
         <p class="text-sm font-medium leading-none">{t.title}</p>
-        <p class="text-muted-foreground text-sm">{t.text}</p>
+        <p class="text-gray-600 text-sm">{t.text}</p>
       </div>
       <div class="ml-auto font-medium">{t.value}</div>
     </div>

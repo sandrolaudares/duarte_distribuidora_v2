@@ -9,7 +9,7 @@
   import { page } from '$app/state'
   import { modal } from './modal'
   import Loading from './Loading.svelte'
-  import { getCartContext } from '../../routes/(tenant)/[tenant]/admin/cashier/[id]/cartContext.svelte'
+  import { getCartContext } from '../state/contextCashier/cartContext.svelte'
   import { onMount } from 'svelte'
   import SenhaAdmin from './SenhaAdmin.svelte'
   import { paymentMethodEnum, paymentMethodLabel } from '$lib/utils/permissions'
@@ -118,7 +118,7 @@
           toast.error(isValid.message)
           isOpenModalSenha?.showModal()
         } else {
-          addOrderFiado()
+          await addOrderFiado()
         }
       } catch (error) {
         console.error(error)
@@ -140,18 +140,17 @@
         cart.meta.taxaEntrega = 0
       }
 
-      const cliente = cart.meta.clienteSelecionado
-      if (!cliente) return
+      if (!cart.meta.clienteSelecionado) return
 
       const orderItems = Object.values(cart.cart).map(item => ({
-        product_id: item.item.product_id,
+        product_id: item.item.id,
         quantity: item.quantity,
         price:
           item.item[item.meta.is_retail ? 'retail_price' : 'wholesale_price'],
       }))
 
       const orderInfo = {
-        customer_id: cliente.id,
+        customer_id: cart.meta.clienteSelecionado.id,
         address_id: cart.meta.enderecoSelecionado?.id,
         total: cart.meta.isDelivery
           ? total_pedido - cart.meta.taxaEntrega

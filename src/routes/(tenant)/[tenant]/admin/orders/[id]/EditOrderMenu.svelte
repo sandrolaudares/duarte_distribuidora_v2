@@ -3,9 +3,7 @@
   import { icons } from '$lib/utils/icons'
   import Cardapio from '$lib/components/Cardapio.svelte'
   import type { RouterOutputs } from '$trpc/router'
-
-  import { Cart } from '$lib/state/cart.svelte'
-  import { getCartContext } from './cartContext.svelte'
+  import { getCartContext } from '$lib/state/contextEditOrder/cartContext.svelte'
   import { formatCurrency } from '$lib/utils'
 
   let {
