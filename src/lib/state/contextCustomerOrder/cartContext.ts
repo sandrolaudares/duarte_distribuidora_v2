@@ -3,6 +3,7 @@ import { getContext, setContext } from 'svelte'
 import type { RouterOutputs } from '$trpc/router'
 import { Cart } from '$lib/state/cart.svelte'
 import type { SelectProductItem } from '$lib/server/db/schema/product'
+import type { paymentMethodEnum } from '$lib/utils/permissions'
 
 type Item = SelectProductItem
 
@@ -11,8 +12,9 @@ type CartProductMeta = {
 }
 
 type CartMeta = {
-  taxaEntrega: number,
-  enderecoSelecionado:RouterOutputs['customer']['getCustomers']['customers'][0]['adresses'][0]
+  taxaEntrega: number | undefined,
+  enderecoSelecionado:RouterOutputs['customer']['getCustomers']['customers'][0]['adresses'][0] | undefined
+  paymentMethodSelecionado: typeof paymentMethodEnum[number] | 'fiado' | undefined
 }
 
 const CART_STORE_KEY = Symbol('cartCustomer')
