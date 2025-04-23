@@ -14,7 +14,7 @@
   import PaymentCashier from '$lib/components/PaymentCashier.svelte'
   import CardapioCaixa from './CardapioCaixa.svelte'
   import CaixaLeftColumn from './CaixaLeftColumn.svelte'
-  import { getCartContext } from './cartContext.svelte'
+  import { getCartContext } from '$lib/state/contextCashier/cartContext.svelte'
   import AlertaFechar from './AlertaFechar.svelte'
   import { goto, invalidate, invalidateAll } from '$app/navigation'
   import Alert from '$lib/components/modal/base/Alert.svelte'

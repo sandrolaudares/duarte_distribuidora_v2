@@ -15,7 +15,7 @@
   import UsedCredits from '$lib/components/UsedCredits.svelte'
   import AvailableCredits from '$lib/components/AvailableCredits.svelte'
   import CustomerInfo from '$lib/components/cards/CustomerInfo.svelte'
-  import { getCartContext } from './cartContext.svelte'
+  import { getCartContext } from '$lib/state/contextCashier/cartContext.svelte'
   import type { SelectUser } from '$lib/server/db/schema'
 
   // export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'

@@ -28,7 +28,7 @@
   
 >
   {#snippet card(c)}
-    <a href="/products/{c.id}">
+    <a href="products/{c.id}">
       <Card1
         nome={c.name}
         descricao={c.description}

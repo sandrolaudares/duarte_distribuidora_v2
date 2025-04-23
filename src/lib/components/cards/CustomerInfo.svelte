@@ -3,7 +3,7 @@
   import CurrencyInput from '../input/CurrencyInput.svelte'
   import type { SelectCustomer } from '$lib/server/db/schema'
   import { formatCurrency } from '$lib/utils'
-  import { getCartContext } from '../../../routes/(tenant)/[tenant]/admin/cashier/[id]/cartContext.svelte'
+  import { getCartContext } from '../../state/contextCashier/cartContext.svelte'
   import type { Snippet } from 'svelte'
 
   const cart = getCartContext()

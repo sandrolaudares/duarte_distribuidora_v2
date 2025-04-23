@@ -16,6 +16,7 @@ type CartProductMeta = {
 }
 type CartMeta = {
   test: string
+  taxaEntrega?: number
 }
 
 const CART_STORE_KEY = Symbol('cartGetOrderById')

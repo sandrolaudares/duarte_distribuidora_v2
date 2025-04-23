@@ -7,7 +7,7 @@
   import { CircleAlert, Pencil, Plus, Printer, Trash2 } from 'lucide-svelte'
   import * as Tooltip from '$lib/components/ui/tooltip/index'
 
-  import { createCartContext } from './cartContext.svelte'
+  import { createCartContext } from '$lib/state/contextEditOrder/cartContext.svelte'
   import EditOrderMenu from './EditOrderMenu.svelte'
   import DisplayCart from './DisplayCart.svelte'
   import CustomerDetails from './CustomerDetails.svelte'

@@ -9,7 +9,7 @@
   import { page } from '$app/state'
   import { modal } from './modal'
   import Loading from './Loading.svelte'
-  import { getCartContext } from '../../routes/(tenant)/[tenant]/admin/cashier/[id]/cartContext.svelte'
+  import { getCartContext } from '../state/contextCashier/cartContext.svelte'
   import { onMount } from 'svelte'
   import SenhaAdmin from './SenhaAdmin.svelte'
   import { paymentMethodEnum, paymentMethodLabel } from '$lib/utils/permissions'

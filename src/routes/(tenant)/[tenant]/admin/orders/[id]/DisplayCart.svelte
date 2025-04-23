@@ -2,7 +2,7 @@
   import type { RouterOutputs } from '$trpc/router'
   import * as Card from '$lib/components/ui/card/index'
   import { formatCurrency, getImagePath } from '$lib/utils'
-  import { getCartContext } from './cartContext.svelte'
+  import { getCartContext } from '$lib/state/contextEditOrder/cartContext.svelte'
 
   let {
     image = 0,
@@ -13,11 +13,6 @@
     isEditable = false,
   } = $props()
 
-
-$effect(()=>{
-  console.log(is_retail)
-  console.log(price)
-})
 </script>
 
 <td class="whitespace-nowrap py-4">
