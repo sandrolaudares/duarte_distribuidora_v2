@@ -46,10 +46,12 @@
 			</div>
 			<div class="flex justify-between text-sm">
 				<span>Taxa de entrega</span>
-				{#if cart.meta.taxaEntrega === 0}
-				 <span class="text-error">Erro ao calcular</span>
+				{#if cart.meta.taxaEntrega === undefined && cart.meta.enderecoSelecionado === undefined}
+				<span class="text-info">Selecione um endereço</span>
 				{:else if cart.meta.taxaEntrega === undefined}
 					Calculando...
+				{:else if cart.meta.taxaEntrega === 0}
+				<span class="text-error">Erro ao calcular</span>
 				{:else}
 				<span>{formatCurrency(cart.meta.taxaEntrega)}</span>
 				{/if}

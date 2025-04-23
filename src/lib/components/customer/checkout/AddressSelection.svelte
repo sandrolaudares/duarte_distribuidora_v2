@@ -39,17 +39,6 @@
 	  .join(', ')
   }
 
-  onMount(async()=>{
-    isLoading = true
-    try {
-      cart.meta.taxaEntrega = await getDistance(cart.meta.enderecoSelecionado, tenant.taxa_por_km ?? 0)
-    } catch (error) {
-      toast.error('Erro ao calcular a taxa de entrega')
-    } finally {
-      isLoading = false
-    }
-  })
-
 </script>
 
 <dialog class="modal" bind:this={isOpenModal}>

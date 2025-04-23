@@ -378,7 +378,7 @@
         </button> -->
         <button
           class="btn btn-primary w-full disabled:bg-opacity-50"
-          disabled={Object.values(cart.cart).length === 0}
+          disabled={Object.values(cart.cart).length === 0 || (cart.meta.isDelivery ? !cart.meta.motoboySelecionado ? true : false : false)}
           onclick={pagamentoModal}
         >
           <span class="mr-1">PAGAMENTO</span>

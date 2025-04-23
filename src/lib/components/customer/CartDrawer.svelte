@@ -64,9 +64,7 @@
       <div class="flex flex-1 flex-col items-center justify-center space-y-4">
         <ShoppingCart class="h-16 w-16 text-gray-600" />
         <p class="text-gray-600">Seu carrinho está vázio</p>
-        <Sheet.Close class={buttonVariants({ variant: 'outlinePrimary' })}>
-          Continue escolhendo
-        </Sheet.Close>
+        <Button variant="outlinePrimary" onclick={()=>$isOpen=false} href={'/customer/products'}>Continue escolhendo</Button>
       </div>
     {:else}
       <div class="flex-1 overflow-auto py-4">
@@ -141,11 +139,7 @@
           </div>
         </div>
         <Button class="w-full" onclick={()=>$isOpen=false} href={'/customer/finalizar'}>Concluir pedido</Button>
-        <Sheet.Close
-          class="{buttonVariants({ variant: 'outlinePrimary' })} w-full"
-        >
-          Continue escolhendo
-        </Sheet.Close>
+        <Button variant="outlinePrimary" class="w-full" onclick={()=>$isOpen=false}>Continue escolhendo</Button>
       </div>
     {/if}
   </Sheet.Content>
