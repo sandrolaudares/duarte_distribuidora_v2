@@ -25,7 +25,7 @@ export class SSRFilters {
     }
   }
 
-  fromState(s: State) {
+  async fromState(s: State) {
     const filters = s.filters ?? []
     const sort = s.sort
     const page = s.currentPage
@@ -48,7 +48,7 @@ export class SSRFilters {
       }
 
       if (typeof window !== 'undefined') {
-        goto(url, { keepFocus: true })
+        await goto(url, { keepFocus: true })
       }
     } catch (error) {
       console.error('error', error)
