@@ -24,7 +24,6 @@
     Pagination,
   } from '@vincjo/datatables'
   import NoResults from '$lib/components/NoResults.svelte'
-  import ThCalendar from './ThCalendar.svelte'
   import { DateFormatter } from '@internationalized/date'
   import { formatCurrency } from '$lib/utils'
   import CustomThFilter from '$lib/components/datatable/CustomThFilter.svelte'

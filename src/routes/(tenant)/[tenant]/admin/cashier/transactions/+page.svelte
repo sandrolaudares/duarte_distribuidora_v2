@@ -22,7 +22,7 @@
   import { trpc } from '$trpc/client'
   import NoResults from '$lib/components/NoResults.svelte'
   import { goto, invalidate } from '$app/navigation'
-  import { formatCurrency, getFilterValue } from '$lib/utils'
+  import { formatCurrency } from '$lib/utils'
   import { DateFormatter } from '@internationalized/date'
   import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
@@ -33,6 +33,7 @@
   } from '$lib/utils/permissions'
   import { User } from 'lucide-svelte'
   import { getColor, printTable } from '../transactionsUtils'
+  import ThDateFilter from '$lib/components/datatable/ThDateFilter.svelte'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -136,21 +137,7 @@
             config={{ value: c => c.id, label: c => c.name }}
             placeholder={'o caixa'}
           />
-          <Th>
-            <DateFilter
-              {filters}
-              startValue={getFilterValue(filters, 'startDate')}
-              endValue={getFilterValue(filters, 'endDate')}
-              onChange={(startDate, endDate) => {
-                if (!startDate || !endDate) return
-
-                filters.update({
-                  startDate: String(startDate),
-                  endDate: String(endDate),
-                })
-              }}
-            />
-          </Th>
+          <ThDateFilter {table} endValue={filters.getFilterValue('startDate')} startValue={filters.getFilterValue('endDate')}/>
           <Th />
           <Th />
           <Th />

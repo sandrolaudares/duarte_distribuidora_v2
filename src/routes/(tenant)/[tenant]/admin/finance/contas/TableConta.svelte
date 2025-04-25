@@ -33,6 +33,7 @@
   import { formatCurrency } from '$lib/utils'
   import { Trash2 } from 'lucide-svelte'
   import SenhaAdmin from '$lib/components/SenhaAdmin.svelte'
+  import ThDateFilter from '$lib/components/datatable/ThDateFilter.svelte'
 
   let {
     table,
@@ -123,18 +124,7 @@
               config={{ value: c => c.id, label: c => c.nome }}
             />
           <Th />
-          <Th>
-            <DateFilter
-              onChange={(startDate, endDate) => {
-                if (!startDate || !endDate) return
-
-                filters.update({
-                  startDate: String(startDate),
-                  endDate: String(endDate),
-                })
-              }}
-            />
-          </Th>
+          <ThDateFilter {table} endValue={filters.getFilterValue('startDate')} startValue={filters.getFilterValue('endDate')}/>
           <Th />
           <Th />
           <Th />

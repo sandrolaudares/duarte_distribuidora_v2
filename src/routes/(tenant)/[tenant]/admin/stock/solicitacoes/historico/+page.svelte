@@ -25,6 +25,7 @@
   import Loading from '$lib/components/Loading.svelte'
   import DateFilter from '$lib/components/DateFilter.svelte'
   import { DateFormatter } from '@internationalized/date'
+  import ThDateFilter from '$lib/components/datatable/ThDateFilter.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -90,19 +91,7 @@
         <tr>
           <Th />
           <ThFilter {table} field="sku_name" />
-          <Th>
-            <DateFilter
-            
-            onChange={(startDate, endDate) => {
-              if (!startDate || !endDate) return
-        
-              filters.update({
-                startDate: String(startDate),
-                endDate: String(endDate),
-              })
-            }}
-            />
-          </Th>
+          <ThDateFilter {table} endValue={filters.getFilterValue('startDate')} startValue={filters.getFilterValue('endDate')}/>
           <Th />
           <Th />
         </tr>

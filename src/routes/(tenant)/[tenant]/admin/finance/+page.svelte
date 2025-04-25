@@ -35,6 +35,7 @@
   import { formatCurrency } from '$lib/utils'
   import * as Select from "$lib/components/ui/select/index";
   import type { Field } from '@vincjo/datatables'
+  import ThDateFilter from '$lib/components/datatable/ThDateFilter.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -160,34 +161,8 @@
           <Th />
           <Th />
           <ThFilter {table} field="name" />
-          <Th>
-            <DateFilter
-            {filters}
-              onChange={(startDate, endDate) => {
-                if (!startDate || !endDate) return
-
-                filters.update({
-                  startDate: String(startDate),
-                  endDate: String(endDate),
-                })
-              }}
-            />
-          </Th>
-
-          <Th>
-            <DateFilter
-              {filters}
-              futureDates={true}
-              onChange={(startExpireDate, endExpireDate) => {
-                if (!startExpireDate || !endExpireDate) return
-
-                filters.update({
-                  startExpireDate: String(startExpireDate),
-                  endExpireDate: String(endExpireDate),
-                })
-              }}
-            />
-          </Th>
+          <ThDateFilter {table} endValue={filters.getFilterValue('startDate')} startValue={filters.getFilterValue('endDate')}/>
+          <ThDateFilter enableFuture={true} keyStart={'startExpireDate'} keyEnd={'endExpireDate'} {table} endValue={filters.getFilterValue('startExpireDate')} startValue={filters.getFilterValue('endExpireDate')}/>
           <Th />
           <Th />
           <Th />

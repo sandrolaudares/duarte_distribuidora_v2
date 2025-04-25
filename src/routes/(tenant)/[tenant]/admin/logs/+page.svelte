@@ -30,6 +30,7 @@
   import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
   import { formatCurrency } from '$lib/utils'
+  import ThDateFilter from '$lib/components/datatable/ThDateFilter.svelte'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -123,18 +124,8 @@
           <Th />
           <Th />
           <Th />
-          <Th>
-            <DateFilter
-            onChange={(startDate, endDate) => {
-              if (!startDate || !endDate) return
-        
-              filters.update({
-                startDate: String(startDate),
-                endDate: String(endDate),
-              })
-            }}
-            />
-          </Th>
+          <ThDateFilter {table} endValue={filters.getFilterValue('startDate')} startValue={filters.getFilterValue('endDate')}/>
+
           <!--FINALIZAR ESSA TABLE, FILTRO DE DATA E ETC-->
         </tr>
       </thead>

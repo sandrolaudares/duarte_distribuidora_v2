@@ -33,6 +33,7 @@
   import { getPrinterContext } from './printerContext.svelte'
   import Loading from '$lib/components/Loading.svelte'
   import ModalPrint from '$lib/components/cashierComponents/ModalPrint.svelte'
+  import ThDateFilter from '$lib/components/datatable/ThDateFilter.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -156,19 +157,7 @@
           <ThFilter {table} field="name" />
           <ThFilter {table} field="created_by" />
           <Th />
-          <Th>
-            <DateFilter
-              {filters}
-              onChange={(startDate, endDate) => {
-                if (!startDate || !endDate) return
-
-                filters.update({
-                  startDate: String(startDate),
-                  endDate: String(endDate),
-                })
-              }}
-            />
-          </Th>
+          <ThDateFilter {table} endValue={filters.getFilterValue('startDate')} startValue={filters.getFilterValue('endDate')}/>
           <Th />
 
           <Th />
