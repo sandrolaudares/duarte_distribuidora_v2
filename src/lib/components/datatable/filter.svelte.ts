@@ -17,28 +17,41 @@ export class SSRFilters {
     return Number(value)
   }
 
-  update(filters: Record<string, string>) {
+ async  update(filters: Record<string, string | undefined>) {
     const url = new URL(this.Filters)
     Object.entries(filters).forEach(([name, value]) => {
       if (!value) {
         url.searchParams.delete(name)
       }
-      if (value !== '') url.searchParams.set(name, value)
-      else url.searchParams.delete(name)
+
+      if (value === undefined || value === "" || value === "null" || value === "undefined") {
+        url.searchParams.delete(name)
+      }else {
+        url.searchParams.set(name, value)
+      }
     })
 
     if (typeof window !== 'undefined') {
-      goto(url, { keepFocus: true })
+      console.log('update', url)
+     await goto(url, { keepFocus: true })
     }
   }
 
-  async fromState(s: State) {
+  async fromState(s: State, keysToKeep: string[] = []) {
     const filters = s.filters ?? []
     const sort = s.sort
     const page = s.currentPage
     const rowsPerPage = s.rowsPerPage
     try {
       const url = new URL(this.Filters.origin + this.Filters.pathname)
+
+      for (const key of keysToKeep) {
+        const value = this.Filters.searchParams.get(key)
+        if (value) {
+          url.searchParams.set(key, value)
+        }
+      }
+      
       for (const { field, value } of filters) {
         url.searchParams.set(String(field), String(value))
       }
