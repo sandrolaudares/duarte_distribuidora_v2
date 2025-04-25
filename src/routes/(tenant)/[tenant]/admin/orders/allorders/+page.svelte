@@ -125,7 +125,7 @@
     <button
       class="btn btn-primary"
       onclick={() =>
-        filters.clear('name', 'created_by', 'startDate', 'endDate')}
+        table.clearFilters()}
     >
       Limpar filtros
     </button>

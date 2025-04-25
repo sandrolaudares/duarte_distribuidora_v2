@@ -135,7 +135,7 @@
         </button>
         <button
           class="btn btn-secondary"
-          onclick={() => filters.clear('name', 'phone')}
+          onclick={() => table.clearFilters()}
         >
           Limpar filtros
         </button>

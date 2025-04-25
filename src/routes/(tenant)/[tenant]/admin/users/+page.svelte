@@ -129,7 +129,7 @@
     </button>
     <button
       class="btn btn-secondary"
-      onclick={() => filters.clear('username', 'email')}
+      onclick={() => table.clearFilters()}
     >
       Limpar filtros
     </button>
