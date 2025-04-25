@@ -157,7 +157,7 @@
           <ThFilter {table} field="name" />
           <ThFilter {table} field="created_by" />
           <Th />
-          <ThDateFilter {table} endValue={filters.getFilterValue('startDate')} startValue={filters.getFilterValue('endDate')}/>
+          <ThDateFilter {table} startValue={filters.getFilterValue('startDate')} endValue={filters.getFilterValue('endDate')}/>
           <Th />
 
           <Th />

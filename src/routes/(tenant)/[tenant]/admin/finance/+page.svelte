@@ -161,8 +161,8 @@
           <Th />
           <Th />
           <ThFilter {table} field="name" />
-          <ThDateFilter {table} endValue={filters.getFilterValue('startDate')} startValue={filters.getFilterValue('endDate')}/>
-          <ThDateFilter enableFuture={true} keyStart={'startExpireDate'} keyEnd={'endExpireDate'} {table} endValue={filters.getFilterValue('startExpireDate')} startValue={filters.getFilterValue('endExpireDate')}/>
+          <ThDateFilter {table} startValue={filters.getFilterValue('startDate')} endValue={filters.getFilterValue('endDate')}/>
+          <ThDateFilter enableFuture={true} keyStart={'startExpireDate'} keyEnd={'endExpireDate'} {table} startValue={filters.getFilterValue('startExpireDate')} endValue={filters.getFilterValue('endExpireDate')}/>
           <Th />
           <Th />
           <Th />

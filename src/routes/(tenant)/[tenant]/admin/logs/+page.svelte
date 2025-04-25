@@ -124,7 +124,7 @@
           <Th />
           <Th />
           <Th />
-          <ThDateFilter {table} endValue={filters.getFilterValue('startDate')} startValue={filters.getFilterValue('endDate')}/>
+          <ThDateFilter {table} startValue={filters.getFilterValue('startDate')} endValue={filters.getFilterValue('endDate')}/>
 
           <!--FINALIZAR ESSA TABLE, FILTRO DE DATA E ETC-->
         </tr>

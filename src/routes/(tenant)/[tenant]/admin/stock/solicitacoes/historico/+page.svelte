@@ -91,7 +91,7 @@
         <tr>
           <Th />
           <ThFilter {table} field="sku_name" />
-          <ThDateFilter {table} endValue={filters.getFilterValue('startDate')} startValue={filters.getFilterValue('endDate')}/>
+          <ThDateFilter {table} startValue={filters.getFilterValue('startDate')} endValue={filters.getFilterValue('endDate')}/>
           <Th />
           <Th />
         </tr>

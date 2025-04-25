@@ -124,7 +124,7 @@
               config={{ value: c => c.id, label: c => c.nome }}
             />
           <Th />
-          <ThDateFilter {table} endValue={filters.getFilterValue('startDate')} startValue={filters.getFilterValue('endDate')}/>
+          <ThDateFilter {table} startValue={filters.getFilterValue('startDate')} endValue={filters.getFilterValue('endDate')}/>
           <Th />
           <Th />
           <Th />
