@@ -1,0 +1,1 @@
+ALTER TABLE `tenants` ADD `created_at` integer;
