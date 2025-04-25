@@ -84,7 +84,6 @@
     isOpenModalCancel?.showModal()
   }
 
-  let selectedCat: string = $state('')
 </script>
 
 <div class="overflow-hidden h-[76vh]">
@@ -115,7 +114,6 @@
               placeholder="o fornecedor"
               delegateQuery={trpc(page).stock.getSupplier.query}
               config={{ value: c => c.id, label: c => c.name }}
-              bind:selectedValue={selectedCat}
             />
             <SelectFilter
             {table}
@@ -123,7 +121,6 @@
               placeholder="a categoria"
               delegateQuery={trpc(page).contas.getCategorias.query}
               config={{ value: c => c.id, label: c => c.nome }}
-              bind:selectedValue={selectedCat}
             />
           <Th />
           <Th>

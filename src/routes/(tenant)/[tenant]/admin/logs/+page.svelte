@@ -74,9 +74,6 @@
     return colorMap[firstLetter] || 'badge-neutral'
   }
 
-  let selectedType: string = $state('')
-  let selectedUser: string = $state('')
-
   let logTypeEnum = ['LOG', 'SYSTEM', 'ERROR', 'CAIXA']
   const delegateQuery = () => {
   return Promise.resolve(logTypeEnum);
@@ -114,8 +111,7 @@
             filterKey="user_name"
             placeholder="o usuario"
             delegateQuery={trpc(page).auth.getUsers.query}
-            config={{ value: c => c.username, label: c => c.username }}
-            bind:selectedValue={selectedUser}/>
+            config={{ value: c => c.username, label: c => c.username }}/>
           <ThFilter {table} field="text" />
           <Th />
           <Th />
@@ -124,8 +120,7 @@
             filterKey="type"
             delegateQuery={delegateQuery}
             placeholder="o tipo"
-            config={{ value: c => c, label: c => c }}
-            bind:selectedValue={selectedType}/>
+            config={{ value: c => c, label: c => c }}/>
           <Th />
           <Th />
           <Th />
