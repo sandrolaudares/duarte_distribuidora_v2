@@ -33,6 +33,8 @@
   import { flip } from 'svelte/animate'
   import { cubicInOut } from 'svelte/easing'
   import { formatCurrency } from '$lib/utils'
+  import * as Select from "$lib/components/ui/select/index";
+  import type { Field } from '@vincjo/datatables'
 
   let { data }: { data: PageData } = $props()
 
@@ -99,41 +101,42 @@
     }
   }
 
+  const filter = table.createFilter('atrasados' as Field<typeof data.rows[number]>)
+
+  const options = [
+    { value: "", label: "Todos" },
+    { value: "true", label: "Pagamentos atrasados" },
+  ];
+
+  const triggerContent = $derived(
+    options.find((f) => f.value === filter.value)?.label ?? "Todos"
+  );
 </script>
 
 <h1 class="my-5 text-center text-2xl font-medium">
   Pedidos com pagamento pendente:
 </h1>
 <main class="mx-4 h-full max-h-[calc(100vh-24vh)]">
-  <select
-    value="todos"
-    onchange={e => {
-      const value = (e.target as HTMLInputElement).value
-      if (value === 'atrasados') {
-        filters.update({ atrasados: 'true' })
-      } else {
-        filters.clear('atrasados')
-      }
-    }}
-    class="select select-bordered mb-3"
-  >
-    <option value="todos" selected={true}>Todos</option>
-    <option value="atrasados">Pagamentos atrasados</option>
-  </select>
-  <button
-    class="btn btn-primary"
-    onclick={() =>
-      filters.clear(
-        'name',
-        'startDate',
-        'endDate',
-        'startExpireDate',
-        'endExpireDate',
-        'atrasados',
-      )}
-  >
-    Limpar filtros
-  </button>
+  <div class="flex items-center justify-start gap-2 mb-2">
+    <Select.Root type="single" bind:value={filter.value} onValueChange={value => {
+        filter.value = value
+        filter.set()
+    }}>
+      <Select.Trigger class="max-w-[280px] select select-bordered !text-gray-700">{triggerContent}</Select.Trigger>
+      <Select.Content>
+        {#each options as option (option.value)}
+          <Select.Item value={option.value} label={option.label} />
+        {/each}
+      </Select.Content>
+    </Select.Root>
+    <button
+      class="btn btn-primary"
+      onclick={() =>
+        table.clearFilters()}
+    >
+      Limpar filtros
+    </button>
+  </div>
   <Datatable {table} headless>
     {#if table.isLoading}
       <LoadingBackground />
