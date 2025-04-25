@@ -135,7 +135,7 @@ export const load = (async ({ url, locals: { tenantDb, user } }) => {
   const queryTotalSum = () =>
     _joins(
       _countSumBuilder().from(schema.cashierTransactionsT).$dynamic(),
-    ).where(queryConditions)
+    )
 
   const _countSelectBuilder = () =>
     _withs(tenantDb!, cte).select({ count: count() })
@@ -156,11 +156,11 @@ export const load = (async ({ url, locals: { tenantDb, user } }) => {
 
   const [rows, [total], [totalSumResult]] = await Promise.all([
     withPagination(query, page, pageSize),
-    queryCount(),
-    queryTotalSum(),
+    queryCount().where(queryConditions),
+    queryTotalSum().where(queryConditions),
   ])
 
-  console.log(rows)
+  console.log(total.count)
 
   return {
     rows,

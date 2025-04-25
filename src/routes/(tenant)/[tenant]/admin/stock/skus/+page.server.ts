@@ -13,14 +13,18 @@ import { and, eq, getTableColumns, SQL, count, like } from 'drizzle-orm'
 import { pageConfig } from '$lib/config'
 
 export const load = (async ({ url, locals: { tenantDb } }) => {
+
+  
   const { searchParams } = url
   const page = Number(searchParams.get('page') ?? 1)
   const pageSize = Number(searchParams.get('pageSize') ?? pageConfig.rowPages)
-
+  
   const name = searchParams.get('name')
-
+  
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_direction')
+  
+  const queryConditions = name ? like(schema.skuTable.name, `%${name}%`) : undefined
 
   const cte = tenantDb!.select().from(schema.skuTable).as('cteSkus')
 
@@ -30,7 +34,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     skusSelectBuilder()
       .from(schema.skuTable)
       .$dynamic()
-      .where(name ? like(schema.skuTable.name, `%${name}%`) : undefined)
+      .where(queryConditions)
 
   const _countSelectBuilder = () =>
     _withs(tenantDb!, cte).select({ count: count() })
@@ -50,7 +54,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   try {
     const [rows, total] = await Promise.all([
       withPagination(query, page, pageSize),
-      queryCount(),
+      queryCount().where(queryConditions),
     ])
 
     console.log(rows)
