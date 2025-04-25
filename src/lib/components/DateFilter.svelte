@@ -23,9 +23,9 @@
     startValue?: DateValue
     endValue?: DateValue
     onChange?: (startDate: number, endDate: number) => void
+    onClear?: () => void
     title?: string
     futureDates?: boolean
-    filters?: SSRFilters
     variant?: ButtonVariant
   }
 
@@ -33,9 +33,9 @@
     startValue: sVProps,
     endValue,
     onChange,
+    onClear,
     title,
     futureDates,
-    filters = $bindable(),
     variant = "ghost"
   }: Props = $props()
 
@@ -50,39 +50,12 @@
 
   let startValue: DateValue | undefined = $state(sVProps)
 
-  const DateRanges = [
-    { value: 0, label: 'Today' },
-    { value: 1, label: 'Tomorrow' },
-    { value: 3, label: 'In 3 days' },
-    { value: 7, label: 'In a week' },
-  ]
-  const valueString = $derived({
-    start: value.start ? df.format(value.start.toDate(getLocalTimeZone())) : '',
-    end: value.end ? df.format(value.end.toDate(getLocalTimeZone())) : '',
-  })
-
-  // let filters = new SSRFilters()
-
   const clearCalendar = () => {
     startValue = undefined
     endValue = undefined
     value = { start: undefined, end: undefined }
 
-    console.log('clearing compare')
-    filters?.clear('compareStartDate', 'compareEndDate', 'startDate', 'endDate')
-
-    // if (title == 'Base')
-    //   filters.update({
-    //     startDate: today('America/Sao_Paulo')
-    //       .subtract({ days: 7 })
-    //       .toDate(getLocalTimeZone())
-    //       .getTime()
-    //       .toString(),
-    //     endDate: today('America/Sao_Paulo')
-    //       .toDate(getLocalTimeZone())
-    //       .getTime()
-    //       .toString(),
-    //   })
+    onClear?.()
   }
 </script>
 
@@ -117,7 +90,6 @@
         !value && 'text-muted-foreground',
       )}
     >
-      <!-- <CalendarIcon class="mr-2 size-4" /> -->
       {#if value && value.start}
         {#if value.end}
           {df.format(value.start.toDate(getLocalTimeZone()))} - {df.format(

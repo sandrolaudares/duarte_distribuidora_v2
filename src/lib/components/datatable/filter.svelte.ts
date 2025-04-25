@@ -2,12 +2,19 @@ import { page } from '$app/state'
 import { goto } from '$app/navigation'
 import type { State } from '@vincjo/datatables/server'
 import { toast } from 'svelte-sonner'
+import { CalendarDate } from '@internationalized/date'
 
 export class SSRFilters {
   Filters = $derived(page.url)
 
   get(name: string) {
     return this.Filters.searchParams.get(name)
+  }
+
+  getDate(name: string) {
+    const value = this.Filters.searchParams.get(name)
+    if (!value) return undefined
+    return Number(value)
   }
 
   update(filters: Record<string, string>) {
@@ -70,6 +77,18 @@ export class SSRFilters {
   isFiltered(...params: string[]) {
     return (
       params.length > 0 && params.some(p => this.Filters.searchParams.has(p))
+    )
+  }
+
+  getFilterValue(filterName: string) {
+    const startValue = this.Filters.searchParams.get(filterName)
+    if (!startValue) return undefined
+
+    const startDate = new Date(Number(startValue))
+    return new CalendarDate(
+      startDate.getFullYear(),
+      startDate.getMonth(),
+      startDate.getDate(),
     )
   }
 }
