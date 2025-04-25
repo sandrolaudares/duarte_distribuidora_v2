@@ -148,7 +148,8 @@
           <ThSort {table} field="expire_at">Data de vencimento</ThSort>
           <Th>Dias para vencimento</Th>
 
-          <ThSort {table} field="total">Valor do pedido</ThSort>
+          <ThSort {table} field="total">Valor pendente</ThSort>
+          <ThSort {table} field="amount_paid">Valor pago</ThSort>
 
           <Th>Ver detalhes</Th>
         </tr>
@@ -184,6 +185,7 @@
               }}
             />
           </Th>
+          <Th />
           <Th />
           <Th />
 
@@ -239,7 +241,8 @@
                 {/if}
               </b>
             </td>
-            <td><b class="text-xl text-success">{formatCurrency(row.total)}</b></td>
+            <td><b class="text-lg text-rose-500">{formatCurrency(row.pending_amount)}</b></td>
+            <td><b class="text-lg text-success">{formatCurrency(row.amount_paid)}</b></td>
 
             <td>
               <a href="/admin/orders/{row.id}" class="badge badge-primary">
@@ -264,6 +267,7 @@
                 
             </span>
           </td>
+          <td></td>
           <td></td>
         </tr>
       </tbody>
