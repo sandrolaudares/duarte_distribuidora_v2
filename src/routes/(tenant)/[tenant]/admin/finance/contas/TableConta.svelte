@@ -84,6 +84,10 @@
     selectedId = contaId
     isOpenModalCancel?.showModal()
   }
+  let value = $state({
+    start: filters.getFilterValue('startDate'),
+    end: filters.getFilterValue('endDate'),
+  })
 
 </script>
 
@@ -124,7 +128,7 @@
               config={{ value: c => c.id, label: c => c.nome }}
             />
           <Th />
-          <ThDateFilter {table} startValue={filters.getFilterValue('startDate')} endValue={filters.getFilterValue('endDate')}/>
+          <ThDateFilter {table} {filters} bind:value />
           <Th />
           <Th />
           <Th />

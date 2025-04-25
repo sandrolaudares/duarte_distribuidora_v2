@@ -46,7 +46,7 @@
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
     try {
-      await filters.fromState(s)
+      await filters.fromState(s, ['startDate', 'endDate'])
       s.setTotalRows(data.count)
     } catch (error) {
       console.error(error)

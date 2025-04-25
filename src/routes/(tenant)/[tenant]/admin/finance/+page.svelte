@@ -62,7 +62,13 @@
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
     try {
-      await filters.fromState(s)
+      await filters.fromState(s,[
+        'startDate',
+        'endDate',
+        'startExpireDate',
+        'endExpireDate',
+
+      ])
       s.setTotalRows(data.count)
       console.log(data.count)
     } catch (error) {
@@ -112,6 +118,14 @@
   const triggerContent = $derived(
     options.find((f) => f.value === filter.value)?.label ?? "Todos"
   );
+  let value = $state({
+    start: filters.getFilterValue('startDate'),
+    end: filters.getFilterValue('endDate'),
+  })
+  let valueExpire = $state({
+    start: filters.getFilterValue('startExpireDate'),
+    end: filters.getFilterValue('endExpireDate'),
+  })
 </script>
 
 <h1 class="my-5 text-center text-2xl font-medium">
@@ -132,8 +146,18 @@
     </Select.Root>
     <button
       class="btn btn-primary"
-      onclick={() =>
-        table.clearFilters()}
+      onclick={() =>{
+        table.clearFilters()
+        filters.clear('startDate', 'endDate','startExpireDate','endExpireDate')
+        value = {
+          start: undefined,
+          end: undefined,
+        }
+        valueExpire = {
+          start: undefined,
+          end: undefined,
+        }}
+        }
     >
       Limpar filtros
     </button>
@@ -161,8 +185,8 @@
           <Th />
           <Th />
           <ThFilter {table} field="name" />
-          <ThDateFilter {table} startValue={filters.getFilterValue('startDate')} endValue={filters.getFilterValue('endDate')}/>
-          <ThDateFilter enableFuture={true} keyStart={'startExpireDate'} keyEnd={'endExpireDate'} {table} startValue={filters.getFilterValue('startExpireDate')} endValue={filters.getFilterValue('endExpireDate')}/>
+          <ThDateFilter {table} {filters} bind:value />
+          <ThDateFilter {table} {filters} bind:value={valueExpire} futureDates={true} key={{start: 'startExpireDate',end:'endExpireDate'}} />
           <Th />
           <Th />
           <Th />

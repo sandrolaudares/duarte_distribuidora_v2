@@ -55,7 +55,7 @@
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
     try {
-      await filters.fromState(s)
+      await filters.fromState(s,['startDate', 'endDate'])
       s.setTotalRows(data.count)
     } catch (error) {
       console.error(error)
@@ -78,6 +78,10 @@
   const delegateQuery = () => {
   return Promise.resolve(logTypeEnum);
 };
+let value = $state({
+    start: filters.getFilterValue('startDate'),
+    end: filters.getFilterValue('endDate'),
+  })
 </script>
 
 <main class="mx-4 h-full max-h-[calc(100vh-10vh)]">
@@ -124,7 +128,7 @@
           <Th />
           <Th />
           <Th />
-          <ThDateFilter {table} startValue={filters.getFilterValue('startDate')} endValue={filters.getFilterValue('endDate')}/>
+          <ThDateFilter {table} {filters} bind:value />
 
           <!--FINALIZAR ESSA TABLE, FILTRO DE DATA E ETC-->
         </tr>

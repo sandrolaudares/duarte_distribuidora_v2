@@ -61,7 +61,7 @@
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
     try {
-      await filters.fromState(s)
+      await filters.fromState(s,['startDate', 'endDate'])
       s.setTotalRows(data.count)
     } catch (error) {
       console.error(error)
@@ -91,7 +91,10 @@
     selectedOrder = orderId
     loadingPrinters = false
   }
-
+  let value = $state({
+    start: filters.getFilterValue('startDate'),
+    end: filters.getFilterValue('endDate'),
+  })
 </script>
 
 {#if loadingPrinters}
@@ -125,7 +128,14 @@
     <button
       class="btn btn-primary"
       onclick={() =>
-        table.clearFilters()}
+        {
+          table.clearFilters()
+          filters.clear('startDate', 'endDate')
+          value = {
+            start: undefined,
+            end: undefined,
+          }}
+        }
     >
       Limpar filtros
     </button>
@@ -157,7 +167,8 @@
           <ThFilter {table} field="name" />
           <ThFilter {table} field="created_by" />
           <Th />
-          <ThDateFilter {table} startValue={filters.getFilterValue('startDate')} endValue={filters.getFilterValue('endDate')}/>
+          <ThDateFilter {table} {filters} bind:value />
+          
           <Th />
 
           <Th />

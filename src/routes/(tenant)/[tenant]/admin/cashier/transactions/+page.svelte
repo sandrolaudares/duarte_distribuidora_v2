@@ -58,7 +58,11 @@
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
     try {
-      await filters.fromState(s)
+      await filters.fromState(s, [
+        'startDate',
+        'endDate',
+
+      ])
       s.setTotalRows(data.count)
     } catch (error) {
       console.error(error)
@@ -71,6 +75,11 @@
   }
 
   let tableRef: HTMLTableElement | undefined = $state(undefined)
+
+  let value = $state({
+    start: filters.getFilterValue('startDate'),
+    end: filters.getFilterValue('endDate'),
+  })
 </script>
 
 <main class="mx-4 h-full max-h-[calc(100vh-20vh)]">
@@ -82,6 +91,11 @@
       class="btn btn-primary"
       onclick={() => {
         table.clearFilters()
+        filters.clear('startDate', 'endDate')
+        value = {
+          start: undefined,
+          end: undefined,
+        }
       }}
     >
       Limpar filtros
@@ -137,7 +151,9 @@
             config={{ value: c => c.id, label: c => c.name }}
             placeholder={'o caixa'}
           />
-          <ThDateFilter {table} endValue={filters.getFilterValue('startDate')} startValue={filters.getFilterValue('endDate')}/>
+
+          <ThDateFilter {table} {filters} bind:value />
+
           <Th />
           <Th />
           <Th />

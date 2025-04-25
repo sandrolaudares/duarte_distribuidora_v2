@@ -54,7 +54,7 @@
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
     try {
-      await filters.fromState(s)
+      await filters.fromState(s,['startDate', 'endDate'])
       s.setTotalRows(data.count)
     } catch (error) {
       console.error(error)
@@ -63,6 +63,11 @@
   })
 
   let isLoading = $state(false)
+
+  let value = $state({
+    start: filters.getFilterValue('startDate'),
+    end: filters.getFilterValue('endDate'),
+  })
 </script>
 
 {#if isLoading}
@@ -91,7 +96,7 @@
         <tr>
           <Th />
           <ThFilter {table} field="sku_name" />
-          <ThDateFilter {table} startValue={filters.getFilterValue('startDate')} endValue={filters.getFilterValue('endDate')}/>
+          <ThDateFilter {table} {filters} bind:value />
           <Th />
           <Th />
         </tr>
