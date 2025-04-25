@@ -59,12 +59,11 @@
 
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
-    console.log(s)
     try {
-      filters.fromState(s)
-      await navigating?.complete
+      await filters.fromState(s)
+      s.setTotalRows(data.count)
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
     return data.rows
   })

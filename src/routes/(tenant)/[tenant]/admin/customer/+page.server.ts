@@ -24,18 +24,17 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_direction')
 
+  const queryConditions = and(
+    name ? like(schema.customerTable.name, `%${name}%`) : undefined,
+    email ? like (schema.customerTable.email, `${email}%`): undefined,
+    phone ? like (schema.customerTable.phone, `${phone}%`): undefined,
+    cpf_cnpj ? like (schema.customerTable.cpf_cnpj, `${cpf_cnpj}%`): undefined,
+  )
+
   let query = tenantDb!
     .select()
     .from(schema.customerTable)
-    .where(
-      and(
-        name ? like(schema.customerTable.name, `%${name}%`) : undefined,
-        email ? like (schema.customerTable.email, `${email}%`): undefined,
-        phone ? like (schema.customerTable.phone, `${phone}%`): undefined,
-        cpf_cnpj ? like (schema.customerTable.cpf_cnpj, `${cpf_cnpj}%`): undefined,
-      )
-
-    )
+    .where(queryConditions)
     .orderBy(desc(schema.customerTable.id))
     .$dynamic()
 
@@ -50,7 +49,7 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
   try {
     const rows = await withPagination(query, page, pageSize)
 
-    const total = await tenantDb!.select({ count: count() }).from(schema.customerTable)
+    const total = await tenantDb!.select({ count: count() }).from(schema.customerTable).where(queryConditions)
 
     return { rows: rows ?? [], count: total[0].count }
   } catch (error) {

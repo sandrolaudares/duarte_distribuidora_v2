@@ -51,9 +51,8 @@
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
     try {
-      console.log(s)
-      filters.fromState(s)
-      await $navigating?.complete
+      await filters.fromState(s)
+      s.setTotalRows(data.count)
     } catch (error) {
       console.error(error)
     }

@@ -23,15 +23,15 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_direction')
 
+  const queryConditions = and(
+    username ? like(schema.userTable.username, `${username}%`) : undefined,
+    email ? like(schema.userTable.email, `${email}%`) : undefined,
+  )
+
   let query = tenantDb!
     .select()
     .from(schema.userTable)
-    .where(
-      and(
-        username ? like(schema.userTable.username, `${username}%`) : undefined,
-        email ? like(schema.userTable.email, `${email}%`) : undefined,
-      ),
-    )
+    .where(queryConditions)
     .orderBy(asc(schema.userTable.created_at))
     .$dynamic()
 
@@ -46,12 +46,7 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
   try {
     const rows = await withPagination(query, page, pageSize)
 
-    const total = await tenantDb!.select({ count: count(schema.userTable.id) }).from(schema.userTable).where(
-      and(
-        username ? like(schema.userTable.username, `${username}%`) : undefined,
-        email ? like(schema.userTable.email, `${email}%`) : undefined,
-      ),
-    )
+    const total = await tenantDb!.select({ count: count(schema.userTable.id) }).from(schema.userTable).where(queryConditions)
 
     return { rows: rows ?? [], count: total[0].count }
     console.log('total',total)
