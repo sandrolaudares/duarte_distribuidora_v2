@@ -152,7 +152,7 @@
             placeholder={'o caixa'}
           />
 
-          <ThDateFilter {table} {filters} bind:value />
+          <ThDateFilter {table} {filters} bind:value tenant={data.tenant!} />
 
           <Th />
           <Th />

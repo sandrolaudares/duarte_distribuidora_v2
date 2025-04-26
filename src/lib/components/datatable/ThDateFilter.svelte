@@ -16,6 +16,7 @@
   import Button from '../ui/button/button.svelte'
   import Separator from '../ui/separator/separator.svelte'
   import type { SelectTenant } from '$lib/server/db/central/schema'
+  import { differenceInDays } from '$lib/utils/expire'
 
   const df = new DateFormatter('pt-BR', {
     dateStyle: 'medium',
@@ -144,7 +145,7 @@
                 end: today('America/Sao_Paulo'),
               })}
             {@render btn('Todo periodo', {
-                start: today('America/Sao_Paulo').subtract({ years: 42 }),
+                start: today('America/Sao_Paulo').subtract({ days: tenant?.created_at ? -differenceInDays(tenant?.created_at) : 18262 }),
                 end: today('America/Sao_Paulo'),
               })}
               <button onclick={handleClear} class="btn btn-outline btn-error">Limpar</button>

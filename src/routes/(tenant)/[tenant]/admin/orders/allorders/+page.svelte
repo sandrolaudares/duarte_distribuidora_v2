@@ -167,7 +167,7 @@
           <ThFilter {table} field="name" />
           <ThFilter {table} field="created_by" />
           <Th />
-          <ThDateFilter {table} {filters} bind:value />
+          <ThDateFilter {table} {filters} bind:value tenant={data.tenant!}/>
           
           <Th />
 

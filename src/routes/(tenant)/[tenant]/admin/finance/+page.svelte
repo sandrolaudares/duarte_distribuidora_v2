@@ -185,8 +185,8 @@
           <Th />
           <Th />
           <ThFilter {table} field="name" />
-          <ThDateFilter {table} {filters} bind:value />
-          <ThDateFilter {table} {filters} bind:value={valueExpire} futureDates={true} key={{start: 'startExpireDate',end:'endExpireDate'}} />
+          <ThDateFilter {table} {filters} bind:value tenant={data.tenant!} />
+          <ThDateFilter {table} {filters} bind:value={valueExpire} futureDates={true} key={{start: 'startExpireDate',end:'endExpireDate'}} tenant={data.tenant!} />
           <Th />
           <Th />
           <Th />

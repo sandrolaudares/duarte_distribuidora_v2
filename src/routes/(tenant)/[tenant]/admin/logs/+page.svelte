@@ -128,7 +128,7 @@ let value = $state({
           <Th />
           <Th />
           <Th />
-          <ThDateFilter {table} {filters} bind:value />
+          <ThDateFilter {table} {filters} bind:value tenant={data.tenant!}/>
 
           <!--FINALIZAR ESSA TABLE, FILTRO DE DATA E ETC-->
         </tr>

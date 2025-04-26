@@ -242,7 +242,7 @@
     </div>
   </div>
 
-  <TableConta {table} totalSum={data.totalSum} />
+  <TableConta {table} totalSum={data.totalSum} tenant={data.tenant!} />
 
   <!-- <div
     class="my-3 flex items-center justify-between rounded-lg bg-gray-100 p-2 shadow"

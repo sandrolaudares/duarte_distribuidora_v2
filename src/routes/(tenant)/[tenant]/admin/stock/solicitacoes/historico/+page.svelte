@@ -96,7 +96,7 @@
         <tr>
           <Th />
           <ThFilter {table} field="sku_name" />
-          <ThDateFilter {table} {filters} bind:value />
+          <ThDateFilter {table} {filters} bind:value tenant={data.tenant!}/>
           <Th />
           <Th />
         </tr>

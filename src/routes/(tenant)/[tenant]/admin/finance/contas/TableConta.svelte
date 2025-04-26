@@ -34,13 +34,16 @@
   import { Trash2 } from 'lucide-svelte'
   import SenhaAdmin from '$lib/components/SenhaAdmin.svelte'
   import ThDateFilter from '$lib/components/datatable/ThDateFilter.svelte'
+  import type { SelectTenant } from '$lib/server/db/central/schema'
 
   let {
     table,
-    totalSum
+    totalSum,
+    tenant
   }: {
     table: TableHandler<PageData['rows'][0]>
     totalSum:number
+    tenant:SelectTenant
   } = $props()
 
   const filters = new SSRFilters()
@@ -128,7 +131,7 @@
               config={{ value: c => c.id, label: c => c.nome }}
             />
           <Th />
-          <ThDateFilter {table} {filters} bind:value />
+          <ThDateFilter {table} {filters} bind:value tenant={tenant}/>
           <Th />
           <Th />
           <Th />
