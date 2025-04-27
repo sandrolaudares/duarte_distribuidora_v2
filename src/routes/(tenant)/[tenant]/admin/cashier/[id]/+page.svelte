@@ -315,7 +315,7 @@
   </div>
 {:else if user && (user.meta.caixa_id === caixa.id || user.role != 'caixa')}
   <AlertaFechar cashier={caixa} tenant={data.tenant!} />
-  <div class="mb-3 flex justify-center gap-2">
+  <div class="mb-3 mx-4 flex flex-col lg:flex-row justify-center gap-2">
     <button
       class="btn btn-primary"
       onclick={() => {
