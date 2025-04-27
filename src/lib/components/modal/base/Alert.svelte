@@ -6,6 +6,7 @@
     text: string
     onConfirm?: () => Promise<void> | void
     onCancel?: () => Promise<void> | void
+    confirmText?:string
   }
 
   const {
@@ -13,6 +14,7 @@
     text = 'Tem certeza?!?',
     onCancel,
     onConfirm,
+    confirmText = 'Confirmar'
   }: Props = $props()
 
   async function confirm() {
@@ -33,10 +35,10 @@
     </div>
   </Modal>
   {#snippet footer()}
-  <button class="btn" onclick={cancel}>
-    {onCancel ? 'Cancelar' : 'Fechar'}
-  </button>
+  {#if onCancel}
+  <button class="btn" onclick={cancel}>Fechar</button>
+  {/if}
   {#if onConfirm}
-    <button class="btn" onclick={confirm}>Confirmar</button>
+    <button class="btn" onclick={confirm}>{confirmText}</button>
   {/if}
   {/snippet}

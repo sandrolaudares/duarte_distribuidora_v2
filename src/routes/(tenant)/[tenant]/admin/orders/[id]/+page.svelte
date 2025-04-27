@@ -19,27 +19,28 @@
   import ModalPrint from '$lib/components/cashierComponents/ModalPrint.svelte'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
   import { getPrinterContext } from '../allorders/printerContext.svelte'
+  import { modal } from '$lib/components/modal'
+  import AlertComponent from '$lib/components/modal/base/Alert.svelte'
+
   let { data }: { data: PageData } = $props()
 
   const order = createCartContext(data.order_details)
 
   const prr = getPrinterContext()
 
-  let order_details = data.order_details
+  let { order_details } = $state(data)
 
   let isOpenModal: HTMLDialogElement | null = $state(null)
   let isOpenModalEdit: HTMLDialogElement | null = $state(null)
   let isOpenModalCancel: HTMLDialogElement | null = $state(null)
 
-  let troco = $state(0)
-  let taxaEntrega = 0
-  let isDelivery = false
-
-  troco =
-    order_details?.payments?.reduce(
+  let troco = $derived.by(()=>{
+    return order_details?.payments?.reduce(
       (acc, payment) => acc + (payment.troco ?? 0),
       0,
     ) ?? 0
+  })
+    
 
   let amount_paid_order = $derived.by(() => {
     return (order_details?.amount_paid ?? 0) - troco
@@ -59,9 +60,21 @@
 
   let isLoading = $state(false)
 
+  function handleConfirmUpdate(){
+    isOpenModalEdit?.close()
+    modal.open(AlertComponent,{
+      title:'Tem certeza que deseja atualizar o pedido?',
+      text:'',
+      confirmText:'Atualizar pedido',
+      onConfirm() {
+        handleUpdateOrder()
+      },
+    })
+  }
+
+  $inspect(data.order_details)
+
   async function handleUpdateOrder() {
-    const confirmed = confirm('Você tem certeza que deseja atualizar o pedido?')
-    if (confirmed) {
       isLoading = true
       try {
         const toAdd = Object.values(order.cart).map(item => ({
@@ -80,16 +93,14 @@
           items: toAdd,
         })
         toast.success('Pedido atualizado com sucesso!')
-        invalidateAll()
+        await invalidateAll()
+        order_details = data.order_details
       } catch (error) {
         toast.error('Erro ao atualizar pedido!')
       } finally {
         isLoading = false
         isOpenModalEdit?.close()
       }
-    } else {
-      toast.error('Pedido não atualizado!')
-    }
   }
 
   async function handleDeleteOrder() {
@@ -124,6 +135,10 @@
 
 {#if loadingPrinters}
   <LoadingBackground />
+{/if}
+
+{#if isLoading}
+  <LoadingBackground/>
 {/if}
 
 <dialog class="modal" bind:this={isOpenModalPrint}>
@@ -387,7 +402,7 @@
           <div class="flex justify-end">
             <button
               class="btn btn-primary mt-4"
-              onclick={handleUpdateOrder}
+              onclick={handleConfirmUpdate}
               disabled={isLoading}
             >
               {#if isLoading}
