@@ -14,6 +14,9 @@
   import SenhaAdmin from './SenhaAdmin.svelte'
   import { paymentMethodEnum, paymentMethodLabel } from '$lib/utils/permissions'
   import SelectSearch from './selectSearch.svelte'
+  import * as Alert from '$lib/components/ui/alert/index'
+  import { Info } from 'lucide-svelte'
+  import Modal from './modal/base/Modal.svelte'
 
   const cart = getCartContext()
 
@@ -207,205 +210,200 @@
   </form>
 </dialog>
 
-<h1 class="mb-2 text-center">
-  Valor total do pedido: <span class="font-bold text-success">
-    {formatCurrency(total_pedido)}
-  </span>
-</h1>
-<div
-  class="flex {total_pedido === total_paid || total_pedido < total_paid
-    ? 'flex-col-reverse'
-    : 'flex-col'}"
->
-  {#if total_pedido === total_paid || total_pedido < total_paid}
-    <div class="mt-3 flex w-full flex-col items-center justify-center gap-2">
-      <div class="badge badge-success gap-2">
-        Valor total to pedido foi pago!
-      </div>
-      <button
-        class="btn btn-secondary"
-        disabled={isLoading}
-        onclick={() => {
-          isLoading = true
-          save(payments)
-        }}
-      >
-        {isLoading
-          ? 'Criando pedido...'
-          : 'CLIQUE AQUI PARA CONFIRMAR O PAGAMENTO'}
-      </button>
-    </div>
-  {:else}
-    <div class="flex flex-col gap-3">
-      {#if isDiferent || isPago || isDinheiro}
+<Modal title="">
+  <h1 class="mb-2 text-center">
+    Valor total do pedido: <span class="font-bold text-success">
+      {formatCurrency(total_pedido)}
+    </span>
+  </h1>
+  <div
+    class="flex {total_pedido === total_paid || total_pedido < total_paid
+      ? 'flex-col-reverse'
+      : 'flex-col'}"
+  >
+    {#if total_pedido === total_paid || total_pedido < total_paid}
+      <div class="mt-3 flex w-full flex-col items-center justify-center gap-2">
+        <div class="badge badge-success gap-2">
+          Valor total to pedido foi pago!
+        </div>
         <button
           class="btn btn-secondary"
-          disabled={payments.length > 0}
+          disabled={isLoading}
           onclick={() => {
-            isDiferent = false
-            isPago = false
-            isDinheiro = false
-            isFiado = false
-            metodo_pagamento = ''
-            valor_recebido_dinheiro = 0
-            valor_a_pagar = total_pedido
+            isLoading = true
+            save(payments)
           }}
         >
-          {@html icons.back()}
-          Voltar
+          {isLoading
+            ? 'Criando pedido...'
+            : 'CLIQUE AQUI PARA CONFIRMAR O PAGAMENTO'}
         </button>
-      {:else}
-        <h1 class="text-center text-xl">Qual metodo de pagamento?</h1>
-      {/if}
-      {#if isDiferent}
-        <label class="form-control w-full items-center">
-          <div class="label">
-            <span class="label-text">
-              Digite aqui o valor para este pagamento
-            </span>
-          </div>
-
-          <div>
-            <CurrencyInput bind:value={valor_a_pagar} />
-            <button class="btn mt-2" onclick={() => divideValor(4)}>25%</button>
-            <button class="btn" onclick={() => divideValor(2)}>50%</button>
-            <button class="btn" onclick={() => divideValor(1.25)}>75%</button>
-            <button class="btn" onclick={() => divideValor(1)}>100%</button>
-          </div>
-          <p>
-            Valor restante do pedido:
-            {formatCurrency(total_pedido - total_paid)}
-          </p>
-        </label>
-      {/if}
-      {#if isPago}
-        <div class="label">
-          <span class="label-text">
-            Selecione o metodo utilizado para pagar:
-          </span>
-        </div>
-        <SelectSearch bind:value={metodo_pagamento} config={{ value: v=>v, label: v=>paymentMethodLabel[v]}} placeholder="metodo" delegateQuery={()=>Promise.resolve(Array.from(paymentMethodEnum).filter(v=>!['dinheiro'].includes(v)))}/>
-        <!-- <hr class="w-full bg-base-300" /> -->
-      {:else if isDinheiro}
-        <div class="flex w-full items-center justify-center gap-4">
-          <label class="form-control w-full gap-2">
-            <div class="label">
-              <span class="label-text">Valor recebido:</span>
-              <span class="label-text-alt">(Valor pago pelo cliente)</span>
-            </div>
-            <CurrencyInput bind:value={valor_recebido_dinheiro} />
-          </label>
-        </div>
-        {#if valor_recebido_dinheiro && (valor_recebido_dinheiro >= total_pedido || valor_recebido_dinheiro >= valor_a_pagar) && troco > 0}
-          <h1 class="font-lg">
-            Troco do cliente: <span class="font-bold">
-              {formatCurrency(troco)}
-            </span>
-          </h1>
-        {/if}
-      {:else}
-        {#if !isDiferent}
+      </div>
+    {:else}
+      <div class="flex flex-col gap-3">
+        {#if isDiferent || isPago || isDinheiro}
           <button
-            class="btn btn-primary"
+            class="btn btn-secondary"
+            disabled={payments.length > 0}
             onclick={() => {
-              isDiferent = !isDiferent
-              isFiado = false
-              isDinheiro = false
+              isDiferent = false
               isPago = false
+              isDinheiro = false
+              isFiado = false
               metodo_pagamento = ''
+              valor_recebido_dinheiro = 0
+              valor_a_pagar = total_pedido
             }}
           >
-            PAGAMENTO PARCIAL
-            {@html icons.divide()}
+            {@html icons.back()}
+            Voltar
           </button>
+        {:else}
+          <h1 class="text-center text-xl">Qual metodo de pagamento?</h1>
         {/if}
-        {#if cart.meta.clienteSelecionado && !isDiferent}
+        {#if isDiferent}
+          <label class="form-control w-full items-center">
+            <div class="label">
+              <span class="label-text">
+                Digite aqui o valor para este pagamento
+              </span>
+            </div>
+  
+            <div>
+              <CurrencyInput bind:value={valor_a_pagar} />
+              <button class="btn mt-2" onclick={() => divideValor(4)}>25%</button>
+              <button class="btn" onclick={() => divideValor(2)}>50%</button>
+              <button class="btn" onclick={() => divideValor(1.25)}>75%</button>
+              <button class="btn" onclick={() => divideValor(1)}>100%</button>
+            </div>
+            <p>
+              Valor restante do pedido:
+              {formatCurrency(total_pedido - total_paid)}
+            </p>
+          </label>
+        {/if}
+        {#if isPago}
+          <div class="label">
+            <span class="label-text">
+              Selecione o metodo utilizado para pagar:
+            </span>
+          </div>
+          <SelectSearch bind:value={metodo_pagamento} config={{ value: v=>v, label: v=>paymentMethodLabel[v]}} placeholder="metodo" delegateQuery={()=>Promise.resolve(Array.from(paymentMethodEnum).filter(v=>!['dinheiro'].includes(v)))}/>
+          <!-- <hr class="w-full bg-base-300" /> -->
+        {:else if isDinheiro}
+          <div class="flex w-full items-center justify-center gap-4">
+            <label class="form-control w-full gap-2">
+              <div class="label">
+                <span class="label-text">Valor recebido:</span>
+                <span class="label-text-alt">(Valor pago pelo cliente)</span>
+              </div>
+              <CurrencyInput bind:value={valor_recebido_dinheiro} />
+            </label>
+          </div>
+          {#if valor_recebido_dinheiro && (valor_recebido_dinheiro >= total_pedido || valor_recebido_dinheiro >= valor_a_pagar) && troco > 0}
+            <h1 class="font-lg">
+              Troco do cliente: <span class="font-bold">
+                {formatCurrency(troco)}
+              </span>
+            </h1>
+          {/if}
+        {:else}
+          {#if !isDiferent}
+            <button
+              class="btn btn-primary"
+              onclick={() => {
+                isDiferent = !isDiferent
+                isFiado = false
+                isDinheiro = false
+                isPago = false
+                metodo_pagamento = ''
+              }}
+            >
+              PAGAMENTO PARCIAL
+              {@html icons.divide()}
+            </button>
+          {/if}
+          {#if cart.meta.clienteSelecionado && !isDiferent}
+            <button
+              class="btn btn-primary w-full"
+              onclick={() => {
+                isFiado = true
+                validaPedido()
+                // nulla()
+              }}
+              disabled={isFiado}
+            >
+              FIADO
+              {@html icons.fiado()}
+            </button>
+          {/if}
           <button
             class="btn btn-primary w-full"
             onclick={() => {
-              isFiado = true
-              validaPedido()
-              // nulla()
+              isPago = true
+              isDinheiro = false
+              isFiado = false
             }}
-            disabled={isFiado}
           >
-            FIADO
-            {@html icons.fiado()}
+            PAGO
+            {@html icons.paid()}
+          </button>
+          <button
+            class="btn btn-primary w-full"
+            onclick={() => {
+              isDinheiro = true
+              isPago = false
+              isFiado = false
+              metodo_pagamento = 'dinheiro'
+            }}
+          >
+            DINHEIRO
+            {@html icons.cashColor()}
           </button>
         {/if}
-        <button
-          class="btn btn-primary w-full"
-          onclick={() => {
-            isPago = true
-            isDinheiro = false
-            isFiado = false
-          }}
-        >
-          PAGO
-          {@html icons.paid()}
-        </button>
-        <button
-          class="btn btn-primary w-full"
-          onclick={() => {
-            isDinheiro = true
-            isPago = false
-            isFiado = false
-            metodo_pagamento = 'dinheiro'
-          }}
-        >
-          DINHEIRO
-          {@html icons.cashColor()}
-        </button>
-      {/if}
-      {#if isDiferent || isPago || isDinheiro || isFiado}
-        <hr />
-        <button
-          class="btn btn-secondary w-full"
-          onclick={addPayment}
-          disabled={!(metodo_pagamento === 'dinheiro'
-            ? valor_recebido_dinheiro >= valor_a_pagar
-            : metodo_pagamento) || metodo_pagamento === null}
-        >
-          ADICIONAR PAGAMENTO
-        </button>
-      {/if}
-    </div>
-  {/if}
-  {#if payments.length > 0}
-    <div class="mt-5">
-      {#if total_paid < total_pedido && total_paid != 0}
-        <p>
-          Foi pago: {formatCurrency(total_paid)} mas ainda faltam
-
-          <span class="text-error">
-            {formatCurrency(total_pedido - total_paid)}
-          </span>
-          para pagar o pedido!
-        </p>
-        <!-- <p class="mb-4">
-          {#if cart.meta.clienteSelecionado}
-            Deseja fazer com que R${((total_pedido - total_paid) / 100).toFixed(
-              2,
-            )} seja um pagamento fiado?
-            <button
-              class="text-info underline"
-              onclick={() => {
-                metodo_pagamento = 'fiado'
-                addPayment()
-              }}
+        {#if isDiferent || isPago || isDinheiro || isFiado}
+          <hr />
+          <button
+            class="btn btn-secondary w-full"
+            onclick={addPayment}
+            disabled={!(metodo_pagamento === 'dinheiro'
+              ? valor_recebido_dinheiro >= valor_a_pagar
+              : metodo_pagamento) || metodo_pagamento === null}
+          >
+            ADICIONAR PAGAMENTO
+          </button>
+        {/if}
+      </div>
+    {/if}
+    {#if payments.length > 0}
+      <div class="mt-5">
+        {#if total_paid < total_pedido && total_paid != 0}
+          <Alert.Root
+              variant="destructive"
+              class="border-destructive/30 bg-destructive/10 mb-2"
             >
-              clique aqui
-            </button>
-          {/if}
-        </p> -->
-      {/if}
-
-      <h3 class="mb-2 text-lg font-medium">Pagamentos feitos:</h3>
-      {#each payments as payment, i}
-        <div class="my-1 flex flex-col">
-          <CardPayments {payment} {i} />
-        </div>
-      {/each}
-    </div>
-  {/if}
-</div>
+            <Info class="h-4 w-4" />
+            <Alert.Description class=" gap-2">
+                <p>
+                  Foi pago: {formatCurrency(total_paid)} mas ainda faltam
+  
+                  <span class="text-error font-bold">
+                    {formatCurrency(total_pedido - total_paid)}
+                  </span>
+                  para pagar o pedido!
+                </p>
+  
+              </Alert.Description>
+            </Alert.Root>
+        {/if}
+  
+        <h3 class="mb-2 text-lg font-medium">Pagamentos feitos:</h3>
+        {#each payments as payment, i}
+          <div class="my-1 flex flex-col">
+            <CardPayments {payment} {i} />
+          </div>
+        {/each}
+      </div>
+    {/if}
+  </div>
+</Modal>
