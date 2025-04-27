@@ -1,6 +1,6 @@
 <script lang="ts">
   import { modal, Modal } from '$lib/components/modal'
-  import { cashierTransactionEnum } from '$lib/utils/permissions'
+  import { cashierTransactionEnum } from '$lib/utils/enums'
   import { trpc } from '$trpc/client'
   import CurrencyInput from '../input/CurrencyInput.svelte'
   import SelectSearch from '../selectSearch.svelte'

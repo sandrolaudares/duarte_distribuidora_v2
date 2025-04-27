@@ -19,7 +19,7 @@ import { createInsertSchema } from 'drizzle-zod'
 
 import { product } from '$db/controller'
 import { timestamps } from '../../utils'
-import { paymentMethodEnum } from '$lib/utils/permissions'
+import { paymentMethodEnum } from '$lib/utils/enums'
 
 export const customerTable = sqliteTable('cliente', {
   id: integer('id').primaryKey({ autoIncrement: true }),

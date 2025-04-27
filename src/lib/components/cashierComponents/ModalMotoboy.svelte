@@ -6,7 +6,7 @@
   import { onMount } from 'svelte'
   import { toast } from 'svelte-sonner'
   import type { RouterOutputs } from '$trpc/router'
-  import { roleEnum, type Role } from '$lib/utils/permissions'
+  import { roleEnum, type Role } from '$lib/utils/enums'
 
   type Motoboy = RouterOutputs['auth']['getMotoboys']
 

@@ -95,6 +95,7 @@ export const product = router({
           retail_price: z.number().optional(),
           image: z.number().optional(),
           visible: z.boolean().optional(),
+          
         }),
       }),
     )

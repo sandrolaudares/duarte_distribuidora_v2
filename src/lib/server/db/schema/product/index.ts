@@ -12,6 +12,7 @@ import { skuTable } from '../stock'
 
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { timestamps } from '../../utils'
+import { alimentTypeEnum } from '$lib/utils/enums'
 
 export const productCategoryTable = sqliteTable('product_category', {
   id: integer('id', { mode: 'number' }).primaryKey({ autoIncrement: true }),
@@ -67,7 +68,7 @@ export const productItemTable = sqliteTable('product_item', {
   }),
   quantity: integer('quantity').notNull().default(1),
 
-  tipo : text('tipo', ['bebida','comida']).default('bebida').notNull(),
+  tipo : text('tipo', alimentTypeEnum).default('bebida').notNull(),
   unidade: integer('unidade'),
 
   image: integer('image_id').references(() => imageTable.id),

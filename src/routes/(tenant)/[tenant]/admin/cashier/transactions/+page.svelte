@@ -30,7 +30,7 @@
     cashierTransactionEnum,
     paymentMethodEnum,
     paymentMethodLabel,
-  } from '$lib/utils/permissions'
+  } from '$lib/utils/enums'
   import { User } from 'lucide-svelte'
   import { getColor, printTable } from '../transactionsUtils'
   import ThDateFilter from '$lib/components/datatable/ThDateFilter.svelte'

@@ -23,7 +23,7 @@
   import type { SelectCashier, SelectUser } from '$lib/server/db/schema'
   import { toast } from 'svelte-sonner'
   import EditCaixa from './EditCaixa.svelte'
-  import type { Role } from '$lib/utils/permissions'
+  import type { Role } from '$lib/utils/enums'
   import { pageConfig } from '$lib/config'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
   import EditableCell from '$lib/components/editableCells/EditableCell.svelte'

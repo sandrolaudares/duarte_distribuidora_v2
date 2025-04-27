@@ -71,3 +71,13 @@ export const cashierTransactionEnum = [
 ] as const
 
 export type CashierTransactionType = (typeof cashierTransactionEnum)[number]
+
+
+export const alimentTypeEnum = [
+  'Alimento',
+  'Bebida',
+  'Objeto',
+  'Outros',
+]
+
+export type AlimentType = (typeof alimentTypeEnum)[number]

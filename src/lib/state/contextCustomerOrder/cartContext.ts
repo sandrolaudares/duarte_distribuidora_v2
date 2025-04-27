@@ -3,7 +3,7 @@ import { getContext, setContext } from 'svelte'
 import type { RouterOutputs } from '$trpc/router'
 import { Cart } from '$lib/state/cart.svelte'
 import type { SelectProductItem } from '$lib/server/db/schema/product'
-import type { paymentMethodEnum } from '$lib/utils/permissions'
+import type { paymentMethodEnum } from '$lib/utils/enums'
 
 type Item = SelectProductItem
 

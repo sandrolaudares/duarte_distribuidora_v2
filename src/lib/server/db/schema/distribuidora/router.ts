@@ -34,7 +34,7 @@ import { TRPCError } from '@trpc/server'
 import { verify } from '../user/password'
 import { formatCurrency } from '$lib/utils'
 import { eq } from 'drizzle-orm'
-import { cashierTransactionEnum } from '$lib/utils/permissions'
+import { cashierTransactionEnum } from '$lib/utils/enums'
 
 export const distribuidora = router({
   insertCashier: publicProcedure

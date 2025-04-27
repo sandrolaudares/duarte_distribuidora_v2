@@ -12,7 +12,7 @@
   import { getCartContext } from '../state/contextCashier/cartContext.svelte'
   import { onMount } from 'svelte'
   import SenhaAdmin from './SenhaAdmin.svelte'
-  import { paymentMethodEnum, paymentMethodLabel } from '$lib/utils/permissions'
+  import { paymentMethodEnum, paymentMethodLabel } from '$lib/utils/enums'
   import SelectSearch from './selectSearch.svelte'
   import * as Alert from '$lib/components/ui/alert/index'
   import { Info } from 'lucide-svelte'

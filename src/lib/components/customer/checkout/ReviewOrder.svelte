@@ -4,7 +4,7 @@
   import type { SelectAddress } from "$lib/server/db/schema"
   import { getCartContext } from "$lib/state/contextCustomerOrder/cartContext"
 	import { ArrowLeftIcon, BlindsIcon, Car, CreditCardIcon, ShoppingBagIcon } from "lucide-svelte";
-  	import { paymentMethodEnum, paymentMethodLabel } from "$lib/utils/permissions"
+  	import { paymentMethodEnum, paymentMethodLabel } from "$lib/utils/enums"
   import { formatCurrency, getImagePath } from "$lib/utils"
 
 	const cart = getCartContext()

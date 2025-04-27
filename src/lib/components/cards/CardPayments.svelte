@@ -4,7 +4,7 @@
     SelectOrderPayment,
   } from '$lib/server/db/schema'
   import { formatCurrency } from '$lib/utils'
-  import { paymentMethodLabel } from '$lib/utils/permissions'
+  import { paymentMethodLabel } from '$lib/utils/enums'
   import { DateFormatter } from '@internationalized/date'
 
   type Props = {

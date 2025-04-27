@@ -13,7 +13,7 @@ import { middleware } from '$trpc/middleware'
 import { emailTemplate, sendMail } from '$lib/server/email'
 // import { tableHelper } from '$lib/server/db/utils'
 import { generateId } from '$lib/server/auth/utils'
-import { permissionsEnum, roleEnum } from '$lib/utils/permissions'
+import { permissionsEnum, roleEnum } from '$lib/utils/enums'
 import {
   deleteSessionTokenCookie,
   setSessionTokenCookie,
