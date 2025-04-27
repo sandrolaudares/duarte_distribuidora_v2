@@ -82,8 +82,8 @@
   })
 </script>
 
-<main class="mx-4 h-full max-h-[calc(100vh-20vh)]">
-  <div class="mb-2 flex justify-end gap-2">
+<main class="mx-4 h-full max-h-[calc(100vh-20vh)] flex flex-col gap-2">
+  <div class=" flex justify-end gap-2">
     <button onclick={() => printTable(tableRef)} class="btn btn-secondary">
       Imprimir
     </button>
@@ -102,15 +102,10 @@
     </button>
   </div>
   <Datatable {table} headless>
-    <!-- {#snippet header()}
-      <Search {table} />
-     
-    {/snippet} -->
-    <!-- svelte-ignore component_name_lowercase -->
     {#if table.isLoading}
       <LoadingBackground />
     {/if}
-    <table class="sizeee table table-xs" bind:this={tableRef}>
+    <table class="sizeee table table-xs " bind:this={tableRef}>
       <thead>
         <tr class="uppercase">
           <Th>ID</Th>
@@ -143,7 +138,6 @@
             config={{ value: c => c, label: c => paymentMethodLabel[c] }}
           />
           <ThFilter {table} field="username" />
-          <!-- <ThFilter {table} field="cashier" /> -->
           <SelectFilter
             {table}
             filterKey="cashier"

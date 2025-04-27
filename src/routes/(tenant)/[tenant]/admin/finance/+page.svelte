@@ -128,7 +128,7 @@
   })
 </script>
 
-<h1 class="my-5 text-center text-2xl font-medium">
+<h1 class="my-5 text-center text-lg lg:text-2xl font-medium">
   Pedidos com pagamento pendente:
 </h1>
 <main class="mx-4 h-full max-h-[calc(100vh-24vh)]">

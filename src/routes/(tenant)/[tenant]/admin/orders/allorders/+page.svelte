@@ -124,7 +124,7 @@
 
 <main class="m-4 h-full max-h-[calc(100vh-20vh)]">
   <div class="flex items-center justify-between">
-    <h1 class="my-5 text-center text-2xl font-medium">Todos os pedidos:</h1>
+    <h1 class=" text-center text-2xl font-medium">Todos os pedidos:</h1>
     <button
       class="btn btn-primary"
       onclick={() =>

@@ -121,7 +121,7 @@
   $inspect(table.isLoading)
 </script>
 
-<main class=" m-4 flex h-full max-h-[calc(100vh-10vh)] flex-col gap-2">
+<main class="mx-4 flex h-full max-h-[calc(100vh-10vh)] flex-col gap-2">
   <div class="flex justify-end gap-2">
     <button onclick={() => isOpenModal?.showModal()} class="btn btn-primary">
       Criar motoboy
