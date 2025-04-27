@@ -87,20 +87,24 @@
 
   async function handleCep(cep: string) {
     disabled = true
-    const responseapi = await getEnderecoFromCEP(cep)
-    if (responseapi.bairro) {
-      formEndereco.neighborhood = responseapi.bairro
+    try {
+      const responseapi = await getEnderecoFromCEP(cep)
+      if (responseapi.bairro) {
+        formEndereco.neighborhood = responseapi.bairro
+      }
+      if (responseapi.logradouro) {
+        formEndereco.street = responseapi.logradouro
+      }
+      if (responseapi.uf) {
+        formEndereco.state = responseapi.uf
+      }
+      if (responseapi.localidade) {
+        formEndereco.city = responseapi.localidade
+      }
+      console.log(responseapi)
+    } catch (error) {
+      toast.error((error as Error).message || 'Erro inesperado, tente novamente')
     }
-    if (responseapi.logradouro) {
-      formEndereco.street = responseapi.logradouro
-    }
-    if (responseapi.uf) {
-      formEndereco.state = responseapi.uf
-    }
-    if (responseapi.localidade) {
-      formEndereco.city = responseapi.localidade
-    }
-    console.log(responseapi)
     disabled = false
   }
 </script>
