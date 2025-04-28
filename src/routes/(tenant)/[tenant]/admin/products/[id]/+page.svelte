@@ -10,11 +10,12 @@
   import { toast } from 'svelte-sonner'
   import { icons } from '$lib/utils'
   import { onMount } from 'svelte'
+  import TipoForm from './TipoForm.svelte'
 
   let { data }: {data:PageData} = $props()
 
   let { prod:produto} = $state(data)
-  
+
   function handleAddItem() {
     modal.open(FormModal, {
       title: 'Adicionar item',
@@ -34,6 +35,22 @@
           required: true,
         },
         {
+          name: 'tipo',
+          label: 'Tipo (bebida/alimento)',
+          type: 'component',
+          required: true,
+          component: {
+            ref: TipoForm,
+            props: {},
+          },
+        },
+        {
+          name: 'unidade',
+          label: 'Unidade de medida (Em gramas, ou ML)',
+          type: 'number',
+          required: false,
+        },
+        {
           name: 'wholesale_price',
           label: 'Preço de atacado',
           type: 'currency',
@@ -51,6 +68,7 @@
           type: 'checkbox',
           required: false,
         },
+
       ],
       save: async data => {
         console.log(data)
@@ -62,6 +80,8 @@
             retail_price: data.retail_price,
             product_id: produto.id,
             visible: data.visible,
+            tipo: data.tipo ?? undefined,
+            unidade: data.unidade ?? undefined,
           })
           console.log(resp)
           produto.items.push(resp)
@@ -201,7 +221,7 @@
     </div>
   </div>
 
-  <div class="m-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4  cols-5-p justify-center gap-4">
+  <div class="m-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4  cols-5-p justify-center gap-4">
     {#each produto.items as item, i (item.id)}
       <ProductItem {item} />
     {/each}
