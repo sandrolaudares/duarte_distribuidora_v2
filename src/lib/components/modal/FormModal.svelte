@@ -62,7 +62,7 @@
             acc[field.name] = message
           }
         } else if (field.required && !field.value) {
-          acc[field.name] = 'Required'
+          acc[field.name] = 'Obrigatório'
         }
         return acc
       },
@@ -195,7 +195,7 @@
     Cancelar
   </button>
   <button class="btn btn-primary" onclick={handleConfirm} disabled={isLoading}>
-    {!isLoading ? "Salvar" : 'Loading...'}
+    {!isLoading ? "Salvar" : 'Carregando...'}
   </button>
 </div>
 {/snippet}

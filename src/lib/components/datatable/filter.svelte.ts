@@ -2,6 +2,7 @@ import { page } from '$app/state'
 import { goto } from '$app/navigation'
 import type { State } from '@vincjo/datatables/server'
 import { toast } from 'svelte-sonner'
+import { CalendarDate } from '@internationalized/date'
 
 export class SSRFilters {
   Filters = $derived(page.url)
@@ -10,28 +11,47 @@ export class SSRFilters {
     return this.Filters.searchParams.get(name)
   }
 
-  update(filters: Record<string, string>) {
+  getDate(name: string) {
+    const value = this.Filters.searchParams.get(name)
+    if (!value) return undefined
+    return Number(value)
+  }
+
+ async  update(filters: Record<string, string | undefined>) {
     const url = new URL(this.Filters)
     Object.entries(filters).forEach(([name, value]) => {
       if (!value) {
         url.searchParams.delete(name)
       }
-      if (value !== '') url.searchParams.set(name, value)
-      else url.searchParams.delete(name)
+
+      if (value === undefined || value === "" || value === "null" || value === "undefined") {
+        url.searchParams.delete(name)
+      }else {
+        url.searchParams.set(name, value)
+      }
     })
 
     if (typeof window !== 'undefined') {
-      goto(url, { keepFocus: true })
+      console.log('update', url)
+     await goto(url, { keepFocus: true })
     }
   }
 
-  fromState(s: State) {
+  async fromState(s: State, keysToKeep: string[] = []) {
     const filters = s.filters ?? []
     const sort = s.sort
     const page = s.currentPage
     const rowsPerPage = s.rowsPerPage
     try {
       const url = new URL(this.Filters.origin + this.Filters.pathname)
+
+      for (const key of keysToKeep) {
+        const value = this.Filters.searchParams.get(key)
+        if (value) {
+          url.searchParams.set(key, value)
+        }
+      }
+      
       for (const { field, value } of filters) {
         url.searchParams.set(String(field), String(value))
       }
@@ -48,7 +68,7 @@ export class SSRFilters {
       }
 
       if (typeof window !== 'undefined') {
-        goto(url, { keepFocus: true })
+        await goto(url, { keepFocus: true })
       }
     } catch (error) {
       console.error('error', error)
@@ -70,6 +90,18 @@ export class SSRFilters {
   isFiltered(...params: string[]) {
     return (
       params.length > 0 && params.some(p => this.Filters.searchParams.has(p))
+    )
+  }
+
+  getFilterValue(filterName: string) {
+    const startValue = this.Filters.searchParams.get(filterName)
+    if (!startValue) return undefined
+
+    const startDate = new Date(Number(startValue))
+    return new CalendarDate(
+      startDate.getFullYear(),
+      startDate.getMonth(),
+      startDate.getDate(),
     )
   }
 }

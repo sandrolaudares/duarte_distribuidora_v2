@@ -1,7 +1,7 @@
 import { t } from '$trpc/t'
 import { TRPCError } from '@trpc/server'
 import { bugReport } from '$lib/server/db/controller'
-import { formated_Permissions } from '$lib/utils/permissions'
+import { formated_Permissions } from '$lib/utils/enums'
 
 // import { allowPermissionsCheck } from '$db/schema'
 const admin = t.middleware(async ({ next, ctx }) => {

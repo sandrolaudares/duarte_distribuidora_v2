@@ -11,6 +11,7 @@
   import { toast } from 'svelte-sonner'
   import CurrencyInput from '$lib/components/input/CurrencyInput.svelte'
   import { getUserContext } from '$lib/stores/user'
+  import Alert from '$lib/components/modal/base/Alert.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -179,15 +180,14 @@
                   <button
                     class="btn btn-circle"
                     onclick={() => {
-                      if (
-                        confirm(
-                          'Tem certeza que gostaria de excluir o caixa?',
-                        ) === true
-                      ) {
-                        handleDeleteCashier(caixa.id)
-                      } else {
-                        toast.info('Ação cancelada!')
-                      }
+                      modal.open(Alert,{
+                        onConfirm() {
+                          handleDeleteCashier(caixa.id)
+                        },
+                        title:'Tem certeza que deseja exluir o caixa?',
+                        text:'Essa ação não pode ser revertida, exclua somente se tiver sido criado por acidente',
+                        confirmText:'Excluir caixa'
+                      })
                     }}
                   >
                     {@html icons.trash()}

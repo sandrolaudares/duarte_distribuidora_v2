@@ -3,8 +3,8 @@
   import Loading from '$lib/components/Loading.svelte'
   import { modal } from '$lib/components/modal'
   import type { DatabaseUser } from '$lib/server/db/schema'
-  import { formated_Permissions, permissionsEnum } from '$lib/utils/permissions'
-  import type { Permission, Role } from '$lib/utils/permissions'
+  import { formated_Permissions, permissionsEnum } from '$lib/utils/enums'
+  import type { Permission, Role } from '$lib/utils/enums'
   import { trpc } from '$trpc/client'
   import { toast } from 'svelte-sonner'
 

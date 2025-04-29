@@ -8,7 +8,7 @@
   import { goto } from '$app/navigation'
   import type { RouterOutputs } from '$trpc/router'
   import { formatCurrency } from '$lib/utils'
-  import { paymentMethodLabel } from '$lib/utils/permissions'
+  import { paymentMethodLabel } from '$lib/utils/enums'
   import { cssPrintTable, printTable } from '../transactionsUtils'
   import TableTransactions from '$lib/components/cashierComponents/TableTransactions.svelte'
   import TransactionsModal from './TransactionsModal.svelte'

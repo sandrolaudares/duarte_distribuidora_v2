@@ -3,7 +3,7 @@
 	import { Button } from "$lib/components/ui/button";
 	import { Label } from "$lib/components/ui/label";
 	import { CreditCardIcon, ArrowLeftIcon } from "lucide-svelte";
-  	import { paymentMethodEnum, paymentMethodLabel } from "$lib/utils/permissions"
+  	import { paymentMethodEnum, paymentMethodLabel } from "$lib/utils/enums"
  	import type { SelectCustomer } from "$lib/server/db/schema"
   	import AvailableCredits from "$lib/components/AvailableCredits.svelte"
     import { getCartContext } from "../../../state/contextCustomerOrder/cartContext"

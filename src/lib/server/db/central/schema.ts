@@ -20,7 +20,7 @@ export type WorkSchedule = {
 };
 
 export const tenants = sqliteTable('tenants', {
-  // ...timestamps,
+  ...timestamps,
   tenantId: integer('tenant_id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
   subdomain: text('subdomain').notNull().unique(),

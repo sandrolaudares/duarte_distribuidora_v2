@@ -7,7 +7,6 @@
     filterKey: Field<TABLE>
     table: TableHandlerInterface<TABLE>
     placeholder?: string
-    selectedValue: string
     config: { value: (item: T) => string | number, label: (item: T) => string}
   }
 
@@ -15,7 +14,6 @@
     delegateQuery,
     filterKey,
     placeholder,
-    selectedValue = $bindable(''),
     config,
     table
   }: Props = $props()
@@ -23,8 +21,7 @@
   const filter = table.createFilter(filterKey)
 
   function handleValueChange(value: string) {
-    selectedValue = value
-    filter.value = selectedValue
+    filter.value = value
     filter.set()
   }
 </script>
@@ -32,11 +29,11 @@
 <th>
   <SelectSearch
     variant="ghost"
-    bind:value={selectedValue}
+    bind:value={filter.value as string}
     delegateQuery={delegateQuery}
     {config}
     onValueChange={value => {
-      handleValueChange(selectedValue)
+      handleValueChange(value)
     }}
     {placeholder}
   />

@@ -8,7 +8,7 @@ import {
 import { relations } from 'drizzle-orm'
 import {  logsTable } from '../bug-report'
 import { customerOrderTable, orderPaymentTable } from '../customer'
-import { roleEnum, type Permission, type Role } from '$lib/utils/permissions'
+import { roleEnum, type Permission, type Role } from '$lib/utils/enums'
 import { timestamps } from '../../utils'
 import { cashierTable, cashierTransactionsT } from '../distribuidora'
 

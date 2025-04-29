@@ -1,4 +1,4 @@
-import type { cashierTransactionEnum } from '$lib/utils/permissions'
+import type { cashierTransactionEnum } from '$lib/utils/enums'
 import { toast } from 'svelte-sonner'
 
 const colorMap: Record<(typeof cashierTransactionEnum)[number], string> = {

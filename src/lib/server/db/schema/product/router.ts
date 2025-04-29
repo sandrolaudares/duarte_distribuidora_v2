@@ -6,12 +6,13 @@ import { product as productController } from '$db/controller'
 
 import {
   insertProductCategorySchema,
-  insertProductItemSchema,
+  // insertProductItemSchema,
   insertProductSchema,
 } from '$db/schema'
 
 // import { tableHelper } from '$db/utils'
 import { middleware } from '$trpc/middleware'
+import { alimentTypeEnum } from '$lib/utils/enums'
 
 export const product = router({
   // paginatedProducts: publicProcedure
@@ -76,7 +77,16 @@ export const product = router({
     .use(middleware.logged)
     .use(middleware.auth)
 
-    .input(insertProductItemSchema)
+    .input(z.object({
+      name: z.string(),
+      quantity: z.number().optional(),
+      wholesale_price: z.number(),
+      retail_price: z.number(),
+      product_id: z.number(),
+      visible: z.boolean().optional(),
+      tipo: z.enum(alimentTypeEnum).optional(),
+      unidade: z.number().optional(),
+    }))
     .mutation(async ({ input, ctx: {tenantDb} }) => {
       return await productController(tenantDb).insertProductItem(input)
     }),
@@ -95,6 +105,8 @@ export const product = router({
           retail_price: z.number().optional(),
           image: z.number().optional(),
           visible: z.boolean().optional(),
+          tipo: z.enum(alimentTypeEnum).optional(),
+          unidade: z.number().optional(),
         }),
       }),
     )
@@ -148,5 +160,10 @@ export const product = router({
     .use(middleware.logged)
     .query(({ ctx: { tenantDb } }) => {
       return productController(tenantDb).queryCategorysWithProductItems()
+    }),
+    queryCategorysWithProducts: publicProcedure
+    .use(middleware.logged)
+    .query(({ ctx: { tenantDb } }) => {
+      return productController(tenantDb).queryCategorysWithProducts()
     }),
 })

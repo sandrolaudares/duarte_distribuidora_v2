@@ -46,9 +46,8 @@
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
     try {
-      console.log(s)
-      filters.fromState(s)
-      await navigating?.complete
+      await filters.fromState(s, ['startDate', 'endDate'])
+      s.setTotalRows(data.count)
     } catch (error) {
       console.error(error)
     }
@@ -243,7 +242,7 @@
     </div>
   </div>
 
-  <TableConta {table} totalSum={data.totalSum} />
+  <TableConta {table} totalSum={data.totalSum} tenant={data.tenant!} />
 
   <!-- <div
     class="my-3 flex items-center justify-between rounded-lg bg-gray-100 p-2 shadow"

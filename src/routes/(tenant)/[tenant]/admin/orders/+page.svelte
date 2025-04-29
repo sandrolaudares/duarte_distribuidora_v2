@@ -192,7 +192,6 @@
               {#each pedidosFiltrados as pedido}
                 {#if pedido.status === 'PENDING'}
                   <CardSimplePedidos
-                  motoboy={pedido.motoboy?.username}
                     button_text="Aceitar pedido"
                     button_recusar="Recusar pedido"
                     order={pedido}
@@ -227,7 +226,6 @@
               {#each pedidosFiltrados as pedido}
                 {#if pedido.status === 'CONFIRMED'}
                   <CardSimplePedidos
-                  motoboy={pedido.motoboy?.username}
                     button_text="A caminho"
                     order={pedido}
                     click_confirm={async () => {
@@ -256,7 +254,6 @@
               {#each pedidosFiltrados as pedido}
                 {#if pedido.status === 'ON THE WAY'}
                   <CardSimplePedidos
-                  motoboy={pedido.motoboy?.username}
                     button_text="Entregue"
                     order={pedido}
                     click_confirm={async () => {

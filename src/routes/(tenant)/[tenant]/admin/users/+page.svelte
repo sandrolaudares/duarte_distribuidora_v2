@@ -23,7 +23,7 @@
   import type { SelectCashier, SelectUser } from '$lib/server/db/schema'
   import { toast } from 'svelte-sonner'
   import EditCaixa from './EditCaixa.svelte'
-  import type { Role } from '$lib/utils/permissions'
+  import type { Role } from '$lib/utils/enums'
   import { pageConfig } from '$lib/config'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
   import EditableCell from '$lib/components/editableCells/EditableCell.svelte'
@@ -51,9 +51,8 @@
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
     try {
-      console.log(s)
-      filters.fromState(s)
-      await $navigating?.complete
+      await filters.fromState(s)
+      s.setTotalRows(data.count)
     } catch (error) {
       console.error(error)
     }
@@ -122,14 +121,14 @@
   $inspect(table.isLoading)
 </script>
 
-<main class=" m-4 flex h-full max-h-[calc(100vh-10vh)] flex-col gap-2">
+<main class="mx-4 flex h-full max-h-[calc(100vh-10vh)] flex-col gap-2">
   <div class="flex justify-end gap-2">
     <button onclick={() => isOpenModal?.showModal()} class="btn btn-primary">
       Criar motoboy
     </button>
     <button
       class="btn btn-secondary"
-      onclick={() => filters.clear('username', 'email')}
+      onclick={() => table.clearFilters()}
     >
       Limpar filtros
     </button>

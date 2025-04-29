@@ -13,7 +13,7 @@
   import {
     cashierTransactionEnum,
     paymentMethodLabel,
-  } from '$lib/utils/permissions'
+  } from '$lib/utils/enums'
   import Separator from '$lib/components/ui/separator/separator.svelte'
   import { cssPrintTable, getColor } from '../transactionsUtils'
   import TableTransactions from '$lib/components/cashierComponents/TableTransactions.svelte'

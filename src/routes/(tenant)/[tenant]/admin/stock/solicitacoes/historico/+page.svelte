@@ -25,6 +25,7 @@
   import Loading from '$lib/components/Loading.svelte'
   import DateFilter from '$lib/components/DateFilter.svelte'
   import { DateFormatter } from '@internationalized/date'
+  import ThDateFilter from '$lib/components/datatable/ThDateFilter.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -53,9 +54,8 @@
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
     try {
-      console.log(s)
-      filters.fromState(s)
-      await $navigating?.complete
+      await filters.fromState(s,['startDate', 'endDate'])
+      s.setTotalRows(data.count)
     } catch (error) {
       console.error(error)
     }
@@ -63,6 +63,11 @@
   })
 
   let isLoading = $state(false)
+
+  let value = $state({
+    start: filters.getFilterValue('startDate'),
+    end: filters.getFilterValue('endDate'),
+  })
 </script>
 
 {#if isLoading}
@@ -91,19 +96,7 @@
         <tr>
           <Th />
           <ThFilter {table} field="sku_name" />
-          <Th>
-            <DateFilter
-            
-            onChange={(startDate, endDate) => {
-              if (!startDate || !endDate) return
-        
-              filters.update({
-                startDate: String(startDate),
-                endDate: String(endDate),
-              })
-            }}
-            />
-          </Th>
+          <ThDateFilter {table} {filters} bind:value tenant={data.tenant!}/>
           <Th />
           <Th />
         </tr>

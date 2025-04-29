@@ -43,23 +43,23 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const dateStart = searchParams.get('startDate')
   const dateEnd = searchParams.get('endDate')
 
+  const queryConditions = and(
+    name ? like(schema.userTable.username, `${name}%`) : undefined,
+    text ? like(schema.logsTable.text, `${text}%`) : undefined,
+    type ? like(schema.logsTable.type, `${type}%`) : undefined,
+    dateStart && dateEnd
+      ? and(
+          gte(schema.logsTable.created_at, new Date(Number(dateStart))),
+          lte(schema.logsTable.created_at, new Date(Number(dateEnd))),
+        )
+      : undefined,
+  )
+
   let query = bugReport(tenantDb!)
     .allLogs()
     .orderBy(desc(schema.logsTable.created_at))
     .$dynamic()
-    .where(
-      and(
-        name ? like(schema.userTable.username, `${name}%`) : undefined,
-        text ? like(schema.logsTable.text, `${text}%`) : undefined,
-        type ? like(schema.logsTable.type, `${type}%`) : undefined,
-        dateStart && dateEnd
-          ? and(
-              gte(schema.logsTable.created_at, new Date(Number(dateStart))),
-              lte(schema.logsTable.created_at, new Date(Number(dateEnd))),
-            )
-          : undefined,
-      ),
-    )
+    .where(queryConditions)
 
   if (sortId && sortOrder) {
     query = withOrderBy(
@@ -75,6 +75,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
   const total = await tenantDb!
     .select({ count: count() })
     .from(schema.logsTable)
+    .where(queryConditions)
 
   return { rows: rows ?? [], count: total[0].count }
   // } catch (err) {

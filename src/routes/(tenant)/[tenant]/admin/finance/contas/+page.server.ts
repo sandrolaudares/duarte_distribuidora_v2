@@ -129,7 +129,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
       )
     }
     const rows = await withPagination(query, page, pageSize)
-    const [total] = await queryCount()
+    const [total] = await queryCount().where(and(...condicoes))
     const [totalSum] = await queryTotalSum().where(and(...condicoes))
 
     return {

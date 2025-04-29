@@ -30,6 +30,7 @@
   import SelectFilter from '$lib/components/datatable/SelectFilter.svelte'
   import LoadingBackground from '$lib/components/datatable/LoadingBackground.svelte'
   import { formatCurrency } from '$lib/utils'
+  import ThDateFilter from '$lib/components/datatable/ThDateFilter.svelte'
 
   let { data }: { data: PageData } = $props()
   const filters = new SSRFilters()
@@ -54,9 +55,8 @@
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
     try {
-      console.log(s)
-      filters.fromState(s)
-      await navigating?.complete
+      await filters.fromState(s,['startDate', 'endDate'])
+      s.setTotalRows(data.count)
     } catch (error) {
       console.error(error)
     }
@@ -74,13 +74,14 @@
     return colorMap[firstLetter] || 'badge-neutral'
   }
 
-  let selectedType: string = $state('')
-  let selectedUser: string = $state('')
-
   let logTypeEnum = ['LOG', 'SYSTEM', 'ERROR', 'CAIXA']
   const delegateQuery = () => {
   return Promise.resolve(logTypeEnum);
 };
+let value = $state({
+    start: filters.getFilterValue('startDate'),
+    end: filters.getFilterValue('endDate'),
+  })
 </script>
 
 <main class="mx-4 h-full max-h-[calc(100vh-10vh)]">
@@ -114,8 +115,7 @@
             filterKey="user_name"
             placeholder="o usuario"
             delegateQuery={trpc(page).auth.getUsers.query}
-            config={{ value: c => c.username, label: c => c.username }}
-            bind:selectedValue={selectedUser}/>
+            config={{ value: c => c.username, label: c => c.username }}/>
           <ThFilter {table} field="text" />
           <Th />
           <Th />
@@ -124,23 +124,12 @@
             filterKey="type"
             delegateQuery={delegateQuery}
             placeholder="o tipo"
-            config={{ value: c => c, label: c => c }}
-            bind:selectedValue={selectedType}/>
+            config={{ value: c => c, label: c => c }}/>
           <Th />
           <Th />
           <Th />
-          <Th>
-            <DateFilter
-            onChange={(startDate, endDate) => {
-              if (!startDate || !endDate) return
-        
-              filters.update({
-                startDate: String(startDate),
-                endDate: String(endDate),
-              })
-            }}
-            />
-          </Th>
+          <ThDateFilter {table} {filters} bind:value tenant={data.tenant!}/>
+
           <!--FINALIZAR ESSA TABLE, FILTRO DE DATA E ETC-->
         </tr>
       </thead>

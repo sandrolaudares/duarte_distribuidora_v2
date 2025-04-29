@@ -3,7 +3,7 @@ import { initTRPC } from '@trpc/server'
 // import transformer from 'trpc-transformer';
 import superjson from 'superjson'
 
-import type { Permission } from '$lib/utils/permissions'
+import type { Permission } from '$lib/utils/enums'
 
 export interface Meta {
   routeName: string

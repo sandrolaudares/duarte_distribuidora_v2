@@ -199,6 +199,22 @@ npm run db:check
 - Impressora ✅
 - Filter table page conta ✅
 - Editar contas✅
+- Tela do caixa puxar apenas alguns clientes ou nenhum e só filtrar quando digitar✅
+- Total nas transações do caixa ✅ 
+- Fix a ordenação nas tables ✅ 
+- Lembrar de feixar caia diariamente ✅ 
+- Mudar server do fiado (confuso)✅ 
+- Checkbox imprimir ou nao na hora de fazer o pedido✅ 
+- Detalhes do pedido imprimir ✅ 
+- Financeiro abrir caixa e escolher um caixa para a pessoa no dia ✅ 
+- Na hora do caixa abrir, apenas na hora de abrir o caixa escolher qual caixa ele vai trabalhar✅ 
+- Caixa apenas acessa transacoes do caixa dele ✅ 
+- Transacao do caixa apenas de pagamento (Resumo do dia) ✅ 
+- Quantidade em caixa e retirar dinheiro do caixa✅ 
+- Tirar dinheiro do caixa para despesas dia a dia✅ 
+- Somar no amount do caixa quando entrar pagamento e etc ✅ 
+- AO cancelar no caixa limpar o cliente e endereco selecionado ✅ 
+- KG como unidade de medida nos produtos (provavelmente mudar a table de produtos) ✅ 
 
 ## IMPORTANTES
 
@@ -208,31 +224,18 @@ npm run db:check
 - Preco de custo nas transferencias e tela historico transafarencias tipo tela
   fiado com total e valor do preço de custo
 - Parte do cliente fazer pedido 
-
 - Formatar ENUMs
-- KG como unidade de medida nos produtos (provavelmente mudar a table de produtos)
-- Total nas transações do caixa
-- Add image to tenant
-- Fix a ordenação nas tables
-- Lembrar de feixar caia diariamente
+- Add image to tenant 
 - adicionar: animate:flip={{ duration: 500, easing: cubicInOut }} nas tables
 - Refatorar page entrada de estoque
-- Mudar server do fiado (confuso)
-- Horario de funcionamento das distribuidoras
-- Ordem alfabetica dos cliente na tela do caixa
-- Checkbox imprimir ou nao na hora de fazer o pedido
-- Detalhes do pedido imprimir 
+
 - Adicionar mascara de telefone no cliente tela caixa
-- Tela do caixa puxar apenas alguns clientes ou nenhum e só filtrar quando digitar
 - Admin - gerente - caixa - motoboy/entregador (modificar nomeclatura) - financeiro
-- Quantidade em caixa e retirar dinheiro do caixa
-- Financeiro abrir caixa e escolher um caixa para a pessoa no dia
-- Na hora do caixa abrir, apenas na hora de abrir o caixa escolher qual caixa ele vai trabalhar
-- Caixa apenas acessa transacoes do caixa dele
-- Transacao do caixa apenas de pagamento (Resumo do dia)
-- Tirar dinheiro do caixa para despesas dia a dia
-- Dashboard do caixa vendas do dia (mudar outro lugar da que ja esta)
 - Username na hora de criar conta avisar erros
+- Imagens table na central
+- Fixe queries lado customer para selecionar produtos corretos
+- Cardapio aquela barra de cat ta sobrescrevendo navbar z-
+- Fix add address na hora de vincular cliente no caixa=
 
 
 ## NAO TAO URGENTE

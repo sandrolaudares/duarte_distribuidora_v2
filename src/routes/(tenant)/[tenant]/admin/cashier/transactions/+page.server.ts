@@ -23,11 +23,13 @@ import {
   lte,
   sql,
 } from 'drizzle-orm'
-import { error } from '@sveltejs/kit'
+import { error, redirect } from '@sveltejs/kit'
 import { Monad } from '$lib/utils'
 import { pageConfig } from '$lib/config'
 import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
 import { asc } from 'drizzle-orm'
+import { getLocalTimeZone, today,Time, toZoned } from '@internationalized/date'
+import { toCalendarDateTime } from '@internationalized/date'
 
 export const load = (async ({ url, locals: { tenantDb, user } }) => {
   const size = pageConfig.rowPages
@@ -47,9 +49,6 @@ export const load = (async ({ url, locals: { tenantDb, user } }) => {
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_direction')
 
-  console.log('username', username)
-  console.log('caixa', caixa)
-
   const queryConditions = and(
     tipo ? like(schema.cashierTransactionsT.type, `${tipo}%`) : undefined,
     getDateRangeCondition(
@@ -60,6 +59,25 @@ export const load = (async ({ url, locals: { tenantDb, user } }) => {
     user?.role === 'caixa' ? eq(schema.cashierTransactionsT.created_by, user.id) : undefined,
     metodo_pagamento ? eq(schema.cashierTransactionsT.metodo_pagamento, metodo_pagamento as 'credit_card' | 'debit_card' | 'pix' | 'dinheiro') : undefined,
   )
+
+  if (!dateStart || !dateEnd) {
+    const tz = 'America/Sao_Paulo'
+    const date = today(tz)
+  
+    const startTime = new Time(0, 0, 0,0)
+    const endTime = new Time(23, 59, 59,59)
+  
+    const startDateTime = toCalendarDateTime(date, startTime)
+    const endDateTime = toCalendarDateTime(date, endTime)
+  
+    const start = toZoned(startDateTime, tz).toDate().getTime()
+    const end = toZoned(endDateTime, tz).toDate().getTime()
+  
+    return redirect(
+      303,
+      `/admin/cashier/transactions?startDate=${start}&endDate=${end}`,
+    )
+  }
 
   const cte = tenantDb!
     .select()
@@ -135,7 +153,7 @@ export const load = (async ({ url, locals: { tenantDb, user } }) => {
   const queryTotalSum = () =>
     _joins(
       _countSumBuilder().from(schema.cashierTransactionsT).$dynamic(),
-    ).where(queryConditions)
+    )
 
   const _countSelectBuilder = () =>
     _withs(tenantDb!, cte).select({ count: count() })
@@ -156,11 +174,11 @@ export const load = (async ({ url, locals: { tenantDb, user } }) => {
 
   const [rows, [total], [totalSumResult]] = await Promise.all([
     withPagination(query, page, pageSize),
-    queryCount(),
-    queryTotalSum(),
+    queryCount().where(queryConditions),
+    queryTotalSum().where(queryConditions),
   ])
 
-  console.log(rows)
+  console.log(total.count)
 
   return {
     rows,

@@ -33,13 +33,17 @@
   import { formatCurrency } from '$lib/utils'
   import { Trash2 } from 'lucide-svelte'
   import SenhaAdmin from '$lib/components/SenhaAdmin.svelte'
+  import ThDateFilter from '$lib/components/datatable/ThDateFilter.svelte'
+  import type { SelectTenant } from '$lib/server/db/central/schema'
 
   let {
     table,
-    totalSum
+    totalSum,
+    tenant
   }: {
     table: TableHandler<PageData['rows'][0]>
     totalSum:number
+    tenant:SelectTenant
   } = $props()
 
   const filters = new SSRFilters()
@@ -83,8 +87,11 @@
     selectedId = contaId
     isOpenModalCancel?.showModal()
   }
+  let value = $state({
+    start: filters.getFilterValue('startDate'),
+    end: filters.getFilterValue('endDate'),
+  })
 
-  let selectedCat: string = $state('')
 </script>
 
 <div class="overflow-hidden h-[76vh]">
@@ -115,7 +122,6 @@
               placeholder="o fornecedor"
               delegateQuery={trpc(page).stock.getSupplier.query}
               config={{ value: c => c.id, label: c => c.name }}
-              bind:selectedValue={selectedCat}
             />
             <SelectFilter
             {table}
@@ -123,21 +129,9 @@
               placeholder="a categoria"
               delegateQuery={trpc(page).contas.getCategorias.query}
               config={{ value: c => c.id, label: c => c.nome }}
-              bind:selectedValue={selectedCat}
             />
           <Th />
-          <Th>
-            <DateFilter
-              onChange={(startDate, endDate) => {
-                if (!startDate || !endDate) return
-
-                filters.update({
-                  startDate: String(startDate),
-                  endDate: String(endDate),
-                })
-              }}
-            />
-          </Th>
+          <ThDateFilter {table} {filters} bind:value tenant={tenant}/>
           <Th />
           <Th />
           <Th />

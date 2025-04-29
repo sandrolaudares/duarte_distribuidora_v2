@@ -33,6 +33,7 @@
   import { getPrinterContext } from './printerContext.svelte'
   import Loading from '$lib/components/Loading.svelte'
   import ModalPrint from '$lib/components/cashierComponents/ModalPrint.svelte'
+  import ThDateFilter from '$lib/components/datatable/ThDateFilter.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -59,12 +60,11 @@
 
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
-    console.log(s)
     try {
-      filters.fromState(s)
-      await navigating?.complete
+      await filters.fromState(s,['startDate', 'endDate'])
+      s.setTotalRows(data.count)
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
     return data.rows
   })
@@ -91,7 +91,10 @@
     selectedOrder = orderId
     loadingPrinters = false
   }
-
+  let value = $state({
+    start: filters.getFilterValue('startDate'),
+    end: filters.getFilterValue('endDate'),
+  })
 </script>
 
 {#if loadingPrinters}
@@ -121,11 +124,18 @@
 
 <main class="m-4 h-full max-h-[calc(100vh-20vh)]">
   <div class="flex items-center justify-between">
-    <h1 class="my-5 text-center text-2xl font-medium">Todos os pedidos:</h1>
+    <h1 class=" text-center text-2xl font-medium">Todos os pedidos:</h1>
     <button
       class="btn btn-primary"
       onclick={() =>
-        filters.clear('name', 'created_by', 'startDate', 'endDate')}
+        {
+          table.clearFilters()
+          filters.clear('startDate', 'endDate')
+          value = {
+            start: undefined,
+            end: undefined,
+          }}
+        }
     >
       Limpar filtros
     </button>
@@ -157,19 +167,8 @@
           <ThFilter {table} field="name" />
           <ThFilter {table} field="created_by" />
           <Th />
-          <Th>
-            <DateFilter
-              {filters}
-              onChange={(startDate, endDate) => {
-                if (!startDate || !endDate) return
-
-                filters.update({
-                  startDate: String(startDate),
-                  endDate: String(endDate),
-                })
-              }}
-            />
-          </Th>
+          <ThDateFilter {table} {filters} bind:value tenant={data.tenant!}/>
+          
           <Th />
 
           <Th />

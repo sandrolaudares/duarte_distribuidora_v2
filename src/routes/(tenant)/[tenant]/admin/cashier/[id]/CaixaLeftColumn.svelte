@@ -18,6 +18,7 @@
   import { getCartContext } from '$lib/state/contextCashier/cartContext.svelte'
   import type { SelectUser } from '$lib/server/db/schema'
   import { getDistance } from '$lib/utils/distance'
+  import Alert from '$lib/components/modal/base/Alert.svelte'
 
   // export let tipo_preco: 'retail_price' | 'wholesale_price' = 'retail_price'
 
@@ -206,7 +207,13 @@
     <button
       class="btn btn-primary w-full disabled:bg-opacity-50"
       onclick={() => {
-        cart.clear()
+        modal.open(Alert,{
+          onConfirm() {
+            cart.clear()
+          },
+          title: 'Tem certeza que deseja cancelar?',
+          text: 'Essa ação irá limpar todas informações, incluido items do carrinho, cliente e endereço.',
+        })
       }}
     >
       <span class="mr-1">CANCELAR</span>

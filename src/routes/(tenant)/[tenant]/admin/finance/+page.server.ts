@@ -84,7 +84,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
         status: schema.customerOrderTable.status,
         type: schema.customerOrderTable.type,
         expire_at: schema.customerOrderTable.expire_at,
-        pending_amount: sql`${schema.customerOrderTable.total} - ${schema.customerOrderTable.amount_paid}`,
+        pending_amount: sql<number>`${schema.customerOrderTable.total} - ${schema.customerOrderTable.amount_paid}`,
 
         name: schema.customerTable.name,
         email: schema.customerTable.email,
@@ -100,7 +100,7 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
       })
 
     const queryTotalSum = () =>
-      _joins(_countSumBuilder().from(schema.customerOrderTable).$dynamic()).where(queryConditions)
+      _joins(_countSumBuilder().from(schema.customerOrderTable).$dynamic())
 
     const _countSelectBuilder = () =>
       _withs(tenantDb!, cte).select({ count: count() })
@@ -133,8 +133,8 @@ export const load = (async ({ url, locals: { tenantDb } }) => {
     
     const [rows, [total], [totalSumResult]] = await Promise.all([
       withPagination(query, page, pageSize),
-      queryCount(),
-      queryTotalSum(),
+      queryCount().where(queryConditions),
+      queryTotalSum().where(queryConditions),
     ])
 
     return {

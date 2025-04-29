@@ -15,18 +15,6 @@
     filters?: SSRFilters
   }
   let { filters = $bindable(new SSRFilters()) }: Props = $props()
-
-  function getFilterValue(filterName: string) {
-    let startValue = filters.get(filterName)
-    if (!startValue) return undefined
-
-    let startDate = new Date(Number(startValue))
-    return new CalendarDate(
-      startDate.getFullYear(),
-      startDate.getMonth(),
-      startDate.getDate(),
-    )
-  }
 </script>
 
 <div class="flex gap-2">
@@ -34,9 +22,11 @@
     <DateFilter
     variant="outlinePrimary"
       title="Comparar"
-      startValue={getFilterValue('compareStartDate')}
-      endValue={getFilterValue('compareEndDate')}
-      bind:filters
+      startValue={filters.getFilterValue('compareStartDate')}
+      endValue={filters.getFilterValue('compareEndDate')}
+      onClear={()=>{
+        filters?.clear('compareStartDate', 'compareEndDate')
+      }}
       onChange={(startDate, endDate) => {
         if (!startDate || !endDate) return
   
@@ -50,9 +40,11 @@
   <DateFilter
   variant="outlinePrimary"
     title="Base"
-    startValue={getFilterValue('startDate')}
-    endValue={getFilterValue('endDate')}
-    bind:filters
+    startValue={filters.getFilterValue('startDate')}
+    endValue={filters.getFilterValue('endDate')}
+    onClear={()=>{
+      filters?.clear('startDate', 'endDate')
+    }}
     onChange={(startDate, endDate) => {
       if (!startDate || !endDate) return
   

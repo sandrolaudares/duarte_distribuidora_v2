@@ -3,7 +3,7 @@
   import type { RouterOutputs } from '$trpc/router'
   import { toast } from 'svelte-sonner'
   import { formatCurrency } from '$lib/utils'
-  import { paymentMethodLabel } from '$lib/utils/permissions'
+  import { paymentMethodLabel } from '$lib/utils/enums'
   import {
     cssPrintTable,
     getColor,

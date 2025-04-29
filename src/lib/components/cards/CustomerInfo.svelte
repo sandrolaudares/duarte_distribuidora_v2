@@ -5,6 +5,7 @@
   import { formatCurrency } from '$lib/utils'
   import { getCartContext } from '../../state/contextCashier/cartContext.svelte'
   import type { Snippet } from 'svelte'
+  import { formatAddress } from '$lib/utils/distance'
 
   const cart = getCartContext()
 
@@ -16,26 +17,6 @@
   }
 
   let { desvincular, distance, isLoading,children }: Props = $props()
-
-  const formattedAddress = $derived.by(()=>{
-
-    if(cart.meta.enderecoSelecionado) {
-      return [
-        cart.meta.enderecoSelecionado.cep
-          ? `${cart.meta.enderecoSelecionado.cep}`
-          : '',
-        cart.meta.enderecoSelecionado.city,
-        cart.meta.enderecoSelecionado.neighborhood,
-        cart.meta.enderecoSelecionado.street,
-        cart.meta.enderecoSelecionado.number,
-        cart.meta.enderecoSelecionado.state,
-      ]
-        .filter(Boolean)
-        .join(', ')
-    } else {
-      return null
-    }
-  })
 </script>
 
 <div class="w-full max-w-md overflow-hidden rounded-lg bg-base-200 shadow-lg">
@@ -57,12 +38,12 @@
         <span class="font-medium">Créditos disponiveis:</span>
         {@render children()}
       </div>
-      {#if formattedAddress !==null}
+      {#if cart.meta.enderecoSelecionado !==null}
       <div class="flex items-start space-x-4 text-sm">
         <MapPin class="mt-0.5 h-4 w-4" />
           <div class="">
             <span class="font-medium">Endereço:</span>
-            <p class="">{formattedAddress}</p>
+            <p class="">{formatAddress(cart.meta.enderecoSelecionado)}</p>
           </div>
         </div>
         {/if}

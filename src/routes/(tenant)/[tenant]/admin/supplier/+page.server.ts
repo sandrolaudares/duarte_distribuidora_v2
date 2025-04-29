@@ -23,16 +23,16 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
   const sortId = searchParams.get('sort_id')
   const sortOrder = searchParams.get('sort_direction')
 
+  const queryConditions = and(
+    name ? like(schema.supplierTable.name, `${name}%`) : undefined,
+    razao_social ? like(schema.supplierTable.razao_social, `${razao_social}%`) : undefined,
+    telephone_1 ? like(schema.supplierTable.telephone_1, `${telephone_1}%`) : undefined,
+  )
+
   let query = tenantDb!
     .select()
     .from(schema.supplierTable)
-    .where(
-      and(
-        name ? like(schema.supplierTable.name, `${name}%`) : undefined,
-        razao_social ? like(schema.supplierTable.razao_social, `${razao_social}%`) : undefined,
-        telephone_1 ? like(schema.supplierTable.telephone_1, `${telephone_1}%`) : undefined,
-      )
-    )
+    .where(queryConditions)
     .$dynamic()
 
   if (sortId && sortOrder) {
@@ -46,7 +46,7 @@ export const load = (async ({ url,locals:{tenantDb} }) => {
   try {
     const rows = await withPagination(query, page, pageSize)
 
-    const total = await tenantDb!.select({ count: count() }).from(schema.supplierTable)
+    const total = await tenantDb!.select({ count: count() }).from(schema.supplierTable).where(queryConditions)
 
     return { rows: rows ?? [], count: total[0].count }
   } catch (error) {

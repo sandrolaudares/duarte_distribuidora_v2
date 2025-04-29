@@ -9,14 +9,7 @@
   <aside>
     <span>{@html title}</span>
   </aside>
-  <!-- <button type="button" on:click={() => modal.close()}>
-        <i class="micon">clear</i>
-    </button> -->
-  <button
-    type="button"
-    onclick={() => modal.close()}
-    class="btn btn-circle btn-ghost btn-sm absolute right-1"
-  >
+  <button type="button" class="btn btn-circle btn-ghost btn-sm absolute right-3 top-3" onclick={() => modal.close()}>
     ✕
   </button>
 </header>
@@ -40,24 +33,7 @@
     border-radius: 4px 4px 0 0;
     user-select: none;
   }
-  header button {
-    cursor: pointer;
-    border-radius: 4px;
-    border: none;
-    background: transparent;
-    transition: all, 0.2s;
-    color: #e57373;
-    height: 32px;
-    width: 32px;
-    padding: 0;
-  }
-  header button:hover {
-    color: #d32f2f;
-  }
-  header button i {
-    margin: 0;
-    line-height: 32px;
-  }
+
   header aside {
     color: #616161;
     font-weight: normal;

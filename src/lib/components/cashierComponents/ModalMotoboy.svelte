@@ -2,15 +2,15 @@
   import Loading from '$lib/components/Loading.svelte'
   import { modal, Modal } from '$lib/components/modal'
   import { trpc } from '$trpc/client'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { onMount } from 'svelte'
   import { toast } from 'svelte-sonner'
   import type { RouterOutputs } from '$trpc/router'
-  import { roleEnum, type Role } from '$lib/utils/permissions'
+  import { roleEnum, type Role } from '$lib/utils/enums'
 
   type Motoboy = RouterOutputs['auth']['getMotoboys']
 
-  export let motoboys: Motoboy = []
+  let motoboys: Motoboy = []
   let filteredMotoboys = motoboys
 
   let isLoading = false
@@ -28,7 +28,7 @@
   onMount(async () => {
     try {
       isLoading = true
-      motoboys = await trpc($page).auth.getMotoboys.query()
+      motoboys = await trpc(page).auth.getMotoboys.query()
       filteredMotoboys = motoboys
       console.log(motoboys)
       isLoading = false
@@ -56,7 +56,7 @@
     try {
       isLoading = true
       newMotoboy.role = 'motoboy'
-      await trpc($page).auth.insertUser.mutate(newMotoboy)
+      await trpc(page).auth.insertUser.mutate(newMotoboy)
       newMotoboy.username = ''
       newMotoboy.email = ''
       toast.success('Motoboy inserido com sucesso!')

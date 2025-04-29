@@ -6,6 +6,7 @@
     text: string
     onConfirm?: () => Promise<void> | void
     onCancel?: () => Promise<void> | void
+    confirmText?:string
   }
 
   const {
@@ -13,28 +14,31 @@
     text = 'Tem certeza?!?',
     onCancel,
     onConfirm,
+    confirmText = 'Confirmar'
   }: Props = $props()
 
   async function confirm() {
-    modal.close()
     if (onConfirm) await onConfirm()
+    modal.close()
   }
 
   async function cancel() {
-    modal.close()
     if (onCancel) await onCancel()
+    modal.close()
   }
 </script>
 
   <Modal {title}>
-    <p>{text}</p>
-    {@render footer()}
+    <p class="my-3 text-lg text-center">{text}</p>
+    <div class="flex justify-end gap-2">
+      {@render footer()}
+    </div>
   </Modal>
   {#snippet footer()}
-  {#if onConfirm}
-    <button class="btn" onclick={confirm}>Confirm</button>
+  {#if onCancel}
+  <button class="btn" onclick={cancel}>Fechar</button>
   {/if}
-  <button class="btn" onclick={cancel}>
-    {onCancel ? 'Cancel' : 'Close'}
-  </button>
+  {#if onConfirm}
+    <button class="btn" onclick={confirm}>{confirmText}</button>
+  {/if}
   {/snippet}

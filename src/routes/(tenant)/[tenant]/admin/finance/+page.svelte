@@ -33,6 +33,9 @@
   import { flip } from 'svelte/animate'
   import { cubicInOut } from 'svelte/easing'
   import { formatCurrency } from '$lib/utils'
+  import * as Select from "$lib/components/ui/select/index";
+  import type { Field } from '@vincjo/datatables'
+  import ThDateFilter from '$lib/components/datatable/ThDateFilter.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -59,9 +62,15 @@
   table.setPage(Number(filters.get('page')) || 1)
   table.load(async s => {
     try {
-      console.log(s)
-      filters.fromState(s)
-      await navigating?.complete
+      await filters.fromState(s,[
+        'startDate',
+        'endDate',
+        'startExpireDate',
+        'endExpireDate',
+
+      ])
+      s.setTotalRows(data.count)
+      console.log(data.count)
     } catch (error) {
       console.error(error)
     }
@@ -99,41 +108,60 @@
     }
   }
 
+  const filter = table.createFilter('atrasados' as Field<typeof data.rows[number]>)
+
+  const options = [
+    { value: "", label: "Todos" },
+    { value: "true", label: "Pagamentos atrasados" },
+  ];
+
+  const triggerContent = $derived(
+    options.find((f) => f.value === filter.value)?.label ?? "Todos"
+  );
+  let value = $state({
+    start: filters.getFilterValue('startDate'),
+    end: filters.getFilterValue('endDate'),
+  })
+  let valueExpire = $state({
+    start: filters.getFilterValue('startExpireDate'),
+    end: filters.getFilterValue('endExpireDate'),
+  })
 </script>
 
-<h1 class="my-5 text-center text-2xl font-medium">
+<h1 class="my-5 text-center text-lg lg:text-2xl font-medium">
   Pedidos com pagamento pendente:
 </h1>
 <main class="mx-4 h-full max-h-[calc(100vh-24vh)]">
-  <select
-    value="todos"
-    onchange={e => {
-      const value = (e.target as HTMLInputElement).value
-      if (value === 'atrasados') {
-        filters.update({ atrasados: 'true' })
-      } else {
-        filters.clear('atrasados')
-      }
-    }}
-    class="select select-bordered mb-3"
-  >
-    <option value="todos" selected={true}>Todos</option>
-    <option value="atrasados">Pagamentos atrasados</option>
-  </select>
-  <button
-    class="btn btn-primary"
-    onclick={() =>
-      filters.clear(
-        'name',
-        'startDate',
-        'endDate',
-        'startExpireDate',
-        'endExpireDate',
-        'atrasados',
-      )}
-  >
-    Limpar filtros
-  </button>
+  <div class="flex items-center justify-start gap-2 mb-2">
+    <Select.Root type="single" bind:value={filter.value} onValueChange={value => {
+        filter.value = value
+        filter.set()
+    }}>
+      <Select.Trigger class="max-w-[280px] select select-bordered !text-gray-700">{triggerContent}</Select.Trigger>
+      <Select.Content>
+        {#each options as option (option.value)}
+          <Select.Item value={option.value} label={option.label} />
+        {/each}
+      </Select.Content>
+    </Select.Root>
+    <button
+      class="btn btn-primary"
+      onclick={() =>{
+        table.clearFilters()
+        filters.clear('startDate', 'endDate','startExpireDate','endExpireDate')
+        value = {
+          start: undefined,
+          end: undefined,
+        }
+        valueExpire = {
+          start: undefined,
+          end: undefined,
+        }}
+        }
+    >
+      Limpar filtros
+    </button>
+  </div>
   <Datatable {table} headless>
     {#if table.isLoading}
       <LoadingBackground />
@@ -148,7 +176,8 @@
           <ThSort {table} field="expire_at">Data de vencimento</ThSort>
           <Th>Dias para vencimento</Th>
 
-          <ThSort {table} field="total">Valor do pedido</ThSort>
+          <ThSort {table} field="total">Valor pendente</ThSort>
+          <ThSort {table} field="amount_paid">Valor pago</ThSort>
 
           <Th>Ver detalhes</Th>
         </tr>
@@ -156,34 +185,9 @@
           <Th />
           <Th />
           <ThFilter {table} field="name" />
-          <Th>
-            <DateFilter
-            {filters}
-              onChange={(startDate, endDate) => {
-                if (!startDate || !endDate) return
-
-                filters.update({
-                  startDate: String(startDate),
-                  endDate: String(endDate),
-                })
-              }}
-            />
-          </Th>
-
-          <Th>
-            <DateFilter
-              {filters}
-              futureDates={true}
-              onChange={(startExpireDate, endExpireDate) => {
-                if (!startExpireDate || !endExpireDate) return
-
-                filters.update({
-                  startExpireDate: String(startExpireDate),
-                  endExpireDate: String(endExpireDate),
-                })
-              }}
-            />
-          </Th>
+          <ThDateFilter {table} {filters} bind:value tenant={data.tenant!} />
+          <ThDateFilter {table} {filters} bind:value={valueExpire} futureDates={true} key={{start: 'startExpireDate',end:'endExpireDate'}} tenant={data.tenant!} />
+          <Th />
           <Th />
           <Th />
 
@@ -239,7 +243,8 @@
                 {/if}
               </b>
             </td>
-            <td><b class="text-xl text-success">{formatCurrency(row.total)}</b></td>
+            <td><b class="text-lg text-rose-500">{formatCurrency(row.pending_amount)}</b></td>
+            <td><b class="text-lg text-success">{formatCurrency(row.amount_paid)}</b></td>
 
             <td>
               <a href="/admin/orders/{row.id}" class="badge badge-primary">
@@ -264,6 +269,7 @@
                 
             </span>
           </td>
+          <td></td>
           <td></td>
         </tr>
       </tbody>

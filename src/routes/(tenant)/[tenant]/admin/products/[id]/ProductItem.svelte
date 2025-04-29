@@ -20,6 +20,7 @@
   import {
     Edit,
     ImagePlus,
+    Info,
     Package2,
     Pencil,
     Save,
@@ -30,6 +31,9 @@
   import Switch from '$lib/components/ui/switch/switch.svelte'
   import { DateFormatter } from '@internationalized/date'
   import { invalidateAll } from '$app/navigation'
+  import TipoForm from './TipoForm.svelte'
+  import { type AlimentType } from '$lib/utils/enums'
+  import FormatUnidadeMedida from '$lib/components/FormatUnidadeMedida.svelte'
 
   type Props = {
     item: SelectProductItem
@@ -78,6 +82,8 @@
           retail_price: item.retail_price,
           sku: item.sku ?? undefined,
           visible: item.visible,
+          tipo: item.tipo as AlimentType ?? undefined,
+          unidade: item.unidade ?? undefined,
         },
       })
       console.log(resp)
@@ -117,7 +123,10 @@
   }
 
   type CostPrice = RouterOutputs['stock']['getLastCostPrice']
-  let costPrice: CostPrice | undefined
+
+  let costPrice: CostPrice | undefined = $state()
+
+  let loadingCost = $state(true)
 
   onMount(async () => {
     if (item.sku) {
@@ -128,12 +137,14 @@
         console.log(costPrice)
       } catch (error: any) {
         toast.error(error.message)
+      } finally {
+        loadingCost = false
       }
     }
   })
 </script>
 
-<Card.Root class="w-full overflow-hidden relative">
+<Card.Root class="w-full  relative">
   {#if isLoading}
     <div class="absolute inset-0 bg-base-200 bg-opacity-50 flex items-center justify-center z-10">
       <div class="spinner-border animate-spin h-8 w-8 border-t-4 border-primary rounded-full"></div>
@@ -259,7 +270,7 @@
       {#if isEditing}
         <input
           type="number"
-          class="input input-xs input-bordered max-w-20 w-full"
+          class="input input-xs input-bordered max-w-24 w-full"
           bind:value={item.quantity}
           oninput={() => (isChanged = true)}
         />
@@ -267,7 +278,41 @@
         <p class="text-md font-bold">{item.quantity}</p>
       {/if}
     </div>
-    <div class="grid grid-cols-2 gap-4">
+    <Separator class="bg-base-200 my-2" />
+    <div class="mb-2">
+      <p class="text-xs font-medium text-gray-600 mb-1">Tipo de produto</p>
+      {#if isEditing}
+        <TipoForm bind:value={item.tipo as AlimentType} customClass="select-xs text-xs "/>
+      {:else}
+      <p class="text-sm font-bold">
+        {item.tipo}
+      </p>
+      {/if}
+    </div>
+    <div class="mb-2">
+      {#if isEditing}
+      <div class="flex items-center justify-start gap-2">
+        <p class="text-xs font-medium text-gray-600 mb-1">Unidade de medida </p>
+        <div class="tooltip" data-tip="Para alimento, use gramas. Para bebida, use ML.">
+          <button class=" btn-info"><Info class="h-4 w-4 text-info"/></button>
+        </div>
+      </div>
+        <input
+          type="number"
+          class="input input-xs input-bordered w-full"
+          bind:value={item.unidade}
+          oninput={() => (isChanged = true)}
+        />
+      {:else if item.unidade}
+        <p class="text-xs font-medium text-gray-600 mb-1">Unidade de medida (Gramas/ML/etc...)</p>
+        <p class="text-sm font-bold">
+          <FormatUnidadeMedida tipo={item.tipo as AlimentType} unidade={item.unidade}/>
+        </p>
+      {/if}
+    </div>
+    
+    <Separator class="bg-base-200 my-2" />
+    <div class="grid grid-cols-2 gap-2">
       <div>
         <p class="text-xs font-medium text-gray-600">Preço de varejo</p>
         {#if isEditing}
@@ -294,7 +339,22 @@
           </p>
         {/if}
       </div>
+      <div>
+        <p class="text-xs font-medium text-gray-600">Preço de custo</p>
+        {#if loadingCost}
+        <p class="animate-pulse text-md font-bold">
+          Carregando...
+        </p>
+        {:else if costPrice}
+          <p class="text-md font-bold">
+            {formatCurrency(costPrice.cost_price ?? 0)}
+          </p>
+        {:else}
+          <p class="text-md font-bold">N/A</p>
+        {/if}
+      </div>
     </div>
+    
   </Card.Content>
   <Separator class="bg-base-200" />
   <Card.Footer class="flex justify-between py-3 text-xs text-gray-600">
