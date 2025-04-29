@@ -8,7 +8,6 @@
   import * as Tooltip from '$lib/components/ui/tooltip/index'
 
   import { createCartContext } from '$lib/state/contextEditOrder/cartContext.svelte'
-  import EditOrderMenu from './EditOrderMenu.svelte'
   import DisplayCart from './DisplayCart.svelte'
   import CustomerDetails from './CustomerDetails.svelte'
   import { toast } from 'svelte-sonner'
@@ -21,6 +20,7 @@
   import { getPrinterContext } from '../allorders/printerContext.svelte'
   import { modal } from '$lib/components/modal'
   import AlertComponent from '$lib/components/modal/base/Alert.svelte'
+  import CardapioCategory from '$lib/components/cashierComponents/CardapioCategory.svelte'
 
   let { data }: { data: PageData } = $props()
 
@@ -340,7 +340,7 @@
   <dialog class="modal" bind:this={isOpenModalEdit}>
     <div class="modal-box flex max-w-fit flex-col gap-5 xl:flex-row">
       <div class="max-h-[100vh] max-w-4xl overflow-y-auto pr-5">
-        <EditOrderMenu products={data.products} />
+        <CardapioCategory products={data.products} cart={order} tipo_preco="retail_price"/>
       </div>
       <div class="max-h-[100vh] max-w-2xl overflow-y-auto pr-5">
         <h1 class="text-2xl font-semibold">Carrinho:</h1>

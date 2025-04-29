@@ -161,4 +161,9 @@ export const product = router({
     .query(({ ctx: { tenantDb } }) => {
       return productController(tenantDb).queryCategorysWithProductItems()
     }),
+    queryCategorysWithProducts: publicProcedure
+    .use(middleware.logged)
+    .query(({ ctx: { tenantDb } }) => {
+      return productController(tenantDb).queryCategorysWithProducts()
+    }),
 })

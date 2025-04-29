@@ -4,7 +4,7 @@ import type { RouterOutputs } from '$trpc/router'
 import { Cart } from '$lib/state/cart.svelte'
 import type { SelectProductItem } from '$lib/server/db/schema/product'
 
-type Item = SelectProductItem
+export type Item = SelectProductItem
 
 type CartProductMeta = {
   is_retail: boolean

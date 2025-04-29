@@ -12,7 +12,6 @@
   import CaixaColumn from './CaixaColumn.svelte'
   import type { InsertOrderPayment } from '$lib/server/db/schema'
   import PaymentCashier from '$lib/components/PaymentCashier.svelte'
-  import CardapioCaixa from './CardapioCaixa.svelte'
   import CaixaLeftColumn from './CaixaLeftColumn.svelte'
   import { getCartContext } from '$lib/state/contextCashier/cartContext.svelte'
   import AlertaFechar from './AlertaFechar.svelte'
@@ -25,6 +24,7 @@
   import { getPrinterContext } from '../../orders/allorders/printerContext.svelte'
   import ModalPrint from '$lib/components/cashierComponents/ModalPrint.svelte'
   import ModalSangria from '$lib/components/cashierComponents/ModalSangria.svelte'
+  import CardapioCategory from '$lib/components/cashierComponents/CardapioCategory.svelte'
 
   const cart = getCartContext()
   const prr = getPrinterContext()
@@ -32,8 +32,6 @@
   let { data }: { data: PageData } = $props()
 
   let { caixa, user, products } = $state(data)
-
-  let filteredProducts = products
 
   let isOpenModal: HTMLDialogElement | null = null
 
@@ -397,7 +395,7 @@
 
 <dialog class="modal" bind:this={isOpenModal}>
   <div class="modal-box max-w-4xl">
-    <CardapioCaixa products={filteredProducts} {tipo_preco} />
+    <CardapioCategory {products} {tipo_preco} {cart}/>
   </div>
   <form method="dialog" class="modal-backdrop">
     <button>close</button>

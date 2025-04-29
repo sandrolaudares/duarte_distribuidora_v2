@@ -4,37 +4,55 @@
   import Card1 from '$lib/components/cards/Card1.svelte'
 
   import { getImagePath } from '$utils/image'
+  import { createSearchStore, searchHandler } from './searchCardapio'
+  import { onDestroy } from 'svelte'
+  import { SearchIcon } from 'lucide-svelte'
 
-  export let data: PageData
+  let { data }: { data: PageData } = $props()
+
   const { products } = data
 
-  let filteredProducts = products
+  const searchProducts = products.map(product => {
+    const subProductNames = product.products.map(p => p.name).join(' ')
+    return {
+      ...product,
+      searchTerms: `${product.name} ${subProductNames}`.toLowerCase(),
+    }
+  })
 
-  // $:console.log(filteredProducts)
+  const searchStore = createSearchStore(searchProducts)
 
-  // onFilterChange={value => {
-  //   filteredProducts = products.map(product => ({
-  //     ...product,
-  //     products: product.products.filter(productInner => {
-  //       let nome = productInner.name.toLowerCase()
-  //       return nome.includes(value.toLowerCase())
-  //     })
-  //   })).filter(product => product.products.length > 0)
-  // }}
+  const unsubscribe = searchStore.subscribe(model => searchHandler(model))
+
+  onDestroy(() => {
+    unsubscribe()
+  })
 </script>
 
-<Cardapio
-  data={products}
-  
->
-  {#snippet card(c)}
-    <a href="products/{c.id}">
-      <Card1
-        nome={c.name}
-        descricao={c.description}
-        image={getImagePath(c.image)}
-        preco={'TODO'}
-      />
-    </a>
-  {/snippet}
-</Cardapio>
+<div class="h-full max-h-[80vh]">
+  <Cardapio data={$searchStore.filtered}>
+    {#snippet filter()}
+      <div class="hidden md:block">
+        <label class="input input-bordered flex h-full items-center gap-2">
+          <input
+            type="text"
+            class="grow"
+            placeholder="Buscar..."
+            bind:value={$searchStore.search}
+          />
+          <SearchIcon class="h-4 w-4 opacity-70" />
+        </label>
+      </div>
+    {/snippet}
+    {#snippet card(c)}
+      <a href="products/{c.id}">
+        <Card1
+          nome={c.name}
+          descricao={c.description}
+          image={getImagePath(c.image)}
+          preco={'TODO'}
+        />
+      </a>
+    {/snippet}
+  </Cardapio>
+</div>
