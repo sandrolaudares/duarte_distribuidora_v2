@@ -70,3 +70,28 @@ export async function getDistance(endereco:SelectAddress | undefined,fee:number)
 
     return taxaEntrega
 }
+
+export function formatAddress(address?: SelectAddress, shortVersion: boolean = false) {
+  if (!address) return 'Endereço não disponível'
+
+  const parts: string[] = []
+
+  parts.push(address.street)
+  
+  
+  if (address.number) {
+    parts.push(address.number)
+  }
+
+  if (address.complement) {
+    parts.push(address.complement)
+  }
+
+  parts.push(address.neighborhood)
+
+  const cityAndState = shortVersion ? `${address.city}` : `${address.city} - ${address.state}, ${address.cep}`
+
+  parts.push(cityAndState)
+
+  return parts.join(', ')
+}

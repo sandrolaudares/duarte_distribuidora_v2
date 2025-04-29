@@ -7,7 +7,7 @@
   import { onMount } from 'svelte'
   import AddAdress from '$lib/components/AddAdress.svelte'
   import { getCartContext } from '../../../state/contextCustomerOrder/cartContext'
-  import { getDistance } from '$lib/utils/distance'
+  import { formatAddress, getDistance } from '$lib/utils/distance'
   import type { SelectTenant } from '$lib/server/db/central/schema'
   import { toast } from 'svelte-sonner'
   import Loading from '$lib/components/Loading.svelte'
@@ -25,19 +25,6 @@
 
   let isOpenModal:HTMLDialogElement | null = $state(null)
   let isLoading = $state(false)
-
-  function formatAddress(address:SelectAddress) {
-	return [
-	  address.cep ? `${address.cep}` : '',
-	  address.city,
-	  address.neighborhood,
-	  address.street,
-	  address.number,
-	  address.state,
-	]
-	  .filter(Boolean)
-	  .join(', ')
-  }
 
 </script>
 

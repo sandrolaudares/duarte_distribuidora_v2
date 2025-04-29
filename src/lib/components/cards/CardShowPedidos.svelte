@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { CurrentOrders } from '$db/schema/customer/controller.ts'
   import { formatCurrency, getImagePath } from '$lib/utils'
+  import { formatAddress } from '$lib/utils/distance'
 
   export let click_confirm = () => {}
   export let click_refuse = () => {}
@@ -109,7 +110,7 @@
         <div>
           <h4 class="text-lg font-semibold text-opacity-80 mb-2">Endereço de Entrega</h4>
           <p class="text-opacity-60">
-            {order.address.street}, {order.address.number}, {order.address.neighborhood}, {order.address.city}, {order.address.state} - {order.address.cep}
+            {formatAddress(order.address)}
           </p>
         </div>
       {:else}

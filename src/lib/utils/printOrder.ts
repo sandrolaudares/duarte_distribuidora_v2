@@ -2,6 +2,7 @@ import type { SelectTenant } from '$lib/server/db/central/schema'
 import { formatCurrency } from '$lib/utils'
 import type { RouterOutputs } from '$trpc/router'
 import { toast } from 'svelte-sonner'
+import { formatAddress } from './distance'
 
 type Order = RouterOutputs['customer']['getOrderById']
 
@@ -44,9 +45,8 @@ export async function printOrderReusable(tenant: SelectTenant, order: Order) {
     }
 
     if (order.address) {
-      const addr = order.address
       info.push(
-        `Endereço de entrega: ${addr.street}, ${addr.number}, ${addr.neighborhood}, ${addr.city}\n`,
+        `Endereço de entrega: ${formatAddress(order.address,true)}\n`,
       )
     }
 
@@ -97,8 +97,10 @@ export async function printOrderReusable(tenant: SelectTenant, order: Order) {
     info.push(
       `TOTAL: ${formatCurrency(order.total - (order.taxa_entrega ?? 0))}\n`,
     )
-    info.push(`+ ENTREGA: ${formatCurrency(order.taxa_entrega ?? 0)}\n`)
+    info.push(`+ ENTREGA: ${formatCurrency(order.taxa_entrega ?? 0)}\n` + '\x0A')
+    info.push('\x1B' + '\x45' + '\x0D' + '\x0A')
     info.push(`= TOTAL A PAGAR: ${formatCurrency(order.total)}\n`)
+    info.push('\x1B' + '\x45' + '\x0A')
 
     if (order.created_by) {
       info.push('\x1B\x61\x00')

@@ -6,6 +6,7 @@
 	import { ArrowLeftIcon, BlindsIcon, Car, CreditCardIcon, ShoppingBagIcon } from "lucide-svelte";
   	import { paymentMethodEnum, paymentMethodLabel } from "$lib/utils/enums"
   import { formatCurrency, getImagePath } from "$lib/utils"
+  import { formatAddress } from "$lib/utils/distance"
 
 	const cart = getCartContext()
 
@@ -15,19 +16,6 @@
 	};
 
 	let { onConfirm, onBack }:Props = $props();
-
-	function formatAddress(address:SelectAddress) {
-	return [
-	  address.cep ? `${address.cep}` : '',
-	  address.city,
-	  address.neighborhood,
-	  address.street,
-	  address.number,
-	  address.state,
-	]
-	  .filter(Boolean)
-	  .join(', ')
-  }
 </script>
 
 <div class="space-y-6">

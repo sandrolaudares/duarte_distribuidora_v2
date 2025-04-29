@@ -12,6 +12,7 @@
   import * as Alert from '$lib/components/ui/alert/index'
   import Loading from '../Loading.svelte'
   import { MapPinned } from 'lucide-svelte'
+  import { formatAddress } from '$lib/utils/distance'
 
   export let addresses: SelectAddress[] = []
   export let selectedAddress: (address: SelectAddress) => void
@@ -59,8 +60,7 @@
         <div
           class="flex flex-col gap-3 rounded-box bg-base-200 p-4 text-center"
         >
-          {addres?.cep}
-          {addres?.city}, {addres?.neighborhood}, {addres?.street}, {addres?.number}
+          {formatAddress(addres)}
           <button
             class="btn btn-primary"
             on:click={() => {

@@ -7,6 +7,7 @@
   import { page } from '$app/state'
   import { toast } from 'svelte-sonner'
   import { invalidateAll } from '$app/navigation'
+  import { formatAddress } from '$lib/utils/distance'
 
   let {
     order_details,
@@ -70,10 +71,7 @@
           </h4>
           <dl>
             <dd class="mt-1 text-base font-normal text-opacity-50">
-              {order_details.address.street}, {order_details.address.number}
-              {order_details.address.complement}, {order_details.address
-                .neighborhood}, {order_details.address.city} - {order_details
-                .address.state}, CEP: {order_details.address.cep}
+                {formatAddress(order_details.address,false)}
             </dd>
           </dl>
           <!-- <div class="flex justify-end">
