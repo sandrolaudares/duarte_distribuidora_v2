@@ -17,7 +17,6 @@
   export let button_text = ''
   export let button_recusar = ''
   export let order: RouterOutputs['customer']['getCurrentOrders'][0]
-  export let motoboy = ''
   // export let columns = 1
 
   export let troco = 0
@@ -52,7 +51,7 @@
         href="/admin/orders/{order.id}"
         class="flex items-center gap-2 text-info-content"
       >
-        Visualizar pedido completo
+        Pedido completo
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="h-5 w-5"
@@ -81,9 +80,9 @@
             <span class="text-xs text-error font-bold">Pagamento ainda pendente</span>
           {/if}
     </div>
-      {#if motoboy}
+      {#if order.motoboy}
       <span class="font-semibold text-xs">
-        Motoboy: {motoboy}
+        Motoboy: {order.motoboy.username}
       </span>
       {/if}
     <div class="">

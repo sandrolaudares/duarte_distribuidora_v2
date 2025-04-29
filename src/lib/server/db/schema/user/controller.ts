@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import {
   type InsertUser,
   userTable,
@@ -183,7 +183,7 @@ export const user = (db: TenantDbType | Transaction) => ({
   },
   DEFAULT_PERMISSIONS,
   getMotoboys: function getMotoboys() {
-    return db.select().from(userTable).where(eq(userTable.role, 'motoboy'))
+    return db.select().from(userTable).where(and(eq(userTable.role, 'motoboy'),eq(userTable.is_active,true)))
   },
   updateUserRole: function updateUserRole(
     userId: SelectUser['id'],

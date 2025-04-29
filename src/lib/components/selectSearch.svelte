@@ -26,6 +26,7 @@
     onValueChange?: (value: string) => void
     variant?: ButtonVariant
     delegateQuery: () => Promise<T[]>
+    disabled?: boolean
   }
 
   let {
@@ -34,7 +35,8 @@
     placeholder,
     onValueChange,
     variant,
-    delegateQuery
+    delegateQuery,
+    disabled
   }: Props = $props()
 
   let open = $state(false)
@@ -50,7 +52,7 @@
 
   const selectedValue = $derived.by(() => {
     const selectedItem = options.find(item => String(config.value(item)) === value)
-    return selectedItem ? config.label(selectedItem) :  ''
+    return selectedItem ? config.label(selectedItem) :  value
   })
 
   // We want to refocus the trigger button when the user selects
@@ -78,7 +80,7 @@
 </script>
 
 <Popover.Root bind:open onOpenChange={loadOptions}>
-  <Popover.Trigger bind:ref={triggerRef} >
+  <Popover.Trigger bind:ref={triggerRef} {disabled}>
     {#snippet child({ props })}
       <Button
         variant={variant ?? 'select'}
