@@ -31,11 +31,6 @@
     unsubscribe();
   });
 
-  async function handleBoardUpdated(newColumnsData: typeof columnsData) {
-    console.log(newColumnsData)
-    columnsData = newColumnsData
-  }
-
   async function handleDeleteCategory(id: number) {
     if(confirm('Tem certeza que deseja deletar categoria')===true){
       try {
@@ -158,51 +153,3 @@
 		</div>
 	</main>
 </div>
-
-<!-- <div class="mx-auto flex items-center justify-center gap-3">
-  <p>Produtos</p>
-  <button class="btn btn-primary" onclick={handleAddCategory}>
-    Adicionar categoria
-  </button>
-</div> -->
-<!--TODO: Ao mover de uma categoria para outra não ta movendo, ao atualizar a pagina sai-->
-<!-- <DnDBoard
-  columns={columnsData}
-  onFinalUpdate={handleBoardUpdated}
-  disabled={{
-    card: false,
-    column: false,
-  }}
->
-  {#snippet collum(cat)}
-    <div class="flex items-center justify-between gap-4  max-w-full">
-      <p class="text-xl overflow-auto">
-        {cat.name}
-      </p>
-      <button
-        class="btn btn-outline btn-primary"
-        onclick={() => handleAddProduct(cat.id)}
-      >
-        {@html icons.plus()}
-      </button>
-
-        <button
-          class="btn btn-outline btn-error"
-          onclick={() => handleDeleteCategory(cat.id)}
-        >
-          {@html icons.trash()}
-        </button>
-
-    </div>
-  {/snippet}
-  {#snippet card(p)}
-    <div class="flex w-full gap-0 rounded-lg bg-base-300 text-center">
-      <a href="/admin/products/{p.id}" class="w-full px-4 py-1 text-center">
-        <p class="text-lg font-bold">{p.name}</p>
-        <p class="font-light">{p.description}</p>
-      </a>
-
-
-    </div>
-  {/snippet}
-</DnDBoard> -->
