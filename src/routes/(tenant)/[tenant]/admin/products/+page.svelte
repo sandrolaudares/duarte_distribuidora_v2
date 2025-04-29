@@ -130,7 +130,7 @@
 </script>
 
 <div class="min-h-dvh bg-background">
-	<nav class="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+	<nav class="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
 		<div class="mx-auto flex h-16  items-center justify-between px-4">
 			<h1 class="text-2xl font-bold">Produtos</h1>
       <div class="flex items-center gap-4">
